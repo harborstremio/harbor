@@ -1,12 +1,13 @@
 import { useCallback, useEffect, useRef, useState } from "react";
-import { ArrowLeft, Play } from "lucide-react";
+import { ArrowLeft } from "lucide-react";
+import { Play } from "@/components/icons/play-filled";
 import type { Meta } from "@/lib/cinemeta";
 import type { EpisodeDetail } from "@/lib/providers/tmdb/tmdb-episode-types";
 import type { CastEntry } from "@/lib/providers/tmdb";
 import { fetchEpisodeData } from "@/lib/episode-data-fetcher";
 import { meta as fetchCinemetaMeta } from "@/lib/cinemeta";
 import { useSettings, type Settings } from "@/lib/settings";
-import { useScrollMemory, useView, type PlayEpisode } from "@/lib/view";
+import { useScrollMemory, useView, type EpisodeDetailPlayback, type PlayEpisode } from "@/lib/view";
 import { useT } from "@/lib/i18n";
 import { openUrl } from "@/lib/window";
 import { useOmdbScores, omdbScores as fetchOmdbScores } from "@/lib/providers/omdb";
@@ -28,6 +29,7 @@ export interface EpisodeDetailViewProps {
   season: number;
   episode: number;
   seriesMeta?: Meta;
+  playback?: EpisodeDetailPlayback;
 }
 
 export function EpisodeDetailView({
@@ -35,6 +37,7 @@ export function EpisodeDetailView({
   season,
   episode,
   seriesMeta: initialSeriesMeta,
+  playback,
 }: EpisodeDetailViewProps) {
   const t = useT();
   const { settings } = useSettings();
@@ -46,8 +49,8 @@ export function EpisodeDetailView({
   const [error, setError] = useState<string | null>(null);
   const scrollRef = useRef<HTMLElement>(null);
 
-  const resolvedImdb = useTmdbImdbId(seriesMeta?.id);
-  const imdbId = resolvedImdb ?? (seriesMeta?.id.startsWith("tt") ? seriesMeta.id : null);
+  const resolvedImdb = useTmdbImdbId(seriesId);
+  const imdbId = resolvedImdb ?? (seriesId.startsWith("tt") ? seriesId : null);
   const omdbScores = useOmdbScores(imdbId ?? undefined);
   const episodeImdbId = episodeData?.imdbId ?? undefined;
   const episodeOmdbScores = useOmdbScores(episodeImdbId);
@@ -78,6 +81,8 @@ export function EpisodeDetailView({
   }, [settings.omdbKey, episodeImdbId]);
 
   const episodeKey = `${seriesId}:${season}:${episode}`;
+  const [revealedArtwork, setRevealedArtwork] = useState<string | null>(null);
+  const artworkHidden = settings.hideSpoilers && settings.blurEpisodes && revealedArtwork !== episodeKey;
   const { tmdbKey } = settings;
 
   useEffect(() => {
@@ -85,18 +90,26 @@ export function EpisodeDetailView({
     setLoading(true);
     setError(null);
     setEpisodeData(null);
+    setSeriesMeta(initialSeriesMeta ?? null);
 
     (async () => {
       try {
         let meta: Meta | undefined = initialSeriesMeta;
         if (!meta) {
           const fetched = await fetchCinemetaMeta("series", seriesId);
-          if (cancelled || !fetched) return;
+          if (cancelled) return;
+          if (!fetched) {
+            setError(t("Episode information is not available"));
+            return;
+          }
           meta = fetched;
           setSeriesMeta(meta);
         }
 
-        const data = await fetchEpisodeData(seriesId, meta, season, episode, { tmdbKey } as Settings);
+        const lookupMeta = playback?.meta.id === seriesId ? playback.meta : meta;
+        const data = await fetchEpisodeData(
+          seriesId, lookupMeta, season, episode, { tmdbKey } as Settings, playback?.episode,
+        );
         if (cancelled) return;
 
         if (data) {
@@ -116,7 +129,7 @@ export function EpisodeDetailView({
     })();
 
     return () => { cancelled = true; };
-  }, [episodeKey, initialSeriesMeta, tmdbKey]);
+  }, [episodeKey, initialSeriesMeta, playback, tmdbKey]);
 
   const getImageUrl = (path: string | null | undefined, size = "original"): string | undefined => {
     if (!path) return undefined;
@@ -157,9 +170,10 @@ export function EpisodeDetailView({
       name: episodeData.name,
       still: getImageUrl(episodeData.stillPath, "w300") || undefined,
       overview: episodeData.overview || undefined,
+      ...playback?.episode,
     };
-    openPicker(seriesMeta, playEpisode, { autoPlay: settings.instantPlay });
-  }, [seriesMeta, episodeData, openPicker, settings.instantPlay]);
+    openPicker(playback?.meta ?? seriesMeta, playEpisode, { autoPlay: settings.instantPlay });
+  }, [seriesMeta, episodeData, playback, openPicker, settings.instantPlay]);
 
   const handleSeriesClick = useCallback(() => {
     if (seriesMeta) openMeta(seriesMeta);
@@ -226,7 +240,7 @@ export function EpisodeDetailView({
               alt=""
               decoding="async"
               fetchPriority="high"
-              className="absolute inset-0 h-full w-full object-cover"
+              className={`absolute inset-0 h-full w-full object-cover ${artworkHidden ? "scale-105 blur-[24px]" : ""}`}
             />
           )}
           <div className="absolute inset-0 bg-gradient-to-t from-canvas via-canvas/55 via-45% to-transparent" />
@@ -267,16 +281,25 @@ export function EpisodeDetailView({
                 />
               </div>
 
-              <div className="mt-9 flex gap-3">
+              <div className="mt-9 flex flex-wrap items-center gap-3">
                 <PlayModeHint>
                   <button
                     onClick={handlePlay}
-                    className="flex h-12 items-center gap-2.5 rounded-full bg-ink px-7 text-[15px] font-semibold text-canvas shadow-[0_8px_24px_rgba(0,0,0,0.3),inset_0_1px_0_rgba(255,255,255,0.65),inset_0_-1px_0_rgba(0,0,0,0.18)] transition-transform duration-200 hover:scale-[1.03] active:scale-[0.98]"
+                    className="flex h-12 items-center gap-2.5 rounded-full bg-ink px-7 text-[15px] font-semibold text-canvas transition-transform duration-200 hover:scale-[1.03] active:scale-[0.98]"
                   >
                     <Play size={18} fill="currentColor" />
                     {t("Play Episode")}
                   </button>
                 </PlayModeHint>
+                {artworkHidden && (
+                  <button
+                    type="button"
+                    onClick={() => setRevealedArtwork(episodeKey)}
+                    className="h-12 rounded-full border border-edge bg-canvas/80 px-5 text-[15px] font-semibold text-ink hover:bg-raised"
+                  >
+                    {t("Reveal episode artwork")}
+                  </button>
+                )}
               </div>
             </div>
           </div>
@@ -309,7 +332,18 @@ export function EpisodeDetailView({
 
         {episodeData.stills && episodeData.stills.length > 0 && (
           <section>
-            <h2 className="mb-6 text-[20px] font-bold text-ink">{t("Stills")}</h2>
+            <div className="mb-6 flex flex-wrap items-center gap-4">
+              <h2 className="text-[20px] font-bold text-ink">{t("Stills")}</h2>
+              {artworkHidden && (
+                <button
+                  type="button"
+                  onClick={() => setRevealedArtwork(episodeKey)}
+                  className="min-h-11 rounded-lg bg-elevated px-4 text-[15px] font-semibold text-ink hover:bg-raised"
+                >
+                  {t("Reveal episode artwork")}
+                </button>
+              )}
+            </div>
             <div className="grid grid-cols-2 gap-4 md:grid-cols-3 lg:grid-cols-4">
               {episodeData.stills.slice(0, 12).map((still, idx) => (
                 <div
@@ -320,7 +354,7 @@ export function EpisodeDetailView({
                     src={getImageUrl(still.filePath, "w780")}
                     alt={`${episodeData.name} — ${t("Still {n}", { n: idx + 1 })}`}
                     loading="lazy"
-                    className="h-full w-full object-cover transition-transform duration-300 group-hover:scale-105"
+                    className={`h-full w-full object-cover ${artworkHidden ? "scale-105 blur-[24px]" : "transition-transform duration-300 group-hover:scale-105"}`}
                   />
                 </div>
               ))}

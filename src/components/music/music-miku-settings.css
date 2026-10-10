@@ -1,0 +1,14 @@
+.music-miku-settings { display: flex; align-items: center; gap: 24px; }
+.music-miku-preview { flex: 0 0 144px; height: 96px; align-self: flex-start; }
+.music-miku-copy { flex: 1; min-width: 0; }
+.music-miku-settings .music-audio-toggle { min-height: 44px; font-weight: 600; }
+.music-miku-copy > p { margin: 4px 0 8px; }
+.music-miku-license { margin-top: 12px; }
+.music-miku-license summary { width: fit-content; padding: 8px 0; cursor: pointer; color: var(--color-ink-muted); font-size: 12px; }
+.music-miku-license summary:focus-visible { outline: 2px solid var(--color-accent); outline-offset: 4px; border-radius: 4px; }
+.music-miku-links { display: flex; flex-wrap: wrap; gap: 8px; margin-top: 12px; }
+@media (max-width: 550px) { .music-miku-settings { gap: 16px; } .music-miku-preview { flex-basis: 84px; height: 56px; } }
+
+.music-miku-model { display: flex; align-items: center; gap: 16px; flex-wrap: wrap; margin-top: 16px; }
+.music-miku-model > span { color: var(--color-ink-muted); font-size: 13px; }
+.music-miku-model > div { width: 220px; max-width: 100%; }

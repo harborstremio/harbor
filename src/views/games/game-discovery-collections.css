@@ -1,0 +1,28 @@
+.games-discovery-collection .games-page-controls { gap:8px; }
+.games-discovery-collection .games-page-controls>.games-text-action { margin-inline-end:12px;font-size:12px; }
+.games-discovery-collection .games-card-caption>span { font-size:11px;display:-webkit-box;-webkit-box-orient:vertical;-webkit-line-clamp:1;overflow:hidden; }
+.games-discovery-collection .games-card-caption h3 { min-height:2.8em;display:-webkit-box;-webkit-box-orient:vertical;-webkit-line-clamp:2;overflow:hidden; }
+.games-milestone-grid { display:grid;grid-template-columns:repeat(3,minmax(0,1fr));gap:24px; }
+.games-milestone { min-width:0; }
+.games-milestone>button { position:relative;isolation:isolate;display:flex;align-items:end;text-align:start;width:100%;aspect-ratio:16/10;overflow:hidden;border-radius:6px;padding:20px;color:#fff; }
+.games-milestone>button>img,.games-milestone>button>.games-skeleton { position:absolute;inset:0;width:100%;height:100%;object-fit:cover;z-index:-2; }
+.games-milestone>button>.games-availability-badge.is-mark { inset-block-start:10px;inset-block-end:auto;inset-inline-end:10px; }
+.games-milestone>button::after { content:"";position:absolute;inset:0;background:linear-gradient(0deg,#000c,transparent 75%);z-index:-1; }
+.games-milestone>button>span:not(.games-skeleton):not(.games-availability-badge) { flex:1;font-size:23px;line-height:1.2;font-weight:600;letter-spacing:-.025em; }
+.games-milestone>div { display:flex;align-items:start;gap:16px;margin:20px 0 15px; }
+.games-milestone>div>strong { font-size:32px;letter-spacing:-.04em;font-weight:600;line-height:1; }
+.games-milestone>div>span { font-size:13px;line-height:1.45; }
+.games-milestone small { display:block;font-size:11px;color:var(--color-ink-muted);margin-top:6px; }
+.games-milestone>a { display:inline-flex;gap:7px;align-items:center;color:var(--color-ink-muted);font-size:11px;text-decoration:none; }
+.games-milestone>a:hover { color:var(--color-ink);text-decoration:underline; }
+.games-record-brand { display:block;flex:none;width:62px;height:62px;opacity:.85; }
+.games-record-brand>img { width:100%;height:100%;object-fit:contain; }
+.games-record-brand:hover { opacity:1; }
+.games-milestone>button>.games-record-logo { position:relative;inset:auto;z-index:0;width:min(80%,230px);height:86px;object-fit:contain;object-position:left bottom; }
+.games-milestone>button>span.games-record-logo { display:flex;align-items:flex-end;height:86px;font-size:26px; }
+.games-milestone>div { min-height:66px; }
+.games-milestone>div>strong { white-space:nowrap;font-variant-numeric:tabular-nums; }
+.games-record-brand:focus-visible { outline:2px solid var(--color-ink);outline-offset:4px; }
+.games-record-logo:not([data-loaded]) { display:none!important; }
+.games-record-logo[data-loaded]+.games-record-title { display:none; }
+@container(max-width:700px){.games-milestone-grid{grid-template-columns:1fr}.games-milestone>button{aspect-ratio:2}.games-discovery-collection .games-section-heading{align-items:start}.games-discovery-collection .games-page-controls{flex-wrap:wrap;justify-content:end}}

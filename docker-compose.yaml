@@ -9,10 +9,9 @@ services:
       - "1420:1420"
     environment:
       - NODE_ENV=development
-      # Vite file-watching over a bind mount is unreliable without polling.
       - CHOKIDAR_USEPOLLING=true
     volumes:
-      - .:/app                 # live-edit source
-      - /app/node_modules      # keep the image's install (don't let the bind mount hide it)
+      - .:/app
+      - /app/node_modules
     tty: true
     stdin_open: true

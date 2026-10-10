@@ -2,6 +2,7 @@ import { useEffect, useRef, type RefObject } from "react";
 import type { PlayerBridge, PlayerSnapshot } from "@/lib/player/bridge";
 import { getPlaybackPosition } from "@/lib/player/playback-clock";
 import { isLocalUrl } from "@/lib/player/local-url";
+import { isLivePlaybackSrc } from "@/lib/player/live-src";
 import type { PlayerSrc } from "@/lib/view";
 
 const WAKE_GAP_MS = 30_000;
@@ -35,14 +36,15 @@ export function useWakeReconnect(params: {
       if (!b) return;
 
       const pos = getPlaybackPosition();
+      const live = isLivePlaybackSrc(s);
       console.warn(`[player] system resumed after ${Math.round(gap / 1000)}s asleep — reconnecting stream`);
       void b.load({
         url: s.url,
         subtitles: s.subtitles,
         notWebReady: s.notWebReady,
-        isLive: s.meta.id.startsWith("iptv:"),
+        isLive: live,
         headers: s.headers,
-        startAtSec: pos > 1 ? pos : undefined,
+        startAtSec: !live && pos > 1 ? pos : undefined,
       });
     }, TICK_MS);
     return () => window.clearInterval(id);

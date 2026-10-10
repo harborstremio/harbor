@@ -15,6 +15,10 @@ pub fn close_to_tray() -> bool {
     CLOSE_TO_TRAY.load(Ordering::Relaxed)
 }
 
+pub fn always_on_top_pref() -> bool {
+    ALWAYS_ON_TOP.load(Ordering::Relaxed)
+}
+
 #[derive(Serialize, Deserialize, Clone, Copy)]
 #[serde(rename_all = "camelCase")]
 pub struct TrayPrefs {
@@ -70,6 +74,9 @@ fn show_main(app: &AppHandle) {
 }
 
 fn apply_always_on_top(app: &AppHandle, on: bool) {
+    if !on && crate::pip::window_pip_is_active(app) {
+        return;
+    }
     if let Some(window) = app.get_webview_window("main") {
         let _ = window.set_always_on_top(on);
     }
@@ -151,9 +158,15 @@ pub fn tray_set_custom_themes(app: AppHandle, themes: Vec<CustomThemeEntry>) {
 }
 
 pub fn build(app: &AppHandle) -> tauri::Result<()> {
-    let show = MenuItem::with_id(app, "tray_show", "Show Harbor", true, None::<&str>)?;
-    let themes: [(&str, &str); 13] = [
-        ("cool-grey", "Harbor default"),
+    let show = MenuItem::with_id(
+        app,
+        "tray_show",
+        concat!("Show ", crate::product_name!()),
+        true,
+        None::<&str>,
+    )?;
+    let themes: [(&str, &str); 14] = [
+        ("cool-grey", concat!(crate::product_name!(), " default")),
         ("nord", "Nord"),
         ("stremio", "Stremio"),
         ("crunch", "Crunchy"),
@@ -161,6 +174,7 @@ pub fn build(app: &AppHandle) -> tauri::Result<()> {
         ("dracula", "Dracula"),
         ("forest", "Forest"),
         ("noir", "Noir"),
+        ("kawaii", "Kawaii"),
         ("elegantfin", "ElegantFin"),
         ("feishin", "Feishin"),
         ("aurora", "Aurora"),
@@ -177,8 +191,10 @@ pub fn build(app: &AppHandle) -> tauri::Result<()> {
             None::<&str>,
         )?);
     }
-    let theme_refs: Vec<&dyn IsMenuItem<Wry>> =
-        theme_items.iter().map(|i| i as &dyn IsMenuItem<Wry>).collect();
+    let theme_refs: Vec<&dyn IsMenuItem<Wry>> = theme_items
+        .iter()
+        .map(|i| i as &dyn IsMenuItem<Wry>)
+        .collect();
     let theme_menu = Submenu::with_items(app, "Theme", true, &theme_refs)?;
     app.manage(ThemeMenu {
         submenu: theme_menu.clone(),
@@ -217,7 +233,13 @@ pub fn build(app: &AppHandle) -> tauri::Result<()> {
         None::<&str>,
     )?;
     let sep = PredefinedMenuItem::separator(app)?;
-    let quit = MenuItem::with_id(app, "tray_quit", "Quit Harbor", true, None::<&str>)?;
+    let quit = MenuItem::with_id(
+        app,
+        "tray_quit",
+        concat!("Quit ", crate::product_name!()),
+        true,
+        None::<&str>,
+    )?;
     let menu = Menu::with_items(
         app,
         &[
@@ -240,36 +262,39 @@ pub fn build(app: &AppHandle) -> tauri::Result<()> {
     });
 
     let mut builder = TrayIconBuilder::with_id("harbor-tray")
-        .tooltip("Harbor")
+        .tooltip("JL Media Vision")
         .menu(&menu)
         .show_menu_on_left_click(false)
         .on_menu_event(|app, event| {
             let id = event.id.as_ref();
             match id {
-            "tray_show" => show_main(app),
-            "tray_aot" => toggle(app, Pref::AlwaysOnTop),
-            "tray_pmin" => toggle(app, Pref::PauseMinimized),
-            "tray_punf" => toggle(app, Pref::PauseUnfocused),
-            "tray_ctt" => toggle(app, Pref::CloseToTray),
-            _ if id.starts_with("tray_theme_") => {
-                let theme = id.strip_prefix("tray_theme_").unwrap_or_default().to_string();
-                let _ = app.emit("harbor://set-theme", theme);
-            }
-            "tray_quit" => {
-                if let Some(w) = app.get_webview_window("main") {
-                    crate::CLOSE_FLUSH_DONE.store(false, Ordering::SeqCst);
-                    let _ = w.emit("harbor://app-closing", ());
-                    for _ in 0..16 {
-                        if crate::CLOSE_FLUSH_DONE.load(Ordering::SeqCst) {
-                            break;
-                        }
-                        std::thread::sleep(std::time::Duration::from_millis(50));
-                    }
+                "tray_show" => show_main(app),
+                "tray_aot" => toggle(app, Pref::AlwaysOnTop),
+                "tray_pmin" => toggle(app, Pref::PauseMinimized),
+                "tray_punf" => toggle(app, Pref::PauseUnfocused),
+                "tray_ctt" => toggle(app, Pref::CloseToTray),
+                _ if id.starts_with("tray_theme_") => {
+                    let theme = id
+                        .strip_prefix("tray_theme_")
+                        .unwrap_or_default()
+                        .to_string();
+                    let _ = app.emit("harbor://set-theme", theme);
                 }
-                crate::shutdown_services(app);
-                app.exit(0);
-            }
-            _ => {}
+                "tray_quit" => {
+                    if let Some(w) = app.get_webview_window("main") {
+                        crate::CLOSE_FLUSH_DONE.store(false, Ordering::SeqCst);
+                        let _ = w.emit("harbor://app-closing", ());
+                        for _ in 0..16 {
+                            if crate::CLOSE_FLUSH_DONE.load(Ordering::SeqCst) {
+                                break;
+                            }
+                            std::thread::sleep(std::time::Duration::from_millis(50));
+                        }
+                    }
+                    crate::shutdown_services(app);
+                    app.exit(0);
+                }
+                _ => {}
             }
         })
         .on_tray_icon_event(|tray, event| {

@@ -1,0 +1,22 @@
+export default {
+  "games.mods.browse": "Cari mod",
+  "games.mods.installed": "Mod Anda",
+  "games.mods.enabled": "Aktif",
+  "games.mods.disabled": "Nonaktif",
+  "games.mods.remove": "Hapus",
+  "games.mods.removeConfirm": "Hapus berkas yang dikelola ini?",
+  "games.mods.noMatches": "Tidak ada mod terpasang yang cocok dengan pencarian ini.",
+  "games.mods.options": "Opsi untuk {name}",
+  "games.mods.versions": "Versi",
+  "games.mods.restore": "Pulihkan sebelumnya",
+  "games.mods.restored": "Versi sebelumnya dipulihkan.",
+  "games.mods.changeTitle": "File yang akan diubah",
+  "games.mods.backupNote": "Versi yang diganti disimpan dalam cadangan lokal. Gunakan Pulihkan sebelumnya di Pengaturan mod Anda untuk kembali; dependensi tetap diperiksa.",
+  "games.mods.currentVersion": "Terpasang: {version}",
+  "games.mods.current": "Terpasang",
+  "games.mods.versionNote": "Pilih versi yang kompatibel. Harbor memeriksa perubahan dan menyimpan versi sebelumnya secara lokal. Tutup Minecraft sebelum menerapkan perubahan.",
+  "games.mods.applyChanges": "Terapkan perubahan",
+  "games.mods.reviewChanges": "Tinjau perubahan",
+  "games.mods.previousVersion": "Sebelumnya: {version}",
+  "games.mods.restoreConfirm": "Pulihkan versi {version}? Tutup Minecraft terlebih dahulu."
+} satisfies Record<string, string>;

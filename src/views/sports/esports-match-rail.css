@@ -1,0 +1,303 @@
+.emr-heading h2 {
+  display: flex;
+  align-items: center;
+  gap: 14px;
+}
+.emr-live-count {
+  display: inline-flex;
+  align-items: center;
+  gap: 6px;
+  color: var(--color-danger, #eb4652);
+  font-size: 12px;
+  font-weight: 650;
+  letter-spacing: 0;
+}
+.emr-live-count i,
+.emr-live i {
+  width: 5px;
+  height: 5px;
+  border-radius: 50%;
+  background: currentColor;
+}
+.emr-nav {
+  display: flex;
+  align-items: center;
+  gap: 7px;
+}
+.emr-nav .sh-text-button {
+  display: inline-flex;
+  align-items: center;
+  gap: 8px;
+  white-space: nowrap;
+  margin-inline-end: 10px;
+}
+.emr-rail {
+  display: flex;
+  gap: 14px;
+  overflow-x: auto;
+  padding: 4px 2px 14px;
+  margin: -4px -2px 0;
+  scrollbar-width: thin;
+  scroll-snap-type: x proximity;
+  touch-action: auto;
+  cursor: grab;
+}
+.emr-rail:active {
+  cursor: grabbing;
+}
+.emr-card {
+  position: relative;
+  flex: 0 0 330px;
+  min-width: 0;
+  background: var(--color-surface);
+  border-radius: 11px;
+  scroll-snap-align: start;
+}
+.emr-open {
+  display: flex;
+  flex-direction: column;
+  width: 100%;
+  min-height: 290px;
+  height: 100%;
+  padding: 20px;
+  text-align: start;
+  border-radius: inherit;
+  transition: background 140ms ease-out;
+}
+.emr-open:hover {
+  background: var(--color-elevated);
+}
+.emr-event-open {
+  position: absolute;
+  inset: 0;
+  width: 100%;
+  border-radius: inherit;
+}
+.emr-teams .emr-team {
+  position: relative;
+  z-index: 1;
+  width: 100%;
+  text-align: start;
+  border-radius: 5px;
+}
+.emr-event-open:focus-visible {
+  outline: 2px solid var(--color-accent);
+  outline-offset: 2px;
+}
+.emr-card-head {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 12px;
+  margin-bottom: 16px;
+}
+.emr-game {
+  display: flex;
+  align-items: center;
+  gap: 9px;
+  font-size: 12px;
+  font-weight: 650;
+}
+.emr-game .ea-game-logo {
+  width: 65px;
+  height: 24px;
+}
+.emr-live,
+.emr-state {
+  display: inline-flex;
+  align-items: center;
+  gap: 5px;
+  font-size: 10px;
+  font-weight: 650;
+  white-space: nowrap;
+}
+.emr-live {
+  color: #fff;
+  background: #ce303f;
+  border-radius: 5px;
+  padding: 5px 7px;
+}
+.emr-state {
+  color: var(--color-ink-muted);
+}
+.emr-event {
+  display: flex;
+  align-items: center;
+  gap: 7px;
+  color: var(--color-ink-muted);
+  font-size: 12px;
+  line-height: 1.4;
+  min-height: 18px;
+  margin-bottom: 18px;
+}
+.emr-event > span:last-child {
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+}
+.emr-event .ea-image {
+  width: 20px;
+  height: 20px;
+}
+.emr-teams {
+  display: flex;
+  flex-direction: column;
+  gap: 13px;
+  width: 100%;
+}
+.emr-team {
+  display: grid;
+  grid-template-columns: 38px minmax(0, 1fr) auto;
+  align-items: center;
+  gap: 11px;
+}
+.emr-team .ea-image {
+  width: 38px;
+  height: 38px;
+}
+.emr-team strong {
+  font-size: 16px;
+  line-height: 1.2;
+  font-weight: 650;
+  overflow-wrap: anywhere;
+}
+.emr-team > b {
+  min-width: 22px;
+  text-align: end;
+  font-size: 24px;
+  line-height: 1;
+  font-weight: 750;
+  font-variant-numeric: tabular-nums;
+}
+.emr-team > b.is-winner {
+  color: var(--color-success);
+}
+.emr-match-meta {
+  display: flex;
+  flex-direction: column;
+  gap: 4px;
+  color: var(--color-ink-muted);
+  font-size: 11px;
+  line-height: 1.45;
+  margin-top: 19px;
+  margin-bottom: 17px;
+}
+.emr-open-label {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  font-size: 12px;
+  font-weight: 650;
+  margin-top: auto;
+  padding-top: 13px;
+  border-top: 1px solid var(--color-edge-soft);
+}
+.emr-watch {
+  position: absolute;
+  inset-inline-end: 13px;
+  bottom: 12px;
+  display: inline-flex;
+  align-items: center;
+  gap: 7px;
+  min-height: 34px;
+  padding: 0 12px;
+  background: var(--color-ink);
+  color: var(--color-canvas);
+  font-size: 12px;
+  font-weight: 650;
+  border-radius: 7px;
+}
+.emr-open:focus-visible,
+.emr-watch:focus-visible,
+.emr-nav button:focus-visible {
+  outline: 2px solid var(--color-accent);
+  outline-offset: 2px;
+}
+.emr-empty {
+  display: flex;
+  align-items: center;
+  gap: 20px;
+  padding: 24px;
+  background: var(--color-surface);
+  border-radius: 10px;
+}
+.emr-empty p {
+  font-size: 14px;
+  color: var(--color-ink-muted);
+}
+.emr-loading {
+  display: flex;
+  gap: 14px;
+  overflow: hidden;
+}
+.emr-loading > div {
+  flex: 0 0 330px;
+  padding: 22px;
+  height: 300px;
+  background: var(--color-surface);
+  border-radius: 11px;
+  display: flex;
+  flex-direction: column;
+  gap: 22px;
+  animation: emr-pulse 1.3s ease-in-out infinite alternate;
+}
+.emr-loading span,
+.emr-loading b {
+  height: 17px;
+  width: 52%;
+  border-radius: 4px;
+  background: var(--color-elevated);
+}
+.emr-loading b {
+  height: 40px;
+  width: 85%;
+}
+@keyframes emr-pulse {
+  to {
+    opacity: 0.45;
+  }
+}
+@media (max-width: 650px) {
+  .emr-heading {
+    align-items: center;
+    gap: 12px;
+    flex-wrap: wrap;
+  }
+  .emr-card {
+    flex-basis: min(330px, calc(100vw - 64px));
+  }
+  .emr-nav .sh-text-button {
+    margin-inline-end: 0;
+  }
+  .emr-nav .sh-icon {
+    display: none;
+  }
+  .emr-open {
+    padding: 17px;
+  }
+  .emr-game .ea-game-logo {
+    width: 48px;
+  }
+  .emr-empty {
+    align-items: start;
+    flex-direction: column;
+    gap: 12px;
+  }
+}
+@media (prefers-reduced-motion: reduce) {
+  .emr-open {
+    transition: none;
+  }
+  .emr-loading > div {
+    animation: none;
+  }
+}
+
+.emr-retry {
+  display: inline-flex;
+  align-items: center;
+  gap: 8px;
+  min-height: 36px;
+  padding: 8px 12px;
+  flex: none;
+}

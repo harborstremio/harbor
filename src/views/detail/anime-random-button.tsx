@@ -1,4 +1,5 @@
 import { Shuffle } from "lucide-react";
+import { HoverTooltip } from "@/components/hover-tooltip";
 import type { Meta } from "@/lib/cinemeta";
 import type { KitsuEpisode } from "@/lib/providers/kitsu";
 import { useSettings } from "@/lib/settings";
@@ -33,19 +34,22 @@ export function AnimeRandomButton({
         imdbId: ep.imdbId,
         imdbSeason: ep.imdbSeason,
         imdbEpisode: ep.imdbEpisode,
+        absoluteNumber: ep.absoluteNumber ?? ep.number,
+        tvdbEpisodeId: ep.tvdbEpisodeId,
       },
       { autoPlay: settings.instantPlay || settings.seasonSourceLock },
     );
   };
   return (
-    <button
-      type="button"
-      onClick={onClick}
-      aria-label={t("Play a random episode")}
-      title={t("Play a random episode")}
-      className="flex h-9 w-9 items-center justify-center rounded-full text-ink-subtle transition-colors hover:bg-elevated hover:text-ink"
-    >
-      <Shuffle size={17} strokeWidth={2} />
-    </button>
+    <HoverTooltip label={t("Play a random episode")} align="center" className="shrink-0">
+      <button
+        type="button"
+        onClick={onClick}
+        aria-label={t("Play a random episode")}
+        className="flex h-9 w-9 items-center justify-center rounded-full text-ink-subtle transition-colors hover:bg-elevated hover:text-ink"
+      >
+        <Shuffle size={17} strokeWidth={2} />
+      </button>
+    </HoverTooltip>
   );
 }

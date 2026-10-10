@@ -152,7 +152,7 @@ export async function tmdbAnimeLogo(
   const backdropPath = (imgs?.backdrops ?? [])[0]?.file_path;
   return {
     logo,
-    backdrop: backdropPath ? `https://image.tmdb.org/t/p/original${backdropPath}` : undefined,
+    backdrop: backdropPath ? `https://image.tmdb.org/t/p/w1280${backdropPath}` : undefined,
     tmdbId: id,
   };
 }

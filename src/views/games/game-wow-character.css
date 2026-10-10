@@ -1,0 +1,53 @@
+.games-wow-character { padding-block: 34px; margin-top: 30px; border-top: 1px solid var(--color-edge-soft); }
+.games-wow-character .games-wow-section-heading { margin-block: 0 16px; }
+.games-wow-character .games-wow-section-heading p { font-size: 13px; color: var(--color-ink-muted); line-height: 1.6; margin: 6px 0 0; }
+.games-wow-character-search { display: flex; align-items: flex-end; gap: 12px; flex-wrap: wrap; }
+.games-wow-character-search label { display: block; flex: 1 1 180px; max-width: 340px; min-width: 0; }
+.games-wow-character-search label > span { display: block; font-size: 13px; color: var(--color-ink-muted); margin-bottom: 7px; }
+.games-wow-character-search input { width: 100%; border: 0; border-radius: 6px; background: var(--color-elevated); color: var(--color-ink); padding: 12px 14px; min-height: 44px; font-size: 14px; }
+.games-wow-character-search input:focus-visible { outline: 2px solid var(--color-accent); outline-offset: 3px; }
+.games-wow-character-search > button { min-height: 44px; }
+.games-wow-character-identity { display: flex; align-items: center; flex-wrap: wrap; gap: 18px; margin-block: 26px; }
+.games-wow-character-identity > img, .games-wow-character-identity > .games-art-empty { width: 64px; height: 64px; border-radius: 50%; object-fit: cover; flex: 0 0 64px; background: var(--color-surface); }
+.games-wow-character-name { min-width: 0; flex: 1 1 180px; }
+.games-wow-character-name h4 { font-size: 24px; font-weight: 600; line-height: 1.3; overflow-wrap: anywhere; margin: 0; }
+.games-wow-character-name p { font-size: 14px; margin: 5px 0; }
+.games-wow-character-name small { color: var(--color-ink-muted); font-size: 12px; }
+.games-wow-character-identity dl { display: flex; flex-wrap: wrap; gap: 28px; margin: 0; }
+.games-wow-character-identity dl > div { flex: 0 0 auto; min-width: max-content; }
+.games-wow-character dt { color: var(--color-ink-muted); font-size: 12px; }
+.games-wow-character-identity dd { font-size: 25px; margin: 6px 0 0; font-weight: 600; font-variant-numeric: tabular-nums; }
+.games-wow-character-tabs { display: flex; align-items: center; flex-wrap: wrap; gap: 6px; margin-bottom: 12px; }
+.games-wow-character-tabs button { padding: 9px 13px; font-size: 14px; color: var(--color-ink-muted); border-radius: 5px; }
+.games-wow-character-tabs button[aria-pressed=true], .games-wow-character-tabs button:hover { background: var(--color-elevated); color: var(--color-ink); }
+.games-wow-character-tabs > span { margin-inline-start: auto; font-size: 12px; color: var(--color-ink-muted); }
+.games-wow-character-runs { padding: 0; margin: 0; list-style: none; display: grid; grid-template-columns: repeat(2, minmax(0, 1fr)); gap: 4px 20px; }
+.games-wow-character-runs a { display: flex; gap: 12px; align-items: center; padding: 12px 8px; border-radius: 6px; }
+.games-wow-character-runs a:hover { background: var(--color-surface); }
+.games-wow-character-runs img, .games-wow-character-runs .games-art-empty { width: 38px; height: 38px; flex: 0 0 38px; object-fit: cover; border-radius: 4px; }
+.games-wow-character-runs a > div { flex: 1; min-width: 0; }
+.games-wow-character-runs strong { display: block; font-size: 14px; font-weight: 550; overflow-wrap: anywhere; }
+.games-wow-character-runs small { display: block; font-size: 12px; color: var(--color-ink-muted); margin-top: 5px; line-height: 1.5; }
+.games-wow-character-level, .games-wow-character-time { font-size: 14px; font-variant-numeric: tabular-nums; white-space: nowrap; }
+.games-wow-character-level, .games-wow-character-time, .games-wow-character dd { direction: ltr; unicode-bidi: isolate; }
+[dir="rtl"] .games-wow-character dd { text-align: right; }
+.games-wow-character-time { color: var(--color-ink-muted); }
+.games-wow-character-runs a > svg { opacity: 0; flex-shrink: 0; }
+.games-wow-character-runs a:hover > svg, .games-wow-character-runs a:focus-visible > svg { opacity: 1; }
+.games-wow-character-more { font-size: 14px; color: var(--color-ink-muted); padding: 12px 8px; }
+.games-wow-character-raid-title { font-size: 16px; font-weight: 600; margin: 22px 0 16px; }
+.games-wow-character-progress { display: flex; flex-wrap: wrap; gap: 30px; }
+.games-wow-character-progress > div { min-width: 220px; }
+.games-wow-character-progress strong { font-size: 14px; font-weight: 550; }
+.games-wow-character-raid-name { display: flex; align-items: center; gap: 12px; }
+.games-wow-character-raid-name > img, .games-wow-character-raid-name > .games-art-empty { width: 40px; height: 40px; flex: 0 0 40px; object-fit: cover; border-radius: 4px; }
+.games-wow-character-progress dl { display: flex; flex-wrap: wrap; gap: 24px; margin: 12px 0 0; }
+.games-wow-character-progress dd { font-size: 18px; margin: 6px 0 0; font-variant-numeric: tabular-nums; }
+.games-wow-character-source { display: flex; flex-wrap: wrap; gap: 6px 16px; font-size: 12px; color: var(--color-ink-muted); margin-top: 24px; line-height: 1.6; }
+.games-wow-character-source a { display: inline-flex; align-items: center; gap: 5px; }
+.games-wow-character-source p { flex-basis: 100%; margin: 0; }
+.games-wow-character-loading { display: grid; gap: 10px; margin-top: 24px; }
+.games-wow-character-loading i { height: 56px; border-radius: 6px; }
+.games-wow-character-loading i:first-child { height: 85px; }
+@media (max-width: 1150px) { .games-wow-character-runs { grid-template-columns: 1fr; } }
+@media (max-width: 650px) { .games-wow-character-identity { display: grid; grid-template-columns: 64px minmax(0, 1fr); gap: 16px; }.games-wow-character-identity dl { grid-column: 1 / -1; gap: 36px; }.games-wow-character-identity dt { min-height: 2.6em; }.games-wow-character-search label { max-width: none; flex-basis: 100%; }.games-wow-character-identity > button { grid-column: 1 / -1; justify-self: start; font-size: 13px; }.games-wow-character-runs a { gap: 8px; }.games-wow-character-runs a > svg { display: none; } }

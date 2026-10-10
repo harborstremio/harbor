@@ -1,0 +1,1207 @@
+{
+ "version": 1,
+ "checked": "2026-09-28",
+ "collection": {
+  "id": "manga",
+  "title": "Horror manga",
+  "description": "Horror and dark manga.",
+  "itemIds": [
+   "uzumaki",
+   "manga-drifting-classroom",
+   "manga-summer-hikaru",
+   "manga-blood-on-the-tracks",
+   "manga-ptsd-radio",
+   "manga-girl-from-other-side",
+   "manga-drcl",
+   "parasyte",
+   "manga-orochi",
+   "manga-homunculus",
+   "manga-mermaid-saga",
+   "manga-dementia-21",
+   "manga-grand-guignol",
+   "manga-town-of-pigs",
+   "tomie",
+   "manga-cat-eyed-boy",
+   "manga-kurosagi",
+   "manga-witches",
+   "manga-devilman",
+   "manga-mountains-of-madness",
+   "manga-portus",
+   "manga-mieruko-chan",
+   "poe-clan-vol-1",
+   "manga-happiness",
+   "manga-another",
+   "manga-dorohedoro",
+   "manga-walking-cat",
+   "manga-hellsing",
+   "gyo",
+   "manga-higurashi",
+   "manga-umineko",
+   "manga-ajin",
+   "manga-berserk",
+   "no-longer-human",
+   "manga-devils-line",
+   "manga-tokyo-ghoul",
+   "manga-flowers-of-evil",
+   "manga-black-butler",
+   "shiver",
+   "manga-blood-lad"
+  ]
+ },
+ "items": [
+  {
+   "id": "uzumaki",
+   "title": "Uzumaki",
+   "year": 2013,
+   "type": "Manga",
+   "section": "manga",
+   "creator": "Junji Ito",
+   "description": "A coastal town becomes obsessed with spirals as the pattern begins transforming its inhabitants.",
+   "poster": "https://covers.openlibrary.org/b/id/11888471-L.jpg",
+   "source": "https://www.viz.com/manga-books/manga/uzumaki-3-in-1-deluxe-edition/product/3382",
+   "edition": "3-in-1 Deluxe Edition",
+   "editionYear": 2013,
+   "yearBasis": "English edition",
+   "release": "English edition · 2013",
+   "publisher": "VIZ Media",
+   "genres": [
+    "Cosmic horror",
+    "Body horror"
+   ],
+   "sourceChecked": "2026-09-28",
+   "sourceKind": "publisher",
+   "destination": {
+    "kind": "publisher",
+    "url": "https://www.viz.com/manga-books/manga/uzumaki-3-in-1-deluxe-edition/product/3382",
+    "label": "About this edition"
+   },
+   "publicationDate": "2013-10-15",
+   "isbn": "9781421561325"
+  },
+  {
+   "id": "manga-drifting-classroom",
+   "title": "The Drifting Classroom",
+   "type": "Manga",
+   "section": "manga",
+   "year": 2019,
+   "creator": "Kazuo Umezz",
+   "description": "An entire school disappears into a barren wasteland, leaving its pupils and teachers to fight for survival.",
+   "poster": "https://s4.anilist.co/file/anilistcdn/media/manga/cover/large/bx30970-tWIRsf2Sk6U0.jpg",
+   "source": "https://www.viz.com/manga-books/manga/drifting-classroom-volume-1/product/6073",
+   "edition": "Perfect Edition, Vol. 1",
+   "editionYear": 2019,
+   "yearBasis": "English edition",
+   "release": "English edition · 2019",
+   "publisher": "VIZ Media",
+   "genres": [
+    "Survival horror",
+    "Science fiction"
+   ],
+   "sourceChecked": "2026-09-28",
+   "sourceKind": "publisher",
+   "destination": {
+    "kind": "publisher",
+    "url": "https://www.viz.com/manga-books/manga/drifting-classroom-volume-1/product/6073",
+    "label": "About this edition"
+   },
+   "publicationDate": "2019-10-15",
+   "isbn": "9781974709373"
+  },
+  {
+   "id": "manga-summer-hikaru",
+   "title": "The Summer Hikaru Died",
+   "type": "Manga",
+   "section": "manga",
+   "year": 2023,
+   "creator": "Mokumokuren",
+   "description": "Yoshiki knows the boy who looks and sounds like his best friend is something else, but cannot bring himself to leave him.",
+   "poster": "https://s4.anilist.co/file/anilistcdn/media/manga/cover/large/bx190970-k3dpZS7OSQD7.jpg",
+   "source": "https://yenpress.com/titles/9781975360542-the-summer-hikaru-died-vol-1",
+   "edition": "Vol. 1",
+   "editionYear": 2023,
+   "yearBasis": "English edition",
+   "release": "English edition · 2023",
+   "publisher": "Yen Press",
+   "genres": [
+    "Supernatural horror",
+    "Psychological horror"
+   ],
+   "sourceChecked": "2026-09-28",
+   "sourceKind": "publisher",
+   "destination": {
+    "kind": "publisher",
+    "url": "https://yenpress.com/titles/9781975360542-the-summer-hikaru-died-vol-1",
+    "label": "About this edition"
+   },
+   "publicationDate": "2023-07-18",
+   "isbn": "9781975360542"
+  },
+  {
+   "id": "manga-blood-on-the-tracks",
+   "title": "Blood on the Tracks",
+   "type": "Manga",
+   "section": "manga",
+   "year": 2020,
+   "creator": "Shuzo Oshimi",
+   "description": "A terrible summer incident exposes the danger beneath Seiichi's seemingly ordinary relationship with his mother.",
+   "poster": "https://s4.anilist.co/file/anilistcdn/media/manga/cover/large/nx98397-5b3kSYyw7ykd.jpg",
+   "source": "https://www.penguinrandomhouse.com/books/616944/blood-on-the-tracks-1-by-shuzo-oshimi/",
+   "edition": "Vol. 1",
+   "editionYear": 2020,
+   "yearBasis": "English edition",
+   "release": "English edition · 2020",
+   "publisher": "Vertical Comics",
+   "genres": [
+    "Psychological horror"
+   ],
+   "sourceChecked": "2026-09-28",
+   "sourceKind": "publisher distributor",
+   "destination": {
+    "kind": "publisher",
+    "url": "https://www.penguinrandomhouse.com/books/616944/blood-on-the-tracks-1-by-shuzo-oshimi/",
+    "label": "About this edition"
+   },
+   "publicationDate": "2020-02-25",
+   "isbn": "9781949980134"
+  },
+  {
+   "id": "manga-ptsd-radio",
+   "title": "PTSD Radio",
+   "type": "Manga",
+   "section": "manga",
+   "year": 2022,
+   "creator": "Masaaki Nakayama",
+   "description": "Interconnected encounters reveal an ancient curse that reaches into modern lives through human hair.",
+   "poster": "https://s4.anilist.co/file/anilistcdn/media/manga/cover/large/bx85401-3FuaR3VSY89o.png",
+   "source": "https://kodansha.us/series/ptsd-radio-2-in-1/volume-1/",
+   "edition": "Omnibus 1 (vols. 1–2)",
+   "editionYear": 2022,
+   "yearBasis": "English edition",
+   "release": "English edition · 2022",
+   "publisher": "Kodansha Comics",
+   "genres": [
+    "Supernatural horror",
+    "Short stories"
+   ],
+   "sourceChecked": "2026-09-28",
+   "sourceKind": "publisher",
+   "destination": {
+    "kind": "publisher",
+    "url": "https://kodansha.us/series/ptsd-radio-2-in-1/volume-1/",
+    "label": "About this edition"
+   },
+   "publicationDate": "2022-10-18",
+   "isbn": "9781646516322"
+  },
+  {
+   "id": "manga-girl-from-other-side",
+   "title": "The Girl from the Other Side",
+   "type": "Manga",
+   "section": "manga",
+   "year": 2017,
+   "creator": "Nagabe",
+   "description": "A human girl lives beside a horned outsider in a divided world where a monster's touch can carry a curse.",
+   "poster": "https://s4.anilist.co/file/anilistcdn/media/manga/cover/large/bx86770-vjBM79Z1GVbs.jpg",
+   "source": "https://sevenseasentertainment.com/books/the-girl-from-the-other-side-siuil-a-run-vol-1/",
+   "edition": "Siúil, a Rún, Vol. 1",
+   "editionYear": 2017,
+   "yearBasis": "English edition",
+   "release": "English edition · 2017",
+   "publisher": "Seven Seas Entertainment",
+   "genres": [
+    "Dark fantasy",
+    "Gothic"
+   ],
+   "sourceChecked": "2026-09-28",
+   "sourceKind": "publisher",
+   "destination": {
+    "kind": "publisher",
+    "url": "https://sevenseasentertainment.com/books/the-girl-from-the-other-side-siuil-a-run-vol-1/",
+    "label": "About this edition"
+   },
+   "publicationDate": "2017-01-10",
+   "isbn": "9781626924673"
+  },
+  {
+   "id": "manga-drcl",
+   "title": "#DRCL midnight children",
+   "type": "Manga",
+   "section": "manga",
+   "year": 2023,
+   "creator": "Shin’ichi Sakamoto, after Bram Stoker",
+   "description": "Mina and her fellow students at Whitby School confront Count Dracula in this reimagining of Stoker's novel.",
+   "poster": "https://s4.anilist.co/file/anilistcdn/media/manga/cover/large/bx127157-uMsiMKefIj4o.png",
+   "source": "https://www.viz.com/manga-books/manga/drcl-midnight-children-volume-1/product/7586",
+   "edition": "Vol. 1",
+   "editionYear": 2023,
+   "yearBasis": "English edition",
+   "release": "English edition · 2023",
+   "publisher": "VIZ Media",
+   "genres": [
+    "Gothic horror",
+    "Vampires"
+   ],
+   "sourceChecked": "2026-09-28",
+   "sourceKind": "publisher",
+   "destination": {
+    "kind": "publisher",
+    "url": "https://www.viz.com/manga-books/manga/drcl-midnight-children-volume-1/product/7586",
+    "label": "About this edition"
+   },
+   "publicationDate": "2023-09-19",
+   "isbn": "9781974740888"
+  },
+  {
+   "id": "parasyte",
+   "title": "Parasyte",
+   "year": 2011,
+   "type": "Manga",
+   "section": "manga",
+   "creator": "Hitoshi Iwaaki",
+   "description": "A student shares his body with an alien parasite as other invaders hide behind human faces.",
+   "poster": "https://covers.openlibrary.org/b/id/212522-L.jpg",
+   "source": "https://www.penguinrandomhouse.com/books/643085/parasyte-1-by-hitoshi-iwaaki/paperback/",
+   "edition": "Vol. 1",
+   "editionYear": 2011,
+   "yearBasis": "English edition",
+   "release": "English edition · 2011",
+   "publisher": "Kodansha Comics",
+   "genres": [
+    "Body horror",
+    "Science fiction"
+   ],
+   "sourceChecked": "2026-09-28",
+   "sourceKind": "publisher distributor",
+   "destination": {
+    "kind": "publisher",
+    "url": "https://www.penguinrandomhouse.com/books/643085/parasyte-1-by-hitoshi-iwaaki/paperback/",
+    "label": "About this edition"
+   },
+   "publicationDate": "2011-07-26",
+   "isbn": "9781612620732"
+  },
+  {
+   "id": "manga-orochi",
+   "title": "Orochi",
+   "type": "Manga",
+   "section": "manga",
+   "year": 2022,
+   "creator": "Kazuo Umezz",
+   "description": "A mysterious girl becomes entangled in the secrets of two sisters and the consequences of a man's resurrection.",
+   "poster": "https://s4.anilist.co/file/anilistcdn/media/manga/cover/medium/b33873-hPJynaEPzaRT.jpg",
+   "source": "https://www.viz.com/manga-books/manga/orochi-the-perfect-edition-volume-1/product/7008",
+   "edition": "The Perfect Edition, Vol. 1",
+   "editionYear": 2022,
+   "yearBasis": "English edition",
+   "release": "English edition · 2022",
+   "publisher": "VIZ Media",
+   "genres": [
+    "Psychological horror",
+    "Supernatural horror"
+   ],
+   "sourceChecked": "2026-09-28",
+   "sourceKind": "publisher",
+   "destination": {
+    "kind": "publisher",
+    "url": "https://www.viz.com/manga-books/manga/orochi-the-perfect-edition-volume-1/product/7008",
+    "label": "About this edition"
+   },
+   "publicationDate": "2022-03-15",
+   "isbn": "9781974725830"
+  },
+  {
+   "id": "manga-homunculus",
+   "title": "Homunculus",
+   "type": "Manga",
+   "section": "manga",
+   "year": 2023,
+   "creator": "Hideo Yamamoto",
+   "description": "A man living in his car accepts payment for experimental skull surgery and begins to perceive disturbing human distortions.",
+   "poster": "https://s4.anilist.co/file/anilistcdn/media/manga/cover/large/bx30936-P55KMUW1sgLN.jpg",
+   "source": "https://sevenseasentertainment.com/books/homunculus-omnibus-vol-1-2/",
+   "edition": "Omnibus, Vols. 1–2",
+   "editionYear": 2023,
+   "yearBasis": "English edition",
+   "release": "English edition · 2023",
+   "publisher": "Seven Seas Entertainment",
+   "genres": [
+    "Psychological horror",
+    "Body horror"
+   ],
+   "sourceChecked": "2026-09-28",
+   "sourceKind": "publisher",
+   "destination": {
+    "kind": "publisher",
+    "url": "https://sevenseasentertainment.com/books/homunculus-omnibus-vol-1-2/",
+    "label": "About this edition"
+   },
+   "publicationDate": "2023-06-27",
+   "isbn": "9781685797294"
+  },
+  {
+   "id": "manga-mermaid-saga",
+   "title": "Mermaid Saga",
+   "type": "Manga",
+   "section": "manga",
+   "year": 2020,
+   "creator": "Rumiko Takahashi",
+   "description": "Made immortal by eating mermaid flesh, Yuta searches for a way to become human again.",
+   "poster": "https://s4.anilist.co/file/anilistcdn/media/manga/cover/medium/b30199-JZJqchi6gkbN.jpg",
+   "source": "https://www.viz.com/manga-books/manga/mermaid-saga-collector-s-edition-volume-1/product/6474",
+   "edition": "Collector’s Edition, Vol. 1",
+   "editionYear": 2020,
+   "yearBasis": "English edition",
+   "release": "English edition · 2020",
+   "publisher": "VIZ Media",
+   "genres": [
+    "Supernatural horror",
+    "Immortality"
+   ],
+   "sourceChecked": "2026-09-28",
+   "sourceKind": "publisher",
+   "destination": {
+    "kind": "publisher",
+    "url": "https://www.viz.com/manga-books/manga/mermaid-saga-collector-s-edition-volume-1/product/6474",
+    "label": "About this edition"
+   },
+   "publicationDate": "2020-11-17",
+   "isbn": "9781974718573"
+  },
+  {
+   "id": "manga-dementia-21",
+   "title": "Dementia 21",
+   "type": "Manga",
+   "section": "manga",
+   "year": 2018,
+   "creator": "Shintaro Kago",
+   "description": "A home health aide's elderly clients draw her into increasingly impossible and grotesque situations.",
+   "poster": "https://s4.anilist.co/file/anilistcdn/media/manga/cover/large/bx103654-OIJTRyxffyLF.png",
+   "source": "https://www.fantagraphics.com/products/dementia-21-vol-1",
+   "edition": "Vol. 1",
+   "editionYear": 2018,
+   "yearBasis": "English edition",
+   "release": "English edition · 2018",
+   "publisher": "Fantagraphics",
+   "genres": [
+    "Surreal horror",
+    "Black comedy"
+   ],
+   "sourceChecked": "2026-09-28",
+   "sourceKind": "publisher",
+   "destination": {
+    "kind": "publisher",
+    "url": "https://www.fantagraphics.com/products/dementia-21-vol-1",
+    "label": "About this edition"
+   },
+   "publicationDate": "2018-09-25",
+   "isbn": "9781683961062"
+  },
+  {
+   "id": "manga-grand-guignol",
+   "title": "Grand Guignol Orchestra",
+   "type": "Manga",
+   "section": "manga",
+   "year": 2010,
+   "creator": "Kaori Yuki",
+   "description": "Traveling musicians enter a town whose residents have become doll-like zombies and attempt to soothe them with music.",
+   "poster": "https://s4.anilist.co/file/anilistcdn/media/manga/cover/large/bx39268-2JBKKM1sVRAV.png",
+   "source": "https://www.viz.com/manga-books/manga/grand-guignol-orchestra-volume-1/product/2536",
+   "edition": "Vol. 1",
+   "editionYear": 2010,
+   "yearBasis": "English edition",
+   "release": "English edition · 2010",
+   "publisher": "VIZ Media",
+   "genres": [
+    "Gothic horror",
+    "Dark fantasy"
+   ],
+   "sourceChecked": "2026-09-28",
+   "sourceKind": "publisher",
+   "destination": {
+    "kind": "publisher",
+    "url": "https://www.viz.com/manga-books/manga/grand-guignol-orchestra-volume-1/product/2536",
+    "label": "About this edition"
+   },
+   "publicationDate": "2010-10-05",
+   "isbn": "9781421536361"
+  },
+  {
+   "id": "manga-town-of-pigs",
+   "title": "Town of Pigs",
+   "type": "Manga",
+   "section": "manga",
+   "year": 2022,
+   "creator": "Hideshi Hino",
+   "description": "A boy escapes when armed creatures abduct his town's residents, then witnesses what becomes of the captives.",
+   "poster": "https://s4.anilist.co/file/anilistcdn/media/manga/cover/large/bx135168-Fr5dNfgbVs6g.jpg",
+   "source": "https://starfruitbooks.com/products/town-of-pigs",
+   "edition": "Digital edition",
+   "editionYear": 2022,
+   "yearBasis": "English edition",
+   "release": "English edition · 2022",
+   "publisher": "Star Fruit Books",
+   "genres": [
+    "Surreal horror",
+    "Body horror"
+   ],
+   "sourceChecked": "2026-09-28",
+   "sourceKind": "publisher",
+   "destination": {
+    "kind": "publisher",
+    "url": "https://starfruitbooks.com/products/town-of-pigs",
+    "label": "About this edition"
+   },
+   "yearSource": "https://www.reddit.com/r/horrormanga/comments/tvpgps/",
+   "yearSourceNote": "Star Fruit Books founder announced the digital edition as released on April 4, 2022; only the year is asserted."
+  },
+  {
+   "id": "tomie",
+   "title": "Tomie",
+   "year": 2016,
+   "type": "Manga",
+   "section": "manga",
+   "creator": "Junji Ito",
+   "description": "An immortal woman provokes murderous obsession and returns no matter how often she is killed.",
+   "poster": "https://covers.openlibrary.org/b/id/9140515-L.jpg",
+   "source": "https://www.viz.com/manga-books/manga/tomie-complete-deluxe-edition/product/4988",
+   "edition": "Complete Deluxe Edition",
+   "editionYear": 2016,
+   "yearBasis": "English edition",
+   "release": "English edition · 2016",
+   "publisher": "VIZ Media",
+   "genres": [
+    "Supernatural horror",
+    "Body horror"
+   ],
+   "sourceChecked": "2026-09-28",
+   "sourceKind": "publisher",
+   "destination": {
+    "kind": "publisher",
+    "url": "https://www.viz.com/manga-books/manga/tomie-complete-deluxe-edition/product/4988",
+    "label": "About this edition"
+   },
+   "publicationDate": "2016-12-20",
+   "isbn": "9781421590561"
+  },
+  {
+   "id": "manga-cat-eyed-boy",
+   "title": "Cat-Eyed Boy",
+   "type": "Manga",
+   "section": "manga",
+   "year": 2023,
+   "creator": "Kazuo Umezz",
+   "description": "A demon boy rejected by humans and monsters passes through encounters that expose the cruelty of both worlds.",
+   "poster": "https://s4.anilist.co/file/anilistcdn/media/manga/cover/large/bx35550-jqmhl87vdF56.png",
+   "source": "https://www.viz.com/manga-books/manga/cat-eyed-boy-the-perfect-edition-volume-1/product/7549",
+   "edition": "The Perfect Edition, Vol. 1",
+   "editionYear": 2023,
+   "yearBasis": "English edition",
+   "release": "English edition · 2023",
+   "publisher": "VIZ Media",
+   "genres": [
+    "Supernatural horror",
+    "Short stories"
+   ],
+   "sourceChecked": "2026-09-28",
+   "sourceKind": "publisher",
+   "destination": {
+    "kind": "publisher",
+    "url": "https://www.viz.com/manga-books/manga/cat-eyed-boy-the-perfect-edition-volume-1/product/7549",
+    "label": "About this edition"
+   },
+   "publicationDate": "2023-08-22",
+   "isbn": "9781974738854"
+  },
+  {
+   "id": "manga-kurosagi",
+   "title": "The Kurosagi Corpse Delivery Service",
+   "type": "Manga",
+   "section": "manga",
+   "year": 2015,
+   "creator": "Eiji Otsuka",
+   "description": "Five Buddhist college students use their unusual skills to contact the dead and fulfill their final wishes.",
+   "poster": "https://s4.anilist.co/file/anilistcdn/media/manga/cover/large/bx31161-YvHLrT4MZaNp.jpg",
+   "source": "https://www.penguinrandomhouse.com/books/251178/the-kurosagi-corpse-delivery-service-book-one-omnibus-by-eiji-otsuka/",
+   "edition": "Book One Omnibus",
+   "editionYear": 2015,
+   "yearBasis": "English edition",
+   "release": "English edition · 2015",
+   "publisher": "Dark Horse Manga",
+   "genres": [
+    "Supernatural horror",
+    "Black comedy"
+   ],
+   "sourceChecked": "2026-09-28",
+   "sourceKind": "publisher distributor",
+   "destination": {
+    "kind": "publisher",
+    "url": "https://www.penguinrandomhouse.com/books/251178/the-kurosagi-corpse-delivery-service-book-one-omnibus-by-eiji-otsuka/",
+    "label": "About this edition"
+   },
+   "publicationDate": "2015-09-08",
+   "isbn": "9781616557546"
+  },
+  {
+   "id": "manga-witches",
+   "title": "Witches",
+   "type": "Manga",
+   "section": "manga",
+   "year": 2022,
+   "creator": "Daisuke Igarashi",
+   "description": "Interwoven stories follow witchcraft and its consequences across different places and generations.",
+   "poster": "https://s4.anilist.co/file/anilistcdn/media/manga/cover/large/bx32139-ANdfj6KectYS.png",
+   "source": "https://sevenseasentertainment.com/books/witches-the-complete-collection-omnibus/",
+   "edition": "The Complete Collection",
+   "editionYear": 2022,
+   "yearBasis": "English edition",
+   "release": "English edition · 2022",
+   "publisher": "Seven Seas Entertainment",
+   "genres": [
+    "Supernatural",
+    "Dark fantasy"
+   ],
+   "sourceChecked": "2026-09-28",
+   "sourceKind": "publisher",
+   "destination": {
+    "kind": "publisher",
+    "url": "https://sevenseasentertainment.com/books/witches-the-complete-collection-omnibus/",
+    "label": "About this edition"
+   },
+   "publicationDate": "2022-05-03",
+   "isbn": "9781648278396"
+  },
+  {
+   "id": "manga-devilman",
+   "title": "Devilman",
+   "type": "Manga",
+   "section": "manga",
+   "year": 2018,
+   "creator": "Go Nagai",
+   "description": "Akira Fudo gains a demon's power while retaining a human heart as demonic possession spreads through the world.",
+   "poster": "https://s4.anilist.co/file/anilistcdn/media/manga/cover/large/bx31474-R4x7qkjUfBw6.jpg",
+   "source": "https://sevenseasentertainment.com/books/devilman-the-classic-collection-vol-1/",
+   "edition": "The Classic Collection, Vol. 1",
+   "editionYear": 2018,
+   "yearBasis": "English edition",
+   "release": "English edition · 2018",
+   "publisher": "Seven Seas Entertainment",
+   "genres": [
+    "Demonic horror",
+    "Apocalypse"
+   ],
+   "sourceChecked": "2026-09-28",
+   "sourceKind": "publisher",
+   "destination": {
+    "kind": "publisher",
+    "url": "https://sevenseasentertainment.com/books/devilman-the-classic-collection-vol-1/",
+    "label": "About this edition"
+   },
+   "publicationDate": "2018-05-22",
+   "isbn": "9781626927575"
+  },
+  {
+   "id": "manga-mountains-of-madness",
+   "title": "At the Mountains of Madness",
+   "type": "Manga",
+   "section": "manga",
+   "year": 2024,
+   "creator": "Gou Tanabe, after H. P. Lovecraft",
+   "description": "An Antarctic expedition discovers a devastated camp and evidence of a civilization older than humanity.",
+   "poster": "https://s4.anilist.co/file/anilistcdn/media/manga/cover/large/nx104782-CaBAhM5XwQUa.jpg",
+   "source": "https://www.penguinrandomhouse.com/books/747925/hp-lovecrafts-at-the-mountains-of-madness-deluxe-edition-manga-by-adaptation-and-artwork-by-gou-tanabe/",
+   "edition": "Deluxe Edition",
+   "editionYear": 2024,
+   "yearBasis": "English edition",
+   "release": "English edition · 2024",
+   "publisher": "Dark Horse Manga",
+   "genres": [
+    "Cosmic horror"
+   ],
+   "sourceChecked": "2026-09-28",
+   "sourceKind": "publisher distributor",
+   "destination": {
+    "kind": "publisher",
+    "url": "https://www.penguinrandomhouse.com/books/747925/hp-lovecrafts-at-the-mountains-of-madness-deluxe-edition-manga-by-adaptation-and-artwork-by-gou-tanabe/",
+    "label": "About this edition"
+   },
+   "publicationDate": "2024-07-09",
+   "isbn": "9781506740690"
+  },
+  {
+   "id": "manga-portus",
+   "title": "Portus",
+   "type": "Manga",
+   "section": "manga",
+   "year": 2007,
+   "creator": "Jun Abe",
+   "description": "After her friend's death, Asami investigates a mysterious video game with the help of two teachers.",
+   "poster": "https://s4.anilist.co/file/anilistcdn/media/manga/cover/large/bx33337-4rjIl0aIZOGb.png",
+   "source": "https://www.viz.com/manga-books/manga/portus/product/1223",
+   "edition": "Complete volume",
+   "editionYear": 2007,
+   "yearBasis": "English edition",
+   "release": "English edition · 2007",
+   "publisher": "VIZ Media",
+   "genres": [
+    "Supernatural horror"
+   ],
+   "sourceChecked": "2026-09-28",
+   "sourceKind": "publisher",
+   "destination": {
+    "kind": "publisher",
+    "url": "https://www.viz.com/manga-books/manga/portus/product/1223",
+    "label": "About this edition"
+   },
+   "publicationDate": "2007-10-09",
+   "isbn": "9781421513836"
+  },
+  {
+   "id": "manga-mieruko-chan",
+   "title": "Mieruko-chan",
+   "type": "Manga",
+   "section": "manga",
+   "year": 2020,
+   "creator": "Tomoki Izumi",
+   "description": "A schoolgirl suddenly sees grotesque spirits everywhere and tries to survive by pretending they are not there.",
+   "poster": "https://s4.anilist.co/file/anilistcdn/media/manga/cover/large/bx105097-nMpc8bjBeuXE.jpg",
+   "source": "https://yenpress.com/titles/9781975317577-mieruko-chan-vol-1",
+   "edition": "Vol. 1",
+   "editionYear": 2020,
+   "yearBasis": "English edition",
+   "release": "English edition · 2020",
+   "publisher": "Yen Press",
+   "genres": [
+    "Supernatural horror",
+    "Horror comedy"
+   ],
+   "sourceChecked": "2026-09-28",
+   "sourceKind": "publisher",
+   "destination": {
+    "kind": "publisher",
+    "url": "https://yenpress.com/titles/9781975317577-mieruko-chan-vol-1",
+    "label": "About this edition"
+   },
+   "publicationDate": "2020-11-17",
+   "isbn": "9781975317577"
+  },
+  {
+   "id": "poe-clan-vol-1",
+   "title": "The Poe Clan, Vol. 1",
+   "year": 2019,
+   "type": "Manga",
+   "section": "manga",
+   "creator": "Moto Hagio",
+   "description": "Vampire siblings remain young while moving through a world where the people around them grow older.",
+   "poster": "https://covers.openlibrary.org/b/id/11319994-L.jpg",
+   "source": "https://www.fantagraphics.com/products/the-poe-clan-vol-1",
+   "edition": "Vol. 1",
+   "editionYear": 2019,
+   "yearBasis": "English edition",
+   "release": "English edition · 2019",
+   "publisher": "Fantagraphics",
+   "genres": [
+    "Gothic",
+    "Vampires"
+   ],
+   "sourceChecked": "2026-09-28",
+   "sourceKind": "publisher",
+   "destination": {
+    "kind": "publisher",
+    "url": "https://www.fantagraphics.com/products/the-poe-clan-vol-1",
+    "label": "About this edition"
+   },
+   "publicationDate": "2019-08-20",
+   "isbn": "9781683962083"
+  },
+  {
+   "id": "manga-happiness",
+   "title": "Happiness",
+   "type": "Manga",
+   "section": "manga",
+   "year": 2016,
+   "creator": "Shuzo Oshimi",
+   "description": "A bullied teenager's encounter with a mysterious girl leaves him struggling with a new hunger for blood.",
+   "poster": "https://s4.anilist.co/file/anilistcdn/media/manga/cover/large/bx86136-CJRGk54qB6Ev.jpg",
+   "source": "https://www.penguinrandomhouse.com/books/547052/happiness-1-by-shuzo-oshimi/",
+   "edition": "Vol. 1",
+   "editionYear": 2016,
+   "yearBasis": "English edition",
+   "release": "English edition · 2016",
+   "publisher": "Kodansha Comics",
+   "genres": [
+    "Vampire horror",
+    "Psychological horror"
+   ],
+   "sourceChecked": "2026-09-28",
+   "sourceKind": "publisher distributor",
+   "destination": {
+    "kind": "publisher",
+    "url": "https://www.penguinrandomhouse.com/books/547052/happiness-1-by-shuzo-oshimi/",
+    "label": "About this edition"
+   },
+   "publicationDate": "2016-09-27",
+   "isbn": "9781632363633"
+  },
+  {
+   "id": "manga-another",
+   "title": "Another",
+   "type": "Manga",
+   "section": "manga",
+   "year": 2013,
+   "creator": "Yukito Ayatsuji; art by Hiro Kiyohara",
+   "description": "A transfer student investigates a classroom curse after his classmates begin dying in a chain of disturbing incidents.",
+   "poster": "https://s4.anilist.co/file/anilistcdn/media/manga/cover/large/bx54098-NZ21m9i1lZOs.jpg",
+   "source": "https://yenpress.com/titles/9780316245913-another",
+   "edition": "Complete manga omnibus",
+   "editionYear": 2013,
+   "yearBasis": "English edition",
+   "release": "English edition · 2013",
+   "publisher": "Yen Press",
+   "genres": [
+    "Supernatural horror",
+    "Mystery"
+   ],
+   "sourceChecked": "2026-09-28",
+   "sourceKind": "publisher",
+   "destination": {
+    "kind": "publisher",
+    "url": "https://yenpress.com/titles/9780316245913-another",
+    "label": "About this edition"
+   },
+   "publicationDate": "2013-10-29",
+   "isbn": "9780316245913"
+  },
+  {
+   "id": "manga-dorohedoro",
+   "title": "Dorohedoro",
+   "type": "Manga",
+   "section": "manga",
+   "year": 2010,
+   "creator": "Q Hayashida",
+   "description": "An amnesiac man with a reptile's head hunts the sorcerer who transformed him in a city used for magical experiments.",
+   "poster": "https://s4.anilist.co/file/anilistcdn/media/manga/cover/large/bx31133-Jx6map3Oidz1.png",
+   "source": "https://www.viz.com/manga-books/manga/dorohedoro-volume-1-0/product/2321/paperback",
+   "edition": "Vol. 1",
+   "editionYear": 2010,
+   "yearBasis": "English edition",
+   "release": "English edition · 2010",
+   "publisher": "VIZ Media",
+   "genres": [
+    "Dark fantasy",
+    "Body horror"
+   ],
+   "sourceChecked": "2026-09-28",
+   "sourceKind": "publisher",
+   "destination": {
+    "kind": "publisher",
+    "url": "https://www.viz.com/manga-books/manga/dorohedoro-volume-1-0/product/2321/paperback",
+    "label": "About this edition"
+   },
+   "publicationDate": "2010-03-16",
+   "isbn": "9781421533636"
+  },
+  {
+   "id": "manga-walking-cat",
+   "title": "The Walking Cat",
+   "type": "Manga",
+   "section": "manga",
+   "year": 2021,
+   "creator": "Tomo Kitaoka",
+   "description": "A rescued cat travels with survivors through a society overrun by zombies.",
+   "poster": "https://s4.anilist.co/file/anilistcdn/media/manga/cover/large/bx115174-UBuzMPWgRWi8.jpg",
+   "source": "https://sevenseasentertainment.com/books/the-walking-cat-a-cats-eye-view-of-the-zombie-apocalypse-omnibus-vols-1-3/",
+   "edition": "A Cat’s-Eye View of the Zombie Apocalypse, Omnibus Vols. 1–3",
+   "editionYear": 2021,
+   "yearBasis": "English edition",
+   "release": "English edition · 2021",
+   "publisher": "Seven Seas Entertainment",
+   "genres": [
+    "Zombie horror",
+    "Survival"
+   ],
+   "sourceChecked": "2026-09-28",
+   "sourceKind": "publisher",
+   "destination": {
+    "kind": "publisher",
+    "url": "https://sevenseasentertainment.com/books/the-walking-cat-a-cats-eye-view-of-the-zombie-apocalypse-omnibus-vols-1-3/",
+    "label": "About this edition"
+   },
+   "publicationDate": "2021-10-26",
+   "isbn": "9781648276118"
+  },
+  {
+   "id": "manga-hellsing",
+   "title": "Hellsing",
+   "type": "Manga",
+   "section": "manga",
+   "year": 2023,
+   "creator": "Kohta Hirano",
+   "description": "The Hellsing Organization uses the vampire Alucard to battle supernatural threats in England.",
+   "poster": "https://s4.anilist.co/file/anilistcdn/media/manga/cover/large/bx39760-ttrfuONSRq54.png",
+   "source": "https://www.penguinrandomhouse.com/books/737751/hellsing-volume-1-second-edition-by-created-written-and-illustrated-by-kohta-hirano-translated-by-duane-johnson-lettered-by-wilbert-lacuna/",
+   "edition": "Vol. 1, Second Edition",
+   "editionYear": 2023,
+   "yearBasis": "English edition",
+   "release": "English edition · 2023",
+   "publisher": "Dark Horse Manga",
+   "genres": [
+    "Gothic horror",
+    "Vampires"
+   ],
+   "sourceChecked": "2026-09-28",
+   "sourceKind": "publisher distributor",
+   "destination": {
+    "kind": "publisher",
+    "url": "https://www.penguinrandomhouse.com/books/737751/hellsing-volume-1-second-edition-by-created-written-and-illustrated-by-kohta-hirano-translated-by-duane-johnson-lettered-by-wilbert-lacuna/",
+    "label": "About this edition"
+   },
+   "publicationDate": "2023-11-07",
+   "isbn": "9781506738505"
+  },
+  {
+   "id": "gyo",
+   "title": "Gyo",
+   "year": 2015,
+   "type": "Manga",
+   "section": "manga",
+   "creator": "Junji Ito",
+   "description": "Tadashi and Kaori encounter a walking fish in Okinawa as a foul-smelling invasion begins.",
+   "poster": "https://covers.openlibrary.org/b/id/8970386-L.jpg",
+   "source": "https://www.viz.com/manga-books/manga/gyo-2-in-1-deluxe-edition/product/3685",
+   "edition": "2-in-1 Deluxe Edition",
+   "editionYear": 2015,
+   "yearBasis": "English edition",
+   "release": "English edition · 2015",
+   "publisher": "VIZ Media",
+   "genres": [
+    "Body horror"
+   ],
+   "sourceChecked": "2026-09-28",
+   "sourceKind": "publisher",
+   "destination": {
+    "kind": "publisher",
+    "url": "https://www.viz.com/manga-books/manga/gyo-2-in-1-deluxe-edition/product/3685",
+    "label": "About this edition"
+   },
+   "publicationDate": "2015-04-21",
+   "isbn": "9781421579153"
+  },
+  {
+   "id": "manga-higurashi",
+   "title": "Higurashi When They Cry",
+   "type": "Manga",
+   "section": "manga",
+   "year": 2008,
+   "creator": "Ryukishi07; art by Karin Suzuragi",
+   "description": "New arrival Keiichi discovers that his village's annual festival is linked to recurring deaths and disappearances.",
+   "poster": "https://s4.anilist.co/file/anilistcdn/media/manga/cover/large/bx124652-OLRZgMu38UWX.jpg",
+   "source": "https://yenpress.com/titles/9780759529830-higurashi-when-they-cry-abducted-by-demons-arc-vol-1",
+   "edition": "Abducted by Demons Arc, Vol. 1",
+   "editionYear": 2008,
+   "yearBasis": "English edition",
+   "release": "English edition · 2008",
+   "publisher": "Yen Press",
+   "genres": [
+    "Psychological horror",
+    "Mystery"
+   ],
+   "sourceChecked": "2026-09-28",
+   "sourceKind": "publisher",
+   "destination": {
+    "kind": "publisher",
+    "url": "https://yenpress.com/titles/9780759529830-higurashi-when-they-cry-abducted-by-demons-arc-vol-1",
+    "label": "About this edition"
+   },
+   "publicationDate": "2008-11-18",
+   "isbn": "9780759529830"
+  },
+  {
+   "id": "manga-umineko",
+   "title": "Umineko When They Cry",
+   "type": "Manga",
+   "section": "manga",
+   "year": 2012,
+   "creator": "Ryukishi07; art by Kei Natsumi",
+   "description": "A typhoon traps a wealthy family on its island estate as brutal deaths revive the legend of a witch.",
+   "poster": "https://s4.anilist.co/file/anilistcdn/media/manga/cover/large/bx103290-8ZE4H2h5nIIC.jpg",
+   "source": "https://yenpress.com/titles/9780316229166-umineko-when-they-cry-episode-1-legend-of-the-golden-witch-vol-1",
+   "edition": "Episode 1: Legend of the Golden Witch, Vol. 1",
+   "editionYear": 2012,
+   "yearBasis": "English edition",
+   "release": "English edition · 2012",
+   "publisher": "Yen Press",
+   "genres": [
+    "Gothic horror",
+    "Mystery"
+   ],
+   "sourceChecked": "2026-09-28",
+   "sourceKind": "publisher",
+   "destination": {
+    "kind": "publisher",
+    "url": "https://yenpress.com/titles/9780316229166-umineko-when-they-cry-episode-1-legend-of-the-golden-witch-vol-1",
+    "label": "About this edition"
+   },
+   "publicationDate": "2012-11-20",
+   "isbn": "9780316229166"
+  },
+  {
+   "id": "manga-ajin",
+   "title": "Ajin: Demi-Human",
+   "type": "Manga",
+   "section": "manga",
+   "year": 2014,
+   "creator": "Gamon Sakurai",
+   "description": "Kei revives after a fatal traffic accident and becomes the target of a manhunt for immortal beings.",
+   "poster": "https://s4.anilist.co/file/anilistcdn/media/manga/cover/medium/b79865-rwKmISrhJJyP.jpg",
+   "source": "https://www.penguinrandomhouse.com/books/239949/ajin-1-by-gamon-sakurai/",
+   "edition": "Vol. 1",
+   "editionYear": 2014,
+   "yearBasis": "English edition",
+   "release": "English edition · 2014",
+   "publisher": "Vertical Comics",
+   "genres": [
+    "Supernatural thriller",
+    "Body horror"
+   ],
+   "sourceChecked": "2026-09-28",
+   "sourceKind": "publisher distributor",
+   "destination": {
+    "kind": "publisher",
+    "url": "https://www.penguinrandomhouse.com/books/239949/ajin-1-by-gamon-sakurai/",
+    "label": "About this edition"
+   },
+   "publicationDate": "2014-10-14",
+   "isbn": "9781939130846"
+  },
+  {
+   "id": "manga-berserk",
+   "title": "Berserk",
+   "type": "Manga",
+   "section": "manga",
+   "year": 2019,
+   "creator": "Kentaro Miura",
+   "description": "The swordsman Guts fights through a violent world shaped by demonic forces.",
+   "poster": "https://s4.anilist.co/file/anilistcdn/media/manga/cover/large/bx30002-Cul4OeN7bYtn.jpg",
+   "source": "https://www.penguinrandomhouse.com/books/606571/berserk-deluxe-volume-1-by-kentaro-miura/",
+   "edition": "Deluxe Volume 1 (vols. 1–3)",
+   "editionYear": 2019,
+   "yearBasis": "English edition",
+   "release": "English edition · 2019",
+   "publisher": "Dark Horse Manga",
+   "genres": [
+    "Dark fantasy",
+    "Horror"
+   ],
+   "sourceChecked": "2026-09-28",
+   "sourceKind": "publisher distributor",
+   "destination": {
+    "kind": "publisher",
+    "url": "https://www.penguinrandomhouse.com/books/606571/berserk-deluxe-volume-1-by-kentaro-miura/",
+    "label": "About this edition"
+   },
+   "publicationDate": "2019-03-26",
+   "isbn": "9781506711980"
+  },
+  {
+   "id": "no-longer-human",
+   "title": "No Longer Human",
+   "year": 2019,
+   "type": "Manga",
+   "section": "manga",
+   "creator": "Junji Ito, after Osamu Dazai",
+   "description": "Yozo hides his alienation behind a comic persona as his life descends into self-destruction.",
+   "poster": "https://covers.openlibrary.org/b/id/14611513-L.jpg",
+   "source": "https://www.viz.com/manga-books/manga/no-longer-human/product/6126",
+   "edition": "Complete manga adaptation",
+   "editionYear": 2019,
+   "yearBasis": "English edition",
+   "release": "English edition · 2019",
+   "publisher": "VIZ Media",
+   "genres": [
+    "Psychological horror"
+   ],
+   "sourceChecked": "2026-09-28",
+   "sourceKind": "publisher",
+   "destination": {
+    "kind": "publisher",
+    "url": "https://www.viz.com/manga-books/manga/no-longer-human/product/6126",
+    "label": "About this edition"
+   },
+   "publicationDate": "2019-12-17",
+   "isbn": "9781974707096"
+  },
+  {
+   "id": "manga-devils-line",
+   "title": "Devils’ Line",
+   "type": "Manga",
+   "section": "manga",
+   "year": 2016,
+   "creator": "Ryo Hanada",
+   "description": "A student forms a bond with the half-vampire investigator who rescues her, testing his refusal to drink human blood.",
+   "poster": "https://s4.anilist.co/file/anilistcdn/media/manga/cover/large/bx86648-4kVHocTwOHMy.jpg",
+   "source": "https://www.penguinrandomhouse.com/books/535287/devils-line-1-by-ryo-hanada/",
+   "edition": "Vol. 1",
+   "editionYear": 2016,
+   "yearBasis": "English edition",
+   "release": "English edition · 2016",
+   "publisher": "Vertical Comics",
+   "genres": [
+    "Vampires",
+    "Dark romance"
+   ],
+   "sourceChecked": "2026-09-28",
+   "sourceKind": "publisher distributor",
+   "destination": {
+    "kind": "publisher",
+    "url": "https://www.penguinrandomhouse.com/books/535287/devils-line-1-by-ryo-hanada/",
+    "label": "About this edition"
+   },
+   "publicationDate": "2016-05-24",
+   "isbn": "9781942993377"
+  },
+  {
+   "id": "manga-tokyo-ghoul",
+   "title": "Tokyo Ghoul",
+   "type": "Manga",
+   "section": "manga",
+   "year": 2015,
+   "creator": "Sui Ishida",
+   "description": "A disastrous date turns Ken Kaneki into a half-human ghoul and draws him into a hidden society of flesh eaters.",
+   "poster": "https://s4.anilist.co/file/anilistcdn/media/manga/cover/large/bx63327-glC9cDxYBja9.png",
+   "source": "https://www.viz.com/manga-books/manga/tokyo-ghoul-volume-1-0/product/3689",
+   "edition": "Vol. 1",
+   "editionYear": 2015,
+   "yearBasis": "English edition",
+   "release": "English edition · 2015",
+   "publisher": "VIZ Media",
+   "genres": [
+    "Body horror",
+    "Dark fantasy"
+   ],
+   "sourceChecked": "2026-09-28",
+   "sourceKind": "publisher",
+   "destination": {
+    "kind": "publisher",
+    "url": "https://www.viz.com/manga-books/manga/tokyo-ghoul-volume-1-0/product/3689",
+    "label": "About this edition"
+   },
+   "publicationDate": "2015-06-16",
+   "isbn": "9781421580364"
+  },
+  {
+   "id": "manga-flowers-of-evil",
+   "title": "The Flowers of Evil",
+   "type": "Manga",
+   "section": "manga",
+   "year": 2017,
+   "creator": "Shuzo Oshimi",
+   "description": "A lonely teenager's relationships with two classmates become a disturbing struggle over shame and identity.",
+   "poster": "https://s4.anilist.co/file/anilistcdn/media/manga/cover/large/bx54705-78Th5SRaL0Ns.png",
+   "source": "https://www.penguinrandomhouse.com/books/563421/the-flowers-of-evil---complete-1-by-shuzo-oshimi/",
+   "edition": "Complete 1 (vols. 1–3)",
+   "editionYear": 2017,
+   "yearBasis": "English edition",
+   "release": "English edition · 2017",
+   "publisher": "Vertical Comics",
+   "genres": [
+    "Psychological drama"
+   ],
+   "sourceChecked": "2026-09-28",
+   "sourceKind": "publisher distributor",
+   "destination": {
+    "kind": "publisher",
+    "url": "https://www.penguinrandomhouse.com/books/563421/the-flowers-of-evil---complete-1-by-shuzo-oshimi/",
+    "label": "About this edition"
+   },
+   "publicationDate": "2017-10-31",
+   "isbn": "9781945054716"
+  },
+  {
+   "id": "manga-black-butler",
+   "title": "Black Butler",
+   "type": "Manga",
+   "section": "manga",
+   "year": 2010,
+   "creator": "Yana Toboso",
+   "description": "A young Victorian earl relies on his uncannily capable butler while investigating London's dark secrets.",
+   "poster": "https://s4.anilist.co/file/anilistcdn/media/manga/cover/large/bx33866-3BaQrUrA7c2w.jpg",
+   "source": "https://yenpress.com/titles/9780316080842-black-butler-vol-1",
+   "edition": "Vol. 1",
+   "editionYear": 2010,
+   "yearBasis": "English edition",
+   "release": "English edition · 2010",
+   "publisher": "Yen Press",
+   "genres": [
+    "Gothic",
+    "Supernatural mystery"
+   ],
+   "sourceChecked": "2026-09-28",
+   "sourceKind": "publisher",
+   "destination": {
+    "kind": "publisher",
+    "url": "https://yenpress.com/titles/9780316080842-black-butler-vol-1",
+    "label": "About this edition"
+   },
+   "publicationDate": "2010-01-26",
+   "isbn": "9780316080842"
+  },
+  {
+   "id": "shiver",
+   "title": "Shiver",
+   "year": 2017,
+   "type": "Manga",
+   "section": "manga",
+   "creator": "Junji Ito",
+   "description": "Nine horror stories include murderous floating heads and a film crew's encounter with an unsettling model.",
+   "poster": "https://covers.openlibrary.org/b/id/6290636-L.jpg",
+   "source": "https://www.viz.com/manga-books/manga/shiver-junji-ito-selected-stories/product/5358",
+   "edition": "Junji Ito Selected Stories",
+   "editionYear": 2017,
+   "yearBasis": "English edition",
+   "release": "English edition · 2017",
+   "publisher": "VIZ Media",
+   "genres": [
+    "Short stories",
+    "Body horror"
+   ],
+   "sourceChecked": "2026-09-28",
+   "sourceKind": "publisher",
+   "destination": {
+    "kind": "publisher",
+    "url": "https://www.viz.com/manga-books/manga/shiver-junji-ito-selected-stories/product/5358",
+    "label": "About this edition"
+   },
+   "publicationDate": "2017-12-19",
+   "isbn": "9781421596938"
+  },
+  {
+   "id": "manga-blood-lad",
+   "title": "Blood Lad",
+   "type": "Manga",
+   "section": "manga",
+   "year": 2012,
+   "creator": "Yuuki Kodama",
+   "description": "A vampire obsessed with Japanese pop culture tries to restore the body of a human girl killed in the demon world.",
+   "poster": "https://s4.anilist.co/file/anilistcdn/media/manga/cover/medium/92948-9UCXTRWhxaJI.jpg",
+   "source": "https://yenpress.com/titles/9780316228954-blood-lad-vol-1",
+   "edition": "Vol. 1",
+   "editionYear": 2012,
+   "yearBasis": "English edition",
+   "release": "English edition · 2012",
+   "publisher": "Yen Press",
+   "genres": [
+    "Supernatural comedy",
+    "Vampires"
+   ],
+   "sourceChecked": "2026-09-28",
+   "sourceKind": "publisher",
+   "destination": {
+    "kind": "publisher",
+    "url": "https://yenpress.com/titles/9780316228954-blood-lad-vol-1",
+    "label": "About this edition"
+   },
+   "publicationDate": "2012-12-11",
+   "isbn": "9780316228954"
+  }
+ ]
+}

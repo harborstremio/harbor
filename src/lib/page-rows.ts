@@ -37,7 +37,17 @@ export function orderedRowKeys(available: string[], c: PageRowCustomization): st
   const out: string[] = [];
   for (const k of c.order) if (set.has(k)) out.push(k);
   const seen = new Set(out);
-  for (const k of available) if (!seen.has(k)) out.push(k);
+  let cursor = 0;
+  for (const k of available) {
+    if (seen.has(k)) {
+      const at = out.indexOf(k);
+      if (at >= 0) cursor = at + 1;
+      continue;
+    }
+    out.splice(cursor, 0, k);
+    seen.add(k);
+    cursor += 1;
+  }
   return out;
 }
 
@@ -97,8 +107,18 @@ export function applyPageRows<T extends { key: string; title: string }>(
     const r = byKey.get(k);
     if (r) ordered.push(r);
   }
-  const orderedSet = new Set(c.order);
-  for (const r of renamed) if (!orderedSet.has(r.key)) ordered.push(r);
+  const orderedSet = new Set(ordered.map((r) => r.key));
+  let cursor = 0;
+  for (const r of renamed) {
+    if (orderedSet.has(r.key)) {
+      const at = ordered.indexOf(r);
+      if (at >= 0) cursor = at + 1;
+      continue;
+    }
+    ordered.splice(cursor, 0, r);
+    orderedSet.add(r.key);
+    cursor += 1;
+  }
   return ordered;
 }
 

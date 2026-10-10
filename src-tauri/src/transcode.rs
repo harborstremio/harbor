@@ -110,6 +110,21 @@ pub fn locate_ffmpeg() -> Option<std::path::PathBuf> {
             }
         }
     } else if cfg!(target_os = "macos") {
+        if let Ok(exe) = std::env::current_exe() {
+            if let Some(dir) = exe.parent() {
+                owned.push(dir.join("ffmpeg").to_string_lossy().to_string());
+                owned.push(
+                    dir.join("ffmpeg-aarch64-apple-darwin")
+                        .to_string_lossy()
+                        .to_string(),
+                );
+                owned.push(
+                    dir.join("ffmpeg-x86_64-apple-darwin")
+                        .to_string_lossy()
+                        .to_string(),
+                );
+            }
+        }
         for p in [
             "/opt/homebrew/bin/ffmpeg",
             "/usr/local/bin/ffmpeg",
@@ -256,8 +271,6 @@ pub async fn probe_codecs(url: &str, headers: &HashMap<String, String>) -> Probe
         .arg("stream=codec_name,codec_type")
         .arg("-of")
         .arg("default=noprint_wrappers=1:nokey=0")
-        // Pass the input via `-i` so an addon-controlled URL beginning with
-        // `-` is treated as ffprobe's input value, not parsed as a flag.
         .arg("-i")
         .arg(url);
     cmd.stdin(std::process::Stdio::null())
@@ -268,10 +281,7 @@ pub async fn probe_codecs(url: &str, headers: &HashMap<String, String>) -> Probe
     cmd.creation_flags(0x0800_0000);
 
     let fut = async {
-        let output =
-            crate::process::output_with_timeout(&mut cmd, std::time::Duration::from_secs(12))
-                .await
-                .ok()?;
+        let output = cmd.output().await.ok()?;
         let stdout = String::from_utf8_lossy(&output.stdout);
         let stderr = String::from_utf8_lossy(&output.stderr);
         if !stderr.trim().is_empty() {
@@ -299,87 +309,18 @@ pub async fn probe_codecs(url: &str, headers: &HashMap<String, String>) -> Probe
         Some(result)
     };
 
-    fut.await.unwrap_or_default()
+    match tokio::time::timeout(std::time::Duration::from_secs(12), fut).await {
+        Ok(Some(r)) => r,
+        Ok(None) => ProbedCodecs::default(),
+        Err(_) => {
+            eprintln!("[harbor::transcode] ffprobe timed out");
+            ProbedCodecs::default()
+        }
+    }
 }
 
 fn default_ua() -> &'static str {
     "Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/120.0.0.0 Safari/537.36"
-}
-
-fn relay_child_stdout(
-    mut child: tokio::process::Child,
-    mut stdout: tokio::process::ChildStdout,
-) -> tokio::sync::mpsc::Receiver<Result<axum::body::Bytes, std::io::Error>> {
-    let (body_tx, body_rx) = tokio::sync::mpsc::channel(8);
-    tokio::spawn(async move {
-        use tokio::io::AsyncReadExt;
-        let mut buffer = vec![0_u8; 64 * 1024];
-        loop {
-            let read_result = tokio::select! {
-                biased;
-                _ = body_tx.closed() => {
-                    let _ = child.kill().await;
-                    let _ = child.wait().await;
-                    eprintln!("[harbor::transcode] client disconnected; ffmpeg stopped");
-                    return;
-                }
-                result = stdout.read(&mut buffer) => result,
-            };
-            match read_result {
-                Ok(0) => break,
-                Ok(read) => {
-                    let bytes = axum::body::Bytes::copy_from_slice(&buffer[..read]);
-                    if body_tx.send(Ok(bytes)).await.is_err() {
-                        let _ = child.kill().await;
-                        eprintln!("[harbor::transcode] client disconnected; ffmpeg stopped");
-                        return;
-                    }
-                }
-                Err(error) => {
-                    let _ = body_tx.send(Err(error)).await;
-                    let _ = child.kill().await;
-                    return;
-                }
-            }
-        }
-        match child.wait().await {
-            Ok(status) => eprintln!("[harbor::transcode] ffmpeg exited: {status}"),
-            Err(error) => eprintln!("[harbor::transcode] ffmpeg wait err: {error}"),
-        }
-    });
-    body_rx
-}
-
-#[cfg(test)]
-mod relay_tests {
-    use super::*;
-
-    #[cfg(unix)]
-    #[tokio::test]
-    async fn dropping_response_stops_stalled_transcoder() {
-        let mut command = tokio::process::Command::new("sh");
-        command
-            .arg("-c")
-            .arg("sleep 30")
-            .stdout(std::process::Stdio::piped());
-        let mut child = command.spawn().expect("spawn stalled child");
-        let pid = child.id().expect("child pid") as i32;
-        let stdout = child.stdout.take().expect("child stdout");
-        let response = relay_child_stdout(child, stdout);
-        drop(response);
-
-        tokio::time::timeout(std::time::Duration::from_secs(2), async {
-            loop {
-                let alive = unsafe { libc::kill(pid, 0) } == 0;
-                if !alive {
-                    break;
-                }
-                tokio::task::yield_now().await;
-            }
-        })
-        .await
-        .expect("stalled child should be killed when response is dropped");
-    }
 }
 
 fn scale_filter(max_height: u32) -> String {
@@ -554,6 +495,7 @@ pub async fn handle_transcode(
         args_dbg.join(" ")
     );
 
+    crate::proc_guard::configure_command(&mut cmd);
     let mut child = match cmd.spawn() {
         Ok(c) => c,
         Err(e) => {
@@ -565,11 +507,11 @@ pub async fn handle_transcode(
                 .into_response();
         }
     };
+    crate::proc_guard::adopt(&child);
 
     let stdout = match child.stdout.take() {
         Some(s) => s,
         None => {
-            let _ = child.kill().await;
             return (StatusCode::INTERNAL_SERVER_ERROR, "ffmpeg stdout missing").into_response();
         }
     };
@@ -586,12 +528,15 @@ pub async fn handle_transcode(
         });
     }
 
-    let body_rx = relay_child_stdout(child, stdout);
-
-    let body_stream = futures_util::stream::unfold(body_rx, |mut receiver| async move {
-        receiver.recv().await.map(|item| (item, receiver))
+    tokio::spawn(async move {
+        match child.wait().await {
+            Ok(status) => eprintln!("[harbor::transcode] ffmpeg exited: {status}"),
+            Err(e) => eprintln!("[harbor::transcode] ffmpeg wait err: {e}"),
+        }
     });
-    let body = Body::from_stream(body_stream);
+
+    let reader = tokio_util::io::ReaderStream::with_capacity(stdout, 64 * 1024);
+    let body = Body::from_stream(reader);
 
     let mut hmap = HeaderMap::new();
     hmap.insert("Content-Type", HeaderValue::from_static("video/mp2t"));
@@ -615,46 +560,6 @@ pub async fn handle_transcode(
     resp.body(body).unwrap_or_else(|_| {
         (StatusCode::INTERNAL_SERVER_ERROR, "response build failed").into_response()
     })
-}
-
-#[cfg(test)]
-mod tests {
-    #[cfg(unix)]
-    #[tokio::test]
-    async fn dropping_stream_receiver_stops_and_reaps_child() {
-        use super::relay_child_stdout;
-        use std::process::Stdio;
-
-        let mut command = tokio::process::Command::new("sh");
-        command
-            .arg("-c")
-            .arg("while :; do printf xxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxx; done")
-            .stdin(Stdio::null())
-            .stdout(Stdio::piped())
-            .stderr(Stdio::null())
-            .kill_on_drop(true);
-        let mut child = command.spawn().expect("spawn producer");
-        let pid = child.id().expect("child pid") as i32;
-        let stdout = child.stdout.take().expect("child stdout");
-        let mut receiver = relay_child_stdout(child, stdout);
-        receiver
-            .recv()
-            .await
-            .expect("first output")
-            .expect("read output");
-        drop(receiver);
-
-        tokio::time::timeout(std::time::Duration::from_secs(2), async {
-            loop {
-                if unsafe { libc::kill(pid, 0) } == -1 {
-                    break;
-                }
-                tokio::task::yield_now().await;
-            }
-        })
-        .await
-        .expect("child must be killed and reaped");
-    }
 }
 
 #[tauri::command]

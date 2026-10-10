@@ -1,0 +1,279 @@
+.music-video-surface {
+  position: relative;
+  width: 100%;
+  aspect-ratio: 16 / 9;
+  overflow: hidden;
+  border-radius: inherit;
+  background: var(--color-surface);
+}
+.music-video-surface[data-video-state="playing"] {
+  background: #000;
+}
+.music-video-media {
+  position: absolute;
+  inset: 0;
+  width: 100%;
+  height: 100%;
+  object-fit: contain;
+  background: #000;
+  border-radius: inherit;
+}
+.music-video-badge {
+  position: absolute;
+  inset: 0;
+  display: grid;
+  place-items: center;
+  pointer-events: none;
+}
+.music-video-badge > div {
+  pointer-events: auto;
+}
+.music-video-placeholder {
+  position: absolute;
+  inset: 0;
+  display: grid;
+  place-items: center;
+  padding: 20px;
+  text-align: center;
+  color: var(--color-ink);
+  font-size: 13px;
+}
+.music-video-placeholder > img {
+  position: absolute;
+  inset: 0;
+  width: 100%;
+  height: 100%;
+  object-fit: contain;
+  opacity: 0.18;
+}
+.music-video-placeholder > span,
+.music-video-placeholder > div {
+  position: relative;
+  display: flex;
+  align-items: center;
+  gap: 10px;
+}
+.music-video-placeholder > div {
+  flex-direction: column;
+}
+.music-video-placeholder button {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  min-height: 40px;
+  padding: 8px 16px;
+  border-radius: 6px;
+  background: var(--color-elevated);
+  cursor: pointer;
+}
+.music-video-placeholder button:hover {
+  background: var(--color-raised);
+}
+.music-video-placeholder button:focus-visible {
+  outline: 2px solid var(--color-accent);
+  outline-offset: 3px;
+}
+.music-now-artwork:has(> .music-video-surface) {
+  aspect-ratio: 16 / 9;
+}
+.music-video-fullscreen-toggle {
+  position: absolute;
+  inset-block-end: 12px;
+  inset-inline-end: 12px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  width: 44px;
+  height: 44px;
+  border-radius: 999px;
+  background: rgba(0, 0, 0, 0.55);
+  color: #fff;
+  box-shadow: inset 0 0 0 1px rgba(255, 255, 255, 0.15);
+  opacity: 0;
+  transition:
+    opacity 150ms ease,
+    background-color 150ms ease;
+}
+.music-video-surface:hover .music-video-fullscreen-toggle,
+.music-video-fullscreen-toggle:focus-visible {
+  opacity: 1;
+}
+.music-video-fullscreen-toggle:hover {
+  background: rgba(0, 0, 0, 0.75);
+}
+.music-video-fullscreen-toggle:focus-visible {
+  outline: 2px solid var(--color-accent);
+  outline-offset: 3px;
+}
+@media (prefers-reduced-motion: reduce) {
+  .music-video-fullscreen-toggle {
+    transition: none;
+  }
+}
+.music-video-controls {
+  position: absolute;
+  inset-block-end: 12px;
+  inset-inline-end: 12px;
+  z-index: 3;
+  display: flex;
+  align-items: center;
+  gap: 8px;
+}
+.music-video-controls .music-video-fullscreen-toggle {
+  position: static;
+  inset: auto;
+}
+.music-video-chrome-button {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  width: 44px;
+  height: 44px;
+  border-radius: 999px;
+  background: rgba(0, 0, 0, 0.55);
+  color: #fff;
+  box-shadow: inset 0 0 0 1px rgba(255, 255, 255, 0.15);
+  opacity: 0;
+  transition:
+    opacity 150ms ease,
+    background-color 150ms ease;
+}
+.music-video-surface:hover .music-video-chrome-button,
+.music-video-chrome-button:focus-visible {
+  opacity: 1;
+}
+.music-video-chrome-button:hover {
+  background: rgba(0, 0, 0, 0.75);
+}
+.music-video-chrome-button:focus-visible {
+  outline: 2px solid var(--color-accent);
+  outline-offset: 3px;
+}
+.music-video-chrome-button[data-state="on"] {
+  background: rgba(255, 255, 255, 0.92);
+  color: #000;
+  box-shadow: inset 0 0 0 1px rgba(0, 0, 0, 0.2);
+}
+.music-video-chrome-button[data-state="on"]:hover {
+  background: #fff;
+}
+.music-video-chrome-button[data-state="loading"] {
+  color: rgba(255, 255, 255, 0.7);
+}
+.music-video-chrome-button[aria-disabled="true"] {
+  cursor: not-allowed;
+  color: rgba(255, 255, 255, 0.4);
+  box-shadow: inset 0 0 0 1px rgba(255, 255, 255, 0.08);
+}
+.music-video-surface:hover .music-video-chrome-button[aria-disabled="true"] {
+  opacity: 0.5;
+}
+.music-video-chrome-button[aria-disabled="true"]:hover {
+  background: rgba(0, 0, 0, 0.55);
+}
+.music-video-subtitle {
+  position: absolute;
+  inset-inline: 0;
+  inset-block-end: 0;
+  z-index: 2;
+  display: flex;
+  justify-content: center;
+  padding-inline: clamp(16px, 6%, 96px);
+  padding-block-end: clamp(64px, 11%, 120px);
+  pointer-events: none;
+}
+.music-video-subtitle > span {
+  max-width: 100%;
+  font-size: 15px;
+  line-height: 1.35;
+  font-weight: 600;
+  text-align: center;
+  text-wrap: balance;
+  overflow-wrap: anywhere;
+  color: #fff;
+  text-shadow:
+    0 1px 2px rgba(0, 0, 0, 0.9),
+    0 2px 14px rgba(0, 0, 0, 0.6);
+  animation: music-video-subtitle-in 160ms ease both;
+}
+@keyframes music-video-subtitle-in {
+  from {
+    opacity: 0;
+  }
+  to {
+    opacity: 1;
+  }
+}
+@media (prefers-reduced-motion: reduce) {
+  .music-video-chrome-button {
+    transition: none;
+  }
+  .music-video-subtitle > span {
+    animation: none;
+  }
+}
+.music-video-spinner {
+  display: grid;
+  place-items: center;
+  color: #fff;
+  opacity: 0.92;
+  filter: drop-shadow(0 2px 12px rgba(0, 0, 0, 0.7));
+  animation: music-video-spinner-in 260ms ease-out both;
+}
+@keyframes music-video-spinner-in {
+  from {
+    opacity: 0;
+  }
+  to {
+    opacity: 0.92;
+  }
+}
+.music-video-surface[data-idle="1"] {
+  cursor: none;
+}
+.music-video-surface[data-idle="1"] .music-video-chrome-button {
+  opacity: 0;
+  pointer-events: none;
+}
+.music-video-surface[data-idle="1"] .music-video-subtitle {
+  padding-block-end: clamp(48px, 8%, 96px);
+}
+.music-now-playing[data-immersive="1"] .music-video-subtitle > span {
+  font-size: clamp(22px, 2.5vw, 40px);
+  line-height: 1.24;
+  font-weight: 700;
+  text-shadow:
+    0 2px 4px rgba(0, 0, 0, 0.95),
+    0 3px 22px rgba(0, 0, 0, 0.7);
+}
+
+.music-video-badge > button {
+  pointer-events: auto;
+}
+.music-video-resume {
+  display: grid;
+  place-items: center;
+  width: 88px;
+  height: 88px;
+  border-radius: 999px;
+  color: #fff;
+  opacity: 0.92;
+  filter: drop-shadow(0 2px 14px rgba(0, 0, 0, 0.75));
+  transition:
+    opacity 160ms ease,
+    transform 160ms ease;
+  animation: music-video-spinner-in 260ms ease-out both;
+}
+.music-video-resume:hover {
+  opacity: 1;
+  transform: scale(1.06);
+}
+.music-video-resume:focus-visible {
+  outline: 2px solid var(--color-accent);
+  outline-offset: 4px;
+}
+@media (prefers-reduced-motion: reduce) {
+  .music-video-resume {
+    transition: none;
+  }
+}

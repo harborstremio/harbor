@@ -1,0 +1,420 @@
+# Every host the sample extensions hand to loadExtractor, plus the domains the layer's own
+# registry claims that no archive happens to hand over.
+#
+# host | extensions that reach it | evidence | probe url | page a probe url is minted off
+#
+# evidence is how the host was established:
+#   bytecode  a string constant in the extension's own converted bytecode, on the path that
+#             reaches loadExtractor
+#   network   a real response from the extension's own site or api, captured 2026-09-24
+#   both      established one way and confirmed the other
+#   registry  no archive names this host: it is a domain a builtin extractor claims by its own
+#             mainUrl, and the row exists so the gate scores that claim. its extensions column is
+#             empty because zero is the honest count, and the gate prints it as 0 ext.
+#
+# a probe url of - means no url could be captured, and the reason is in EXTRACTORS.md. a host
+# that signs its addresses will never have a durable one, so it leaves the probe url empty and
+# names a page instead, off which the gate resolves a fresh url of that host before measuring it.
+# probe urls are episode scoped and expire; a failed live probe is not by itself a failed
+# extractor, which is why the registry column and the live column are reported separately.
+#
+# every probe url below was taken from a live run on 2026-09-24, either off an extension's own
+# resolve attempt or off the host's own index, and was confirmed to answer before being written
+# here. an id that has since expired shows up as an error page, not as a broken extractor.
+
+# two probe urls carry a code that was not handed out on that domain. the nine byse frontend
+# domains answer one api off one record pool, confirmed 2026-09-24 by asking all nine for the
+# same code and reading the same record back, so a code from one is a real url on the rest.
+# twitch.tv is probed with a vod rather than a channel, because a channel url resolves only
+# while that channel happens to be streaming; the live path is what livegate.sh drives.
+
+# streamsb.net carries a url minted on 2026-09-26 rather than 2026-09-24, off Toonstream's own
+# resolve in the wider live pass, and confirmed to answer by hand the same day. Its row exists to
+# measure a host the layer declines on purpose: the domain answers a jwt gate that ends in an
+# advertising campaign, so this probe is expected to read none rather than skipped, and a skip
+# here is the gate losing sight of the claim rather than the host being fine.
+
+# vidwish.live is here for that same reason. Its url is the shape both its extensions build,
+# /stream/s-<n>/<id>/<sub|dub>, carrying an id one of the wider corpus's own resolves handed to this
+# host. Measured by hand 2026-09-26: the origin answers nginx 404 on that path and on every other
+# one, its root is a cached line of script pointing at megaplay.buzz/api, and its www name answers
+# the hosting panel's own stopped-site page, so the id is never read and the row is expected to read
+# none. It read skipped while the layer still claimed the host, which is a claim nothing measured.
+
+# vidtube.site is here for that same reason, and it is half alive rather than gone, which is what
+# kept it unmeasured. Measured by hand 2026-09-26: /stream/getSources?id=<id> answers a plaintext
+# record for every id tried from 1 to 50000, and the id it wants is the one in this url rather than
+# a player id, so nothing about this host needs its page. The record names one video url and one
+# subtitle url; the subtitle serves 16992 bytes and the video url is 500 on every mirror it is
+# offered on, s1 and s2 across akirax.buzz, norami.top, shiora.top and shiora.site, carrying
+# `b2_authorize_account failed: 403 account_trouble`, asked three times over forty seconds. So its
+# storage is suspended rather than its api dead, and the one url it hands a player cannot be played.
+# Its page half answers the app's own 404 shell on this path and every other, 1352 bytes with no
+# player id, which is why the layer read nothing here at all rather than reading the outage. The row
+# is expected to read none from the layer and one link serving nothing from the extension that
+# carries the id in the url. Declining costs no archive its coverage: all four that name this host,
+# AniKoto here and AniSnatch, HiAnime and StreamPlay in the wider corpus, ship an extractor of their
+# own for it and win over the layer's wherever they are loaded.
+
+megaplay.buzz|AllWish,AniKoto,Anikage|network|https://megaplay.buzz/stream/s-2/73497/sub
+vidwish.live|AllWish,AniKoto|bytecode|https://vidwish.live/stream/s-2/78728/sub
+vidtube.site|AniKoto|bytecode|https://vidtube.site/stream/s-2/12345/sub
+player.sgsgsgsr.site|AllWish|bytecode|-
+animeav1.uns.bio|Animeav1|both|https://animeav1.uns.bio/#3zq51b
+player.zilla-networks.com|Animeav1|both|https://player.zilla-networks.com/play/7601658844858539e438dceee32e7924
+voe.sx|Animeav1|network|https://voe.sx/e/bkvxsyie9vmw
+byselapuix.com|Animeav1|network|https://byselapuix.com/e/3ro7ibvu2hhi
+mega.nz|Animeav1,Animexin,Latanime|network|https://mega.nz/embed/MnoChCpQ#S63JRkBV3kcc90w1aQnsEMjohfR6aaIHbbY-ieNnnmc
+www.mp4upload.com|Animeav1,Anichi|both|https://www.mp4upload.com/embed-vzg4t5cfe39g.html
+flixcloud.cc|Anikage|network|https://flixcloud.cc/e/rtt4nppua1i6?v=2&autoPlay=true
+playeng.animeapps.top|Anikage|network|https://playeng.animeapps.top/r2/play2.php?id=ani4&url=21eop1web
+play.echovideo.ru|Anikage|network|https://play.echovideo.ru/embed-1/ZG083zoDDxilShLvq2P6VbNBuUMFfSiF1fZxYqvt0_YFWR97ZuqP-y16RmztaNyXccTEWQ6DJCcUExwBo0Vh0_OJ0Q9OvIB3a3Ien1btSTdAPKHIVW0iQYwiGqhipkkicWayUMI2tSlBMRLpors3Zi7JuYhe5uOkq8Q8UOb4BCBS8KOxwbmX0GDTM8r1ZyY9?v=1&asi=0&autoPlay=0&ao=0
+gn1r5n.org|Anikage|network|https://gn1r5n.org/e/3ro7ibvu2hhi
+myvidplay.com|Anikage|network|https://myvidplay.com/e/8vh47lk0yu8e?v=1&asi=0&autoPlay=0&ao=0
+youtube.com|InvidiousProvider,YoutubeProvider|bytecode|https://youtube.com/watch?v=dQw4w9WgXcQ
+www.dailymotion.com|DailymotionProvider|bytecode|https://www.dailymotion.com/embed/video/xbasduq
+archive.org|InternetArchiveProvider|bytecode|https://archive.org/details/the-release-of-the-playstation-dual-analog-and-dual-shock-controllers
+twitch.tv|TwitchProvider|bytecode|https://twitch.tv/videos/2882890564
+ok.ru|Anichi|bytecode|https://ok.ru/video/14440854325803
+streamwish.to|Anichi|bytecode|https://streamwish.to/e/7wklr8vnruue
+strwish.com|Anichi|bytecode|https://strwish.com/e/7wklr8vnruue
+hlswish.com|Anichi|bytecode|https://hlswish.com/e/7wklr8vnruue
+flaswish.com|Anichi|bytecode|https://flaswish.com/e/dxb7r6b4rr3t
+swiftplayers.com|Anichi|bytecode|https://swiftplayers.com/e/7wklr8vnruue
+filemoon.sx|Anichi|bytecode|https://filemoon.sx/e/3ro7ibvu2hhi
+filemoon.to|Anichi|bytecode|https://filemoon.to/e/3ro7ibvu2hhi
+filemoon.in|Anichi|bytecode|https://filemoon.in/e/3ro7ibvu2hhi
+streamsb.net|Anichi|bytecode|https://streamsb.net/e/jn1wmi4f01td.html
+streamlare.com|Anichi|bytecode|-
+videobin.co|Anichi|bytecode|-
+dood.to|Anichi|bytecode|https://dood.to/e/8vh47lk0yu8e
+mkissa.to|Anichi|bytecode|-
+bysekoze.com|Anichi|bytecode|https://bysekoze.com/e/3ro7ibvu2hhi
+bysesukior.com|Anichi|bytecode|https://bysesukior.com/e/3ro7ibvu2hhi
+bysevepoin.com|Anichi|bytecode|https://bysevepoin.com/e/3ro7ibvu2hhi
+bysewihe.com|Anichi|bytecode|https://bysewihe.com/e/3ro7ibvu2hhi
+bysezejataos.com|Anichi|bytecode|https://bysezejataos.com/e/3ro7ibvu2hhi
+# these two rows carried no probe url and no mint page, so for as long as they have existed the
+# gate has printed them skipped while the layer's UnsBio claimed them through its parent name. that
+# is a claim nothing measured. measured 2026-09-26 on two codes, ucrgkk and 3zq51b, and the claim is
+# now withdrawn rather than left standing: UnsBio is registered on animeav1.uns.bio and these two
+# zones fall to the generic reader, which finds nothing in a player shell and says so.
+#
+# what was measured. all three zones answer /api/v1/info for a code, and animeav1.uns.bio and
+# allanime.uns.bio answer it with the same 3713B blob, which decrypts under the CONFIG_KEY and
+# CONFIG_IV the layer already holds to the same record, title 197_1_SUB.mp4, so the shape is right
+# and the record pool is shared. /api/v1/video is not shared: animeav1.uns.bio answered 200 with a
+# 5601B and a 5633B config for those two codes and allanime.uns.bio answered 503 `Video is not
+# available` for both, twice each, which on this engine is a record another zone owns rather than
+# one never handed out, a 404. so a sibling's code cannot stand in as a probe here.
+#
+# why no code of these zones can be captured. they are issued only by api.allanime.day, which on
+# 2026-09-26 answered 403 and a Cloudflare interactive challenge on /api, /api/, /allanimeapi and
+# /graphql, to four user agents and to this layer's own http client. allmanga.to renders client side
+# and its shell holds no ids, and allanime.day answers a redirect loop on its root. nothing reaches
+# a watch page, so no probe url and no mint page can be written honestly for either row.
+#
+# the rows stay, because both hosts are real and an extension still covers each: Anichi and
+# StreamPlay each ship an Allanimeups subclassing this layer's VidStack, and Anichi a Watchanimeups
+# of its own, and those win while loaded. what changed is only that the layer no longer counts
+# these two zones as coverage of its own.
+allanime.uns.bio|Anichi|bytecode|-
+watchanime.uns.bio|Anichi|bytecode|-
+
+# measured 2026-09-25 from a live gate pass over samples/repo86, which records every url an
+# extension hands to loadExtractor. the rumble probe carries an id taken from rumble's own
+# listing rather than from an extension, because every id the extensions hand out answers 410
+# gone; the embed path itself answers, which is what the probe is for.
+emturbovid.com|OnePace,Toonstream|both|https://emturbovid.com/t/6aabf3fa8ff09
+turbovidhls.com|AnimeDekhoProvider,Animekhor,LayarKacaProvider,Piratexplay|both|https://turbovidhls.com/t/6a7166bcc8c86
+rumble.com|Animekhor,Animexin,Donghuastream|both|https://rumble.com/embed/v7ds4ry/
+play.d.tube|Animekhor,Animexin|both|https://play.d.tube/?v=2yq4eiYShjQCZS9cVMZfXG
+do7go.com|Aniworld|both|https://do7go.com/e/71f1cxfs2a30
+
+# measured 2026-09-26 from the same kind of live gate pass over samples/repo86, this block being
+# the hosts whose rank in that pass was 3 modulo 4. every url below was fetched again immediately
+# before being written here and answered 200, except vidstreamnew.xyz, which refuses the tls
+# handshake outright with an access_denied alert from three different clients. that url is kept
+# rather than replaced with a dash because the extension really does produce it and the refusal is
+# the measurement. mega.nz and flixcloud.cc are not repeated here: both already have a row above
+# whose url was re-fetched today and still answers, so the 86 reaching them is recorded there
+# vdplay.pages.dev is no longer claimed by any class here, and the reason is on
+# builtinExtractors(): the wrapper carries the file url in its own query, and every one the
+# corpus produced named an address the same page hands over directly, so the entry doubled a row
+# the picker already had. the probe url is kept rather than replaced with a dash because the page
+# renders for any u, so it is still a real page of this host for the generic reader to be measured
+# against, and none rather than skipped is what this row should read. its own payload is gone,
+# 404 text/html 27150B re-fetched 2026-09-26, which no longer bears on what is measured here: a
+# host that signs its addresses with hours of life has no durable url to probe, and no page in
+# the corpus mints a wrapper through this registry for the gate to resolve one off instead
+vdplay.pages.dev|FourKHDHub,HDhub4u|both|https://vdplay.pages.dev/?u=aHR0cHM6Ly9jZG4uY29ja3RhaWwuYmVlci9TaGFxdWUuVHJ1c3QuTm8uT25lLlMwMUUwMS4xMDgwcC5IaW5kaS5XRUItREwuNS4xLkVTdWIueDI2NC1IREh1YjR1Lk1zLm1rdj90b2tlbj1lMzZhMWI4YTQ1YWQxNDg4M2YyZjcwZjIyMzk1N2E0NA==&m=dmlkZW8veC1tYXRyb3Nr&t=U2hhcXVlLlRydXN0Lk5vLk9uZS5TMDFFMDEuMTA4MHAuSGluZGkuV0VCLURMLjUuMS5FU3ViLngyNjQtSERIdWI0dS5Ncy5ta3Y=
+hubdrive.pics|FourKHDHub|both|https://hubdrive.pics/file/3905642359
+blakiteapi.xyz|AnimeDekhoProvider|both|https://blakiteapi.xyz/embed/86031/1-1
+toonstream.vip|ToonHub|both|https://toonstream.vip/episode/one-piece-wano-arc-22x1089/
+vidmoly.biz|AnimeDekhoProvider,Animenosub,OnePace|both|https://vidmoly.biz/embed-485oi2jkkxw2.html
+animekhor.p2pstream.vip|Animekhor|both|https://animekhor.p2pstream.vip/#l8pmcl
+nova.upn.one|Animenosub|both|https://nova.upn.one/#hdlntd
+plextream.work|BanglaPlex|both|https://plextream.work/embed.php?id=J3XosGPZ
+play.673x655r3.shop|Microtv|both|https://play.673x655r3.shop/#17qvs
+savefiles.com|Latanime|both|https://savefiles.com/e/xfxwwi2v8f1q
+dsvplay.com|Latanime|both|https://dsvplay.com/e/qqrn8ni36vop
+vidstreamnew.xyz|AnimeDekhoProvider|both|https://vidstreamnew.xyz/v/DaoQEaZxMwgv/
+
+# measured 2026-09-26 over samples/repo86, the hosts whose rank in that pass was 0 modulo 4.
+# the ranked list is every host the live run handed to the extractor registry, ordered by how
+# many providers handed it, then by how many urls, then by name. rows already written above are
+# not repeated. every url below was fetched again immediately before being written here.
+# three of these are files rather than embeds, which is why they are here at all: an extension
+# hands a finished object store url to loadExtractor and the page reader then downloads the
+# container looking for a player config.
+mixdrop.top|Latanime,PMSM|network|https://mixdrop.top/e/l7qxwo8mt4v7ew
+rubystm.com|Animecloud,Obejrzyj|both|https://rubystm.com/e/t7038qxk9bwn.html
+hdm2.biz|Hdmovie2|network|https://hdm2.biz/play?v=3OI36
+# the odysee page names a player.odycdn.com mp4 that answers 401 edge credentials missing
+# on v3, v4 and v6, so the link the generic reader offers for this row does not play.
+odysee.com|Animexin|network|https://odysee.com/%24/embed/%40awdwa%3A2%2FAX-guan-ep-1-eng%3A4?r=HLKBUHzds1UcwtdhncHJ9c2bBeMgQ9vr&signature=4c1a67f93d986911cfe4d2d45e6798263e615e47037adb077e58eb79994435cb7716207314b8c29bf544a1353a50666734bf0c87e97c3471107ad60f57cd8fe2&signature_ts=1785208295
+dldokan.online|Microtv|both|https://dldokan.online/file/543WJAjGjYiqBG68dkBVDU
+# the file the extension handed over has since been taken down and answers 451, so the id
+# here is another file on the same service, which serves every id on all three domains.
+pixeldrain.net|Obejrzyj|network|https://pixeldrain.net/u/1z9f8x4E
+playing.donghuaworld.in|Donghuaword|network|https://playing.donghuaworld.in/v7atapo
+pub-976af5d3d697423fb74ec395e0a8d6d3.r2.dev|Microtv|network|https://pub-976af5d3d697423fb74ec395e0a8d6d3.r2.dev/The%20Bowl%20That%20Prints%20Money%20Full%20Episode%20HD%20MicroTV.site.mkv
+# this host signs its downloads and the signature dies within hours, so it has no url of its own
+# here. the one captured on 2026-09-25 answered 400 to HEAD and to GET the next morning, and the
+# row read no links while the extractor was sound and serving. the fifth field is the drive page a
+# session reaches this host through, and the gate mints a fresh url off it. measured 2026-09-26:
+# that page resolves to one googleusercontent address which answers HEAD 200 video/mkv and serves
+# 496441777B with matroska in the first bytes.
+video-downloads.googleusercontent.com|Microtv|network|-|https://hubcloud.one/drive/cclk0cb91s0h_sb
+# abstream.to answered 522 then 523 on the embed and on its own root, from three probes across
+# two hours, so nothing was reachable to measure. the url is the extension's own.
+abstream.to|Pinoymoviepedia|network|https://abstream.to/embed/gymsk1p0dpzv
+# the signature on this one was cut on 2026-09-02 with two hours of life, so it answers
+# ExpiredRequest and no fresh one can be made without the account that signed it.
+think.fbdd6c6343bcd410341d33fa0b06ae31.r2.cloudflarestorage.com|Microtv|network|-
+
+# worker 2 of four, ranked live-gate hosts at position 1 modulo 4, measured 2026-09-25.
+# every url below was resolved through the real registry and the link it produced was fetched with
+# the headers the extractor attached, immediately before this block was written.
+bysesayeveum.com|Animenosub|both|https://bysesayeveum.com/e/lri5b02y56ep
+streamhls.to|Pinoymoviepedia|both|https://streamhls.to/e/lhvvmvbd0472
+animekhor.upns.live|Animekhor|both|https://animekhor.upns.live/#rvj31w
+cloudy.upns.one|AnimeDekhoProvider,ToonHub|both|https://cloudy.upns.one/#hdhajk
+toonstream.one|ToonHub|both|https://toonstream.one/episode/dr-stone-4x1/
+new.xdl.my.id|Microtv|both|https://new.xdl.my.id/download.php?code=JQUFByfL
+geo.dailymotion.com|Animekhor|network|https://geo.dailymotion.com/player/x19frc.html?video=k6nfnCkBprEKw5HWRAm
+# the abyss player, the same software abyssplayer.com runs. the page carries the whole record as
+# one base64 blob whose media field is AES-GCM ciphertext, and the key is assembled inside the
+# player bundle on iamcdn.net rather than being in the record. nothing in the layer claims it, so
+# the url is kept as the next reader's starting point rather than as coverage.
+abyss.msmbot.club|Pmsm|network|https://abyss.msmbot.club/?v=-z1fROd70
+
+# the known-family-domain group of the 43, measured 2026-09-26. every row below was resolved
+# through the real registry and the url it produced was fetched again with the headers the
+# extractor attaches, immediately before this block was written. probe urls age out: these are
+# file codes on live accounts, and a code that has since been deleted answers an expired file
+# page rather than exposing a broken extractor. two of the six carry a code that was not handed
+# out on that domain, for the reason the row records.
+# the corpus code for this domain, cijzepr7lngx, is deleted; this one is live in the same pool,
+# which lulustream.com and luluvdo.com share.
+# the page fetch must ask for no language. a page asked for with any non-empty Accept-Language
+# mints a master url the cdn then answers 403, and one asked for with that header empty or absent
+# mints one that serves. the token is spent at mint time, so no header the player sends afterwards
+# repairs it. do not put the shared Accept-Language back on this class.
+luluvdo.com|Goojara,Latanime|both|https://luluvdo.com/e/06uniy91dqbb
+# the same pool under its own name, and the mainUrl the base LuluStream claims. no archive in the
+# corpus hands this domain over, so it is a registry claim rather than a corpus host, and it is
+# scored here because an unmeasured claim is how a dead link ships. measured 2026-09-26:
+# /e/06uniy91dqbb 301s to luluvdo.com/e/<same id> and answers 200 text/html 13102B, and with this
+# domain as origin and referer the master answers 200 application/vnd.apple.mpegurl, its variant
+# 200, and its first segment 206 video/MP2T beginning 0x47. the same page asked for with the
+# layer's default Accept-Language mints a master the cdn answers 403 text/html 146B, which is why
+# declining the host would be the worse fix: the generic reader sends that header, so it would
+# claim the host and mint the dead url.
+lulustream.com||registry|https://lulustream.com/e/06uniy91dqbb
+# the corpus code u48xqtv5b3t5 answers 404 video not found on every domain of the byse pool, so
+# this row carries the pool code the other nine byse rows use.
+mfw09.org|Anikage|both|https://mfw09.org/e/3ro7ibvu2hhi
+miiixdrop.net|Pinoymoviepedia|both|https://miiixdrop.net/e/pmxmpe
+# not a lulu mirror, despite serving lulu's expired file template: its own player, read by StreamHg.
+# its config names three mirrors and the page's own expression prefers the one that is a path on the
+# embed host. that one resolves to the same 870 segments named as .image urls on an ad image cdn,
+# each a 70 byte png header in front of the transport payload, so it answers 200 for everything and
+# announces itself as png to a player. the absolute edge mirror serves the same segments as
+# video/MP2T. the class prefers the edge mirror for that reason; do not restore the page's order.
+swdyu.com|Latanime|both|https://swdyu.com/e/6h6eeuh01cr2
+vidmoly.net|Aniworld|both|https://vidmoly.net/embed-3uc7masntzp0.html
+vvide0.com|Animexin|both|https://vvide0.com/e/z1vttagnex5j
+
+# measured 2026-09-26, the hubcloud drive family, the animeapps player and yourupload. every url
+# here was fetched immediately before the row was written and the link it produced was fetched
+# with the headers the extractor attaches. these probes age out: a drive id is post scoped, the
+# yourupload path carries the day's date, and the animeapps id is episode scoped, so a row that
+# stops answering is a stale url first and a broken extractor second.
+hubcloud.one|DudeFilms|network|https://hubcloud.one/drive/cclk0cb91s0h_sb
+hubcloud.ist|Animedubhindi,DudeFilms,HDhub4u|network|https://hubcloud.ist/drive/7xzgjctgq1xyz87
+hblinks.lol|HDhub4u|network|https://hblinks.lol/archives/80815
+# the file code the corpus carries answers "File is Deleted or UnAvailable", so this id was taken
+# off a live HDhub4u post on the day of measurement. hubcdn.club redirects here and serves the
+# same page, so one entry on this zone covers both.
+hubcdn.wiki|HDhub4u|network|https://hubcdn.wiki/file/1EQ9EwtzCY4v4WaKSzwNy3b3N
+# the same host software on the zone the providers actually hand over, 196 urls in the live pass
+# against 22 for the row above. this id is from that pass and redirects to the same path on .wiki.
+hubcdn.club|HDhub4u|network|https://hubcdn.club/file/3yEb4DHB94TvFwbT8NdyLqO8H
+# the delivery host serves the address only to a request refered from the embed site. one address,
+# the same minute: this host as the referer 200 video/mp4 183556272B, the calling site as the
+# referer 500 application/json 42B, no referer the same 500. the one extension here sends an empty
+# referer, so the extractor replaces the caller's rather than relaying it.
+www.yourupload.com|Animeav1|network|https://www.yourupload.com/embed/1V64jfw03ysp
+
+# the mirror wrapper family, measured 2026-09-26. these four pages hold no stream: each names or
+# fetches the embed on the host that has the file, so every row below was proved by resolving the
+# wrapper through the real registry and then fetching the address its mirror produced. probe urls
+# here age out twice over, once when the wrapper's own id is retired and again when the mirrors
+# behind a still live id are deleted, which happened to three of five mirrors on one slug while
+# this was being written.
+# the pixel arm rather than the video.php arm, because the frame arm names as-cdn26.top and that
+# host answers 522 from its own origin. pixeldrain.net/api/file/o4hAEF2b answered 206
+# video/x-matroska under its own referer and under none. this host has two further arms, neither
+# probeable: /aaa/down/v/<id>/ is a Server Down report form, and /aaa/ad/<name>/?url=<sealed> is a
+# proxy whose own loopback service is refused, so it answers 280B naming the drive url it could not
+# fetch. that arm carries a per episode parameter and cannot be written down here, but a live
+# episode hands it over more often than the two above.
+animedekho.app|AnimeDekhoProvider,OnePace|both|https://animedekho.app/aaa/pixel/?slug=o4hAEF2b
+animeworld.site|OnePace|both|https://animeworld.site/mirror/play.php?id=xrs6538
+filesforever.link|MultiMoviesProvider,Toonstream|both|https://filesforever.link/embed/eow1dp9
+pro.iqsmartgames.com|Piratexplay,Toonstream|both|https://pro.iqsmartgames.com/embed/eow1dp9
+# no extension names this domain. it is the one mirror of the two wrappers above that resolved, so
+# it is reached by everything that reaches them, and the code below was handed out by animeworld.site
+# rather than found on the domain itself.
+bysetayico.com|OnePace,Toonstream|network|https://bysetayico.com/e/z9zuutzqx7ib
+# the four remaining mirrors these wrappers hand out have no row, because none of them could be
+# given a probe url that can ever pass. measured 2026-09-26 with codes taken live off the wrappers
+# minutes before: hanerix.com answers 200 with a 17399B player page on a fresh code and the page
+# reader got one link out of it whose cdn then answered 502, morencius.com answers 200 4290B on the
+# same engine, zoro.rpmhub.site and zoro.streamcasthub.store both answer the api shape this layer
+# already reads with 404 Video not found or deleted for every code their own wrapper hands out, and
+# cloudy.p2pplay.pro answers 530 with cloudflare 1016, no origin address. a row for any of those is
+# a probe that fails for the id rather than for the host, which is the opposite of what a row means.
+# not claimed. the json arm answers the real embed on a player host whose own page holds no stream
+# either: it nests a second page whose api returns the sources as one ChaCha20 ciphertext keyed by a
+# WebAssembly module fetched per five minute window, and no window of that module's bytes, nor of its
+# memory after a decrypt, decrypts the ciphertext it shipped with, so the key is derived inside it
+# rather than stored. the module is also regenerated per request, two fetches of one window coming
+# back 7385 and 7130 bytes, so there is no offset to read even a stored key from, and the urls that
+# come out of it answer 401 no token without the player's own token step. the url is kept as the next
+# reader's starting point rather than as coverage.
+pinoystreaming.qzz.io|Pinoymoviepedia|network|https://pinoystreaming.qzz.io/embed/movie?imdb=tt37971717
+
+# the jwt gate family, measured 2026-09-26. four domains, one gate: the first request answers a 484
+# to 493 byte Loading document whose whole body is window.location.replace of the same url plus
+# ?ch=1&js=<jwt>&sid=<uuid>, the jwt issued by Joken behind Cowboy. following that gate from here
+# with the cookie it set answered 302 to an advertising click host, and a browser that runs the
+# script lands on a keyword advertising page, one keyword set per domain, fed by s.yimg.com and
+# carrying intivesearch.com terms, with no video, iframe or source element and no media url
+# anywhere in the 31 to 34KB it serves. a nonsense id on listeamed.net and the bare root of
+# strmup.to serve that same page, so the id is not read at all: these four are parked rather than
+# hosting, none of them is claimed, and the rows are kept so the next reader sees the measurement
+# instead of repeating it. probes age out, and these age out twice over: the id retires, and the
+# parking arm rotates its keyword set and its click host per request. the 192.157.56.x three also
+# answer 429 17B Too many requests to everything from an address that has asked recently, which is
+# a throttle on the block and not a property of the url.
+listeamed.net|Animekhor,Latanime|network|https://listeamed.net/e/wP2050epzKLxdmy
+sbbrisk.com|ToonHub|network|https://sbbrisk.com/zb7f11qmar45.html
+strmup.to|AnimeDekhoProvider|network|https://strmup.to/G4jXb792UY8QV
+vidstreaming.xyz|Toonstream|network|https://vidstreaming.xyz/v/2TVgNr3rI4NT/
+
+# the sealed config player group of the 43, measured 2026-09-26: abyssplayer.com, flixcloud.cc,
+# mega.nz, play.echovideo.ru and tryembed.us.cc. all five answer and none of them is claimed, for
+# the same reason in five different spellings: the address the page's own player ends up with is not
+# an address another player can use. probes here age out twice over, once when the file id is retired
+# and again when the token minted against it expires, so a row that stops answering is a stale id
+# before it is a broken extractor. flixcloud.cc and mega.nz keep the rows they already have above
+# rather than being repeated here, and play.echovideo.ru keeps its row for the reason its note gives.
+#
+# flixcloud.cc: the seal opens. obfuscation_seed hashed three times names the fields, kf_ and ivf_
+# for the key fragment and the iv, plus a token field and a second key fragment, /api/m3u8/<token>
+# answers the ciphertext and a third fragment, the three fragments go through the page's own
+# WebAssembly _r as a byte mix seeded from the first 8 hex of the seed, PBKDF2-SHA256 at 1000 rounds
+# salted with the seed then xored with the seed and hashed once more is the AES-256-CBC key, and the
+# plaintext is the master url. proved on /e/u6pohmficyxu, whose url
+# fetch8.flixcloud.cc/_v7/<video id>/master.m3u8?token=<jwt bound to client ip, six hour exp>
+# answered 200 application/vnd.apple.mpegurl 495B under the page as referer. that body is not a
+# playlist. it is base64 of the playlist xored with the 32 bytes the same module returns from _c,
+# which the page publishes as window.__pk, and flixcloud's patched hls.js de-xors it in the playlist
+# loader's onSuccess, keyed on the body not already starting with #EXTM3U. the variant playlist is
+# xored the same way, and its segments are served from vault83.slopnet.site as image/webp and
+# image/png behind a RIFF header, one measured at 200 image/webp 401016B. subtitles and fonts are
+# the only things in the clear, on vault92.slopnet.site. an ExtractorLink carries a url and headers
+# and not a body, so there is nothing here this layer can hand a player: this one wants a decrypting
+# local proxy, the same verdict mega.nz gets, and for the same reason.
+#
+# abyssplayer.com: the page carries the whole record as one base64 datas blob of slug, md5_id,
+# user_id and a media field that is ciphertext, and hands it to SoTrym in iamcdn.net's
+# core.bundle.js, 216274B of string-array obfuscation whose readable fragments are sourceBuffer,
+# audio/mp4, mp4a.40.2 and /sw.js. it is a media source player fed through a service worker, so the
+# player never holds a url at all and the key is assembled in the bundle rather than carried in the
+# record, which is what the abyss.msmbot.club note above says of the same software. not claimed.
+abyssplayer.com|AnimeDekhoProvider,Animekhor,OnePace,Toonstream|network|https://abyssplayer.com/kBXaHX-6c
+# tryembed.us.cc: the 403 Invalid Request Signature on /api/bootstrap recorded against this host is
+# not a signature at all. the gate wants Sec-Fetch-Site same-origin with Mode cors and Dest empty,
+# and either an Origin or a Referer on the embed: with the three Sec-Fetch headers and no origin it
+# says Unauthorized access endpoint origin instead, and with both it answers 200 3216B of providers,
+# qualities and captions. /api/stream_data answers 200 the same way once bootstrap has run, and the
+# caption arm serves, one measured at 200 text/vtt 22791B through god.anixx.cloud/proxy/astra. the
+# video does not. every quality carries a token and a fallbackToken, the player plays
+# /s/<token>.m3u8, and that route answers 403 34B Forbidden: Missing stream session for both tokens,
+# on the bootstrap token and the stream_data token, with and without the nonce as a query parameter
+# and as X-Embed-Nonce, after refresh_nonce, and under every Sec-Fetch shape the api itself accepts,
+# so the session it wants is not anything the page hands out. the upstream the caption names refuses
+# on its own: 403 564B for the subtitle it just served through the proxy and for every playlist name
+# beside it. the api is worth the row, the stream cannot be claimed.
+tryembed.us.cc|StreamPlay|network|https://tryembed.us.cc/embed/anime/5040/1/sub?autoplay=true&autoSkip=true
+# play.echovideo.ru: nothing observable is left to read. both ids the corpus holds, the one in the
+# row above and the longer one in the 43, answer 404 999B File not found - Echovideo today, so the
+# 245632B obfuscator.io builder that assembles the source at runtime cannot even be watched doing
+# it. a speculative extractor for this host would be written against no observation at all.
+# mega.nz: declined as it stands. the embed is the web app shell, the file is encrypted end to end
+# with the key in the fragment, and the bytes need AES-CTR as they stream, so there is no url to
+# hand a player.
+
+# the third upns zone, measured 2026-09-26. UpnsInk claims upns.ink by its mainUrl and had no row
+# here at all, so of the three zones the layer registers, two were probed through
+# animekhor.upns.live and cloudy.upns.one above and this one was never measured.
+#
+# it is a corpus host rather than a registry claim: AnimeDekhoProvider and OnePace each ship a class
+# whose mainUrl is https://vidcloud.upns.ink, and animedekho.app still hands the host out. its
+# /?trdekho=5&trid=49671&trtype=2 answered an iframe of https://vidcloud.upns.ink/#taic6v on the
+# trapped-in-a-dating-sim episode, the only one of the thirteen series that resolved a term id of
+# fifteen scanned, the other twelve naming abyssplayer, rubystm, cloudy.upns.one and animeworld.site
+# instead. onepace.co named no upns zone on the episode probed. that captured id is not the probe
+# url: the api answered it 404 Video not found or deleted on five reads of eight, the other three an
+# edge refusal and a rate limit and never a record, so the site's fifth server entry points at
+# something this zone has deleted. that is exactly how a host looks reachable and plays nothing.
+#
+# the probe id came off a third-party episode index instead, and was then observed serving. the api
+# answers it 200 with a hex config of a few kilobytes that decrypts under the CONFIG_KEY and
+# CONFIG_IV the layer already holds, and the config names three addresses: source on the bare ip
+# 94.131.217.183, which answered 504 from nginx, cf as a .txt the reader skips, and cfNative on
+# vidcloud.upns.ink itself. cfNative answered 200 application/vnd.apple.mpegurl 1308B, its 1080p
+# variant 200 44651B of VOD, and that variant's first segment 206 video/mp4 opening styp isom iso6
+# dash. rankOf preferring the embed host over a bare address is what makes this one serve rather
+# than time out.
+#
+# the four zones run one engine, not one record pool, so no id can be borrowed between them: rvj31w
+# is live on animekhor.upns.live and answers 503 on this host and on cloudy.upns.one, hdhajk is live
+# on cloudy.upns.one and 503 on those other two, while an id that was never handed out answers 404
+# rather than 503, which is how the two verdicts are told apart from each other. the edge flaps
+# here as it does on the siblings, interleaving 530 error code 1016, 522 and 429 Rate limit
+# exceeded with the 200s.
+#
+# 2026-09-26 12:00, watched through a dark stretch and out of it: for a quarter of an hour all
+# four zones answered every path, api and embed alike, 530 Origin DNS error at 0.07s, six asks for
+# six, while animeav1.uns.bio answered 200 and the origin box 94.131.217.183 answered nginx 404s.
+# by 12:18 this zone answered 200 with a 7169B config, then 429 from the fourth ask a second
+# apart. the dark phase is the origin name not resolving, it lasts minutes, and a run that catches
+# it is not a verdict on the extractor. what it exposed is: playerPage took the 8249B `Origin DNS
+# error | vidcloud.upns.ink | Cloudflare` page as the player page, so a dark zone came out as
+# `found no sources`, the words an unreadable shape earns, from this extractor and from the
+# generic reader after it. a refused page is now reported refused rather than read.
+vidcloud.upns.ink|AnimeDekhoProvider,OnePace|both|https://vidcloud.upns.ink/#e9otma

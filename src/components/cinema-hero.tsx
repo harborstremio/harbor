@@ -1,4 +1,5 @@
-import { ChevronRight, Info, Play } from "lucide-react";
+import { ChevronRight, Info } from "lucide-react";
+import { Play } from "@/components/icons/play-filled";
 import { useEffect, useRef, useState } from "react";
 import { ImdbIcon } from "@/components/icons/imdb-icon";
 import { MetaAwardsCorner } from "@/components/meta-awards-corner";
@@ -6,12 +7,14 @@ import { meta as fetchMeta, narrowMediaType, type Meta } from "@/lib/cinemeta";
 import { tmdbLogo, tmdbTrailerList, useTmdbImdbId } from "@/lib/providers/tmdb";
 import { useImdbRating } from "@/lib/imdb-rating";
 import { useSettings } from "@/lib/settings";
+import { useTitleLogo } from "@/lib/title-logo";
 import { useLocalizedOverview } from "@/lib/use-localized-overview";
 import { smartPlayEpisode } from "@/lib/smart-play";
 import { fetchTrailer, prefetchTrailer, trailerSrc, type TrailerInfo } from "@/lib/trailer";
 import { useT } from "@/lib/i18n";
 import { useView } from "@/lib/view";
 import { observe, usePageVisible } from "@/lib/visibility";
+import { useTrailerVideo } from "@/lib/use-trailer-video";
 
 const ROTATE_MS = 11000;
 const EASE_OUT = "cubic-bezier(0.32, 0.72, 0.24, 1)";
@@ -22,6 +25,9 @@ const FLICK_VELOCITY = 0.45;
 function rubberBand(distance: number, dim: number, c = 0.55): number {
   return (1 - 1 / (distance / dim / c + 1)) * dim * c;
 }
+
+const CINEMA_VIDEO_CLASS =
+  "absolute left-1/2 top-1/2 h-[110%] w-[110%] -translate-x-1/2 -translate-y-1/2 object-cover";
 
 export function CinemaHero({
   slides,
@@ -156,7 +162,7 @@ export function CinemaHero({
           style={{
             transform: trackTransform,
             transition: dragging ? "none" : `transform 700ms ${EASE_OUT}`,
-            willChange: "transform",
+            willChange: dragging ? "transform" : "auto",
           }}
         >
           {slides.map((m, i) => {
@@ -169,6 +175,7 @@ export function CinemaHero({
                     meta={m}
                     active={i === active && !dragging}
                     eyebrow={eyebrow}
+                    inViewport={inViewport}
                   />
                 ) : null}
               </div>
@@ -197,10 +204,12 @@ export function CinemaHero({
 function CinemaSlide({
   meta,
   active,
+  inViewport,
   eyebrow,
 }: {
   meta: Meta;
   active: boolean;
+  inViewport: boolean;
   eyebrow: string;
 }) {
   const t = useT();
@@ -209,15 +218,21 @@ function CinemaSlide({
   const description = useLocalizedOverview(meta);
   const resolvedImdb = useTmdbImdbId(meta.id);
   const imdbRating = useImdbRating(meta, resolvedImdb);
-  const [logo, setLogo] = useState<string | undefined>(meta.logo);
+  const [logoState, setLogo] = useState<string | undefined>(meta.logo);
+  const pinnedLogo = useTitleLogo(meta.id);
+  const logo = pinnedLogo ?? logoState;
   const [logoLoaded, setLogoLoaded] = useState(false);
   const [logoResolved, setLogoResolved] = useState<boolean>(!!meta.logo);
   const [trailerCandidates, setTrailerCandidates] = useState<string[]>([]);
   const [trailerInfo, setTrailerInfo] = useState<TrailerInfo | null>(null);
-  const [videoReady, setVideoReady] = useState(false);
-  const videoRef = useRef<HTMLVideoElement>(null);
   const pageVisible = usePageVisible();
-  const wantsPlayback = active && !!trailerInfo && pageVisible;
+  const wantsPlayback = active && !!trailerInfo && pageVisible && inViewport && settings.heroTrailers;
+  const { slot, video: videoRef, ready: videoReady } = useTrailerVideo({
+    src: trailerInfo ? trailerSrc(trailerInfo) : null,
+    active: !!wantsPlayback,
+    className: CINEMA_VIDEO_CLASS,
+    loop: true,
+  });
   const bg = upsizeTmdb(meta.background || meta.poster);
 
   useEffect(() => {
@@ -245,10 +260,9 @@ function CinemaSlide({
   }, [active, logoResolved, meta.id, meta.type, settings.tmdbKey]);
 
   useEffect(() => {
-    if (!active) return;
+    if (!active || !settings.heroTrailers) return;
     setTrailerCandidates([]);
     setTrailerInfo(null);
-    setVideoReady(false);
     let cancelled = false;
     const isTmdb = meta.id.startsWith("tmdb:");
     const lookup: Promise<string[]> = isTmdb
@@ -271,10 +285,10 @@ function CinemaSlide({
     return () => {
       cancelled = true;
     };
-  }, [active, meta.id, meta.type, settings.tmdbKey]);
+  }, [active, meta.id, meta.type, settings.tmdbKey, settings.heroTrailers]);
 
   useEffect(() => {
-    if (!active || trailerCandidates.length === 0 || trailerInfo) return;
+    if (!active || !settings.heroTrailers || trailerCandidates.length === 0 || trailerInfo) return;
     let cancelled = false;
     fetchTrailer(trailerCandidates[0], "360p").then((info) => {
       if (!cancelled && info) setTrailerInfo(info);
@@ -282,32 +296,17 @@ function CinemaSlide({
     return () => {
       cancelled = true;
     };
-  }, [active, trailerCandidates, trailerInfo]);
+  }, [active, trailerCandidates, trailerInfo, settings.heroTrailers]);
 
   useEffect(() => {
     const v = videoRef.current;
     if (!v) return;
-    if (wantsPlayback) {
+    if (wantsPlayback && videoReady) {
       v.play().catch(() => {});
-    } else {
+    } else if (!wantsPlayback) {
       v.pause();
     }
-  }, [wantsPlayback]);
-
-  useEffect(() => {
-    if (!trailerInfo) return;
-    const v = videoRef.current;
-    return () => {
-      if (!v) return;
-      try {
-        v.pause();
-        v.removeAttribute("src");
-        v.load();
-      } catch {
-        void 0;
-      }
-    };
-  }, [trailerInfo]);
+  }, [wantsPlayback, videoReady, videoRef]);
 
   return (
     <div
@@ -329,16 +328,7 @@ function CinemaSlide({
           className="pointer-events-none absolute inset-0 overflow-hidden transition-opacity duration-700"
           style={{ opacity: wantsPlayback && videoReady ? 1 : 0 }}
         >
-          <video
-            ref={videoRef}
-            src={trailerSrc(trailerInfo)}
-            muted
-            loop
-            playsInline
-            preload="none"
-            onCanPlay={() => setVideoReady(true)}
-            className="absolute left-1/2 top-1/2 h-[135%] w-[135%] -translate-x-1/2 -translate-y-1/2 object-cover"
-          />
+          <div ref={slot} className="absolute inset-0" />
         </div>
       )}
       <div className="absolute inset-0 bg-gradient-to-t from-canvas via-canvas/70 via-30% to-transparent" />
@@ -385,14 +375,14 @@ function CinemaSlide({
           <div className="mt-2 flex items-center gap-3">
             <button
               onClick={() => openPicker(meta, smartPlayEpisode(meta), { autoPlay: settings.instantPlay })}
-              className="flex h-12 items-center gap-2.5 rounded-md bg-ink px-7 text-[14.5px] font-semibold text-canvas shadow-[0_8px_24px_rgba(0,0,0,0.3),inset_0_1px_0_rgba(255,255,255,0.5)] transition-transform duration-200 hover:scale-[1.03] active:scale-[0.97]"
+              className="flex h-12 items-center gap-2.5 rounded-md bg-ink px-7 text-[14.5px] font-semibold text-canvas transition-transform duration-200 hover:scale-[1.03] active:scale-[0.97]"
             >
               <Play size={17} fill="currentColor" />
               {t("Play")}
             </button>
             <button
               onClick={() => openMeta(meta)}
-              className="flex h-12 items-center gap-2.5 rounded-md border border-edge bg-canvas/50 px-6 text-[14.5px] font-medium text-ink backdrop-blur-sm transition-colors duration-200 hover:bg-canvas/70"
+              className="flex h-12 items-center gap-2.5 rounded-md bg-canvas/80 px-6 text-[14.5px] font-medium text-ink transition-colors duration-200 hover:bg-canvas/95"
             >
               <Info size={16} strokeWidth={2} />
               {t("More info")}
@@ -453,5 +443,5 @@ function Dot() {
 
 function upsizeTmdb(url?: string): string | undefined {
   if (!url) return url;
-  return url.replace("/t/p/w780/", "/t/p/w1280/");
+  return url.replace(/\/t\/p\/(w780|original)\//, "/t/p/w1280/");
 }

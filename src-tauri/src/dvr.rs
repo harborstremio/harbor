@@ -148,7 +148,9 @@ pub async fn dvr_start(
     cmd.kill_on_drop(true);
     #[cfg(windows)]
     cmd.creation_flags(CREATE_NO_WINDOW);
+    crate::proc_guard::configure_command(&mut cmd);
     let child = cmd.spawn().map_err(|e| format!("spawn mpv: {}", e))?;
+    crate::proc_guard::adopt(&child);
 
     let id = Uuid::new_v4().to_string();
     let started_at = Instant::now();
@@ -286,6 +288,16 @@ async fn finalize(
     Ok(())
 }
 
+pub(crate) fn shutdown(app: &AppHandle) {
+    use tauri::Manager;
+    let inner = app.state::<DvrState>().inner.clone();
+    tauri::async_runtime::block_on(async move {
+        for (_, mut rec) in inner.lock().await.drain() {
+            let _ = rec.child.start_kill();
+        }
+    });
+}
+
 #[tauri::command]
 pub async fn dvr_stop(
     app: AppHandle,
@@ -353,7 +365,14 @@ pub async fn dvr_default_dir(app: AppHandle) -> Result<String, String> {
         .or_else(|_| app.path().download_dir())
         .or_else(|_| app.path().app_data_dir())
         .map_err(|e| format!("no base dir: {}", e))?;
-    let dir = base.join("Harbor DVR");
+    // Earlier builds recorded into "Harbor DVR". Keep using that folder when it
+    // exists so existing recordings stay where new ones land.
+    let legacy = base.join("Harbor DVR");
+    let dir = if legacy.is_dir() {
+        legacy
+    } else {
+        base.join(concat!(crate::product_name!(), " DVR"))
+    };
     if !dir.exists() {
         let _ = std::fs::create_dir_all(&dir);
     }

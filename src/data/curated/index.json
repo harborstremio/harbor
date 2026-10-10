@@ -1,0 +1,4151 @@
+{
+  "builtAt": "2026-09-27",
+  "lists": [
+    {
+      "id": "nyt-tv-100",
+      "count": 100,
+      "snapshotDate": "2026-09-26",
+      "head": [
+        {
+          "rank": 1,
+          "imdb": "tt0903747",
+          "title": "Breaking Bad"
+        },
+        {
+          "rank": 2,
+          "imdb": "tt0306414",
+          "title": "The Wire"
+        },
+        {
+          "rank": 3,
+          "imdb": "tt0804503",
+          "title": "Mad Men"
+        },
+        {
+          "rank": 4,
+          "imdb": "tt7660850",
+          "title": "Succession"
+        },
+        {
+          "rank": 5,
+          "imdb": "tt5687612",
+          "title": "Fleabag"
+        },
+        {
+          "rank": 6,
+          "imdb": "tt0944947",
+          "title": "Game of Thrones"
+        },
+        {
+          "rank": 7,
+          "imdb": "tt1759761",
+          "title": "Veep"
+        },
+        {
+          "rank": 8,
+          "imdb": "tt0496424",
+          "title": "30 Rock"
+        },
+        {
+          "rank": 9,
+          "imdb": "tt0264235",
+          "title": "Curb Your Enthusiasm"
+        },
+        {
+          "rank": 10,
+          "imdb": "tt4288182",
+          "title": "Atlanta"
+        },
+        {
+          "rank": 11,
+          "imdb": "tt0386676",
+          "title": "The Office (U.S.)"
+        },
+        {
+          "rank": 12,
+          "imdb": "tt0367279",
+          "title": "Arrested Development"
+        },
+        {
+          "rank": 13,
+          "imdb": "tt1723816",
+          "title": "Girls"
+        },
+        {
+          "rank": 14,
+          "imdb": "tt0758745",
+          "title": "Friday Night Lights"
+        },
+        {
+          "rank": 15,
+          "imdb": "tt0248654",
+          "title": "Six Feet Under"
+        },
+        {
+          "rank": 16,
+          "imdb": "tt0290978",
+          "title": "The Office (U.K.)"
+        },
+        {
+          "rank": 17,
+          "imdb": "tt2149175",
+          "title": "The Americans"
+        },
+        {
+          "rank": 18,
+          "imdb": "tt11204260",
+          "title": "I May Destroy You"
+        },
+        {
+          "rank": 19,
+          "imdb": "tt7366338",
+          "title": "Chernobyl"
+        },
+        {
+          "rank": 20,
+          "imdb": "tt4786824",
+          "title": "The Crown"
+        },
+        {
+          "rank": 21,
+          "imdb": "tt13406094",
+          "title": "The White Lotus"
+        },
+        {
+          "rank": 22,
+          "imdb": "tt0411008",
+          "title": "Lost"
+        },
+        {
+          "rank": 23,
+          "imdb": "tt0434672",
+          "title": "The Comeback"
+        },
+        {
+          "rank": 24,
+          "imdb": "tt0348914",
+          "title": "Deadwood"
+        },
+        {
+          "rank": 25,
+          "imdb": "tt2699128",
+          "title": "The Leftovers"
+        },
+        {
+          "rank": 26,
+          "imdb": "tt2085059",
+          "title": "Black Mirror"
+        },
+        {
+          "rank": 27,
+          "imdb": "tt3032476",
+          "title": "Better Call Saul"
+        },
+        {
+          "rank": 28,
+          "imdb": "tt0185906",
+          "title": "Band of Brothers"
+        },
+        {
+          "rank": 29,
+          "imdb": "tt1981558",
+          "title": "Key & Peele"
+        },
+        {
+          "rank": 30,
+          "imdb": "tt11280740",
+          "title": "Severance"
+        },
+        {
+          "rank": 31,
+          "imdb": "tt0239195",
+          "title": "Survivor"
+        },
+        {
+          "rank": 32,
+          "imdb": "tt9253284",
+          "title": "Andor"
+        },
+        {
+          "rank": 33,
+          "imdb": "tt1509004",
+          "title": "Enlightened"
+        },
+        {
+          "rank": 34,
+          "imdb": "tt3526078",
+          "title": "Schitt's Creek"
+        },
+        {
+          "rank": 35,
+          "imdb": "tt2356777",
+          "title": "True Detective (Season 1)"
+        },
+        {
+          "rank": 36,
+          "imdb": "tt31938062",
+          "title": "The Pitt"
+        },
+        {
+          "rank": 37,
+          "imdb": "tt0407362",
+          "title": "Battlestar Galactica"
+        },
+        {
+          "rank": 38,
+          "imdb": "tt1796960",
+          "title": "Homeland"
+        },
+        {
+          "rank": 39,
+          "imdb": "tt7049682",
+          "title": "Watchmen"
+        },
+        {
+          "rank": 40,
+          "imdb": "tt31806037",
+          "title": "Adolescence"
+        },
+        {
+          "rank": 41,
+          "imdb": "tt1492966",
+          "title": "Louie"
+        },
+        {
+          "rank": 42,
+          "imdb": "tt11815682",
+          "title": "Hacks"
+        },
+        {
+          "rank": 43,
+          "imdb": "tt2442560",
+          "title": "Peaky Blinders"
+        },
+        {
+          "rank": 44,
+          "imdb": "tt3398228",
+          "title": "BoJack Horseman"
+        },
+        {
+          "rank": 45,
+          "imdb": "tt3428912",
+          "title": "Happy Valley"
+        },
+        {
+          "rank": 46,
+          "imdb": "tt2578560",
+          "title": "Broad City"
+        },
+        {
+          "rank": 47,
+          "imdb": "tt4093826",
+          "title": "Twin Peaks: The Return"
+        },
+        {
+          "rank": 48,
+          "imdb": "tt1856010",
+          "title": "House of Cards"
+        },
+        {
+          "rank": 49,
+          "imdb": "tt9059760",
+          "title": "Normal People"
+        },
+        {
+          "rank": 50,
+          "imdb": "tt1266020",
+          "title": "Parks and Recreation"
+        },
+        {
+          "rank": 51,
+          "imdb": "tt4955642",
+          "title": "The Good Place"
+        },
+        {
+          "rank": 52,
+          "imdb": "tt1606375",
+          "title": "Downton Abbey"
+        },
+        {
+          "rank": 53,
+          "imdb": "tt4574334",
+          "title": "Stranger Things"
+        },
+        {
+          "rank": 54,
+          "imdb": "tt4063800",
+          "title": "The Bureau"
+        },
+        {
+          "rank": 55,
+          "imdb": "tt5024912",
+          "title": "Insecure"
+        },
+        {
+          "rank": 56,
+          "imdb": "tt2297757",
+          "title": "Nathan for You"
+        },
+        {
+          "rank": 57,
+          "imdb": "tt10050772",
+          "title": "I Think You Should Leave"
+        },
+        {
+          "rank": 58,
+          "imdb": "tt0353049",
+          "title": "Chappelle's Show"
+        },
+        {
+          "rank": 59,
+          "imdb": "tt8324422",
+          "title": "PEN15"
+        },
+        {
+          "rank": 60,
+          "imdb": "tt0387764",
+          "title": "Peep Show"
+        },
+        {
+          "rank": 61,
+          "imdb": "tt1353056",
+          "title": "RuPaul's Drag Race"
+        },
+        {
+          "rank": 62,
+          "imdb": "tt5875444",
+          "title": "Slow Horses"
+        },
+        {
+          "rank": 63,
+          "imdb": "tt0459159",
+          "title": "The Thick of It"
+        },
+        {
+          "rank": 64,
+          "imdb": "tt2845786",
+          "title": "Anthony Bourdain: Parts Unknown"
+        },
+        {
+          "rank": 65,
+          "imdb": "tt10155688",
+          "title": "Mare of Easttown"
+        },
+        {
+          "rank": 66,
+          "imdb": "tt10802170",
+          "title": "The Rehearsal"
+        },
+        {
+          "rank": 67,
+          "imdb": "tt5834204",
+          "title": "The Handmaid's Tale"
+        },
+        {
+          "rank": 68,
+          "imdb": "tt5071412",
+          "title": "Ozark"
+        },
+        {
+          "rank": 69,
+          "imdb": "tt0475900",
+          "title": "Anthony Bourdain: No Reservations"
+        },
+        {
+          "rank": 70,
+          "imdb": "tt0286486",
+          "title": "The Shield"
+        },
+        {
+          "rank": 71,
+          "imdb": "tt14403178",
+          "title": "Beef (Season 1)"
+        },
+        {
+          "rank": 72,
+          "imdb": "tt10919420",
+          "title": "Squid Game"
+        },
+        {
+          "rank": 73,
+          "imdb": "tt5348176",
+          "title": "Barry"
+        },
+        {
+          "rank": 74,
+          "imdb": "tt14452776",
+          "title": "The Bear"
+        },
+        {
+          "rank": 75,
+          "imdb": "tt10986410",
+          "title": "Ted Lasso"
+        },
+        {
+          "rank": 76,
+          "imdb": "tt12759100",
+          "title": "Somebody Somewhere"
+        },
+        {
+          "rank": 77,
+          "imdb": "tt1442437",
+          "title": "Modern Family"
+        },
+        {
+          "rank": 78,
+          "imdb": "tt0472954",
+          "title": "It's Always Sunny in Philadelphia"
+        },
+        {
+          "rank": 79,
+          "imdb": "tt1442462",
+          "title": "The Good Wife"
+        },
+        {
+          "rank": 80,
+          "imdb": "tt10801534",
+          "title": "How To With John Wilson"
+        },
+        {
+          "rank": 81,
+          "imdb": "tt10048342",
+          "title": "The Queen's Gambit"
+        },
+        {
+          "rank": 82,
+          "imdb": "tt4370596",
+          "title": "Better Things"
+        },
+        {
+          "rank": 83,
+          "imdb": "tt1489428",
+          "title": "Justified"
+        },
+        {
+          "rank": 84,
+          "imdb": "tt0795176",
+          "title": "Planet Earth"
+        },
+        {
+          "rank": 85,
+          "imdb": "tt1877368",
+          "title": "The Great British Baking Show"
+        },
+        {
+          "rank": 86,
+          "imdb": "tt2788316",
+          "title": "Shogun"
+        },
+        {
+          "rank": 87,
+          "imdb": "tt13623580",
+          "title": "Reservation Dogs"
+        },
+        {
+          "rank": 88,
+          "imdb": "tt0773262",
+          "title": "Dexter"
+        },
+        {
+          "rank": 89,
+          "imdb": "tt13649112",
+          "title": "Baby Reindeer"
+        },
+        {
+          "rank": 90,
+          "imdb": "tt0866442",
+          "title": "Eastbound & Down"
+        },
+        {
+          "rank": 91,
+          "imdb": "tt4374208",
+          "title": "Catastrophe"
+        },
+        {
+          "rank": 92,
+          "imdb": "tt2401256",
+          "title": "The Night Of"
+        },
+        {
+          "rank": 93,
+          "imdb": "tt10574236",
+          "title": "Station Eleven"
+        },
+        {
+          "rank": 94,
+          "imdb": "tt17491088",
+          "title": "The Diplomat"
+        },
+        {
+          "rank": 95,
+          "imdb": "tt0412142",
+          "title": "House"
+        },
+        {
+          "rank": 96,
+          "imdb": "tt2543312",
+          "title": "Halt and Catch Fire"
+        },
+        {
+          "rank": 97,
+          "imdb": "tt1439629",
+          "title": "Community"
+        },
+        {
+          "rank": 98,
+          "imdb": "tt4635282",
+          "title": "The OA"
+        },
+        {
+          "rank": 99,
+          "imdb": "tt0238784",
+          "title": "Gilmore Girls"
+        },
+        {
+          "rank": 100,
+          "imdb": "tt1837576",
+          "title": "Scandal"
+        }
+      ]
+    },
+    {
+      "id": "sight-and-sound-2022",
+      "count": 100,
+      "snapshotDate": "2026-09-27",
+      "head": [
+        {
+          "rank": 1,
+          "imdb": "tt0073198",
+          "title": "Jeanne Dielman, 23, quai du Commerce, 1080 Bruxelles",
+          "tmdb": 44012,
+          "year": 1976
+        },
+        {
+          "rank": 2,
+          "imdb": "tt0052357",
+          "title": "Vertigo",
+          "tmdb": 426,
+          "year": 1958
+        },
+        {
+          "rank": 3,
+          "imdb": "tt0033467",
+          "title": "Citizen Kane",
+          "tmdb": 15,
+          "year": 1941
+        },
+        {
+          "rank": 4,
+          "imdb": "tt0046438",
+          "title": "Tokyo Story",
+          "tmdb": 18148,
+          "year": 1953
+        },
+        {
+          "rank": 5,
+          "imdb": "tt0118694",
+          "title": "In the Mood for Love",
+          "tmdb": 843,
+          "year": 2000
+        },
+        {
+          "rank": 6,
+          "imdb": "tt0062622",
+          "title": "2001: A Space Odyssey",
+          "tmdb": 62,
+          "year": 1968
+        },
+        {
+          "rank": 7,
+          "imdb": "tt0209933",
+          "title": "Beau Travail",
+          "tmdb": 14626,
+          "year": 2000
+        },
+        {
+          "rank": 8,
+          "imdb": "tt0166924",
+          "title": "Mulholland Drive",
+          "tmdb": 1018,
+          "year": 2001
+        },
+        {
+          "rank": 9,
+          "imdb": "tt0019760",
+          "title": "Man with a Movie Camera",
+          "tmdb": 26317,
+          "year": 1929
+        },
+        {
+          "rank": 10,
+          "imdb": "tt0045152",
+          "title": "Singin' in the Rain",
+          "tmdb": 872,
+          "year": 1952
+        },
+        {
+          "rank": 11,
+          "imdb": "tt0018455",
+          "title": "Sunrise: A Song of Two Humans",
+          "tmdb": 631,
+          "year": 1927
+        },
+        {
+          "rank": 12,
+          "imdb": "tt0068646",
+          "title": "The Godfather",
+          "tmdb": 238,
+          "year": 1972
+        },
+        {
+          "rank": 13,
+          "imdb": "tt0031885",
+          "title": "The Rules of the Game",
+          "tmdb": 776,
+          "year": 1939
+        },
+        {
+          "rank": 14,
+          "imdb": "tt0055852",
+          "title": "Cléo from 5 to 7",
+          "tmdb": 499,
+          "year": 1962
+        },
+        {
+          "rank": 15,
+          "imdb": "tt0049730",
+          "title": "The Searchers",
+          "tmdb": 3114,
+          "year": 1956
+        },
+        {
+          "rank": 16,
+          "imdb": "tt0036154",
+          "title": "Meshes of the Afternoon",
+          "tmdb": 27040,
+          "year": 1943
+        },
+        {
+          "rank": 17,
+          "imdb": "tt0100234",
+          "title": "Close-Up",
+          "tmdb": 30017,
+          "year": 1990
+        },
+        {
+          "rank": 18,
+          "imdb": "tt0060827",
+          "title": "Persona",
+          "tmdb": 797,
+          "year": 1966
+        },
+        {
+          "rank": 19,
+          "imdb": "tt0078788",
+          "title": "Apocalypse Now",
+          "tmdb": 28,
+          "year": 1979
+        },
+        {
+          "rank": 20,
+          "imdb": "tt0047478",
+          "title": "Seven Samurai",
+          "tmdb": 346,
+          "year": 1954
+        },
+        {
+          "rank": 21,
+          "imdb": "tt0019254",
+          "title": "The Passion of Joan of Arc",
+          "tmdb": 780,
+          "year": 1928
+        },
+        {
+          "rank": 22,
+          "imdb": "tt0041154",
+          "title": "Late Spring",
+          "tmdb": 20530,
+          "year": 1949
+        },
+        {
+          "rank": 23,
+          "imdb": "tt0062136",
+          "title": "PlayTime",
+          "tmdb": 10227,
+          "year": 1967
+        },
+        {
+          "rank": 24,
+          "imdb": "tt0097216",
+          "title": "Do the Right Thing",
+          "tmdb": 925,
+          "year": 1989
+        },
+        {
+          "rank": 25,
+          "imdb": "tt0060138",
+          "title": "Au Hasard Balthazar",
+          "tmdb": 20108,
+          "year": 1966
+        },
+        {
+          "rank": 26,
+          "imdb": "tt0048424",
+          "title": "The Night of the Hunter",
+          "tmdb": 3112,
+          "year": 1955
+        },
+        {
+          "rank": 27,
+          "imdb": "tt0090015",
+          "title": "Shoah",
+          "tmdb": 42044,
+          "year": 1985
+        },
+        {
+          "rank": 28,
+          "imdb": "tt0060959",
+          "title": "Daisies",
+          "tmdb": 46919,
+          "year": 1966
+        },
+        {
+          "rank": 29,
+          "imdb": "tt0075314",
+          "title": "Taxi Driver",
+          "tmdb": 103,
+          "year": 1976
+        },
+        {
+          "rank": 30,
+          "imdb": "tt8613070",
+          "title": "Portrait of a Lady on Fire",
+          "tmdb": 531428,
+          "year": 2019
+        }
+      ]
+    },
+    {
+      "id": "criterion-collection",
+      "count": 1518,
+      "snapshotDate": "2026-09-27",
+      "head": [
+        {
+          "rank": 1,
+          "imdb": "tt0028950",
+          "title": "Grand Illusion",
+          "tmdb": 777,
+          "year": 1937
+        },
+        {
+          "rank": 2,
+          "imdb": "tt0047478",
+          "title": "Seven Samurai",
+          "tmdb": 346,
+          "year": 1954
+        },
+        {
+          "rank": 3,
+          "imdb": "tt0030341",
+          "title": "The Lady Vanishes",
+          "tmdb": 940,
+          "year": 1938
+        },
+        {
+          "rank": 4,
+          "imdb": "tt0071129",
+          "title": "Amarcord",
+          "tmdb": 7857,
+          "year": 1973
+        },
+        {
+          "rank": 5,
+          "imdb": "tt0053198",
+          "title": "The 400 Blows",
+          "tmdb": 147,
+          "year": 1959
+        },
+        {
+          "rank": 6,
+          "imdb": "tt0038348",
+          "title": "Beauty and the Beast",
+          "tmdb": 648,
+          "year": 1946
+        },
+        {
+          "rank": 7,
+          "imdb": "tt0051994",
+          "title": "A Night to Remember",
+          "tmdb": 10971,
+          "year": 1958
+        },
+        {
+          "rank": 8,
+          "imdb": "tt0097202",
+          "title": "The Killer",
+          "tmdb": 10835,
+          "year": 1989
+        },
+        {
+          "rank": 9,
+          "imdb": "tt0104684",
+          "title": "Hard Boiled",
+          "tmdb": 11782,
+          "year": 1992
+        },
+        {
+          "rank": 10,
+          "imdb": "tt0067959",
+          "title": "Walkabout",
+          "tmdb": 36040,
+          "year": 1971
+        },
+        {
+          "rank": 11,
+          "imdb": "tt0050976",
+          "title": "The Seventh Seal",
+          "tmdb": 490,
+          "year": 1957
+        },
+        {
+          "rank": 12,
+          "imdb": "tt0088258",
+          "title": "This Is Spinal Tap",
+          "tmdb": 11031,
+          "year": 1984
+        },
+        {
+          "rank": 13,
+          "imdb": "tt0102926",
+          "title": "The Silence of the Lambs",
+          "tmdb": 274,
+          "year": 1991
+        },
+        {
+          "rank": 14,
+          "imdb": "tt0047444",
+          "title": "Samurai I: Musashi Miyamoto",
+          "tmdb": 31372,
+          "year": 1954
+        },
+        {
+          "rank": 15,
+          "imdb": "tt0048579",
+          "title": "Samurai II: Duel at Ichijoji Temple",
+          "tmdb": 31374,
+          "year": 1955
+        },
+        {
+          "rank": 16,
+          "imdb": "tt0049710",
+          "title": "Samurai III: Duel at Ganryu Island",
+          "tmdb": 31378,
+          "year": 1956
+        },
+        {
+          "rank": 17,
+          "imdb": "tt0073650",
+          "title": "Salò, or the 120 Days of Sodom",
+          "tmdb": 5336,
+          "year": 1976
+        },
+        {
+          "rank": 18,
+          "imdb": "tt0058390",
+          "title": "The Naked Kiss",
+          "tmdb": 26031,
+          "year": 1964
+        },
+        {
+          "rank": 19,
+          "imdb": "tt0057495",
+          "title": "Shock Corridor",
+          "tmdb": 25504,
+          "year": 1963
+        },
+        {
+          "rank": 20,
+          "imdb": "tt0091954",
+          "title": "Sid and Nancy",
+          "tmdb": 14924,
+          "year": 1986
+        },
+        {
+          "rank": 21,
+          "imdb": "tt0094964",
+          "title": "Dead Ringers",
+          "tmdb": 9540,
+          "year": 1988
+        },
+        {
+          "rank": 22,
+          "imdb": "tt0048673",
+          "title": "Summertime",
+          "tmdb": 50363,
+          "year": 1955
+        },
+        {
+          "rank": 23,
+          "imdb": "tt0093870",
+          "title": "RoboCop",
+          "tmdb": 5548,
+          "year": 1987
+        },
+        {
+          "rank": 24,
+          "imdb": "tt0057565",
+          "title": "High and Low",
+          "tmdb": 12493,
+          "year": 1963
+        },
+        {
+          "rank": 25,
+          "imdb": "tt0058898",
+          "title": "Alphaville",
+          "tmdb": 8072,
+          "year": 1965
+        },
+        {
+          "rank": 26,
+          "imdb": "tt0081070",
+          "title": "The Long Good Friday",
+          "tmdb": 14807,
+          "year": 1980
+        },
+        {
+          "rank": 27,
+          "imdb": "tt0071508",
+          "title": "Flesh for Frankenstein",
+          "tmdb": 3043,
+          "year": 1973
+        },
+        {
+          "rank": 28,
+          "imdb": "tt0071233",
+          "title": "Blood for Dracula",
+          "tmdb": 25944,
+          "year": 1974
+        },
+        {
+          "rank": 29,
+          "imdb": "tt0073540",
+          "title": "Picnic at Hanging Rock",
+          "tmdb": 11020,
+          "year": 1975
+        },
+        {
+          "rank": 30,
+          "imdb": "tt0022100",
+          "title": "M",
+          "tmdb": 832,
+          "year": 1931
+        }
+      ]
+    },
+    {
+      "id": "afi-100-1998",
+      "count": 100,
+      "snapshotDate": "2026-09-27",
+      "head": [
+        {
+          "rank": 1,
+          "imdb": "tt0033467",
+          "title": "Citizen Kane",
+          "tmdb": 15,
+          "year": 1941
+        },
+        {
+          "rank": 2,
+          "imdb": "tt0034583",
+          "title": "Casablanca",
+          "tmdb": 289,
+          "year": 1943
+        },
+        {
+          "rank": 3,
+          "imdb": "tt0068646",
+          "title": "The Godfather",
+          "tmdb": 238,
+          "year": 1972
+        },
+        {
+          "rank": 4,
+          "imdb": "tt0031381",
+          "title": "Gone with the Wind",
+          "tmdb": 770,
+          "year": 1939
+        },
+        {
+          "rank": 5,
+          "imdb": "tt0056172",
+          "title": "Lawrence of Arabia",
+          "tmdb": 947,
+          "year": 1962
+        },
+        {
+          "rank": 6,
+          "imdb": "tt0032138",
+          "title": "The Wizard of Oz",
+          "tmdb": 630,
+          "year": 1939
+        },
+        {
+          "rank": 7,
+          "imdb": "tt0061722",
+          "title": "The Graduate",
+          "tmdb": 37247,
+          "year": 1967
+        },
+        {
+          "rank": 8,
+          "imdb": "tt0047296",
+          "title": "On the Waterfront",
+          "tmdb": 654,
+          "year": 1954
+        },
+        {
+          "rank": 9,
+          "imdb": "tt0108052",
+          "title": "Schindler's List",
+          "tmdb": 424,
+          "year": 1993
+        },
+        {
+          "rank": 10,
+          "imdb": "tt0045152",
+          "title": "Singin' in the Rain",
+          "tmdb": 872,
+          "year": 1952
+        },
+        {
+          "rank": 11,
+          "imdb": "tt0038650",
+          "title": "It's a Wonderful Life",
+          "tmdb": 1585,
+          "year": 1946
+        },
+        {
+          "rank": 12,
+          "imdb": "tt0043014",
+          "title": "Sunset Boulevard",
+          "tmdb": 599,
+          "year": 1950
+        },
+        {
+          "rank": 13,
+          "imdb": "tt0050212",
+          "title": "The Bridge on the River Kwai",
+          "tmdb": 826,
+          "year": 1957
+        },
+        {
+          "rank": 14,
+          "imdb": "tt0053291",
+          "title": "Some Like It Hot",
+          "tmdb": 239,
+          "year": 1959
+        },
+        {
+          "rank": 15,
+          "imdb": "tt0076759",
+          "title": "Star Wars",
+          "tmdb": 11,
+          "year": 1977
+        },
+        {
+          "rank": 16,
+          "imdb": "tt0042192",
+          "title": "All About Eve",
+          "tmdb": 705,
+          "year": 1950
+        },
+        {
+          "rank": 17,
+          "imdb": "tt0043265",
+          "title": "The African Queen",
+          "tmdb": 488,
+          "year": 1952
+        },
+        {
+          "rank": 18,
+          "imdb": "tt0054215",
+          "title": "Psycho",
+          "tmdb": 539,
+          "year": 1960
+        },
+        {
+          "rank": 19,
+          "imdb": "tt0071315",
+          "title": "Chinatown",
+          "tmdb": 829,
+          "year": 1974
+        },
+        {
+          "rank": 20,
+          "imdb": "tt0073486",
+          "title": "One Flew Over the Cuckoo's Nest",
+          "tmdb": 510,
+          "year": 1975
+        },
+        {
+          "rank": 21,
+          "imdb": "tt0032551",
+          "title": "The Grapes of Wrath",
+          "tmdb": 596,
+          "year": 1940
+        },
+        {
+          "rank": 22,
+          "imdb": "tt0062622",
+          "title": "2001: A Space Odyssey",
+          "tmdb": 62,
+          "year": 1968
+        },
+        {
+          "rank": 23,
+          "imdb": "tt0033870",
+          "title": "The Maltese Falcon",
+          "tmdb": 963,
+          "year": 1941
+        },
+        {
+          "rank": 24,
+          "imdb": "tt0081398",
+          "title": "Raging Bull",
+          "tmdb": 1578,
+          "year": 1980
+        },
+        {
+          "rank": 25,
+          "imdb": "tt0083866",
+          "title": "E.T. the Extra-Terrestrial",
+          "tmdb": 601,
+          "year": 1982
+        },
+        {
+          "rank": 26,
+          "imdb": "tt0057012",
+          "title": "Dr. Strangelove or: How I Learned to Stop Worrying and Love the Bomb",
+          "tmdb": 935,
+          "year": 1964
+        },
+        {
+          "rank": 27,
+          "imdb": "tt0061418",
+          "title": "Bonnie and Clyde",
+          "tmdb": 475,
+          "year": 1967
+        },
+        {
+          "rank": 28,
+          "imdb": "tt0078788",
+          "title": "Apocalypse Now",
+          "tmdb": 28,
+          "year": 1979
+        },
+        {
+          "rank": 29,
+          "imdb": "tt0031679",
+          "title": "Mr. Smith Goes to Washington",
+          "tmdb": 3083,
+          "year": 1939
+        },
+        {
+          "rank": 30,
+          "imdb": "tt0040897",
+          "title": "The Treasure of the Sierra Madre",
+          "tmdb": 3090,
+          "year": 1948
+        }
+      ]
+    },
+    {
+      "id": "national-film-registry",
+      "count": 903,
+      "snapshotDate": "2026-09-27",
+      "head": [
+        {
+          "rank": null,
+          "imdb": "tt0050086",
+          "title": "3:10 to Yuma",
+          "awardYear": 2012,
+          "tmdb": 14168,
+          "year": 1957
+        },
+        {
+          "rank": null,
+          "imdb": "tt0118540",
+          "title": "4 Little Girls",
+          "awardYear": 2017,
+          "tmdb": 26580,
+          "year": 1997
+        },
+        {
+          "rank": null,
+          "imdb": "tt0051337",
+          "title": "The 7th Voyage of Sinbad",
+          "awardYear": 2008,
+          "tmdb": 15515,
+          "year": 1958
+        },
+        {
+          "rank": null,
+          "imdb": "tt0050083",
+          "title": "12 Angry Men",
+          "awardYear": 2007,
+          "tmdb": 389,
+          "year": 1957
+        },
+        {
+          "rank": null,
+          "imdb": "tt2024544",
+          "title": "12 Years a Slave",
+          "awardYear": 2023,
+          "tmdb": 76203,
+          "year": 2013
+        },
+        {
+          "rank": null,
+          "imdb": "tt0445158",
+          "title": "13 Lakes",
+          "awardYear": 2014,
+          "tmdb": 36067,
+          "year": 2004
+        },
+        {
+          "rank": null,
+          "imdb": "tt0006333",
+          "title": "20,000 Leagues Under the Sea",
+          "awardYear": 2016,
+          "tmdb": 30266,
+          "year": 1916
+        },
+        {
+          "rank": null,
+          "imdb": "tt2396566",
+          "title": "20 Feet from Stardom",
+          "awardYear": 2023,
+          "tmdb": 159014,
+          "year": 2013
+        },
+        {
+          "rank": null,
+          "imdb": "tt0024034",
+          "title": "42nd Street",
+          "awardYear": 1998,
+          "tmdb": 3062,
+          "year": 1933
+        },
+        {
+          "rank": null,
+          "imdb": "tt0062622",
+          "title": "2001: A Space Odyssey",
+          "awardYear": 1991,
+          "tmdb": 62,
+          "year": 1968
+        },
+        {
+          "rank": null,
+          "imdb": "tt0040068",
+          "title": "Abbott and Costello Meet Frankenstein",
+          "awardYear": 2001,
+          "tmdb": 3073,
+          "year": 1948
+        },
+        {
+          "rank": null,
+          "imdb": "tt0043338",
+          "title": "Ace in the Hole (aka Big Carnival)",
+          "awardYear": 2017,
+          "tmdb": 25364,
+          "year": 1951
+        },
+        {
+          "rank": null,
+          "imdb": "tt0041090",
+          "title": "Adam's Rib",
+          "awardYear": 1992,
+          "tmdb": 25431,
+          "year": 1949
+        },
+        {
+          "rank": null,
+          "imdb": "tt0029843",
+          "title": "The Adventures of Robin Hood",
+          "awardYear": 1995,
+          "tmdb": 10907,
+          "year": 1938
+        },
+        {
+          "rank": null,
+          "imdb": "tt0043265",
+          "title": "The African Queen",
+          "awardYear": 1994,
+          "tmdb": 488,
+          "year": 1951
+        },
+        {
+          "rank": null,
+          "imdb": "tt0080339",
+          "title": "Airplane!",
+          "awardYear": 2010,
+          "tmdb": 813,
+          "year": 1980
+        },
+        {
+          "rank": null,
+          "imdb": "tt0075654",
+          "title": "¡Alambrista!",
+          "awardYear": 2023,
+          "tmdb": 86975,
+          "year": 1977
+        },
+        {
+          "rank": null,
+          "imdb": "tt0078748",
+          "title": "Alien",
+          "awardYear": 2002,
+          "tmdb": 348,
+          "year": 1979
+        },
+        {
+          "rank": null,
+          "imdb": "tt0042192",
+          "title": "All About Eve",
+          "awardYear": 1990,
+          "tmdb": 705,
+          "year": 1950
+        },
+        {
+          "rank": null,
+          "imdb": "tt0344807",
+          "title": "All My Babies",
+          "awardYear": 2002,
+          "tmdb": 153382,
+          "year": 1953
+        },
+        {
+          "rank": null,
+          "imdb": "tt0020629",
+          "title": "All Quiet on the Western Front",
+          "awardYear": 1990,
+          "tmdb": 143,
+          "year": 1930
+        },
+        {
+          "rank": null,
+          "imdb": "tt0047811",
+          "title": "All That Heaven Allows",
+          "awardYear": 1995,
+          "tmdb": 43316,
+          "year": 1955
+        },
+        {
+          "rank": null,
+          "imdb": "tt0078754",
+          "title": "All That Jazz",
+          "awardYear": 2001,
+          "tmdb": 16858,
+          "year": 1979
+        },
+        {
+          "rank": null,
+          "imdb": "tt0041113",
+          "title": "All the King's Men",
+          "awardYear": 2001,
+          "tmdb": 25430,
+          "year": 1949
+        },
+        {
+          "rank": null,
+          "imdb": "tt0074119",
+          "title": "All the President's Men",
+          "awardYear": 2010,
+          "tmdb": 891,
+          "year": 1976
+        },
+        {
+          "rank": null,
+          "imdb": "tt0054616",
+          "title": "Allures",
+          "awardYear": 2011,
+          "tmdb": 142191,
+          "year": 1961
+        },
+        {
+          "rank": null,
+          "imdb": "tt0086879",
+          "title": "Amadeus",
+          "awardYear": 2019,
+          "tmdb": 279,
+          "year": 1984
+        },
+        {
+          "rank": null,
+          "imdb": "tt0023042",
+          "title": "I Am a Fugitive from a Chain Gang",
+          "awardYear": 1991,
+          "tmdb": 29740,
+          "year": 1932
+        },
+        {
+          "rank": null,
+          "imdb": "tt0056825",
+          "title": "America, America",
+          "awardYear": 2001,
+          "tmdb": 47249,
+          "year": 1963
+        },
+        {
+          "rank": null,
+          "imdb": "tt0069704",
+          "title": "American Graffiti",
+          "awardYear": 1995,
+          "tmdb": 838,
+          "year": 1973
+        }
+      ]
+    },
+    {
+      "id": "national-film-registry-latest",
+      "count": 22,
+      "snapshotDate": "2026-09-27",
+      "head": [
+        {
+          "rank": null,
+          "imdb": "tt0112471",
+          "title": "Before Sunrise",
+          "awardYear": 2025,
+          "tmdb": 76,
+          "year": 1995
+        },
+        {
+          "rank": null,
+          "imdb": "tt0085244",
+          "title": "The Big Chill",
+          "awardYear": 2025,
+          "tmdb": 12560,
+          "year": 1983
+        },
+        {
+          "rank": null,
+          "imdb": "tt0082106",
+          "title": "Brooklyn Bridge",
+          "awardYear": 2025,
+          "tmdb": 67079,
+          "year": 1981
+        },
+        {
+          "rank": null,
+          "imdb": "tt0112697",
+          "title": "Clueless",
+          "awardYear": 2025,
+          "tmdb": 9603,
+          "year": 1995
+        },
+        {
+          "rank": null,
+          "imdb": "tt0120679",
+          "title": "Frida",
+          "awardYear": 2025,
+          "tmdb": 1360,
+          "year": 2002
+        },
+        {
+          "rank": null,
+          "imdb": "tt0097441",
+          "title": "Glory",
+          "awardYear": 2025,
+          "tmdb": 9665,
+          "year": 1989
+        },
+        {
+          "rank": null,
+          "imdb": "tt2278388",
+          "title": "The Grand Budapest Hotel",
+          "awardYear": 2025,
+          "tmdb": 120467,
+          "year": 2014
+        },
+        {
+          "rank": null,
+          "imdb": "tt0049314",
+          "title": "High Society",
+          "awardYear": 2025,
+          "tmdb": 11424,
+          "year": 1956
+        },
+        {
+          "rank": null,
+          "imdb": "tt0274558",
+          "title": "The Hours",
+          "awardYear": 2025,
+          "tmdb": 590,
+          "year": 2002
+        },
+        {
+          "rank": null,
+          "imdb": "tt1375666",
+          "title": "Inception",
+          "awardYear": 2025,
+          "tmdb": 27205,
+          "year": 2010
+        },
+        {
+          "rank": null,
+          "imdb": "tt0317705",
+          "title": "The Incredibles",
+          "awardYear": 2025,
+          "tmdb": 9806,
+          "year": 2004
+        },
+        {
+          "rank": null,
+          "imdb": "tt0087538",
+          "title": "The Karate Kid",
+          "awardYear": 2025,
+          "tmdb": 1885,
+          "year": 1984
+        },
+        {
+          "rank": null,
+          "imdb": "tt0016006",
+          "title": "The Lady",
+          "awardYear": 2025,
+          "tmdb": 184450,
+          "year": 1925
+        },
+        {
+          "rank": null,
+          "imdb": "tt0107818",
+          "title": "Philadelphia",
+          "awardYear": 2025,
+          "tmdb": 9800,
+          "year": 1993
+        },
+        {
+          "rank": null,
+          "imdb": "tt0086245",
+          "title": "Say Amen, Somebody",
+          "awardYear": 2025,
+          "tmdb": 123020,
+          "year": 1982
+        },
+        {
+          "rank": null,
+          "imdb": "tt0017423",
+          "title": "Sparrows",
+          "awardYear": 2025,
+          "tmdb": 73575,
+          "year": 1926
+        },
+        {
+          "rank": null,
+          "imdb": "tt0139641",
+          "title": "Ten Nights in a Barroom",
+          "awardYear": 2025,
+          "tmdb": 408008,
+          "year": 1926
+        },
+        {
+          "rank": null,
+          "imdb": "tt0084787",
+          "title": "The Thing",
+          "awardYear": 2025,
+          "tmdb": 1091,
+          "year": 1982
+        },
+        {
+          "rank": null,
+          "imdb": "tt2262307",
+          "title": "The Tramp and the Dog",
+          "awardYear": 2025,
+          "tmdb": 819805,
+          "year": 1896
+        },
+        {
+          "rank": null,
+          "imdb": "tt0120382",
+          "title": "The Truman Show",
+          "awardYear": 2025,
+          "tmdb": 37165,
+          "year": 1998
+        },
+        {
+          "rank": null,
+          "imdb": "tt0047673",
+          "title": "White Christmas",
+          "awardYear": 2025,
+          "tmdb": 13368,
+          "year": 1954
+        },
+        {
+          "rank": null,
+          "imdb": "tt1185418",
+          "title": "The Wrecking Crew",
+          "awardYear": 2025,
+          "tmdb": 70027,
+          "year": 2008
+        }
+      ]
+    },
+    {
+      "id": "nbr-top-ten",
+      "count": 894,
+      "snapshotDate": "2026-09-27",
+      "head": [
+        {
+          "rank": null,
+          "imdb": "tt19770238",
+          "title": "Aftersun",
+          "awardYear": 2022,
+          "tmdb": 965150,
+          "year": 2022
+        },
+        {
+          "rank": null,
+          "imdb": "tt11286314",
+          "title": "Don't Look Up",
+          "awardYear": 2021,
+          "tmdb": 646380,
+          "year": 2021
+        },
+        {
+          "rank": null,
+          "imdb": "tt8579674",
+          "title": "1917",
+          "awardYear": 2019,
+          "tmdb": 530915,
+          "year": 2019
+        },
+        {
+          "rank": null,
+          "imdb": "tt8526872",
+          "title": "Dolemite Is My Name",
+          "awardYear": 2019,
+          "tmdb": 528888,
+          "year": 2019
+        },
+        {
+          "rank": null,
+          "imdb": "tt1950186",
+          "title": "Ford v Ferrari",
+          "awardYear": 2019,
+          "tmdb": 359724,
+          "year": 2019
+        },
+        {
+          "rank": null,
+          "imdb": "tt2584384",
+          "title": "Jojo Rabbit",
+          "awardYear": 2019,
+          "tmdb": 515001,
+          "year": 2019
+        },
+        {
+          "rank": null,
+          "imdb": "tt7653254",
+          "title": "Marriage Story",
+          "awardYear": 2019,
+          "tmdb": 492188,
+          "year": 2019
+        },
+        {
+          "rank": null,
+          "imdb": "tt7131622",
+          "title": "Once Upon a Time in Hollywood",
+          "awardYear": 2019,
+          "tmdb": 466272,
+          "year": 2019
+        },
+        {
+          "rank": null,
+          "imdb": "tt3513548",
+          "title": "Richard Jewell",
+          "awardYear": 2019,
+          "tmdb": 292011,
+          "year": 2019
+        },
+        {
+          "rank": null,
+          "imdb": "tt1302006",
+          "title": "The Irishman",
+          "awardYear": 2019,
+          "tmdb": 398978,
+          "year": 2019
+        },
+        {
+          "rank": null,
+          "imdb": "tt5727208",
+          "title": "Uncut Gems",
+          "awardYear": 2019,
+          "tmdb": 473033,
+          "year": 2019
+        },
+        {
+          "rank": null,
+          "imdb": "tt8652728",
+          "title": "Waves",
+          "awardYear": 2019,
+          "tmdb": 533444,
+          "year": 2019
+        },
+        {
+          "rank": null,
+          "imdb": "tt6644200",
+          "title": "A Quiet Place",
+          "awardYear": 2018,
+          "tmdb": 447332,
+          "year": 2018
+        },
+        {
+          "rank": null,
+          "imdb": "tt1517451",
+          "title": "A Star Is Born",
+          "awardYear": 2018,
+          "tmdb": 332562,
+          "year": 2018
+        },
+        {
+          "rank": null,
+          "imdb": "tt1825683",
+          "title": "Black Panther",
+          "awardYear": 2018,
+          "tmdb": 284054,
+          "year": 2018
+        },
+        {
+          "rank": null,
+          "imdb": "tt4595882",
+          "title": "Can You Ever Forgive Me?",
+          "awardYear": 2018,
+          "tmdb": 401847,
+          "year": 2018
+        },
+        {
+          "rank": null,
+          "imdb": "tt7014006",
+          "title": "Eighth Grade",
+          "awardYear": 2018,
+          "tmdb": 489925,
+          "year": 2018
+        },
+        {
+          "rank": null,
+          "imdb": "tt6966692",
+          "title": "Green Book",
+          "awardYear": 2018,
+          "tmdb": 490132,
+          "year": 2018
+        },
+        {
+          "rank": null,
+          "imdb": "tt7125860",
+          "title": "If Beale Street Could Talk",
+          "awardYear": 2018,
+          "tmdb": 465914,
+          "year": 2018
+        },
+        {
+          "rank": null,
+          "imdb": "tt5028340",
+          "title": "Mary Poppins Returns",
+          "awardYear": 2018,
+          "tmdb": 400650,
+          "year": 2018
+        },
+        {
+          "rank": null,
+          "imdb": "tt6155172",
+          "title": "Roma",
+          "awardYear": 2018,
+          "tmdb": 426426,
+          "year": 2018
+        },
+        {
+          "rank": null,
+          "imdb": "tt6412452",
+          "title": "The Ballad of Buster Scruggs",
+          "awardYear": 2018,
+          "tmdb": 537996,
+          "year": 2018
+        },
+        {
+          "rank": null,
+          "imdb": "tt3890160",
+          "title": "Baby Driver",
+          "awardYear": 2017,
+          "tmdb": 339403,
+          "year": 2017
+        },
+        {
+          "rank": null,
+          "imdb": "tt5726616",
+          "title": "Call Me by Your Name",
+          "awardYear": 2017,
+          "tmdb": 398818,
+          "year": 2017
+        },
+        {
+          "rank": null,
+          "imdb": "tt1389072",
+          "title": "Downsizing",
+          "awardYear": 2017,
+          "tmdb": 301337,
+          "year": 2017
+        },
+        {
+          "rank": null,
+          "imdb": "tt5013056",
+          "title": "Dunkirk",
+          "awardYear": 2017,
+          "tmdb": 374720,
+          "year": 2017
+        },
+        {
+          "rank": null,
+          "imdb": "tt6053438",
+          "title": "First Reformed",
+          "awardYear": 2017,
+          "tmdb": 458737,
+          "year": 2017
+        },
+        {
+          "rank": null,
+          "imdb": "tt5052448",
+          "title": "Get Out",
+          "awardYear": 2017,
+          "tmdb": 419430,
+          "year": 2017
+        },
+        {
+          "rank": null,
+          "imdb": "tt4925292",
+          "title": "Lady Bird",
+          "awardYear": 2017,
+          "tmdb": 391713,
+          "year": 2017
+        },
+        {
+          "rank": null,
+          "imdb": "tt3315342",
+          "title": "Logan",
+          "awardYear": 2017,
+          "tmdb": 263115,
+          "year": 2017
+        }
+      ]
+    },
+    {
+      "id": "locarno-golden-leopard",
+      "count": 82,
+      "snapshotDate": "2026-09-27",
+      "head": [
+        {
+          "rank": null,
+          "imdb": "tt30327762",
+          "title": "Toxic",
+          "awardYear": 2024,
+          "tmdb": 1315091,
+          "year": 2024
+        },
+        {
+          "rank": null,
+          "imdb": "tt10334222",
+          "title": "Nightsiren",
+          "awardYear": 2022,
+          "tmdb": 997660,
+          "year": 2022
+        },
+        {
+          "rank": null,
+          "imdb": "tt8726116",
+          "title": "A Land Imagined",
+          "awardYear": 2018,
+          "tmdb": 537526,
+          "year": 2018
+        },
+        {
+          "rank": null,
+          "imdb": "tt4768776",
+          "title": "Right Now, Wrong Then",
+          "awardYear": 2015,
+          "tmdb": 354275,
+          "year": 2015
+        },
+        {
+          "rank": null,
+          "imdb": "tt3303310",
+          "title": "From What Is Before",
+          "awardYear": 2014,
+          "tmdb": 280492,
+          "year": 2014
+        },
+        {
+          "rank": null,
+          "imdb": "tt3102458",
+          "title": "Story of My Death",
+          "awardYear": 2013,
+          "tmdb": 214251,
+          "year": 2013
+        },
+        {
+          "rank": null,
+          "imdb": "tt2332514",
+          "title": "The Girl from Nowhere",
+          "awardYear": 2012,
+          "tmdb": 153820,
+          "year": 2012
+        },
+        {
+          "rank": null,
+          "imdb": "tt2023367",
+          "title": "Back to Stay",
+          "awardYear": 2011,
+          "tmdb": 85544,
+          "year": 2011
+        },
+        {
+          "rank": null,
+          "imdb": "tt1701993",
+          "title": "Winter Vacation",
+          "awardYear": 2010,
+          "tmdb": 95361,
+          "year": 2010
+        },
+        {
+          "rank": null,
+          "imdb": "tt1389374",
+          "title": "She, a Chinese",
+          "awardYear": 2009,
+          "tmdb": 73970,
+          "year": 2009
+        },
+        {
+          "rank": null,
+          "imdb": "tt1183942",
+          "title": "Parque via",
+          "awardYear": 2008,
+          "tmdb": 12474,
+          "year": 2008
+        },
+        {
+          "rank": null,
+          "imdb": "tt0476999",
+          "title": "Das Fräulein",
+          "awardYear": 2006,
+          "tmdb": 10420,
+          "year": 2006
+        },
+        {
+          "rank": null,
+          "imdb": "tt0420015",
+          "title": "Nine Lives",
+          "awardYear": 2005,
+          "tmdb": 16022,
+          "year": 2005
+        },
+        {
+          "rank": null,
+          "imdb": "tt0420090",
+          "title": "Private",
+          "awardYear": 2004,
+          "tmdb": 44104,
+          "year": 2004
+        },
+        {
+          "rank": null,
+          "imdb": "tt0357283",
+          "title": "Khamosh Pani",
+          "awardYear": 2003,
+          "tmdb": 100086,
+          "year": 2003
+        },
+        {
+          "rank": null,
+          "imdb": "tt0328727",
+          "title": "The Longing",
+          "awardYear": 2002,
+          "tmdb": 6179,
+          "year": 2002
+        },
+        {
+          "rank": null,
+          "imdb": "tt0274323",
+          "title": "Off to the Revolution by a 2CV",
+          "awardYear": 2001,
+          "tmdb": 73929,
+          "year": 2001
+        },
+        {
+          "rank": null,
+          "imdb": "tt0256630",
+          "title": "Father",
+          "awardYear": 2000,
+          "tmdb": 255526,
+          "year": 2000
+        },
+        {
+          "rank": null,
+          "imdb": "tt0208348",
+          "title": "Skin of Man, Heart of Beast",
+          "awardYear": 1999,
+          "tmdb": 104743,
+          "year": 1999
+        },
+        {
+          "rank": null,
+          "imdb": "tt0166890",
+          "title": "Mr. Zhao",
+          "awardYear": 1998,
+          "tmdb": 287171,
+          "year": 1998
+        },
+        {
+          "rank": null,
+          "imdb": "tt0117056",
+          "title": "The Mirror",
+          "awardYear": 1997,
+          "tmdb": 40882,
+          "year": 1997
+        },
+        {
+          "rank": null,
+          "imdb": "tt0117221",
+          "title": "Nenette and Boni",
+          "awardYear": 1996,
+          "tmdb": 99002,
+          "year": 1996
+        },
+        {
+          "rank": null,
+          "imdb": "tt0114227",
+          "title": "Raï",
+          "awardYear": 1995,
+          "tmdb": 40910,
+          "year": 1995
+        },
+        {
+          "rank": null,
+          "imdb": "tt0104606",
+          "title": "Khomreh",
+          "awardYear": 1994,
+          "tmdb": 275096,
+          "year": 1992
+        },
+        {
+          "rank": null,
+          "imdb": "tt0128063",
+          "title": "The Place on the Tricorne",
+          "awardYear": 1993,
+          "tmdb": 287173,
+          "year": 1993
+        },
+        {
+          "rank": null,
+          "imdb": "tt0105198",
+          "title": "Autumn Moon",
+          "awardYear": 1992,
+          "tmdb": 26855,
+          "year": 1992
+        },
+        {
+          "rank": null,
+          "imdb": "tt0104567",
+          "title": "Johnny Suede",
+          "awardYear": 1991,
+          "tmdb": 45145,
+          "year": 1991
+        },
+        {
+          "rank": null,
+          "imdb": "tt0128542",
+          "title": "Accidental Waltz",
+          "awardYear": 1990,
+          "tmdb": 389825,
+          "year": 1990
+        },
+        {
+          "rank": null,
+          "imdb": "tt0097195",
+          "title": "Why Has Bodhi-Dharma Left for the East?",
+          "awardYear": 1989,
+          "tmdb": 62637,
+          "year": 1989
+        },
+        {
+          "rank": null,
+          "imdb": "tt0095037",
+          "title": "Distant Voices, Still Lives",
+          "awardYear": 1988,
+          "tmdb": 41799,
+          "year": 1988
+        },
+        {
+          "rank": null,
+          "imdb": "tt0096052",
+          "title": "Schmetterlinge",
+          "awardYear": 1988,
+          "tmdb": 354176,
+          "year": 1988
+        },
+        {
+          "rank": null,
+          "imdb": "tt0091290",
+          "title": "Jezioro Bodenskie",
+          "awardYear": 1986,
+          "tmdb": 158326,
+          "year": 1986
+        },
+        {
+          "rank": null,
+          "imdb": "tt0093235",
+          "title": "Alpine Fire",
+          "awardYear": 1985,
+          "tmdb": 67263,
+          "year": 1985
+        },
+        {
+          "rank": null,
+          "imdb": "tt0088184",
+          "title": "Stranger Than Paradise",
+          "awardYear": 1984,
+          "tmdb": 469,
+          "year": 1984
+        },
+        {
+          "rank": null,
+          "imdb": "tt0083522",
+          "title": "The Princess",
+          "awardYear": 1983,
+          "tmdb": 273602,
+          "year": 1982
+        },
+        {
+          "rank": null,
+          "imdb": "tt0080514",
+          "title": "Chakra",
+          "awardYear": 1981,
+          "tmdb": 388687,
+          "year": 1981
+        },
+        {
+          "rank": null,
+          "imdb": "tt0081106",
+          "title": "To Love the Damned",
+          "awardYear": 1980,
+          "tmdb": 67068,
+          "year": 1980
+        },
+        {
+          "rank": null,
+          "imdb": "tt0078355",
+          "title": "The Herd",
+          "awardYear": 1979,
+          "tmdb": 84014,
+          "year": 1979
+        },
+        {
+          "rank": null,
+          "imdb": "tt0128725",
+          "title": "The Idlers of the Fertile Valley",
+          "awardYear": 1978,
+          "tmdb": 258026,
+          "year": 1978
+        },
+        {
+          "rank": null,
+          "imdb": "tt0075688",
+          "title": "Antonio Gramsci: The Days of Prison",
+          "awardYear": 1977,
+          "tmdb": 246457,
+          "year": 1977
+        },
+        {
+          "rank": null,
+          "imdb": "tt0074585",
+          "title": "The Big Night",
+          "awardYear": 1976,
+          "tmdb": 549380,
+          "year": 1976
+        },
+        {
+          "rank": null,
+          "imdb": "tt0128212",
+          "title": "Le Fils d'Amr est mort",
+          "awardYear": 1975,
+          "tmdb": 458983,
+          "year": 1975
+        },
+        {
+          "rank": null,
+          "imdb": "tt0070847",
+          "title": "Tűzoltó utca 25.",
+          "awardYear": 1974,
+          "tmdb": 42467,
+          "year": 1973
+        },
+        {
+          "rank": null,
+          "imdb": "tt0070217",
+          "title": "The Illumination",
+          "awardYear": 1973,
+          "tmdb": 154575,
+          "year": 1973
+        },
+        {
+          "rank": null,
+          "imdb": "tt0066842",
+          "title": "Bleak Moments",
+          "awardYear": 1972,
+          "tmdb": 122271,
+          "year": 1971
+        },
+        {
+          "rank": null,
+          "imdb": "tt0128269",
+          "title": "On the Point of Death",
+          "awardYear": 1971,
+          "tmdb": 607189,
+          "year": 1971
+        },
+        {
+          "rank": null,
+          "imdb": "tt0067620",
+          "title": "Private Road",
+          "awardYear": 1971,
+          "tmdb": 77368,
+          "year": 1971
+        },
+        {
+          "rank": null,
+          "imdb": "tt0065393",
+          "title": "The Friends",
+          "awardYear": 1971,
+          "tmdb": 219823,
+          "year": 1971
+        },
+        {
+          "rank": null,
+          "imdb": "tt0067178",
+          "title": "They Have Changed Their Face",
+          "awardYear": 1971,
+          "tmdb": 100468,
+          "year": 1971
+        },
+        {
+          "rank": null,
+          "imdb": "tt0068016",
+          "title": "Znaki na drodze",
+          "awardYear": 1971,
+          "tmdb": 577836,
+          "year": 1970
+        },
+        {
+          "rank": null,
+          "imdb": "tt0128308",
+          "title": "Lilika",
+          "awardYear": 1970,
+          "tmdb": 231754,
+          "year": 1970
+        },
+        {
+          "rank": null,
+          "imdb": "tt0128364",
+          "title": "Mujo",
+          "awardYear": 1970,
+          "tmdb": 104452,
+          "year": 1970
+        },
+        {
+          "rank": null,
+          "imdb": "tt0062285",
+          "title": "Soleil Ô",
+          "awardYear": 1970,
+          "tmdb": 195841,
+          "year": 1967
+        },
+        {
+          "rank": null,
+          "imdb": "tt0064153",
+          "title": "Charles, Dead or Alive",
+          "awardYear": 1969,
+          "tmdb": 108543,
+          "year": 1969
+        },
+        {
+          "rank": null,
+          "imdb": "tt0062428",
+          "title": "No Path Through Fire",
+          "awardYear": 1969,
+          "tmdb": 83444,
+          "year": 1968
+        },
+        {
+          "rank": null,
+          "imdb": "tt0065058",
+          "title": "Those Who Wear Glasses",
+          "awardYear": 1969,
+          "tmdb": 343466,
+          "year": 1969
+        },
+        {
+          "rank": null,
+          "imdb": "tt0063718",
+          "title": "Three Sad Tigers",
+          "awardYear": 1969,
+          "tmdb": 122097,
+          "year": 1968
+        },
+        {
+          "rank": null,
+          "imdb": "tt0062352",
+          "title": "Entranced Earth",
+          "awardYear": 1967,
+          "tmdb": 67062,
+          "year": 1967
+        },
+        {
+          "rank": null,
+          "imdb": "tt0058259",
+          "title": "Courage for Every Day",
+          "awardYear": 1966,
+          "tmdb": 173873,
+          "year": 1964
+        },
+        {
+          "rank": null,
+          "imdb": "tt0060426",
+          "title": "Four in the Morning",
+          "awardYear": 1965,
+          "tmdb": 129134,
+          "year": 1965
+        },
+        {
+          "rank": null,
+          "imdb": "tt0056919",
+          "title": "Black Peter",
+          "awardYear": 1964,
+          "tmdb": 46982,
+          "year": 1964
+        },
+        {
+          "rank": null,
+          "imdb": "tt0056609",
+          "title": "Transport z ráje",
+          "awardYear": 1963,
+          "tmdb": 57913,
+          "year": 1963
+        },
+        {
+          "rank": null,
+          "imdb": "tt0056635",
+          "title": "The Winner",
+          "awardYear": 1962,
+          "tmdb": 275092,
+          "year": 1961
+        },
+        {
+          "rank": null,
+          "imdb": "tt0053121",
+          "title": "Fires on the Plain",
+          "awardYear": 1961,
+          "tmdb": 31427,
+          "year": 1959
+        },
+        {
+          "rank": null,
+          "imdb": "tt0053643",
+          "title": "Il bell'Antonio",
+          "awardYear": 1960,
+          "tmdb": 76157,
+          "year": 1960
+        },
+        {
+          "rank": null,
+          "imdb": "tt0048254",
+          "title": "Killer's Kiss",
+          "awardYear": 1959,
+          "tmdb": 10056,
+          "year": 1955
+        },
+        {
+          "rank": null,
+          "imdb": "tt0052283",
+          "title": "Ten North Frederick",
+          "awardYear": 1958,
+          "tmdb": 101288,
+          "year": 1958
+        },
+        {
+          "rank": null,
+          "imdb": "tt0043410",
+          "title": "The Emperor's Nightingale",
+          "awardYear": 1955,
+          "tmdb": 79596,
+          "year": 1948
+        },
+        {
+          "rank": null,
+          "imdb": "tt0045935",
+          "title": "Gate of Hell",
+          "awardYear": 1954,
+          "tmdb": 43349,
+          "year": 1953
+        },
+        {
+          "rank": null,
+          "imdb": "tt0225145",
+          "title": "Prince Bayaya",
+          "awardYear": 1954,
+          "tmdb": 257095,
+          "year": 1950
+        },
+        {
+          "rank": null,
+          "imdb": "tt0041826",
+          "title": "Rotation",
+          "awardYear": 1954,
+          "tmdb": 212434,
+          "year": 1950
+        },
+        {
+          "rank": null,
+          "imdb": "tt0047250",
+          "title": "The Sheep Has Five Legs",
+          "awardYear": 1954,
+          "tmdb": 74810,
+          "year": 1954
+        },
+        {
+          "rank": null,
+          "imdb": "tt0157673",
+          "title": "Wild Fruit",
+          "awardYear": 1954,
+          "tmdb": 368775,
+          "year": 1954
+        },
+        {
+          "rank": null,
+          "imdb": "tt0044804",
+          "title": "Composer Glinka",
+          "awardYear": 1953,
+          "tmdb": 89903,
+          "year": 1952
+        },
+        {
+          "rank": null,
+          "imdb": "tt0042622",
+          "title": "Julius Caesar",
+          "awardYear": 1953,
+          "tmdb": 241483,
+          "year": 1950
+        },
+        {
+          "rank": null,
+          "imdb": "tt0045824",
+          "title": "The Glass Wall",
+          "awardYear": 1953,
+          "tmdb": 34752,
+          "year": 1953
+        },
+        {
+          "rank": null,
+          "imdb": "tt0045201",
+          "title": "Hunted",
+          "awardYear": 1952,
+          "tmdb": 131074,
+          "year": 1952
+        },
+        {
+          "rank": null,
+          "imdb": "tt0043129",
+          "title": "When Willie Comes Marching Home",
+          "awardYear": 1950,
+          "tmdb": 54615,
+          "year": 1950
+        },
+        {
+          "rank": null,
+          "imdb": "tt0040348",
+          "title": "The Farm of Seven Sins",
+          "awardYear": 1949,
+          "tmdb": 275090,
+          "year": 1950
+        },
+        {
+          "rank": null,
+          "imdb": "tt0039417",
+          "title": "Germany, Year Zero",
+          "awardYear": 1948,
+          "tmdb": 8016,
+          "year": 1948
+        },
+        {
+          "rank": null,
+          "imdb": "tt0039823",
+          "title": "Man About Town",
+          "awardYear": 1947,
+          "tmdb": 146828,
+          "year": 1947
+        },
+        {
+          "rank": null,
+          "imdb": "tt0037515",
+          "title": "And Then There Were None",
+          "awardYear": 1946,
+          "tmdb": 4886,
+          "year": 1945
+        }
+      ]
+    },
+    {
+      "id": "golden-horse-best-feature",
+      "count": 52,
+      "snapshotDate": "2026-09-27",
+      "head": [
+        {
+          "rank": null,
+          "imdb": "tt14071684",
+          "title": "Stonewalling",
+          "awardYear": 2023,
+          "tmdb": 957996,
+          "year": 2022
+        },
+        {
+          "rank": null,
+          "imdb": "tt3508840",
+          "title": "The Assassin",
+          "awardYear": 2015,
+          "tmdb": 253450,
+          "year": 2015
+        },
+        {
+          "rank": null,
+          "imdb": "tt3469964",
+          "title": "Blind Massage",
+          "awardYear": 2014,
+          "tmdb": 256106,
+          "year": 2014
+        },
+        {
+          "rank": null,
+          "imdb": "tt2901736",
+          "title": "Ilo Ilo",
+          "awardYear": 2013,
+          "tmdb": 188598,
+          "year": 2013
+        },
+        {
+          "rank": null,
+          "imdb": "tt2273470",
+          "title": "Beijing Blues",
+          "awardYear": 2012,
+          "tmdb": 125184,
+          "year": 2012
+        },
+        {
+          "rank": null,
+          "imdb": "tt4164468",
+          "title": "Warriors of the Rainbow: Seediq Bale",
+          "awardYear": 2011,
+          "tmdb": 313230,
+          "year": 2011
+        },
+        {
+          "rank": null,
+          "imdb": "tt1829658",
+          "title": "When Love Comes",
+          "awardYear": 2010,
+          "tmdb": 88752,
+          "year": 2010
+        },
+        {
+          "rank": null,
+          "imdb": "tt1456584",
+          "title": "Cannot Live Without You",
+          "awardYear": 2009,
+          "tmdb": 98868,
+          "year": 2009
+        },
+        {
+          "rank": null,
+          "imdb": "tt0913968",
+          "title": "The Warlords",
+          "awardYear": 2008,
+          "tmdb": 14392,
+          "year": 2007
+        },
+        {
+          "rank": null,
+          "imdb": "tt0808357",
+          "title": "Lust, Caution",
+          "awardYear": 2007,
+          "tmdb": 4588,
+          "year": 2007
+        },
+        {
+          "rank": null,
+          "imdb": "tt0768114",
+          "title": "After This Our Exile",
+          "awardYear": 2006,
+          "tmdb": 11960,
+          "year": 2006
+        },
+        {
+          "rank": null,
+          "imdb": "tt0373074",
+          "title": "Kung Fu Hustle",
+          "awardYear": 2005,
+          "tmdb": 9470,
+          "year": 2004
+        },
+        {
+          "rank": null,
+          "imdb": "tt0338564",
+          "title": "Infernal Affairs",
+          "awardYear": 2003,
+          "tmdb": 10775,
+          "year": 2002
+        },
+        {
+          "rank": null,
+          "imdb": "tt0333902",
+          "title": "The Best of Times",
+          "awardYear": 2002,
+          "tmdb": 121036,
+          "year": 2002
+        },
+        {
+          "rank": null,
+          "imdb": "tt0255327",
+          "title": "Durian Durian",
+          "awardYear": 2001,
+          "tmdb": 81593,
+          "year": 2000
+        },
+        {
+          "rank": null,
+          "imdb": "tt0190332",
+          "title": "Crouching Tiger, Hidden Dragon",
+          "awardYear": 2000,
+          "tmdb": 146,
+          "year": 2000
+        },
+        {
+          "rank": null,
+          "imdb": "tt0189954",
+          "title": "Ordinary Heroes",
+          "awardYear": 1999,
+          "tmdb": 169258,
+          "year": 1999
+        },
+        {
+          "rank": null,
+          "imdb": "tt0115005",
+          "title": "Xiu Xiu: The Sent Down Girl",
+          "awardYear": 1998,
+          "tmdb": 33194,
+          "year": 1998
+        },
+        {
+          "rank": null,
+          "imdb": "tt0117905",
+          "title": "Comrades: Almost a Love Story",
+          "awardYear": 1997,
+          "tmdb": 37185,
+          "year": 1996
+        },
+        {
+          "rank": null,
+          "imdb": "tt0111786",
+          "title": "In the Heat of the Sun",
+          "awardYear": 1996,
+          "tmdb": 161285,
+          "year": 1994
+        },
+        {
+          "rank": null,
+          "imdb": "tt0111767",
+          "title": "Summer Snow",
+          "awardYear": 1995,
+          "tmdb": 72507,
+          "year": 1995
+        },
+        {
+          "rank": null,
+          "imdb": "tt0109066",
+          "title": "Vive L'Amour",
+          "awardYear": 1994,
+          "tmdb": 11985,
+          "year": 1994
+        },
+        {
+          "rank": null,
+          "imdb": "tt0107156",
+          "title": "The Wedding Banquet",
+          "awardYear": 1993,
+          "tmdb": 9261,
+          "year": 1993
+        },
+        {
+          "rank": null,
+          "imdb": "tt0108602",
+          "title": "Hill of No Return",
+          "awardYear": 1992,
+          "tmdb": 176668,
+          "year": 1992
+        },
+        {
+          "rank": null,
+          "imdb": "tt0101985",
+          "title": "A Brighter Summer Day",
+          "awardYear": 1991,
+          "tmdb": 15804,
+          "year": 1991
+        },
+        {
+          "rank": null,
+          "imdb": "tt0099719",
+          "title": "Red Dust",
+          "awardYear": 1990,
+          "tmdb": 156201,
+          "year": 1990
+        },
+        {
+          "rank": null,
+          "imdb": "tt0098187",
+          "title": "Full Moon in New York",
+          "awardYear": 1989,
+          "tmdb": 255976,
+          "year": 1989
+        },
+        {
+          "rank": null,
+          "imdb": "tt0095937",
+          "title": "Painted Faces",
+          "awardYear": 1988,
+          "tmdb": 154989,
+          "year": 1988
+        },
+        {
+          "rank": null,
+          "imdb": "tt0092829",
+          "title": "Strawman",
+          "awardYear": 1987,
+          "tmdb": 176664,
+          "year": 1987
+        },
+        {
+          "rank": null,
+          "imdb": "tt0091355",
+          "title": "The Terrorizers",
+          "awardYear": 1986,
+          "tmdb": 78450,
+          "year": 1986
+        },
+        {
+          "rank": null,
+          "imdb": "tt0092231",
+          "title": "Kuei-Mei, a Woman",
+          "awardYear": 1985,
+          "tmdb": 256133,
+          "year": 1985
+        },
+        {
+          "rank": null,
+          "imdb": "tt0183390",
+          "title": "Old Mao's Second Spring",
+          "awardYear": 1984,
+          "tmdb": 341232,
+          "year": 1984
+        },
+        {
+          "rank": null,
+          "imdb": "tt0085695",
+          "title": "Growing Up",
+          "awardYear": 1983,
+          "tmdb": 176656,
+          "year": 1983
+        },
+        {
+          "rank": null,
+          "imdb": "tt0083346",
+          "title": "The Battle for the Republic of China",
+          "awardYear": 1982,
+          "tmdb": 186893,
+          "year": 1981
+        },
+        {
+          "rank": null,
+          "imdb": "tt0289112",
+          "title": "If I Were for Real",
+          "awardYear": 1981,
+          "tmdb": 341230,
+          "year": 1981
+        },
+        {
+          "rank": null,
+          "imdb": "tt0314939",
+          "title": "Good Morning, Taipei",
+          "awardYear": 1980,
+          "tmdb": 211207,
+          "year": 1979
+        },
+        {
+          "rank": null,
+          "imdb": "tt0314907",
+          "title": "The Story of a Small Town",
+          "awardYear": 1979,
+          "tmdb": 316942,
+          "year": 1979
+        },
+        {
+          "rank": null,
+          "imdb": "tt0079277",
+          "title": "He Never Gives Up",
+          "awardYear": 1978,
+          "tmdb": 176671,
+          "year": 1978
+        },
+        {
+          "rank": null,
+          "imdb": "tt0184567",
+          "title": "Heroes of the Eastern Skies",
+          "awardYear": 1977,
+          "tmdb": 375731,
+          "year": 1977
+        },
+        {
+          "rank": null,
+          "imdb": "tt0195050",
+          "title": "The Victory",
+          "awardYear": 1976,
+          "tmdb": 487259,
+          "year": 1976
+        },
+        {
+          "rank": null,
+          "imdb": "tt0314902",
+          "title": "Land of the Undaunted",
+          "awardYear": 1975,
+          "tmdb": 706746,
+          "year": 1975
+        },
+        {
+          "rank": null,
+          "imdb": "tt1427286",
+          "title": "The Escape",
+          "awardYear": 1973,
+          "tmdb": 415569,
+          "year": 1972
+        },
+        {
+          "rank": null,
+          "imdb": "tt1033618",
+          "title": "Execution in Autumn",
+          "awardYear": 1972,
+          "tmdb": 176633,
+          "year": 1972
+        },
+        {
+          "rank": null,
+          "imdb": "tt0067797",
+          "title": "The Story of Ti-Ying",
+          "awardYear": 1971,
+          "tmdb": 239096,
+          "year": 1971
+        },
+        {
+          "rank": null,
+          "imdb": "tt0978620",
+          "title": "Home, Sweet Home",
+          "awardYear": 1970,
+          "tmdb": 278450,
+          "year": 1970
+        },
+        {
+          "rank": null,
+          "imdb": "tt4302792",
+          "title": "Spring in a Small Town",
+          "awardYear": 1969,
+          "tmdb": 1017116,
+          "year": 1969
+        },
+        {
+          "rank": null,
+          "imdb": "tt7176712",
+          "title": "The Road",
+          "awardYear": 1968,
+          "tmdb": 944043,
+          "year": 1967
+        },
+        {
+          "rank": null,
+          "imdb": "tt0185582",
+          "title": "Orchids and My Love",
+          "awardYear": 1967,
+          "tmdb": 284060,
+          "year": 1966
+        },
+        {
+          "rank": null,
+          "imdb": "tt0311305",
+          "title": "The Beauty of Beauties",
+          "awardYear": 1966,
+          "tmdb": 284049,
+          "year": 1965
+        },
+        {
+          "rank": null,
+          "imdb": "tt1345532",
+          "title": "Beautiful Duckling",
+          "awardYear": 1965,
+          "tmdb": 176655,
+          "year": 1965
+        },
+        {
+          "rank": null,
+          "imdb": "tt0057248",
+          "title": "The Love Eterne",
+          "awardYear": 1963,
+          "tmdb": 107248,
+          "year": 1963
+        },
+        {
+          "rank": null,
+          "imdb": "tt0211753",
+          "title": "Sun, Moon and Star",
+          "awardYear": 1962,
+          "tmdb": 172195,
+          "year": 1961
+        }
+      ]
+    },
+    {
+      "id": "sundance-documentary-jury",
+      "count": 41,
+      "snapshotDate": "2026-09-27",
+      "head": [
+        {
+          "rank": null,
+          "imdb": "tt30294282",
+          "title": "Porcelain War",
+          "awardYear": 2024,
+          "tmdb": 1214527,
+          "year": 2024
+        },
+        {
+          "rank": null,
+          "imdb": "tt7196012",
+          "title": "Going to Mars: The Nikki Giovanni Project",
+          "awardYear": 2023,
+          "tmdb": 1058650
+        },
+        {
+          "rank": null,
+          "imdb": "tt7378922",
+          "title": "Summer of Soul (…Or, When the Revolution Could Not Be Televised)",
+          "awardYear": 2021,
+          "tmdb": 776527,
+          "year": 2021
+        },
+        {
+          "rank": null,
+          "imdb": "tt11095742",
+          "title": "Boys State",
+          "awardYear": 2020,
+          "tmdb": 653723,
+          "year": 2020
+        },
+        {
+          "rank": null,
+          "imdb": "tt8923482",
+          "title": "One Child Nation",
+          "awardYear": 2019,
+          "tmdb": 566368,
+          "year": 2019
+        },
+        {
+          "rank": null,
+          "imdb": "tt6333058",
+          "title": "Dina",
+          "awardYear": 2017,
+          "tmdb": 432607,
+          "year": 2017
+        },
+        {
+          "rank": null,
+          "imdb": "tt5278596",
+          "title": "Weiner",
+          "awardYear": 2016,
+          "tmdb": 376261,
+          "year": 2016
+        },
+        {
+          "rank": null,
+          "imdb": "tt2415458",
+          "title": "The Wolfpack",
+          "awardYear": 2015,
+          "tmdb": 307931,
+          "year": 2015
+        },
+        {
+          "rank": null,
+          "imdb": "tt2548738",
+          "title": "Rich Hill",
+          "awardYear": 2014,
+          "tmdb": 250668,
+          "year": 2014
+        },
+        {
+          "rank": null,
+          "imdb": "tt2265179",
+          "title": "Blood Brother",
+          "awardYear": 2013,
+          "tmdb": 155556,
+          "year": 2013
+        },
+        {
+          "rank": null,
+          "imdb": "tt2125653",
+          "title": "The House I Live In",
+          "awardYear": 2012,
+          "tmdb": 84284,
+          "year": 2012
+        },
+        {
+          "rank": null,
+          "imdb": "tt1715802",
+          "title": "How to Die in Oregon",
+          "awardYear": 2011,
+          "tmdb": 65992,
+          "year": 2011
+        },
+        {
+          "rank": null,
+          "imdb": "tt1559549",
+          "title": "Restrepo",
+          "awardYear": 2010,
+          "tmdb": 39312,
+          "year": 2010
+        },
+        {
+          "rank": null,
+          "imdb": "tt0498329",
+          "title": "We Live in Public",
+          "awardYear": 2009,
+          "tmdb": 34015,
+          "year": 2009
+        },
+        {
+          "rank": null,
+          "imdb": "tt1149405",
+          "title": "Trouble the Water",
+          "awardYear": 2008,
+          "tmdb": 22319,
+          "year": 2008
+        },
+        {
+          "rank": null,
+          "imdb": "tt0912590",
+          "title": "Manda Bala",
+          "awardYear": 2007,
+          "tmdb": 18181,
+          "year": 2007
+        },
+        {
+          "rank": null,
+          "imdb": "tt0301555",
+          "title": "God Grew Tired of Us",
+          "awardYear": 2006,
+          "tmdb": 15325,
+          "year": 2006
+        },
+        {
+          "rank": null,
+          "imdb": "tt0436971",
+          "title": "Why We Fight",
+          "awardYear": 2005,
+          "tmdb": 14286,
+          "year": 2005
+        },
+        {
+          "rank": null,
+          "imdb": "tt0388888",
+          "title": "Dig!",
+          "awardYear": 2004,
+          "tmdb": 1843,
+          "year": 2004
+        },
+        {
+          "rank": null,
+          "imdb": "tt0342172",
+          "title": "Capturing the Friedmans",
+          "awardYear": 2003,
+          "tmdb": 2260,
+          "year": 2003
+        },
+        {
+          "rank": null,
+          "imdb": "tt0303281",
+          "title": "Daughter from Danang",
+          "awardYear": 2002,
+          "tmdb": 67232,
+          "year": 2002
+        },
+        {
+          "rank": null,
+          "imdb": "tt0276515",
+          "title": "Southern Comfort",
+          "awardYear": 2001,
+          "tmdb": 55852,
+          "year": 2001
+        },
+        {
+          "rank": null,
+          "imdb": "tt0236447",
+          "title": "Long Night's Journey into Day",
+          "awardYear": 2000,
+          "tmdb": 95682,
+          "year": 2000
+        },
+        {
+          "rank": null,
+          "imdb": "tt0181288",
+          "title": "American Movie",
+          "awardYear": 1999,
+          "tmdb": 14242,
+          "year": 1999
+        },
+        {
+          "rank": null,
+          "imdb": "tt0139221",
+          "title": "Frat House",
+          "awardYear": 1998,
+          "tmdb": 54641,
+          "year": 1998
+        },
+        {
+          "rank": null,
+          "imdb": "tt0139193",
+          "title": "The Farm: Angola, USA",
+          "awardYear": 1998,
+          "tmdb": 113284,
+          "year": 1998
+        },
+        {
+          "rank": null,
+          "imdb": "tt0116415",
+          "title": "Girls Like Us",
+          "awardYear": 1997,
+          "tmdb": 133430,
+          "year": 1997
+        },
+        {
+          "rank": null,
+          "imdb": "tt1614420",
+          "title": "Troublesome Creek: A Midwestern",
+          "awardYear": 1996,
+          "tmdb": 124643,
+          "year": 1995
+        },
+        {
+          "rank": null,
+          "imdb": "tt0109508",
+          "title": "Crumb",
+          "awardYear": 1995,
+          "tmdb": 26564,
+          "year": 1994
+        },
+        {
+          "rank": null,
+          "imdb": "tt0109839",
+          "title": "Freedom on My Mind",
+          "awardYear": 1994,
+          "tmdb": 133434,
+          "year": 1994
+        },
+        {
+          "rank": null,
+          "imdb": "tt0106556",
+          "title": "Children of Fate: Life and Death in a Sicilian Family",
+          "awardYear": 1993,
+          "tmdb": 149405,
+          "year": 1993
+        },
+        {
+          "rank": null,
+          "imdb": "tt0108138",
+          "title": "Silverlake Life: The View from Here",
+          "awardYear": 1993,
+          "tmdb": 133436,
+          "year": 1993
+        },
+        {
+          "rank": null,
+          "imdb": "tt0103882",
+          "title": "A Brief History of Time",
+          "awardYear": 1992,
+          "tmdb": 1358,
+          "year": 1991
+        },
+        {
+          "rank": null,
+          "imdb": "tt0099028",
+          "title": "American Dream",
+          "awardYear": 1991,
+          "tmdb": 41326,
+          "year": 1990
+        },
+        {
+          "rank": null,
+          "imdb": "tt0100332",
+          "title": "Paris Is Burning",
+          "awardYear": 1991,
+          "tmdb": 31225,
+          "year": 1990
+        },
+        {
+          "rank": null,
+          "imdb": "tt0123097",
+          "title": "H-2 Worker",
+          "awardYear": 1990,
+          "tmdb": 133438,
+          "year": 1990
+        },
+        {
+          "rank": null,
+          "imdb": "tt0098624",
+          "title": "Water and Power",
+          "awardYear": 1990,
+          "tmdb": 117565,
+          "year": 1989
+        },
+        {
+          "rank": null,
+          "imdb": "tt0097372",
+          "title": "For All Mankind",
+          "awardYear": 1989,
+          "tmdb": 20423,
+          "year": 1989
+        },
+        {
+          "rank": null,
+          "imdb": "tt0092630",
+          "title": "Beirut: The Last Home Movie",
+          "awardYear": 1988,
+          "tmdb": 133439,
+          "year": 1987
+        },
+        {
+          "rank": null,
+          "imdb": "tt0091943",
+          "title": "Sherman's March",
+          "awardYear": 1987,
+          "tmdb": 41480,
+          "year": 1985
+        },
+        {
+          "rank": null,
+          "imdb": "tt0086290",
+          "title": "Seventeen",
+          "awardYear": 1985,
+          "tmdb": 97887,
+          "year": 1985
+        }
+      ]
+    },
+    {
+      "id": "annecy-cristal-feature",
+      "count": 36,
+      "snapshotDate": "2026-09-27",
+      "head": [
+        {
+          "rank": null,
+          "imdb": "tt30388264",
+          "title": "The Violinist",
+          "awardYear": 2026,
+          "tmdb": 748681,
+          "year": 2026
+        },
+        {
+          "rank": null,
+          "imdb": "tt14883538",
+          "title": "Arco",
+          "awardYear": 2025,
+          "tmdb": 804370,
+          "year": 2025
+        },
+        {
+          "rank": null,
+          "imdb": "tt23770030",
+          "title": "Memoir of a Snail",
+          "awardYear": 2024,
+          "tmdb": 1064486,
+          "year": 2024
+        },
+        {
+          "rank": null,
+          "imdb": "tt21042126",
+          "title": "Chicken for Linda!",
+          "awardYear": 2023,
+          "tmdb": 589026,
+          "year": 2023
+        },
+        {
+          "rank": null,
+          "imdb": "tt10290244",
+          "title": "Little Nicholas - Happy as Can Be",
+          "awardYear": 2022,
+          "tmdb": 893366,
+          "year": 2022
+        },
+        {
+          "rank": null,
+          "imdb": "tt8430054",
+          "title": "Flee",
+          "awardYear": 2021,
+          "tmdb": 680813,
+          "year": 2021
+        },
+        {
+          "rank": null,
+          "imdb": "tt9719864",
+          "title": "Calamity, a Childhood of Martha Jane Cannary",
+          "awardYear": 2020,
+          "tmdb": 587311,
+          "year": 2020
+        },
+        {
+          "rank": null,
+          "imdb": "tt9806192",
+          "title": "I Lost My Body",
+          "awardYear": 2019,
+          "tmdb": 586940,
+          "year": 2019
+        },
+        {
+          "rank": null,
+          "imdb": "tt6342440",
+          "title": "Funan",
+          "awardYear": 2018,
+          "tmdb": 515353,
+          "year": 2018
+        },
+        {
+          "rank": null,
+          "imdb": "tt6452332",
+          "title": "Lu over the Wall",
+          "awardYear": 2017,
+          "tmdb": 436120,
+          "year": 2017
+        },
+        {
+          "rank": null,
+          "imdb": "tt2321405",
+          "title": "My Life as a Zucchini",
+          "awardYear": 2016,
+          "tmdb": 393559,
+          "year": 2016
+        },
+        {
+          "rank": null,
+          "imdb": "tt3422078",
+          "title": "April and the Twisted World",
+          "awardYear": 2015,
+          "tmdb": 340357,
+          "year": 2015
+        },
+        {
+          "rank": null,
+          "imdb": "tt3183630",
+          "title": "The Boy and the World",
+          "awardYear": 2014,
+          "tmdb": 223706,
+          "year": 2013
+        },
+        {
+          "rank": null,
+          "imdb": "tt2231208",
+          "title": "Rio 2096: A Story of Love and Fury",
+          "awardYear": 2013,
+          "tmdb": 173443,
+          "year": 2013
+        },
+        {
+          "rank": null,
+          "imdb": "tt1996223",
+          "title": "Crulic: The Path to Beyond",
+          "awardYear": 2012,
+          "tmdb": 147698,
+          "year": 2011
+        },
+        {
+          "rank": null,
+          "imdb": "tt1355638",
+          "title": "The Rabbi's Cat",
+          "awardYear": 2011,
+          "tmdb": 75491,
+          "year": 2011
+        },
+        {
+          "rank": null,
+          "imdb": "tt0432283",
+          "title": "Fantastic Mr. Fox",
+          "awardYear": 2010,
+          "tmdb": 10315,
+          "year": 2009
+        },
+        {
+          "rank": null,
+          "imdb": "tt0327597",
+          "title": "Coraline",
+          "awardYear": 2009,
+          "tmdb": 14836,
+          "year": 2009
+        },
+        {
+          "rank": null,
+          "imdb": "tt0978762",
+          "title": "Mary and Max",
+          "awardYear": 2009,
+          "tmdb": 24238,
+          "year": 2009
+        },
+        {
+          "rank": null,
+          "imdb": "tt1172203",
+          "title": "Sita Sings the Blues",
+          "awardYear": 2008,
+          "tmdb": 20529,
+          "year": 2008
+        },
+        {
+          "rank": null,
+          "imdb": "tt0298337",
+          "title": "Free Jimmy",
+          "awardYear": 2007,
+          "tmdb": 14453,
+          "year": 2006
+        },
+        {
+          "rank": null,
+          "imdb": "tt0386741",
+          "title": "Renaissance",
+          "awardYear": 2006,
+          "tmdb": 9389,
+          "year": 2006
+        },
+        {
+          "rank": null,
+          "imdb": "tt0398237",
+          "title": "The District!",
+          "awardYear": 2005,
+          "tmdb": 29004,
+          "year": 2004
+        },
+        {
+          "rank": null,
+          "imdb": "tt0359784",
+          "title": "Oseam",
+          "awardYear": 2004,
+          "tmdb": 38562,
+          "year": 2003
+        },
+        {
+          "rank": null,
+          "imdb": "tt0312941",
+          "title": "My Life as McDull",
+          "awardYear": 2003,
+          "tmdb": 73884,
+          "year": 2001
+        },
+        {
+          "rank": null,
+          "imdb": "tt0302758",
+          "title": "My Beautiful Girl, Mari",
+          "awardYear": 2002,
+          "tmdb": 105280,
+          "year": 2002
+        },
+        {
+          "rank": null,
+          "imdb": "tt0277909",
+          "title": "Mutant Aliens",
+          "awardYear": 2001,
+          "tmdb": 30863,
+          "year": 2001
+        },
+        {
+          "rank": null,
+          "imdb": "tt0181627",
+          "title": "Kirikou and the Sorceress",
+          "awardYear": 1999,
+          "tmdb": 21348,
+          "year": 1998
+        },
+        {
+          "rank": null,
+          "imdb": "tt0119346",
+          "title": "I Married a Strange Person!",
+          "awardYear": 1998,
+          "tmdb": 51942,
+          "year": 1997
+        },
+        {
+          "rank": null,
+          "imdb": "tt0116683",
+          "title": "James and the Giant Peach",
+          "awardYear": 1997,
+          "tmdb": 10539,
+          "year": 1996
+        },
+        {
+          "rank": null,
+          "imdb": "tt0110008",
+          "title": "Pom Poko",
+          "awardYear": 1995,
+          "tmdb": 15283,
+          "year": 1994
+        },
+        {
+          "rank": null,
+          "imdb": "tt0104652",
+          "title": "Porco Rosso",
+          "awardYear": 1993,
+          "tmdb": 11621,
+          "year": 1992
+        },
+        {
+          "rank": null,
+          "imdb": "tt0330830",
+          "title": "Robinson et compagnie",
+          "awardYear": 1991,
+          "tmdb": 167151,
+          "year": 1991
+        },
+        {
+          "rank": null,
+          "imdb": "tt0095715",
+          "title": "Alice",
+          "awardYear": 1989,
+          "tmdb": 18917,
+          "year": 1988
+        },
+        {
+          "rank": null,
+          "imdb": "tt0090315",
+          "title": "When the Wind Blows",
+          "awardYear": 1987,
+          "tmdb": 10857,
+          "year": 1986
+        },
+        {
+          "rank": null,
+          "imdb": "tt0847478",
+          "title": "Heroic Times",
+          "awardYear": 1985,
+          "tmdb": 244265,
+          "year": 1984
+        }
+      ]
+    },
+    {
+      "id": "karlovy-vary-crystal-globe",
+      "count": 32,
+      "snapshotDate": "2026-09-27",
+      "head": [
+        {
+          "rank": null,
+          "imdb": "tt20769484",
+          "title": "Summer with Hope",
+          "awardYear": 2022,
+          "tmdb": 993272,
+          "year": 2022
+        },
+        {
+          "rank": null,
+          "imdb": "tt3474438",
+          "title": "Little Crusader",
+          "awardYear": 2017,
+          "tmdb": 467600,
+          "year": 2017
+        },
+        {
+          "rank": null,
+          "imdb": "tt3473410",
+          "title": "Bob and the Trees",
+          "awardYear": 2015,
+          "tmdb": 308987,
+          "year": 2015
+        },
+        {
+          "rank": null,
+          "imdb": "tt1863192",
+          "title": "Corn Island",
+          "awardYear": 2014,
+          "tmdb": 282376,
+          "year": 2014
+        },
+        {
+          "rank": null,
+          "imdb": "tt2324384",
+          "title": "The Notebook",
+          "awardYear": 2013,
+          "tmdb": 199615,
+          "year": 2013
+        },
+        {
+          "rank": null,
+          "imdb": "tt0414891",
+          "title": "A Children's Story",
+          "awardYear": 2004,
+          "tmdb": 58014,
+          "year": 2004
+        },
+        {
+          "rank": null,
+          "imdb": "tt0352343",
+          "title": "Facing Windows",
+          "awardYear": 2003,
+          "tmdb": 29987,
+          "year": 2003
+        },
+        {
+          "rank": null,
+          "imdb": "tt0282917",
+          "title": "Year of the Devil",
+          "awardYear": 2002,
+          "tmdb": 101801,
+          "year": 2002
+        },
+        {
+          "rank": null,
+          "imdb": "tt0211915",
+          "title": "Amélie",
+          "awardYear": 2001,
+          "tmdb": 194,
+          "year": 2001
+        },
+        {
+          "rank": null,
+          "imdb": "tt0244504",
+          "title": "Me You Them",
+          "awardYear": 2000,
+          "tmdb": 82103,
+          "year": 2000
+        },
+        {
+          "rank": null,
+          "imdb": "tt0162909",
+          "title": "Yana's Friends",
+          "awardYear": 1999,
+          "tmdb": 173925,
+          "year": 1999
+        },
+        {
+          "rank": null,
+          "imdb": "tt0148002",
+          "title": "Streetheart",
+          "awardYear": 1998,
+          "tmdb": 98495,
+          "year": 1998
+        },
+        {
+          "rank": null,
+          "imdb": "tt0119590",
+          "title": "Ma vie en rose",
+          "awardYear": 1997,
+          "tmdb": 27103,
+          "year": 1997
+        },
+        {
+          "rank": null,
+          "imdb": "tt0116754",
+          "title": "Prisoner of the Mountains",
+          "awardYear": 1996,
+          "tmdb": 55936,
+          "year": 1996
+        },
+        {
+          "rank": null,
+          "imdb": "tt0110202",
+          "title": "The Ride",
+          "awardYear": 1995,
+          "tmdb": 81400,
+          "year": 1994
+        },
+        {
+          "rank": null,
+          "imdb": "tt0107564",
+          "title": "My Soul Brother",
+          "awardYear": 1994,
+          "tmdb": 115661,
+          "year": 1993
+        },
+        {
+          "rank": null,
+          "imdb": "tt0104638",
+          "title": "Krapatchouk",
+          "awardYear": 1992,
+          "tmdb": 162839,
+          "year": 1992
+        },
+        {
+          "rank": null,
+          "imdb": "tt0087301",
+          "title": "Hibiscus Town",
+          "awardYear": 1988,
+          "tmdb": 122973,
+          "year": 1987
+        },
+        {
+          "rank": null,
+          "imdb": "tt0090088",
+          "title": "A Street to Die",
+          "awardYear": 1986,
+          "tmdb": 270835,
+          "year": 1985
+        },
+        {
+          "rank": null,
+          "imdb": "tt0087615",
+          "title": "Lev Tolstoy",
+          "awardYear": 1984,
+          "tmdb": 148858,
+          "year": 1984
+        },
+        {
+          "rank": null,
+          "imdb": "tt0084222",
+          "title": "Red Bells",
+          "awardYear": 1982,
+          "tmdb": 206648,
+          "year": 1982
+        },
+        {
+          "rank": null,
+          "imdb": "tt0081711",
+          "title": "The Fiancee",
+          "awardYear": 1980,
+          "tmdb": 198013,
+          "year": 1980
+        },
+        {
+          "rank": null,
+          "imdb": "tt0076765",
+          "title": "Shadows of a Hot Summer",
+          "awardYear": 1978,
+          "tmdb": 46793,
+          "year": 1978
+        },
+        {
+          "rank": null,
+          "imdb": "tt0077222",
+          "title": "White Bim Black Ear",
+          "awardYear": 1978,
+          "tmdb": 63899,
+          "year": 1977
+        },
+        {
+          "rank": null,
+          "imdb": "tt0072760",
+          "title": "Cantata de Chile",
+          "awardYear": 1976,
+          "tmdb": 255980,
+          "year": 1976
+        },
+        {
+          "rank": null,
+          "imdb": "tt0072096",
+          "title": "A Lover's Romance",
+          "awardYear": 1974,
+          "tmdb": 195823,
+          "year": 1974
+        },
+        {
+          "rank": null,
+          "imdb": "tt0069434",
+          "title": "Taming of the Fire",
+          "awardYear": 1972,
+          "tmdb": 126523,
+          "year": 1972
+        },
+        {
+          "rank": null,
+          "imdb": "tt0064541",
+          "title": "Kes",
+          "awardYear": 1970,
+          "tmdb": 13384,
+          "year": 1969
+        },
+        {
+          "rank": null,
+          "imdb": "tt0063527",
+          "title": "Capricious Summer",
+          "awardYear": 1968,
+          "tmdb": 47189,
+          "year": 1968
+        },
+        {
+          "rank": null,
+          "imdb": "tt0058424",
+          "title": "Accused",
+          "awardYear": 1964,
+          "tmdb": 270749,
+          "year": 1964
+        },
+        {
+          "rank": null,
+          "imdb": "tt0054293",
+          "title": "Splendid Days",
+          "awardYear": 1960,
+          "tmdb": 27920,
+          "year": 1960
+        },
+        {
+          "rank": null,
+          "imdb": "tt0040674",
+          "title": "The Last Stage",
+          "awardYear": 1948,
+          "tmdb": 121141,
+          "year": 1948
+        }
+      ]
+    },
+    {
+      "id": "san-sebastian-golden-shell",
+      "count": 21,
+      "snapshotDate": "2026-09-27",
+      "head": [
+        {
+          "rank": null,
+          "imdb": "tt35513027",
+          "title": "Sundays",
+          "awardYear": 2025,
+          "tmdb": 1443576,
+          "year": 2025
+        },
+        {
+          "rank": null,
+          "imdb": "tt21920634",
+          "title": "The Rye Horn",
+          "awardYear": 2023,
+          "tmdb": 816888,
+          "year": 2023
+        },
+        {
+          "rank": null,
+          "imdb": "tt15079124",
+          "title": "Blue Moon",
+          "awardYear": 2021,
+          "tmdb": 853123,
+          "year": 2021
+        },
+        {
+          "rank": null,
+          "imdb": "tt12444572",
+          "title": "Beginning",
+          "awardYear": 2020,
+          "tmdb": 712167,
+          "year": 2020
+        },
+        {
+          "rank": null,
+          "imdb": "tt7611940",
+          "title": "Pacified",
+          "awardYear": 2019,
+          "tmdb": 625518,
+          "year": 2019
+        },
+        {
+          "rank": null,
+          "imdb": "tt6157294",
+          "title": "Between Two Waters",
+          "awardYear": 2018,
+          "tmdb": 536808,
+          "year": 2018
+        },
+        {
+          "rank": null,
+          "imdb": "tt3074610",
+          "title": "Bad Hair",
+          "awardYear": 2013,
+          "tmdb": 214138,
+          "year": 2013
+        },
+        {
+          "rank": null,
+          "imdb": "tt1964624",
+          "title": "In the House",
+          "awardYear": 2012,
+          "tmdb": 121875,
+          "year": 2012
+        },
+        {
+          "rank": null,
+          "imdb": "tt0255473",
+          "title": "The Ruination of Men",
+          "awardYear": 2000,
+          "tmdb": 111649,
+          "year": 2000
+        },
+        {
+          "rank": null,
+          "imdb": "tt0094229",
+          "title": "Wedding in Galilee",
+          "awardYear": 1987,
+          "tmdb": 49168,
+          "year": 1987
+        },
+        {
+          "rank": null,
+          "imdb": "tt0085370",
+          "title": "Entre Nous",
+          "awardYear": 1983,
+          "tmdb": 42108,
+          "year": 1983
+        },
+        {
+          "rank": null,
+          "imdb": "tt0079090",
+          "title": "The Orchestra Conductor",
+          "awardYear": 1980,
+          "tmdb": 95269,
+          "year": 1980
+        },
+        {
+          "rank": null,
+          "imdb": "tt0073781",
+          "title": "Queen of the Gypsies",
+          "awardYear": 1976,
+          "tmdb": 50186,
+          "year": 1976
+        },
+        {
+          "rank": null,
+          "imdb": "tt0069762",
+          "title": "Badlands",
+          "awardYear": 1974,
+          "tmdb": 3133,
+          "year": 1973
+        },
+        {
+          "rank": null,
+          "imdb": "tt0070040",
+          "title": "The Spirit of the Beehive",
+          "awardYear": 1973,
+          "tmdb": 4495,
+          "year": 1973
+        },
+        {
+          "rank": null,
+          "imdb": "tt0169406",
+          "title": "Golden Queen",
+          "awardYear": 1965,
+          "tmdb": 273649,
+          "year": 1965
+        },
+        {
+          "rank": null,
+          "imdb": "tt0059448",
+          "title": "Mirage",
+          "awardYear": 1965,
+          "tmdb": 19661,
+          "year": 1965
+        },
+        {
+          "rank": null,
+          "imdb": "tt0056107",
+          "title": "Arturo's Island",
+          "awardYear": 1962,
+          "tmdb": 143244,
+          "year": 1962
+        },
+        {
+          "rank": null,
+          "imdb": "tt0054250",
+          "title": "Romeo, Juliet and Darkness",
+          "awardYear": 1960,
+          "tmdb": 80084,
+          "year": 1960
+        },
+        {
+          "rank": null,
+          "imdb": "tt0051598",
+          "title": "Ewa chce spać",
+          "awardYear": 1958,
+          "tmdb": 89900,
+          "year": 1958
+        },
+        {
+          "rank": null,
+          "imdb": "tt0050777",
+          "title": "Oh! Sabella",
+          "awardYear": 1957,
+          "tmdb": 62457,
+          "year": 1957
+        }
+      ]
+    },
+    {
+      "id": "cannes-camera-dor",
+      "count": 11,
+      "snapshotDate": "2026-09-27",
+      "head": [
+        {
+          "rank": null,
+          "imdb": "tt26745321",
+          "title": "Armand",
+          "awardYear": 2024,
+          "tmdb": 1144681,
+          "year": 2024
+        },
+        {
+          "rank": null,
+          "imdb": "tt10399622",
+          "title": "Inside the Yellow Cocoon Shell",
+          "awardYear": 2023,
+          "tmdb": 1114816,
+          "year": 2023
+        },
+        {
+          "rank": null,
+          "imdb": "tt16227002",
+          "title": "War Pony",
+          "awardYear": 2022,
+          "tmdb": 962566,
+          "year": 2022
+        },
+        {
+          "rank": null,
+          "imdb": "tt9206516",
+          "title": "Our Mothers",
+          "awardYear": 2019,
+          "tmdb": 596873,
+          "year": 2019
+        },
+        {
+          "rank": null,
+          "imdb": "tt2125435",
+          "title": "Beasts of the Southern Wild",
+          "awardYear": 2012,
+          "tmdb": 84175,
+          "year": 2012
+        },
+        {
+          "rank": null,
+          "imdb": "tt1754078",
+          "title": "Las Acacias",
+          "awardYear": 2011,
+          "tmdb": 85549,
+          "year": 2011
+        },
+        {
+          "rank": null,
+          "imdb": "tt0986233",
+          "title": "Hunger",
+          "awardYear": 2008,
+          "tmdb": 10360,
+          "year": 2008
+        },
+        {
+          "rank": null,
+          "imdb": "tt0388311",
+          "title": "Or",
+          "awardYear": 2004,
+          "tmdb": 1918,
+          "year": 2004
+        },
+        {
+          "rank": null,
+          "imdb": "tt0101003",
+          "title": "Freeze Die Come to Life",
+          "awardYear": 1990,
+          "tmdb": 41948,
+          "year": 1990
+        },
+        {
+          "rank": null,
+          "imdb": "tt0091580",
+          "title": "Robinsonada or My English Grandfather",
+          "awardYear": 1987,
+          "tmdb": 149835,
+          "year": 1986
+        },
+        {
+          "rank": null,
+          "imdb": "tt0080612",
+          "title": "Desperado City",
+          "awardYear": 1981,
+          "tmdb": 264162,
+          "year": 1981
+        }
+      ]
+    },
+    {
+      "id": "tiff-peoples-choice",
+      "count": 7,
+      "snapshotDate": "2026-09-27",
+      "head": [
+        {
+          "rank": null,
+          "imdb": "tt12789558",
+          "title": "Belfast",
+          "awardYear": 2021,
+          "tmdb": 777270,
+          "year": 2021
+        },
+        {
+          "rank": null,
+          "imdb": "tt2024544",
+          "title": "12 Years a Slave",
+          "awardYear": 2013,
+          "tmdb": 76203,
+          "year": 2013
+        },
+        {
+          "rank": null,
+          "imdb": "tt0084776",
+          "title": "Tempest",
+          "awardYear": 1982,
+          "tmdb": 48249,
+          "year": 1982
+        },
+        {
+          "rank": null,
+          "imdb": "tt0082158",
+          "title": "Chariots of Fire",
+          "awardYear": 1981,
+          "tmdb": 9443,
+          "year": 1981
+        },
+        {
+          "rank": null,
+          "imdb": "tt0080408",
+          "title": "Bad Timing",
+          "awardYear": 1980,
+          "tmdb": 33214,
+          "year": 1980
+        },
+        {
+          "rank": null,
+          "imdb": "tt0078850",
+          "title": "Best Boy",
+          "awardYear": 1979,
+          "tmdb": 42165,
+          "year": 1979
+        },
+        {
+          "rank": null,
+          "imdb": "tt0077613",
+          "title": "Girlfriends",
+          "awardYear": 1978,
+          "tmdb": 111469,
+          "year": 1978
+        }
+      ]
+    }
+  ]
+}

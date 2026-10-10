@@ -1,0 +1,101 @@
+.music-cta-card {
+  display: flex;
+  align-items: center;
+  gap: 14px;
+  inline-size: 100%;
+  min-block-size: 108px;
+  padding: 12px;
+  border-radius: 14px;
+  border: 1px solid var(--color-edge-soft);
+  background: var(--color-elevated);
+  text-align: start;
+  transition: border-color 200ms ease-in-out, background-color 200ms ease-in-out;
+}
+.music-cta-card:hover,
+.music-cta-card:focus-within {
+  border-color: var(--color-edge);
+  background: var(--color-raised);
+}
+.music-cta-art {
+  position: relative;
+  flex-shrink: 0;
+  inline-size: 84px;
+  block-size: 84px;
+  overflow: hidden;
+  border-radius: 8px;
+  background: var(--color-canvas);
+}
+.music-cta-art img {
+  inline-size: 100%;
+  block-size: 100%;
+  object-fit: cover;
+}
+.music-cta-body {
+  display: flex;
+  min-width: 0;
+  flex: 1;
+  flex-direction: column;
+  gap: 4px;
+}
+.music-cta-eyebrow {
+  font-size: 11px;
+  font-weight: 600;
+  letter-spacing: 0.04em;
+  text-transform: uppercase;
+  color: var(--color-ink-subtle);
+}
+.music-cta-line {
+  font-size: 14px;
+  font-weight: 600;
+  line-height: 1.25;
+  color: var(--color-ink);
+  overflow: hidden;
+  display: block;
+  white-space: nowrap;
+  block-size: 1.25em;
+}
+.music-cta-line > span {
+  display: block;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+}
+.music-cta-line > span[data-marquee] {
+  inline-size: max-content;
+  overflow: visible;
+}
+.music-cta-card:focus-visible {
+  outline: 2px solid var(--color-accent);
+  outline-offset: 2px;
+}
+.music-cta-artist {
+  font-size: 12.5px;
+  color: var(--color-ink-muted);
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+}
+.music-cta-play {
+  display: inline-flex;
+  align-items: center;
+  gap: 7px;
+  align-self: flex-start;
+  margin-block-start: 2px;
+  min-block-size: 32px;
+  padding-inline: 13px;
+  border-radius: 999px;
+  background: var(--color-ink);
+  color: var(--color-canvas);
+  font-size: 12.5px;
+  font-weight: 600;
+  transition: opacity 180ms ease-in-out;
+}
+.music-cta-play:hover {
+  opacity: 0.88;
+}
+@media (prefers-reduced-motion: reduce) {
+  .music-cta-card,
+  .music-cta-play {
+    transition: none;
+  }
+}

@@ -1,4 +1,5 @@
 import { activeProfileId, activeProfileIsPrimary } from "@/lib/active-profile-id";
+import { getSecret, setSecret } from "@/lib/secret-store";
 import type { MalSession } from "./types";
 
 const BASE_KEY = "harbor.mal.session.v1";
@@ -14,12 +15,12 @@ let loaded = false;
 function read(): MalSession | null {
   try {
     const key = keyFor();
-    let raw = localStorage.getItem(key);
+    let raw = getSecret(key);
     if (!raw) {
-      const legacy = localStorage.getItem(BASE_KEY);
+      const legacy = getSecret(BASE_KEY);
       if (legacy && activeProfileIsPrimary()) {
-        localStorage.setItem(key, legacy);
-        localStorage.removeItem(BASE_KEY);
+        setSecret(key, legacy);
+        setSecret(BASE_KEY, null);
         raw = legacy;
       }
     }
@@ -42,8 +43,8 @@ function read(): MalSession | null {
 
 function write(session: MalSession | null): void {
   try {
-    if (session) localStorage.setItem(keyFor(), JSON.stringify(session));
-    else localStorage.removeItem(keyFor());
+    if (session) setSecret(keyFor(), JSON.stringify(session));
+    else setSecret(keyFor(), null);
   } catch {
     return;
   }

@@ -1,4 +1,4 @@
-import { ArrowUpDown, Settings2 } from "lucide-react";
+import { ArrowUpDown, Columns2, Rows3, Settings2 } from "lucide-react";
 import { useState } from "react";
 import { AddonLogo, resolveAddonLogo } from "@/components/addon-logo";
 import { HoverTooltip } from "@/components/hover-tooltip";
@@ -6,6 +6,14 @@ import { isAddonEnabled, setAddonEnabled } from "@/lib/addon-store";
 import type { ResolvedAddon } from "@/lib/addons-store/store";
 import { useT } from "@/lib/i18n";
 import { addonKey, idOf, nameOf, subtitleFromManifest } from "./addons-utils";
+
+const LAYOUT_KEY = "harbor.addons.installedLayout";
+
+type InstalledLayout = "columns" | "list";
+
+function readLayout(): InstalledLayout {
+  return localStorage.getItem(LAYOUT_KEY) === "list" ? "list" : "columns";
+}
 
 export function InstalledPane({
   installed,
@@ -23,6 +31,15 @@ export function InstalledPane({
   onReorder?: () => void;
 }) {
   const t = useT();
+  const [layout, setLayout] = useState<InstalledLayout>(readLayout);
+  const switchLayout = (next: InstalledLayout) => {
+    setLayout(next);
+    try {
+      localStorage.setItem(LAYOUT_KEY, next);
+    } catch {
+      /* noop */
+    }
+  };
   const q = search?.trim().toLowerCase() ?? "";
   const filtered = q
     ? installed.filter((r) => {
@@ -32,6 +49,7 @@ export function InstalledPane({
         return name.includes(q) || desc.includes(q) || id.includes(q);
       })
     : installed;
+  const positions = new Map(installed.map((r, i) => [addonKey(r), i + 1]));
   if (installed.length === 0) {
     return (
       <div className="rounded-2xl border border-edge-soft bg-elevated/30 p-12 text-center">
@@ -54,8 +72,34 @@ export function InstalledPane({
   }
   return (
     <div className="flex flex-col gap-3">
-      {onReorder && (
-        <div className="flex justify-end">
+      <div className="flex items-center justify-end gap-2">
+        <div className="flex h-9 shrink-0 items-center gap-0.5 rounded-full border border-edge-soft p-1">
+          <HoverTooltip label={t("Two columns")} side="top" align="center" delayMs={200}>
+            <button
+              onClick={() => switchLayout("columns")}
+              aria-pressed={layout === "columns"}
+              aria-label={t("Two columns")}
+              className={`flex h-7 w-8 items-center justify-center rounded-full transition-colors ${
+                layout === "columns" ? "bg-raised text-ink" : "text-ink-subtle hover:text-ink-muted"
+              }`}
+            >
+              <Columns2 size={14} strokeWidth={2.2} />
+            </button>
+          </HoverTooltip>
+          <HoverTooltip label={t("One list")} side="top" align="center" delayMs={200}>
+            <button
+              onClick={() => switchLayout("list")}
+              aria-pressed={layout === "list"}
+              aria-label={t("One list")}
+              className={`flex h-7 w-8 items-center justify-center rounded-full transition-colors ${
+                layout === "list" ? "bg-raised text-ink" : "text-ink-subtle hover:text-ink-muted"
+              }`}
+            >
+              <Rows3 size={14} strokeWidth={2.2} />
+            </button>
+          </HoverTooltip>
+        </div>
+        {onReorder && (
           <button
             onClick={onReorder}
             title={t("Change the order addons are tried in")}
@@ -64,30 +108,61 @@ export function InstalledPane({
             <ArrowUpDown size={13} strokeWidth={2.4} />
             {t("Reorder")}
           </button>
+        )}
+      </div>
+      {layout === "list" ? (
+        <div className="flex flex-col gap-2">
+          {filtered.map((r) => (
+            <InstalledRow
+              key={addonKey(r)}
+              resolved={r}
+              position={positions.get(addonKey(r)) ?? 0}
+              large
+              onOpen={onOpen}
+              onUninstall={onUninstall}
+              onManage={onManage}
+            />
+          ))}
+        </div>
+      ) : (
+        <div className="grid grid-cols-1 items-start gap-2 lg:grid-cols-2">
+          {splitColumnMajor(filtered).map((column, ci) => (
+            <div key={ci} className="flex min-w-0 flex-col gap-2">
+              {column.map((r) => (
+                <InstalledRow
+                  key={addonKey(r)}
+                  resolved={r}
+                  position={positions.get(addonKey(r)) ?? 0}
+                  onOpen={onOpen}
+                  onUninstall={onUninstall}
+                  onManage={onManage}
+                />
+              ))}
+            </div>
+          ))}
         </div>
       )}
-      <div className="grid grid-cols-1 gap-2 lg:grid-cols-2">
-        {filtered.map((r) => (
-          <InstalledRow
-            key={addonKey(r)}
-            resolved={r}
-            onOpen={onOpen}
-            onUninstall={onUninstall}
-            onManage={onManage}
-          />
-        ))}
-      </div>
     </div>
   );
 }
 
+function splitColumnMajor<T>(items: T[]): T[][] {
+  if (items.length < 2) return [items];
+  const mid = Math.ceil(items.length / 2);
+  return [items.slice(0, mid), items.slice(mid)];
+}
+
 function InstalledRow({
   resolved,
+  position,
+  large = false,
   onOpen,
   onUninstall,
   onManage,
 }: {
   resolved: ResolvedAddon;
+  position: number;
+  large?: boolean;
   onOpen: (id: string) => void;
   onUninstall: (r: ResolvedAddon) => Promise<void>;
   onManage?: (r: ResolvedAddon) => void;
@@ -128,23 +203,34 @@ function InstalledRow({
       tabIndex={0}
       onClick={() => !busy && onOpen(idOf(r))}
       onKeyDown={(e) => !busy && (e.key === "Enter" || e.key === " ") && onOpen(idOf(r))}
-      className={`flex items-center gap-3.5 rounded-xl border bg-elevated px-4 py-3 text-start transition-all ${
+      className={`flex items-center rounded-xl border bg-elevated text-start transition-all ${
+        large ? "gap-4 px-5 py-4" : "gap-3.5 px-4 py-3"
+      } ${
         busy
           ? "border-edge-soft cursor-wait opacity-60"
           : "border-edge-soft cursor-pointer hover:border-edge hover:bg-raised"
       }`}
     >
+      <span
+        className={`shrink-0 text-center font-display font-medium tabular-nums text-ink-subtle ${
+          large ? "min-w-8 text-[18px]" : "min-w-6 text-[15px]"
+        }`}
+      >
+        {position}
+      </span>
       <div className={enabled ? "" : "opacity-45 transition-opacity"}>
         <AddonLogo
           addonId={idOf(r)}
           addonName={nameOf(r)}
           manifestLogo={resolveAddonLogo(r.manifest?.logo, r.transportUrl)}
-          size="lg"
+          size={large ? "tile" : "lg"}
         />
       </div>
-      <div className={`flex min-w-0 flex-1 flex-col gap-0.5 ${enabled ? "" : "opacity-55"}`}>
-        <span className="truncate text-[14px] font-medium text-ink">{nameOf(r)}</span>
-        <span className="truncate text-[11.5px] text-ink-subtle">
+      <div className={`flex min-w-0 flex-1 flex-col ${large ? "gap-1" : "gap-0.5"} ${enabled ? "" : "opacity-55"}`}>
+        <span className={`truncate font-medium text-ink ${large ? "text-[16px]" : "text-[14px]"}`}>
+          {nameOf(r)}
+        </span>
+        <span className={`truncate text-ink-subtle ${large ? "text-[13px]" : "text-[11.5px]"}`}>
           {enabled ? subtitleFromManifest(r) : t("Off · catalogs and streams hidden")}
         </span>
       </div>

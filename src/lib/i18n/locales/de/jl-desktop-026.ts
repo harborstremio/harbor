@@ -1,0 +1,181 @@
+const jlDesktop026: Record<string, string> = {
+  "Sharing {name}'s addon setup": "Add-on-Einstellungen von {name} werden geteilt",
+  "Local JL profile": "Lokales JL-Profil",
+  "Offline Room": "Offline-Bereich",
+  "Your library and addons work locally. Sign in to use JL account features.":
+    "Deine Bibliothek und Add-ons funktionieren lokal. Melde dich an, um die Funktionen deines JL-Kontos zu nutzen.",
+  "Continue locally": "Lokal fortfahren",
+  "Choose your JL profile to sync supported preferences, favorites, library and progress. Device files and configured addon URLs stay on this device.":
+    "Wähle dein JL-Profil, um unterstützte Einstellungen, Favoriten, die Bibliothek und den Wiedergabefortschritt zu synchronisieren. Dateien und konfigurierte Add-on-URLs bleiben auf diesem Gerät.",
+  "Sign-out could not be saved. Free some storage and try again.":
+    "Die Abmeldung konnte nicht gespeichert werden. Gib Speicherplatz frei und versuche es erneut.",
+  "Sign in to your JL Media Vision account, then choose the profile whose supported settings and library you want to sync.":
+    "Melde dich bei deinem JL Media Vision-Konto an und wähle dann das Profil, dessen unterstützte Einstellungen und Bibliothek du synchronisieren möchtest.",
+  "Library and addon sharing": "Bibliothek und Add-ons teilen",
+  "Use the primary profile's saved addon setup and watchlist.":
+    "Verwende die gespeicherten Add-on-Einstellungen und die Merkliste des Hauptprofils.",
+  "Keep this profile separate": "Dieses Profil getrennt halten",
+  "Library and addons stay separate. No additional account is needed.":
+    "Bibliothek und Add-ons bleiben getrennt. Ein zusätzliches Konto ist nicht erforderlich.",
+  "Addon install link copied": "Installationslink für das Add-on kopiert",
+  "Compatible addon, listed in JL Media Vision.":
+    "Kompatibles Add-on, in JL Media Vision aufgeführt.",
+  "Saving on this device": "Wird auf diesem Gerät gespeichert",
+  "Couldn't read your local addon collection. Nothing was written.":
+    "Deine lokale Add-on-Sammlung konnte nicht gelesen werden. Es wurde nichts geschrieben.",
+  "Local storage didn't confirm the move. Your collection may be unchanged. Reload to see the current state.":
+    "Der lokale Speicher hat das Verschieben nicht bestätigt. Deine Sammlung ist möglicherweise unverändert. Lade die Seite neu, um den aktuellen Stand zu sehen.",
+  "Moved 1 addon to this JL profile. It is saved on this device.":
+    "1 Add-on wurde in dieses JL-Profil verschoben. Es ist auf diesem Gerät gespeichert.",
+  "Moved {n} addons to this JL profile. They are saved on this device.":
+    "{n} Add-ons wurden in dieses JL-Profil verschoben. Sie sind auf diesem Gerät gespeichert.",
+  "Couldn't load your local addon collection. Nothing can be reordered safely without it.":
+    "Deine lokale Add-on-Sammlung konnte nicht geladen werden. Ohne sie lässt sich die Reihenfolge nicht sicher ändern.",
+  "This JL profile": "Dieses JL-Profil",
+  "This order is saved on this device for the active JL profile.":
+    "Diese Reihenfolge wird auf diesem Gerät für das aktive JL-Profil gespeichert.",
+  "No addons are installed in this profile yet.":
+    "In diesem Profil sind noch keine Add-ons installiert.",
+  "Add every addon below to this JL profile":
+    "Alle unten aufgeführten Add-ons zu diesem JL-Profil hinzufügen",
+  "Choose a JL profile to organize its installed addons.":
+    "Wähle ein JL-Profil, um dessen installierte Add-ons zu organisieren.",
+  "JL Media Vision reads the saved local collection back to verify the order.":
+    "JL Media Vision liest die gespeicherte lokale Sammlung erneut ein, um die Reihenfolge zu prüfen.",
+  "Your addon collection changed while the editor was open. Nothing was written.":
+    "Deine Add-on-Sammlung hat sich geändert, während der Editor geöffnet war. Es wurde nichts geschrieben.",
+  "Local storage didn't confirm the save. Your collection may be unchanged. Retry will re-check before writing again.":
+    "Der lokale Speicher hat das Speichern nicht bestätigt. Deine Sammlung ist möglicherweise unverändert. Beim erneuten Versuch wird sie vor dem Schreiben nochmals geprüft.",
+  "The local collection has a different order than was saved.":
+    "Die lokale Sammlung hat eine andere Reihenfolge als die gespeicherte.",
+  "Addon order saved in this JL profile": "Add-on-Reihenfolge in diesem JL-Profil gespeichert",
+  "Using a local JL profile.": "Ein lokales JL-Profil wird verwendet.",
+  "JL account (sign in on the TV)": "JL-Konto (am Fernseher anmelden)",
+  "Your JL Media Vision password": "Dein JL Media Vision-Passwort",
+  "Skip this and JL Media Vision still works. Your library stays local.":
+    "Du kannst diesen Schritt überspringen und JL Media Vision trotzdem nutzen. Deine Bibliothek bleibt lokal.",
+  "Interrupted. Retry to resume safely; sources without a validator restart.":
+    "Unterbrochen. Versuche es erneut, um sicher fortzusetzen; bei Quellen ohne Validierungskennung beginnt der Download von vorn.",
+  "Play offline": "Offline abspielen",
+  "Choose a fresh download source": "Eine neue Downloadquelle wählen",
+  "Saved movies, episodes, music, and eBooks for offline use":
+    "Gespeicherte Filme, Folgen, Musik und E-Books für die Offline-Nutzung",
+  "Saved files belong to this account and profile on this device. Only completed files play offline. Direct, unencrypted files are supported; streaming playlists and protected sources are not.":
+    "Gespeicherte Dateien gehören zu diesem Konto und Profil auf diesem Gerät. Nur vollständig heruntergeladene Dateien lassen sich offline abspielen. Direkte, unverschlüsselte Dateien werden unterstützt, Streaming-Wiedergabelisten und geschützte Quellen hingegen nicht.",
+  "Older downloads have no profile owner. Add them to this local profile only if they are yours.":
+    "Ältere Downloads sind keinem Profil zugeordnet. Füge sie diesem lokalen Profil nur hinzu, wenn sie dir gehören.",
+  "Add older downloads to this local profile": "Ältere Downloads diesem lokalen Profil hinzufügen",
+  "Movies, episodes and books": "Filme, Folgen und Bücher",
+  "Choose Download on a movie, episode, music track, or eBook to keep an intentional offline copy. Queue progress and saved files appear here.":
+    "Wähle bei einem Film, einer Folge, einem Musiktitel oder einem E-Book „Herunterladen“, um gezielt eine Offline-Kopie zu speichern. Den Fortschritt der Warteschlange und gespeicherte Dateien findest du hier.",
+  "Your playback history appears here. You can optionally connect Trakt.":
+    "Dein Wiedergabeverlauf erscheint hier. Du kannst bei Bedarf Trakt verbinden.",
+  "{n} in your JL library": "{n} in deiner JL-Bibliothek",
+  "Your account or profile changed. Reopen this dialog to choose again.":
+    "Dein Konto oder Profil hat sich geändert. Öffne diesen Dialog erneut, um eine neue Auswahl zu treffen.",
+  "The conflict backup could not be saved. Try again.":
+    "Die Sicherung des Konfliktstands konnte nicht gespeichert werden. Versuche es erneut.",
+  "Save conflict backup": "Konfliktstand sichern",
+  "Your JL account stays with you": "Dein JL-Konto begleitet dich",
+  "Sign in to JL Media Vision directly on your TV. This legacy phone setup step does not send account tokens. Your addons and library also work with a local profile.":
+    "Melde dich direkt auf deinem Fernseher bei JL Media Vision an. Dieser frühere Einrichtungsschritt per Smartphone sendet keine Kontotokens. Deine Add-ons und deine Bibliothek funktionieren auch mit einem lokalen Profil.",
+  "Live updates are unavailable. Retrying.":
+    "Live-Aktualisierungen sind nicht verfügbar. Ein neuer Versuch läuft.",
+  Unnumbered: "Ohne Nummer",
+  "No episodes were returned for this season.":
+    "Für diese Staffel wurden keine Folgen zurückgegeben.",
+  "Episodes could not be loaded. Check the connection and retry.":
+    "Die Folgen konnten nicht geladen werden. Prüfe die Verbindung und versuche es erneut.",
+  "Reset to account avatar": "Auf den Konto-Avatar zurücksetzen",
+  "Sign in with your JL Media Vision account. Your local library and addons remain available.":
+    "Melde dich mit deinem JL Media Vision-Konto an. Deine lokale Bibliothek und Add-ons bleiben verfügbar.",
+  "JL account ID": "JL-Konto-ID",
+  "Your stable JL account identifier.": "Deine dauerhafte JL-Kontokennung.",
+  "Sign out of JL Media Vision": "Von JL Media Vision abmelden",
+  "Stops account sync and returns to this device's local profiles.":
+    "Beendet die Kontosynchronisierung und kehrt zu den lokalen Profilen dieses Geräts zurück.",
+  "Choose a JL profile to manage installed addons.":
+    "Wähle ein JL-Profil, um installierte Add-ons zu verwalten.",
+  "Checked {n}s ago.": "Vor {n} s geprüft.",
+  "Installed in this JL profile.": "In diesem JL-Profil installiert.",
+  "addon installed": "Add-on installiert",
+  "addons installed": "Add-ons installiert",
+  "Refresh addons": "Add-ons aktualisieren",
+  "JL account": "JL-Konto",
+  "Community account": "Community-Konto",
+  "Each JL profile keeps its own settings, library, and PIN.":
+    "Jedes JL-Profil hat eigene Einstellungen, eine eigene Bibliothek und eine eigene PIN.",
+  "Profiles on this device": "Profile auf diesem Gerät",
+  "Your local library remains available without an account.":
+    "Deine lokale Bibliothek bleibt auch ohne Konto verfügbar.",
+  "Your addon configurations are kept on this device. Manage each installation in Addons.":
+    "Deine Add-on-Konfigurationen bleiben auf diesem Gerät. Verwalte jede Installation unter „Add-ons“.",
+  "Addon install links": "Installationslinks für Add-ons",
+  "JL Media Vision supports compatible manifests and stremio:// install links without an external account.":
+    "JL Media Vision unterstützt kompatible Manifeste und stremio://-Installationslinks ohne externes Konto.",
+  "Open compatible addon links in JL Media Vision":
+    "Kompatible Add-on-Links in JL Media Vision öffnen",
+  "Choose JL Media Vision when your operating system asks which app should open an addon link. You can also paste a manifest URL in Addons.":
+    "Wähle JL Media Vision, wenn dein Betriebssystem fragt, welche App einen Add-on-Link öffnen soll. Du kannst auch unter „Add-ons“ eine Manifest-URL einfügen.",
+  "{app} itself does not host, distribute, or index any media. All streams come from third-party addons, debrid services, or your own media sources that you configure yourself. You are responsible for what you choose to play and for complying with the laws of your jurisdiction.":
+    "{app} selbst hostet, verbreitet oder indexiert keine Medien. Alle Streams stammen von Add-ons Dritter, Debrid-Diensten oder eigenen Medienquellen, die du selbst konfigurierst. Du bist für die Inhalte verantwortlich, die du abspielst, und für die Einhaltung der in deinem Rechtsgebiet geltenden Gesetze.",
+  "Select a JL profile first. The repair scans only its local library.":
+    "Wähle zuerst ein JL-Profil. Die Reparatur prüft nur dessen lokale Bibliothek.",
+  "Repairs malformed records in the active JL profile library. Existing provider IDs and playback progress are retained.":
+    "Repariert fehlerhafte Datensätze in der Bibliothek des aktiven JL-Profils. Vorhandene Anbieter-IDs und der Wiedergabefortschritt bleiben erhalten.",
+  "Select a JL profile first. This scans its local library.":
+    "Wähle zuerst ein JL-Profil. Dadurch wird dessen lokale Bibliothek geprüft.",
+  "Local library repair": "Lokale Bibliothek reparieren",
+  "Checks the active JL profile library for malformed item records and repairs compatible fields locally.":
+    "Prüft die Bibliothek des aktiven JL-Profils auf fehlerhafte Einträge und repariert unterstützte Felder lokal.",
+  "This browser stores your JL session and local settings. Signing in enables account sync for supported profile data and service credentials. Clearing browser data removes local copies, but does not delete data already synced to your JL account.":
+    "Dieser Browser speichert deine JL-Sitzung und lokalen Einstellungen. Mit der Anmeldung wird die Kontosynchronisierung für unterstützte Profildaten und Dienstzugangsdaten aktiviert. Das Löschen der Browserdaten entfernt lokale Kopien, aber keine Daten, die bereits mit deinem JL-Konto synchronisiert wurden.",
+  "Choose which parts of your setup to save in one backup file. Your account sign-in is excluded.":
+    "Wähle die Teile deiner Einrichtung aus, die du in einer Sicherungsdatei speichern möchtest. Deine Kontoanmeldung ist ausgeschlossen.",
+  "Choose a Harbor backup and review what it contains before restoring. Your account sign-in stays on this device.":
+    "Wähle eine JL Media Vision-Sicherung und prüfe ihren Inhalt vor der Wiederherstellung. Deine Kontoanmeldung bleibt auf diesem Gerät.",
+  "Choose the sections to save in one file. Your account sign-in is excluded.":
+    "Wähle die Bereiche aus, die du in einer Datei speichern möchtest. Deine Kontoanmeldung ist ausgeschlossen.",
+  "Saved {when} from Harbor {app}. Your account sign-in stays as is.":
+    "Gespeichert {when} mit JL Media Vision {app}. Deine Kontoanmeldung bleibt unverändert.",
+  "Signed in as {email} with your JL Media Vision account.":
+    "Als {email} mit deinem JL Media Vision-Konto angemeldet.",
+  "Your library and addons work locally. Sign in to use JL account sync.":
+    "Deine Bibliothek und Add-ons funktionieren lokal. Melde dich an, um die Synchronisierung deines JL-Kontos zu nutzen.",
+  "On: only titles you bookmarked. Off: also keeps titles added when you hit play.":
+    "Ein: nur Titel auf deiner Merkliste. Aus: behält auch Titel, die beim Starten der Wiedergabe hinzugefügt wurden.",
+  "Keep the Library Watchlist tab limited to titles you bookmarked. Turn this off to also include anything automatically added when you pressed play.":
+    "Zeige im Tab „Merkliste“ der Bibliothek nur Titel an, die du selbst vorgemerkt hast. Deaktiviere diese Option, um auch automatisch beim Starten der Wiedergabe hinzugefügte Titel anzuzeigen.",
+  "Only show Continue Watching for the profile that's active. Each profile sees just its own progress, so what you watch stays hidden from the other profiles that share this device.":
+    "Zeige „Weiterschauen“ nur für das aktive Profil an. Jedes Profil sieht nur seinen eigenen Fortschritt. Was du ansiehst, bleibt dadurch vor anderen Profilen auf diesem Gerät verborgen.",
+  "Classic rows": "Klassische Reihen",
+  "Classic button order.": "Klassische Schaltflächenreihenfolge.",
+  "When you hit Play on something you've partly watched, show a prompt to resume from where you left off or start over. Also covers saved JL progress and connected Trakt history.":
+    "Zeige beim Starten eines bereits teilweise angesehenen Titels eine Abfrage an, ob du an der letzten Stelle fortsetzen oder von vorn beginnen möchtest. Gilt auch für gespeicherten JL-Fortschritt und den Verlauf eines verbundenen Trakt-Kontos.",
+  "This is a compatible addon manifest. Add it from the Addons page instead.":
+    "Dies ist ein kompatibles Add-on-Manifest. Füge es stattdessen auf der Seite „Add-ons“ hinzu.",
+  "Condensed shows a top pick, quality tiles, and a drawer. Addon list groups sources by addon, no scoring.":
+    "Die Ansicht „Kompakt“ zeigt eine Top-Empfehlung, Qualitätskacheln und ein ausklappbares Panel. Die Add-on-Liste gruppiert Quellen nach Add-on, ohne Bewertung.",
+  "Show complete addon descriptions in the addon list picker, downloads, and Big Picture.":
+    "Zeige vollständige Add-on-Beschreibungen in der Quellenauswahl der Add-on-Liste, in Downloads und im Großbildmodus an.",
+  "Addon list": "Add-on-Liste",
+  "Harbor ranking puts the best-scoring sources first. Addon order keeps each addon's results in the order it returned them, in a flat list. Stream priority below decides which addon leads, in both modes.":
+    "Die JL Media Vision-Rangfolge zeigt die am besten bewerteten Quellen zuerst. Die Add-on-Reihenfolge behält die Ergebnisse jedes Add-ons in der gelieferten Reihenfolge als flache Liste bei. Die Stream-Priorität unten legt in beiden Modi fest, welches Add-on zuerst erscheint.",
+  "Show each addon's results in the order it returned them, grouped by your addon list. Keeps the original addon ordering.":
+    "Zeige die Ergebnisse jedes Add-ons in der gelieferten Reihenfolge an, gruppiert nach deiner Add-on-Liste. Die ursprüngliche Add-on-Reihenfolge bleibt erhalten.",
+  "Any compatible subtitle addons you have installed are searched here too.":
+    "Auch deine installierten kompatiblen Untertitel-Add-ons werden hier durchsucht.",
+  "Addon compatibility": "Add-on-Kompatibilität",
+  "JL Media Vision uses the open addon protocol. Compatible manifests and configured addon links work without an external media account. Third-party notices are listed in Licenses.":
+    "JL Media Vision verwendet das offene Add-on-Protokoll. Kompatible Manifeste und konfigurierte Add-on-Links funktionieren ohne externes Medienkonto. Hinweise zu Drittanbietern findest du unter „Lizenzen“.",
+  "If you were going to send something, send it to ElfHosted above, or to one of the charities below. They all do more good with it.":
+    "Wenn du etwas spenden möchtest, unterstütze ElfHosted oben oder eine der gemeinnützigen Organisationen unten. Dort bewirkt deine Spende mehr.",
+  "Support ElfHosted, or give to any charity below, and the badge lands on your profile.":
+    "Unterstütze ElfHosted oder spende an eine der gemeinnützigen Organisationen unten, um das Abzeichen in deinem Profil zu erhalten.",
+  "Choose a JL profile first so its watchlist can sync.":
+    "Wähle zuerst ein JL-Profil, damit dessen Merkliste synchronisiert werden kann.",
+  "Export your entire Harbor setup to a single file, then restore it on a new computer or keep it as a backup. Everything is included except your account sign-in.":
+    "Exportiere deine gesamte JL Media Vision-Einrichtung in eine einzige Datei. Stelle sie dann auf einem neuen Computer wieder her oder bewahre sie als Sicherung auf. Alles außer deiner Kontoanmeldung ist enthalten.",
+};
+
+export default jlDesktop026;

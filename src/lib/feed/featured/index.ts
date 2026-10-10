@@ -25,7 +25,10 @@ function rank(pool: FeaturedItem[], now: number, di: number): FeaturedItem[] {
   const sets = buildExclusionSets();
   const { affinity } = getStore();
   return pool
-    .filter((it) => it.meta.background && passesFloor(it.meta, it.source) && !isExcluded(it.meta, sets, now))
+    .filter(
+      (it) =>
+        it.meta.background && passesFloor(it.meta, it.source) && !isExcluded(it.meta, sets, now),
+    )
     .map((it) => ({ it, s: scoreFeatured(it, affinity, now, di) }))
     .sort((a, b) => b.s - a.s)
     .map((x) => x.it);
@@ -42,7 +45,14 @@ function split(items: FeaturedItem[]): FeaturedResult {
 export async function buildFeaturedFast(key: string, settings: Settings): Promise<FeaturedResult> {
   if (!key) return buildFeatured(key, settings);
   const raw = await fastLanes(key, settings.region || "US");
-  return split(diversify(rank(mergeAndDedup(raw), Date.now(), dayIndex()), 30));
+  const candidates = diversify(rank(mergeAndDedup(raw), Date.now(), dayIndex()), 30);
+  // Resolve identities before exposing this pool, just as the full build does.
+  // Limit the first pass to its candidates rather than warming every lane.
+  await warmCandidateIds(
+    key,
+    candidates.map((item) => item.meta),
+  );
+  return split(diversify(rank(candidates, Date.now(), dayIndex()), 30));
 }
 
 export async function buildFeatured(key: string, settings: Settings): Promise<FeaturedResult> {

@@ -1,0 +1,89 @@
+.music-sticky-title {
+  position: sticky;
+  inset-block-start: 0;
+  z-index: 30;
+  margin-block-end: -68px;
+  pointer-events: none;
+}
+.music-sticky-title-bar {
+  position: relative;
+  display: flex;
+  align-items: center;
+  gap: 16px;
+  block-size: 68px;
+  margin-inline: calc(var(--music-sticky-bleed, 20px) * -1);
+  padding-inline: var(--music-sticky-bleed, 20px);
+  background: var(--color-canvas);
+  visibility: hidden;
+  transition: visibility 0s linear 100ms;
+}
+/* Keep the content cover solid while the controls fade in place. */
+.music-sticky-title-bar > * {
+  opacity: 0;
+  transition: opacity 100ms ease-out;
+}
+.music-sticky-title-bar::before {
+  content: "";
+  position: absolute;
+  inset-inline: 0;
+  inset-block-end: 100%;
+  block-size: 320px;
+  background: inherit;
+}
+.music-sticky-title[data-on] {
+  pointer-events: auto;
+}
+.music-sticky-title[data-on] .music-sticky-title-bar {
+  visibility: visible;
+  transition-delay: 0s;
+}
+.music-sticky-title[data-on] .music-sticky-title-bar > * {
+  opacity: 1;
+  transition-duration: 160ms;
+}
+.music-sticky-play {
+  display: grid;
+  place-items: center;
+  inline-size: 44px;
+  block-size: 44px;
+  flex-shrink: 0;
+  border-radius: 50%;
+  background: var(--color-ink);
+  color: var(--color-canvas);
+  transition: opacity 100ms ease-out, transform 150ms ease-out;
+}
+[data-art-colors] .music-sticky-play {
+  background: var(--music-art-accent, var(--color-ink));
+  color: var(--music-art-ink, var(--color-canvas));
+}
+.music-sticky-play:hover:not(:disabled) {
+  transform: scale(1.06);
+}
+.music-sticky-play:disabled {
+  cursor: default;
+}
+.music-sticky-title[data-on] .music-sticky-play:disabled {
+  opacity: 0.4;
+}
+.music-sticky-play:focus-visible {
+  outline: 2px solid var(--color-accent);
+  outline-offset: 3px;
+}
+.music-sticky-name {
+  min-inline-size: 0;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+  font-size: 22px;
+  font-weight: 700;
+  letter-spacing: -0.02em;
+  color: var(--color-ink);
+}
+@media (prefers-reduced-motion: reduce) {
+  .music-sticky-title-bar,
+  .music-sticky-title-bar > *,
+  .music-sticky-title[data-on] .music-sticky-title-bar > *,
+  .music-sticky-play {
+    transition: none;
+  }
+}

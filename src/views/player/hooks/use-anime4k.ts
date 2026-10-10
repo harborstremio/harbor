@@ -1,22 +1,19 @@
 import { useEffect, type RefObject } from "react";
 import type { PlayerBridge } from "@/lib/player/bridge";
 import { anime4kChain, type Anime4kMode, type Anime4kTier } from "@/lib/player/anime4k-modes";
+import { metaIsAnime } from "@/lib/player/anime-src";
+import {
+  generalShaderChain,
+  shaderCompanionProps,
+} from "@/lib/player/shader-chain";
 import { useSettings, type Settings } from "@/lib/settings";
 import type { PlayerSrc } from "@/lib/view";
 
 export type Anime4kChoice = "auto" | "off" | Anime4kMode;
 
-function isAnimeSrc(src: PlayerSrc): boolean {
-  const id = src.meta.id ?? "";
-  if (/^(kitsu|mal|anilist|anidb):/.test(id)) return true;
-  return (src.meta.genres ?? []).some((g) => {
-    const lg = g.toLowerCase();
-    return lg === "anime" || lg === "animation";
-  });
-}
-
 function autoActive(settings: Settings, src: PlayerSrc): boolean {
-  return settings.playerAnime4k && (!settings.playerAnime4kAnimeOnly || isAnimeSrc(src));
+  return settings.playerAnime4k &&
+    (!settings.playerAnime4kAnimeOnly || !!src.isAnime || metaIsAnime(src.meta));
 }
 
 type Anime4kDims = { srcWidth: number; displayWidth: number };
@@ -69,22 +66,31 @@ export function useAnime4k(
   srcKey: string,
   src: PlayerSrc,
   videoWidth = 0,
+  bridgeReady = true,
 ) {
   const { settings, update } = useSettings();
   const choice = (settings.playerAnime4kOverride as Anime4kChoice) || "auto";
   const available = !!settings.playerAnime4kFolder;
   const dims: Anime4kDims = { srcWidth: videoWidth, displayWidth: screenWidthPx() };
+  // Depend on the resulting configuration so clock ticks and unrelated settings
+  // don't recompile shaders, while folder, quality and override changes do.
+  const shaderConfig = JSON.stringify({
+    chain: [...anime4kShadersFor(settings, src, choice, dims), ...generalShaderChain(settings)],
+    props: shaderCompanionProps(settings),
+  });
 
   useEffect(() => {
-    bridgeRef.current?.setAnime4kShaders(anime4kShadersFor(settings, src, choice, dims));
-    // eslint-disable-next-line react-hooks/exhaustive-deps
-  }, [srcKey, videoWidth]);
+    if (!bridgeReady) return;
+    const { chain, props } = JSON.parse(shaderConfig) as {
+      chain: string[];
+      props: Record<string, string>;
+    };
+    bridgeRef.current?.setAnime4kShaders(chain);
+    bridgeRef.current?.setShaderProps?.(props);
+  }, [bridgeRef, bridgeReady, srcKey, shaderConfig]);
 
   const setMode = (c: string) => {
     update({ playerAnime4kOverride: c });
-    bridgeRef.current?.setAnime4kShaders(
-      anime4kShadersFor(settings, src, c as Anime4kChoice, dims),
-    );
   };
 
   const displayMode: Anime4kChoice =

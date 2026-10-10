@@ -2,12 +2,13 @@
 <html lang="en" dir="ltr">
   <head>
     <meta charset="UTF-8" />
-    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, viewport-fit=cover" />
+    <meta name="theme-color" content="#111214" />
     <meta name="robots" content="noindex, nofollow, noarchive, nosnippet, noimageindex" />
     <meta name="googlebot" content="noindex, nofollow, noarchive, nosnippet, noimageindex" />
     <meta name="referrer" content="no-referrer" />
     <link rel="icon" type="image/png" href="/favicon.png" />
-    <title>Harbor</title>
+    <title>JL Media Vision</title>
     <link rel="preconnect" href="https://api.fontshare.com" crossorigin />
     <link rel="preconnect" href="https://cdn.fontshare.com" crossorigin />
     <link rel="preconnect" href="https://fonts.googleapis.com" />
@@ -23,14 +24,14 @@
       rel="stylesheet"
     />
     <link
-      href="https://fonts.googleapis.com/css2?family=Fraunces:ital,opsz,wght@0,9..144,100..900;1,9..144,100..900&family=Vazirmatn:wght@100..900&family=Inter:wght@100..900&family=IBM+Plex+Sans:wght@100..700&family=Plus+Jakarta+Sans:wght@100..800&family=Fredoka:wght@300..700&display=swap"
+      href="https://fonts.googleapis.com/css2?family=Oswald:wght@500;600;700&family=Fraunces:ital,opsz,wght@0,9..144,100..900;1,9..144,100..900&family=Vazirmatn:wght@100..900&family=Inter:wght@100..900&family=IBM+Plex+Sans:wght@100..700&family=Plus+Jakarta+Sans:wght@100..800&family=Fredoka:wght@300..700&family=Orbitron:wght@500..800&display=swap"
       rel="stylesheet"
     />
     <style>
       html,
       body,
       #root {
-        background: var(--color-canvas, #0a0a0a);
+        background: var(--color-canvas, #111214);
         color-scheme: dark;
         margin: 0;
         height: 100%;
@@ -44,6 +45,72 @@
         background: #0a0a0a;
         z-index: 9999;
         pointer-events: none;
+        transition: opacity 280ms ease-out;
+      }
+      #harbor-boot-chrome {
+        position: fixed;
+        top: 8px;
+        right: 10px;
+        display: flex;
+        gap: 4px;
+        z-index: 10000;
+        -webkit-app-region: no-drag;
+      }
+      #harbor-boot-chrome button {
+        width: 32px;
+        height: 28px;
+        border: 0;
+        border-radius: 6px;
+        background: transparent;
+        color: #878d9c;
+        font: 12px/1 system-ui, sans-serif;
+        cursor: pointer;
+      }
+      #harbor-boot-chrome button:hover {
+        background: #1c1e25;
+        color: #e9ecf2;
+      }
+      #harbor-boot-chrome button[data-act="close"]:hover {
+        background: #c0392b;
+        color: #fff;
+      }
+      #harbor-boot.gone {
+        opacity: 0;
+      }
+      #harbor-boot > .harbor-boot-mark {
+        width: 112px;
+        height: auto;
+        filter: drop-shadow(0 10px 30px rgba(255, 106, 31, 0.22));
+        transform-origin: center 65%;
+        animation:
+          harborBootBob 2400ms ease-in-out infinite,
+          harborBootGlow 2400ms ease-in-out infinite;
+      }
+      @keyframes harborBootBob {
+        0% {
+          transform: translateY(0) rotate(-2deg) scale(0.98);
+        }
+        25% {
+          transform: translateY(-3px) rotate(0deg) scale(1);
+        }
+        50% {
+          transform: translateY(0) rotate(2deg) scale(1.02);
+        }
+        75% {
+          transform: translateY(-3px) rotate(0deg) scale(1);
+        }
+        100% {
+          transform: translateY(0) rotate(-2deg) scale(0.98);
+        }
+      }
+      @keyframes harborBootGlow {
+        0%,
+        100% {
+          opacity: 0.78;
+        }
+        50% {
+          opacity: 1;
+        }
       }
       #root[data-startup-hidden] {
         visibility: hidden;
@@ -53,9 +120,32 @@
       (function () {
         try {
           var p = new URLSearchParams(window.location.search);
-          if (p.get("harbor-modal") === "1") {
+          var hdrOverlay = p.get("harbor-overlay") === "1";
+          if (p.get("harbor-dj") === "1") {
+            var bar = document.createElement("div");
+            bar.id = "harbor-boot-chrome";
+            bar.innerHTML =
+              '<button type="button" data-act="min" aria-label="Minimise">&#8211;</button>' +
+              '<button type="button" data-act="close" aria-label="Close">&#10005;</button>';
+            bar.addEventListener("click", function (event) {
+              var act = event.target && event.target.getAttribute("data-act");
+              if (!act) return;
+              var api = window.__TAURI__ && window.__TAURI__.window;
+              var win = api && api.getCurrentWindow && api.getCurrentWindow();
+              if (!win) return;
+              if (act === "min") win.minimize();
+              else win.close();
+            });
+            document.addEventListener("DOMContentLoaded", function () {
+              document.body.appendChild(bar);
+            });
+          }
+          if (p.get("harbor-modal") === "1" || hdrOverlay) {
             var s = document.createElement("style");
             s.textContent = "#harbor-boot{display:none !important}";
+            if (hdrOverlay) {
+              s.textContent += "html,body,#root{background:transparent !important}";
+            }
             document.head.appendChild(s);
           }
         } catch (e) {}
@@ -63,8 +153,27 @@
     </script>
   </head>
   <body>
-    <div id="harbor-boot"></div>
+    <div id="harbor-boot">
+      <img class="harbor-boot-mark" src="/brand/jl-mark.webp" alt="" aria-hidden="true" draggable="false" />
+    </div>
     <div id="root" inert data-startup-hidden></div>
+    <script>
+      // Paint the saved poster before React or the animation player loads.
+      try {
+        var art = JSON.parse(localStorage.getItem('harbor.custom-artwork.v1') || '{}').launch;
+        if (art && /^[\w-]{1,80}$/.test(art.id) && typeof art.poster === 'string' && art.poster.length < 200000 && /^data:image\/png;base64,[A-Za-z0-9+/=]+$/.test(art.poster)) {
+          var mark = document.querySelector('#harbor-boot > .harbor-boot-mark');
+          var custom = document.createElement('div');
+          custom.id = 'harbor-custom-boot-art';
+          custom.style.cssText = 'position:relative;width:128px;height:128px';
+          custom.setAttribute('aria-hidden', 'true');
+          var poster = document.createElement('img');
+          poster.src = art.poster; poster.alt = ''; poster.style.cssText = 'width:100%;height:100%;object-fit:contain';
+          custom.appendChild(poster); mark.after(custom); mark.style.display = 'none';
+        }
+      } catch (e) {}
+    </script>
+    <script type="module" src="/src/boot-artwork.ts"></script>
     <script type="module" src="/src/main.tsx"></script>
   </body>
 </html>

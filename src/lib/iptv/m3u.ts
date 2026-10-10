@@ -6,13 +6,15 @@ const EXTVLCOPT = "#EXTVLCOPT:";
 const KODIPROP = "#KODIPROP:";
 
 export function parseM3u(text: string, baseId: string): IptvChannel[] {
-  const lines = text.replace(/^﻿/, "").split(/\r?\n/);
-  const out: IptvChannel[] = [];
+  return [...iterateM3uChannels(text, baseId)];
+}
+
+export function* iterateM3uChannels(text: string, baseId: string): Generator<IptvChannel> {
   let pending: PendingEntry | null = null;
   let stickyGroup: string | null = null;
   let autoIndex = 0;
-  for (const raw of lines) {
-    const line = raw.trim();
+  for (const match of text.matchAll(/[^\r\n]+/g)) {
+    const line = match[0].trim();
     if (!line) continue;
     if (line.startsWith("#EXTM3U")) continue;
     if (line.startsWith(EXTINF)) {
@@ -52,7 +54,7 @@ export function parseM3u(text: string, baseId: string): IptvChannel[] {
     const tvgId = pending.attrs["tvg-id"] || pending.attrs["tvg-chno"] || null;
     const id = `${baseId}::${tvgId || pending.attrs["tvg-name"] || pending.title || `ch-${autoIndex}`}::${autoIndex}`;
     autoIndex += 1;
-    out.push({
+    yield {
       id,
       tvgId,
       name: displayName,
@@ -62,10 +64,9 @@ export function parseM3u(text: string, baseId: string): IptvChannel[] {
       catchupSource: pending.attrs["catchup-source"] || pending.attrs["catchup"] || null,
       durationSec: pending.durationSec,
       attrs: pending.attrs,
-    });
+    };
     pending = null;
   }
-  return out;
 }
 
 function isDecorativeRow(name: string): boolean {
@@ -155,7 +156,10 @@ function captureVlcOpt(rest: string, attrs: Record<string, string>): void {
   const eq = rest.indexOf("=");
   if (eq < 0) return;
   const key = rest.slice(0, eq).trim().toLowerCase();
-  const val = rest.slice(eq + 1).trim().replace(/^"|"$/g, "");
+  const val = rest
+    .slice(eq + 1)
+    .trim()
+    .replace(/^"|"$/g, "");
   if (!val) return;
   if (key === "http-user-agent") attrs["vlcopt-user-agent"] = val;
   else if (key === "http-referrer") attrs["vlcopt-referrer"] = val;
@@ -177,7 +181,8 @@ function capturePipeOpts(rest: string, attrs: Record<string, string>): void {
     const val = safeDecode(pair.slice(eq + 1).trim());
     if (!val) continue;
     if (key === "user-agent" && !attrs["vlcopt-user-agent"]) attrs["vlcopt-user-agent"] = val;
-    else if ((key === "referer" || key === "referrer") && !attrs["vlcopt-referrer"]) attrs["vlcopt-referrer"] = val;
+    else if ((key === "referer" || key === "referrer") && !attrs["vlcopt-referrer"])
+      attrs["vlcopt-referrer"] = val;
     else if (key === "cookie" && !attrs["vlcopt-cookie"]) attrs["vlcopt-cookie"] = val;
   }
 }
@@ -211,8 +216,7 @@ export function deriveEpgFromGetPhp(playlistUrl: string): string | null {
 export function deriveEpgUrls(playlistUrl: string): string[] {
   try {
     const u = new URL(playlistUrl);
-    const isXtream =
-      u.pathname.endsWith("get.php") || u.pathname.endsWith("player_api.php");
+    const isXtream = u.pathname.endsWith("get.php") || u.pathname.endsWith("player_api.php");
     if (!isXtream) return [];
     const username = u.searchParams.get("username");
     const password = u.searchParams.get("password");

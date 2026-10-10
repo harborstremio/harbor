@@ -1,0 +1,104 @@
+{
+ "items": [
+  {
+   "id": "tt1099212",
+   "title": "Twilight",
+   "year": "2008",
+   "type": "Film",
+   "section": "catalog",
+   "creator": "Catherine Hardwicke",
+   "description": "When Bella Swan moves to a small town in the Pacific Northwest, she falls in love with Edward Cullen, a mysterious classmate who reveals himself to be a 108-year-old vampire.",
+   "source": "https://www.imdb.com/title/tt1099212/",
+   "poster": "https://images.metahub.space/poster/medium/tt1099212/img",
+   "background": "https://images.metahub.space/background/medium/tt1099212/img",
+   "logo": "https://images.metahub.space/logo/medium/tt1099212/img",
+   "runtime": "122 min",
+   "genres": [
+    "Drama",
+    "Fantasy",
+    "Romance"
+   ],
+   "imdbRating": "5.4"
+  },
+  {
+   "id": "tt1259571",
+   "title": "The Twilight Saga: New Moon",
+   "year": "2009",
+   "type": "Film",
+   "section": "catalog",
+   "creator": "Chris Weitz",
+   "description": "After Edward leaves because of an incident involving Bella, Jacob Black becomes her best friend, but what Bella doesn't realize is that Jacob also has a secret that will suddenly change their lives.",
+   "source": "https://www.imdb.com/title/tt1259571/",
+   "poster": "https://images.metahub.space/poster/medium/tt1259571/img",
+   "background": "https://images.metahub.space/background/medium/tt1259571/img",
+   "logo": "https://images.metahub.space/logo/medium/tt1259571/img",
+   "runtime": "130 min",
+   "genres": [
+    "Adventure",
+    "Drama",
+    "Fantasy"
+   ],
+   "imdbRating": "4.8"
+  },
+  {
+   "id": "tt1325004",
+   "title": "The Twilight Saga: Eclipse",
+   "year": "2010",
+   "type": "Film",
+   "section": "catalog",
+   "creator": "David Slade",
+   "description": "Danger once again lurks for Bella, with a malicious vampire seeking revenge. Amidst the turmoil, Bella must choose between her love for Edward and her friendship with Jacob, knowing the decision could trigger a battle between them.",
+   "source": "https://www.imdb.com/title/tt1325004/",
+   "poster": "https://images.metahub.space/poster/medium/tt1325004/img",
+   "background": "https://images.metahub.space/background/medium/tt1325004/img",
+   "logo": "https://images.metahub.space/logo/medium/tt1325004/img",
+   "runtime": "123 min",
+   "genres": [
+    "Action",
+    "Adventure",
+    "Drama"
+   ],
+   "imdbRating": "5.1"
+  },
+  {
+   "id": "tt1324999",
+   "title": "The Twilight Saga: Breaking Dawn - Part 1",
+   "year": "2011",
+   "type": "Film",
+   "section": "catalog",
+   "creator": "Bill Condon",
+   "description": "A wedding and honeymoon bring unexpected and shocking consequences for Bella and Edward, including new complications with Jacob.",
+   "source": "https://www.imdb.com/title/tt1324999/",
+   "poster": "https://images.metahub.space/poster/medium/tt1324999/img",
+   "background": "https://images.metahub.space/background/medium/tt1324999/img",
+   "logo": "https://images.metahub.space/logo/medium/tt1324999/img",
+   "runtime": "117 min",
+   "genres": [
+    "Adventure",
+    "Drama",
+    "Fantasy"
+   ],
+   "imdbRating": "4.9"
+  },
+  {
+   "id": "tt1673434",
+   "title": "The Twilight Saga: Breaking Dawn - Part 2",
+   "year": "2012",
+   "type": "Film",
+   "section": "catalog",
+   "creator": "Bill Condon",
+   "description": "After the birth of Bella and Edward's daughter, Renesmee, the Cullens gather werewolves, vampire clans, and other allies from around the world to protect her after a false allegation puts her life in danger.",
+   "source": "https://www.imdb.com/title/tt1673434/",
+   "poster": "https://images.metahub.space/poster/medium/tt1673434/img",
+   "background": "https://images.metahub.space/background/medium/tt1673434/img",
+   "logo": "https://images.metahub.space/logo/medium/tt1673434/img",
+   "runtime": "115 min",
+   "genres": [
+    "Adventure",
+    "Drama",
+    "Fantasy"
+   ],
+   "imdbRating": "5.6"
+  }
+ ]
+}

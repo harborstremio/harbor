@@ -1,4 +1,5 @@
-import { Play, RotateCcw } from "lucide-react";
+import { RotateCcw } from "lucide-react";
+import { Play } from "@/components/icons/play-filled";
 import { useT } from "@/lib/i18n";
 import { useActiveKid } from "@/lib/profiles";
 
@@ -87,16 +88,20 @@ export function ResumePrompt({
         <h2 className="mt-3 line-clamp-2 font-display text-[24px] font-semibold leading-tight text-ink">
           {title}
         </h2>
-        <p className="mt-2 text-[13.5px] text-ink-muted">
-          {t("{watched} of {total} watched ({pct}%).", {
-            watched: formatTime(resumeSec),
-            total: formatTime(totalSec),
-            pct,
-          })}
-        </p>
-        <div className="mt-5 h-1 w-full overflow-hidden rounded-full bg-elevated">
-          <div className="h-full bg-accent" style={{ width: `${pct}%` }} />
-        </div>
+        {totalSec > 0 && (
+          <>
+            <p className="mt-2 text-[13.5px] text-ink-muted">
+              {t("{watched} of {total} watched ({pct}%).", {
+                watched: formatTime(resumeSec),
+                total: formatTime(totalSec),
+                pct,
+              })}
+            </p>
+            <div className="mt-5 h-1 w-full overflow-hidden rounded-full bg-elevated">
+              <div className="h-full bg-accent" style={{ width: `${pct}%` }} />
+            </div>
+          </>
+        )}
         <div className="mt-6 flex flex-col gap-2.5 sm:flex-row">
           <button
             onClick={onResume}

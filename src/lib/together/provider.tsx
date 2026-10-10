@@ -1,25 +1,10 @@
-import {
-  createContext,
-  useCallback,
-  useContext,
-  useEffect,
-  useMemo,
-  useRef,
-  useState,
-  type ReactNode,
-} from "react";
+import { createContext, useCallback, useContext, useEffect, useMemo, useRef, useState, type ReactNode } from "react";
 import { useSettings } from "@/lib/settings";
 import { randomUuid } from "@/lib/uuid";
 import { TogetherClient, type RoomEvent, type RoomSnapshot } from "./client";
 import { useSelfIdentity } from "./use-self-identity";
-import { relayOutdated } from "./relay-version";
-import { clearInviteParams, parseInviteFromLocation } from "./invite";
-import {
-  deriveHostSource,
-  deriveRoomGuestPick,
-  type HostSourceInfo,
-  type LastInviteMeta,
-} from "./room-derive";
+import { isPublicRelay, relayOutdated } from "./relay-version";
+import { deriveHostSource, deriveRoomGuestPick, type HostSourceInfo, type LastInviteMeta } from "./room-derive";
 import { applyRoomEvent } from "./provider-events";
 import type {
   ChatMessage,
@@ -82,14 +67,7 @@ type TogetherValue = {
   dismissSummon: () => void;
   sendCursor: (x: number, y: number, visible: boolean, path: string) => void;
   remoteCursors: RemoteCursor[];
-  sendDraw: (
-    strokeId: string,
-    phase: "start" | "point" | "end" | "clear",
-    path: string,
-    x?: number,
-    y?: number,
-    color?: string,
-  ) => void;
+  sendDraw: (strokeId: string, phase: "start" | "point" | "end" | "clear", path: string, x?: number, y?: number, color?: string) => void;
   onIncomingDraw: (cb: (e: IncomingDraw) => void) => () => void;
   sendPresence: (location?: ParticipantLocation) => void;
   presenceMap: Map<string, number>;
@@ -98,7 +76,8 @@ type TogetherValue = {
   suppressOutgoingFor: (ms: number) => void;
   onIncomingState: (cb: (state: SyncState) => void) => () => void;
   modalOpen: boolean;
-  openModal: () => void;
+  modalOwner: string | null;
+  openModal: (owner: string) => void;
   closeModal: () => void;
   incomingInvite: IncomingInvite | null;
   dismissInvite: () => void;
@@ -186,20 +165,20 @@ export function TogetherProvider({ children }: { children: ReactNode }) {
     lastError: null,
   });
   const [chat, setChat] = useState<ChatMessage[]>([]);
-  const [modalOpen, setModalOpen] = useState(false);
+  const [modalOwner, setModalOwner] = useState<string | null>(null);
+  const modalOpen = modalOwner !== null;
   const [incomingInvite, setIncomingInvite] = useState<IncomingInvite | null>(null);
   const [incomingHostLeaving, setIncomingHostLeaving] = useState<IncomingHostLeaving | null>(null);
-  const [incomingParticipantLeft, setIncomingParticipantLeft] =
-    useState<IncomingParticipantLeft | null>(null);
+  const [incomingParticipantLeft, setIncomingParticipantLeft] = useState<IncomingParticipantLeft | null>(null);
   const [incomingSummon, setIncomingSummon] = useState<IncomingSummon | null>(null);
   const [cursorMap, setCursorMap] = useState<Map<string, RemoteCursor>>(new Map());
   const [presenceMap, setPresenceMap] = useState<Map<string, number>>(new Map());
-  const [participantLocations, setParticipantLocations] = useState<
-    Map<string, ParticipantLocation>
-  >(new Map());
+  const [participantLocations, setParticipantLocations] = useState<Map<string, ParticipantLocation>>(
+    new Map(),
+  );
 
-  const openModal = useCallback(() => setModalOpen(true), []);
-  const closeModal = useCallback(() => setModalOpen(false), []);
+  const openModal = useCallback((owner: string) => setModalOwner(owner), []);
+  const closeModal = useCallback(() => setModalOwner(null), []);
   const dismissInvite = useCallback(() => setIncomingInvite(null), []);
   const dismissHostLeaving = useCallback(() => setIncomingHostLeaving(null), []);
   const dismissParticipantLeft = useCallback(() => setIncomingParticipantLeft(null), []);
@@ -290,6 +269,7 @@ export function TogetherProvider({ children }: { children: ReactNode }) {
   const pendingInviteRef = useRef<{ relayUrl: string; roomCode: string } | null>(null);
   useEffect(() => {
     void (async () => {
+      const { parseInviteFromLocation, clearInviteParams } = await import("./invite");
       const invite = parseInviteFromLocation();
       if (!invite) return;
       pendingInviteRef.current = invite;
@@ -297,7 +277,7 @@ export function TogetherProvider({ children }: { children: ReactNode }) {
       if (settings.togetherRelayUrl !== invite.relayUrl) {
         update({ togetherRelayUrl: invite.relayUrl });
       }
-      setModalOpen(true);
+      setModalOwner("auto");
     })();
   }, []);
 
@@ -461,7 +441,10 @@ export function TogetherProvider({ children }: { children: ReactNode }) {
   const hostSource = useMemo(() => deriveHostSource(snapshot), [snapshot]);
   const roomGuestPick = deriveRoomGuestPick(snapshot, clientIdRef.current, lastInviteRef.current);
   const lastInviteProto = lastInviteRef.current?.proto ?? 0;
-  const isRelayOutdated = snapshot.state === "joined" && relayOutdated(snapshot.relayVersion);
+  const isRelayOutdated =
+    snapshot.state === "joined" &&
+    !isPublicRelay(relayUrl ?? "") &&
+    relayOutdated(snapshot.relayVersion);
 
   const value: TogetherValue = useMemo(
     () => ({
@@ -498,6 +481,7 @@ export function TogetherProvider({ children }: { children: ReactNode }) {
       suppressOutgoingFor,
       onIncomingState,
       modalOpen,
+      modalOwner,
       openModal,
       closeModal,
       incomingInvite,
@@ -547,6 +531,7 @@ export function TogetherProvider({ children }: { children: ReactNode }) {
       suppressOutgoingFor,
       onIncomingState,
       modalOpen,
+      modalOwner,
       openModal,
       closeModal,
       incomingInvite,

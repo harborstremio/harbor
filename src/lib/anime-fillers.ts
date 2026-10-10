@@ -1,10 +1,10 @@
+import { animeCatalogRequest } from "./providers/anime-catalog-client";
 import { fetch as tauriHttpFetch } from "@tauri-apps/plugin-http";
 
 const CACHE_KEY = "harbor.animefillercache.v2";
 const TTL_MS = 14 * 24 * 60 * 60 * 1000;
 const NEG_TTL_MS = 24 * 60 * 60 * 1000;
 const AFL = "https://www.animefillerlist.com/shows";
-const JIKAN = "https://api.jikan.moe/v4";
 const UA = "Mozilla/5.0 (Windows NT 10.0; Win64; x64) Harbor";
 const isTauri = typeof window !== "undefined" && "__TAURI_INTERNALS__" in window;
 
@@ -67,21 +67,10 @@ function slugify(title: string): string {
 
 async function malInfo(malId: number): Promise<{ titles: string[]; year?: number }> {
   try {
-    const ac = new AbortController();
-    const timer = setTimeout(() => ac.abort(), 8000);
-    const r = await fetch(`${JIKAN}/anime/${malId}`, { signal: ac.signal }).finally(() =>
-      clearTimeout(timer),
-    );
-    if (!r.ok) return { titles: [] };
-    const j = (await r.json()) as {
-      data?: {
-        title?: string;
-        title_english?: string;
-        titles?: Array<{ title?: string }>;
-        year?: number;
-        aired?: { from?: string };
-      };
-    };
+    const j = await animeCatalogRequest<{
+      title?: string; title_english?: string; titles?: Array<{ title?: string }>;
+      year?: number; aired?: { from?: string };
+    }>(`/anime/${malId}`);
     const d = j?.data ?? {};
     const titles: string[] = [];
     if (d.title_english) titles.push(d.title_english);

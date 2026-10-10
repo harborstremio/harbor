@@ -1,0 +1,159 @@
+.sports-access-page {
+  height: 100%;
+  overflow: auto;
+  overscroll-behavior: contain;
+  padding: clamp(28px, 4vw, 64px);
+  padding-block-start: clamp(88px, 10vh, 112px);
+  color: var(--color-ink);
+  background: var(--color-canvas);
+}
+.sports-access-notice {
+  max-width: 760px;
+  margin-inline: auto;
+  padding-block: 16px 32px;
+}
+.sports-access-notice h1 {
+  font-size: clamp(25px, 3vw, 32px);
+  line-height: 1.2;
+  letter-spacing: -0.035em;
+  font-weight: 700;
+  margin: 0 0 16px;
+  outline: none;
+}
+#sports-access-title:focus {
+  outline: none !important;
+  box-shadow: none !important;
+}
+.sports-access-notice p,
+.sports-usage-details p {
+  font-size: 14px;
+  line-height: 1.65;
+  color: var(--color-ink-muted);
+}
+.sports-access-intro {
+  margin: 0 0 26px;
+}
+.sports-access-sections {
+  display: grid;
+  gap: 20px;
+}
+.sports-access-sections h2 {
+  font-size: 15px;
+  line-height: 1.4;
+  font-weight: 650;
+  margin: 0 0 5px;
+}
+.sports-access-sections p {
+  margin: 0;
+}
+.sports-usage-details {
+  margin-block: 24px;
+  font-size: 14px;
+  color: var(--color-ink-muted);
+}
+.sports-usage-details summary {
+  cursor: pointer;
+  min-height: 44px;
+  align-content: center;
+  color: var(--color-ink);
+  font-weight: 600;
+}
+.sports-policy-links {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 8px;
+}
+.sports-policy-links button {
+  display: inline-flex;
+  align-items: center;
+  gap: 7px;
+  min-height: 40px;
+  text-align: start;
+  padding: 8px 12px;
+  background: var(--color-elevated);
+  color: var(--color-ink);
+  border-radius: 8px;
+  font-size: 12px;
+}
+.sports-policy-logo {
+  display: grid;
+  place-items: center;
+  flex-shrink: 0;
+  width: 24px;
+  height: 24px;
+}
+.sports-policy-logo img {
+  display: block;
+  max-width: 100%;
+  max-height: 100%;
+  object-fit: contain;
+}
+.sports-access-check {
+  display: flex;
+  align-items: flex-start;
+  gap: 12px;
+  padding: 16px;
+  background: var(--color-surface);
+  border-radius: 10px;
+  font-size: 14px;
+  line-height: 1.55;
+  cursor: pointer;
+}
+.sports-access-check input {
+  width: 19px;
+  height: 19px;
+  margin-block-start: 2px;
+  flex-shrink: 0;
+  accent-color: var(--color-accent);
+}
+.sports-access-actions {
+  display: flex;
+  flex-wrap: wrap;
+  justify-content: space-between;
+  gap: 12px;
+  margin-top: 20px;
+}
+.sports-access-actions button {
+  min-height: 44px;
+  padding: 10px 18px;
+  border-radius: 9px;
+  font-size: 14px;
+  font-weight: 650;
+  background: var(--color-elevated);
+  color: var(--color-ink);
+}
+.sports-access-actions .sports-access-accept {
+  background: var(--color-ink);
+  color: var(--color-canvas);
+}
+.sports-access-actions button:disabled {
+  opacity: 0.4;
+  cursor: not-allowed;
+}
+.sports-access-actions button:not(:disabled):hover,
+.sports-policy-links button:hover {
+  filter: brightness(1.08);
+}
+.sports-access-notice :is(button, input, summary):focus-visible,
+.sports-usage-details :is(button, summary):focus-visible {
+  outline: 2px solid var(--color-accent);
+  outline-offset: 3px;
+}
+.sports-access-notice .sports-access-footnote {
+  font-size: 12px;
+  margin-top: 16px;
+}
+@media (max-width: 520px) {
+  .sports-access-page {
+    padding: 80px 20px 24px;
+  }
+  .sports-access-actions {
+    flex-direction: column-reverse;
+  }
+  .sports-access-actions button {
+    width: 100%;
+  }
+  .sports-access-check {
+    padding: 13px;
+  }
+}

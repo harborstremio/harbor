@@ -1,4 +1,6 @@
 import { activeProfileId, activeProfileIsPrimary } from "@/lib/active-profile-id";
+import { getSecret, setSecret } from "@/lib/secret-store";
+import { clearPendingWatches } from "./pending-sync";
 import type { SimklSession } from "./types";
 
 const BASE_KEY = "harbor.simkl.session.v1";
@@ -14,12 +16,12 @@ let loaded = false;
 function read(): SimklSession | null {
   try {
     const key = keyFor();
-    let raw = localStorage.getItem(key);
+    let raw = getSecret(key);
     if (!raw) {
-      const legacy = localStorage.getItem(BASE_KEY);
+      const legacy = getSecret(BASE_KEY);
       if (legacy && activeProfileIsPrimary()) {
-        localStorage.setItem(key, legacy);
-        localStorage.removeItem(BASE_KEY);
+        setSecret(key, legacy);
+        setSecret(BASE_KEY, null);
         raw = legacy;
       }
     }
@@ -34,8 +36,8 @@ function read(): SimklSession | null {
 
 function write(session: SimklSession | null): void {
   try {
-    if (session) localStorage.setItem(keyFor(), JSON.stringify(session));
-    else localStorage.removeItem(keyFor());
+    if (session) setSecret(keyFor(), JSON.stringify(session));
+    else setSecret(keyFor(), null);
   } catch {
     return;
   }
@@ -60,6 +62,9 @@ export function getSession(): SimklSession | null {
 
 export function setSession(session: SimklSession | null): void {
   ensureLoaded();
+  if (!session || !cached || session.username !== cached.username) {
+    clearPendingWatches();
+  }
   cached = session;
   write(session);
   for (const fn of subscribers) fn();

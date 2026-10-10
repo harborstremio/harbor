@@ -6,6 +6,7 @@ export type AddonHit = {
   id: string;
   name: string;
   logo?: string;
+  transportUrl?: string;
   blurb?: string;
   installed: boolean;
 };
@@ -41,6 +42,7 @@ export function searchAddonIndex(query: string, limit = 6): AddonHit[] {
       id: a.id,
       name,
       logo: a.manifest?.logo,
+      transportUrl: a.transportUrl,
       blurb: a.manifest?.description,
       installed: true,
     });
@@ -59,6 +61,7 @@ export function searchAddonIndex(query: string, limit = 6): AddonHit[] {
     out.set(e.id, {
       id: e.id,
       name,
+      transportUrl: e.transportUrl,
       blurb: e.curatorNote,
       installed: isInstalled(e.id),
     });

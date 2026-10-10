@@ -11,6 +11,7 @@ export type IptvChannel = {
 };
 
 export type IptvPlaylist = {
+  loading?: boolean;
   id: string;
   name: string;
   url: string;

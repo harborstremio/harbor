@@ -1,0 +1,18 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 260 140" fill="#0e1219">
+  <title>Three bats banking across the moon</title>
+  <!-- Elbows form the leading edge; long fingers tension the scalloped membrane. -->
+  <g transform="translate(78 85) rotate(-13)">
+    <path d="M-3-3C-13-8-19-21-29-26L-53-30C-43-24-39-14-38-3Q-29-11-23 2Q-15-4-9 9L-4 7 0 14 4 7 9 9Q15-4 23 2Q29-11 38-3C39-14 43-24 53-30L29-26C19-21 13-8 3-3Z"/>
+    <path d="M-5 0-6-13-2-9Q0-11 2-9L6-13 5 0Q9 10 0 14-9 10-5 0Z"/>
+    <g fill="none" stroke="#222730" stroke-width=".65" opacity=".8"><path d="M-5-1-29-25-38-3M-29-25-23 2M-29-25-9 9M5-1 29-25 38-3M29-25 23 2M29-25 9 9"/></g>
+  </g>
+  <g transform="translate(174 43) rotate(16) scale(.69)">
+    <path d="M-4-1C-13-15-14-36-31-49L-46-62C-39-40-38-29-43-14Q-32-23-24-7Q-15-10-8 7L-3 7 0 14 4 7 9 7Q17-8 24-6Q30-17 42-12C39-29 45-45 53-55L30-40C19-30 14-13 4-1Z"/>
+    <path d="M-5 1-5-11-2-7Q0-9 2-7L5-11 5 1Q9 11 0 14-9 11-5 1Z"/>
+    <path d="M-5-1-29-43-43-14M-29-43-24-7M5-1 30-39 42-12M30-39 24-6" fill="none" stroke="#222730" stroke-width=".8"/>
+  </g>
+  <g transform="translate(222 100) rotate(-22) scale(.46)">
+    <path d="M-4-2Q-14-16-33-10L-54 4Q-36 2-30 25Q-26 12-16 20Q-14 8-6 10L0 16 6 10Q14 8 16 20Q26 12 30 25Q36 2 54 4L33-10Q14-16 4-2Z"/>
+    <path d="M-5 0-5-12-2-8Q0-10 2-8L5-12 5 0Q8 10 0 16-8 10-5 0Z"/>
+  </g>
+</svg>

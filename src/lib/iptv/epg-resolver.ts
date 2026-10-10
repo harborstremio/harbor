@@ -4,10 +4,30 @@ import { epgOffsetHoursPref } from "./settings-bridge";
 import type { EpgIndex, EpgProgram, IptvChannel } from "./types";
 
 const NOISE_WORDS = new Set([
-  "hd", "fhd", "uhd", "4k", "sd", "raw", "alt", "backup",
-  "channel", "channels", "network", "tv",
-  "the", "and", "of", "for",
-  "us", "usa", "uk", "ca", "mx", "br", "am", "fm",
+  "hd",
+  "fhd",
+  "uhd",
+  "4k",
+  "sd",
+  "raw",
+  "alt",
+  "backup",
+  "channel",
+  "channels",
+  "network",
+  "tv",
+  "the",
+  "and",
+  "of",
+  "for",
+  "us",
+  "usa",
+  "uk",
+  "ca",
+  "mx",
+  "br",
+  "am",
+  "fm",
 ]);
 
 function tokenize(name: string): string[] {
@@ -56,27 +76,50 @@ function nameKey(s: string): string {
   return s.toLowerCase().replace(/[^a-z0-9]/g, "");
 }
 
-function shiftHours(channel: IptvChannel): number {
-  const global = epgOffsetHoursPref();
+function shiftHours(channel: IptvChannel, global = epgOffsetHoursPref()): number {
   const raw = channel.attrs["tvg-shift"];
   if (!raw) return global;
   const n = Number.parseFloat(raw);
   return (Number.isFinite(n) ? n : 0) + global;
 }
 
+// merged EPG sources routinely list the same programme more than once, or with
+// slightly different times. Overlapping entries stack on top of each other in the
+// guide, so collapse them to one run before anything renders.
+function sanitize(programs: EpgProgram[]): EpgProgram[] {
+  const sorted = [...programs]
+    .filter((p) => p.endMs > p.startMs)
+    .sort((a, b) => a.startMs - b.startMs || b.endMs - a.endMs);
+  const out: EpgProgram[] = [];
+  for (const p of sorted) {
+    const last = out[out.length - 1];
+    if (!last) {
+      out.push(p);
+      continue;
+    }
+    if (p.startMs >= last.endMs) {
+      out.push(p);
+      continue;
+    }
+    if (p.endMs - p.startMs > last.endMs - last.startMs) out[out.length - 1] = p;
+  }
+  return out;
+}
+
 function applyShift(programs: EpgProgram[], hours: number): EpgProgram[] {
-  if (hours === 0) return programs;
+  if (hours === 0) return sanitize(programs);
   const ms = hours * 3_600_000;
-  return programs.map((p) => ({ ...p, startMs: p.startMs + ms, endMs: p.endMs + ms }));
+  return sanitize(programs.map((p) => ({ ...p, startMs: p.startMs + ms, endMs: p.endMs + ms })));
 }
 
 export function epgProgramsForChannel(
   channel: IptvChannel,
   epg: EpgIndex | null,
   tvgIdCounts: ReadonlyMap<string, number>,
+  offsetHours?: number,
 ): EpgProgram[] | undefined {
   if (!epg) return undefined;
-  const shift = shiftHours(channel);
+  const shift = shiftHours(channel, offsetHours);
   const override = getEpgOverride(channel.id);
   if (override) {
     const ov = epg.byChannel.get(override);

@@ -1,12 +1,13 @@
 import type { Meta } from "@/lib/cinemeta";
 
+import { releaseYear } from "@/lib/release-info";
 export function dropUnreleased(metas: Meta[]): Meta[] {
   const now = new Date();
   const today = now.toISOString().slice(0, 10);
   const yearNow = now.getUTCFullYear();
   return metas.filter((m) => {
     if (m.releaseDate) return m.releaseDate.slice(0, 10) <= today;
-    const y = m.releaseInfo ? parseInt(m.releaseInfo.slice(0, 4), 10) : NaN;
+    const y = releaseYear(m.releaseInfo);
     return !Number.isFinite(y) || y <= yearNow;
   });
 }
@@ -14,17 +15,11 @@ export function dropUnreleased(metas: Meta[]): Meta[] {
 const UNSAFE_CINEMETA_GENRE = /^(action|biography|crime|history|horror|romance|thriller|war)$/i;
 
 export function dropUnsafeGenres(metas: Meta[]): Meta[] {
-  return metas.filter(
-    (meta) => !meta.genres?.some((genre) => /^(horror|thriller)$/i.test(genre.trim())),
-  );
-}
-
-export function dropAdultContent(metas: Meta[]): Meta[] {
   return metas.filter((meta) => !meta.adult);
 }
 
 export function dropUnsafeCinemetaKids(metas: Meta[]): Meta[] {
-  return dropAdultContent(metas).filter((meta) => {
+  return dropUnsafeGenres(metas).filter((meta) => {
     const genres = meta.genres ?? [];
     return (
       !genres.some((genre) => UNSAFE_CINEMETA_GENRE.test(genre.trim())) &&

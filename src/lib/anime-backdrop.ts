@@ -9,6 +9,7 @@ import { isDerivedAnimeFormat } from "@/lib/providers/anime-format";
 import { externalToKitsu, kitsuToAnilist } from "@/lib/providers/anime-mapping";
 import { stripFranchiseSuffix } from "@/lib/providers/jikan";
 import { kitsuCoverImage, parseKitsuId } from "@/lib/providers/kitsu";
+import { staticHeroArt } from "@/lib/providers/anime-hero-art-static";
 import { tmdbAnimeLogo } from "@/lib/providers/tmdb";
 import { fetchTvdbArtwork } from "@/lib/providers/tvdb-proxy";
 
@@ -32,11 +33,18 @@ export async function resolveHeroArt(tmdbKey: string, meta: Meta): Promise<HeroA
   if (hit) return hit;
   const existing = inflight.get(meta.id);
   if (existing) return existing;
-  const p = computeArt(tmdbKey, meta).then((art) => {
+  const p = (async (): Promise<HeroArt> => {
+    const stat = await staticHeroArt(meta.id).catch(() => undefined);
+    const art: HeroArt = stat?.bg
+      ? { background: stat.bg, logo: stat.logo ?? meta.logo }
+      : await computeArt(tmdbKey, meta).then((c) => ({
+          background: c.background,
+          logo: stat?.logo ?? c.logo,
+        }));
     lruSet(cache, meta.id, art, CACHE_MAX);
     inflight.delete(meta.id);
     return art;
-  });
+  })();
   inflight.set(meta.id, p);
   return p;
 }

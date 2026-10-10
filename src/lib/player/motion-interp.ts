@@ -9,7 +9,9 @@ export async function applyMotionInterp(on: boolean): Promise<void> {
       ]
     : [
         ["interpolation", "no"],
-        ["video-sync", "audio"],
+        // Pace frames to the display (audio is resampled slightly to match) rather than to the
+        // audio clock: removes the judder fast sports motion shows with "audio" sync.
+        ["video-sync", "display-resample"],
       ];
   await Promise.all(
     props.map(([name, value]) =>

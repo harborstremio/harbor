@@ -1,3 +1,6 @@
+import { activeProfileId } from "@/lib/active-profile-id";
+import { getSession } from "./session";
+import { rememberTraktWatched } from "./watched-keys";
 import { traktRequest } from "./client";
 import type { TraktTarget } from "./types";
 
@@ -15,7 +18,7 @@ export type HistoryItem = {
   number?: number;
 };
 
-export async function fetchWatchedHistory(limit = 200): Promise<HistoryItem[]> {
+export async function fetchWatchedHistory(limit = 200, strict = false): Promise<HistoryItem[]> {
   type Raw = {
     id: number;
     watched_at: string;
@@ -37,9 +40,10 @@ export async function fetchWatchedHistory(limit = 200): Promise<HistoryItem[]> {
       ids: { imdb?: string; tmdb?: number };
     };
   };
-  const rows = await traktRequest<Raw[]>(`/sync/history?limit=${limit}`).catch(
-    () => [] as Raw[],
-  );
+  const rows = await traktRequest<Raw[]>(`/sync/history?limit=${limit}`).catch((error) => {
+    if (strict) throw error;
+    return [] as Raw[];
+  });
   return rows.map((r) => {
     if (r.type === "movie" && r.movie) {
       return {
@@ -66,30 +70,48 @@ export async function fetchWatchedHistory(limit = 200): Promise<HistoryItem[]> {
   });
 }
 
+type HistoryWriteResponse = {
+  added?: { movies?: number; episodes?: number };
+  existing?: { movies?: number; episodes?: number };
+};
+
+// Trakt returns 200 with the miss listed under `not_found`, so the status alone cannot
+// distinguish a write from a no-op.
+function writtenCount(response: HistoryWriteResponse | undefined): number {
+  return (
+    (response?.added?.movies ?? 0) +
+    (response?.added?.episodes ?? 0) +
+    (response?.existing?.movies ?? 0) +
+    (response?.existing?.episodes ?? 0)
+  );
+}
+
 export async function pushWatched(target: TraktTarget): Promise<boolean> {
   try {
     if (target.kind === "movie") {
-      await traktRequest("/sync/history", {
+      const response = await traktRequest<HistoryWriteResponse>("/sync/history", {
         method: "POST",
         body: { movies: [{ ids: target.ids }] },
       });
-      return true;
+      return writtenCount(response) > 0;
     }
     if (target.kind === "episode") {
-      await traktRequest("/sync/history", {
-        method: "POST",
-        body: {
-          shows: [
-            {
-              ids: target.show.ids,
-              seasons: [
-                { number: target.season, episodes: [{ number: target.number }] },
+      const body =
+        target.episodeIds && Object.keys(target.episodeIds).length > 0
+          ? { episodes: [{ ids: target.episodeIds }] }
+          : {
+              shows: [
+                {
+                  ids: target.show.ids,
+                  seasons: [{ number: target.season, episodes: [{ number: target.number }] }],
+                },
               ],
-            },
-          ],
-        },
+            };
+      const response = await traktRequest<HistoryWriteResponse>("/sync/history", {
+        method: "POST",
+        body,
       });
-      return true;
+      return writtenCount(response) > 0;
     }
   } catch {
     return false;
@@ -98,7 +120,11 @@ export async function pushWatched(target: TraktTarget): Promise<boolean> {
 }
 
 export async function fetchWatchedKeySet(): Promise<Set<string>> {
-  const rows = await fetchWatchedHistory(1000);
+  const profile = activeProfileId();
+  const session = getSession();
+  const rows = await fetchWatchedHistory(1000, true);
+  if (profile !== activeProfileId() || session !== getSession())
+    throw new Error("Trakt session changed");
   const set = new Set<string>();
   for (const r of rows) {
     if (r.type === "movie") {
@@ -113,5 +139,6 @@ export async function fetchWatchedKeySet(): Promise<Set<string>> {
       }
     }
   }
+  rememberTraktWatched(set);
   return set;
 }

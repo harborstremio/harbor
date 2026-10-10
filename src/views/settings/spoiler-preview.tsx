@@ -1,5 +1,4 @@
-import still1 from "@/assets/preview/blur1.png";
-import still2 from "@/assets/preview/blur2.png";
+import { useSettingsSamples } from "@/lib/sample-artwork";
 import {
   SPOILER_TEXT_CLASS,
   SPOILER_THUMB_CLASS,
@@ -8,49 +7,49 @@ import {
 } from "@/lib/spoilers";
 import { useSettings } from "@/lib/settings";
 import { useT } from "@/lib/i18n";
+import { PreviewImage } from "./preview-image";
 
 export function SpoilerPreview() {
+  const samples = useSettingsSamples();
+  const first = samples[0];
+  const second = samples[1] || first;
   const { settings } = useSettings();
   const t = useT();
   const mask = spoilerMaskFor(settings, { watched: false, isNextUp: false });
   const active = mask.thumb || mask.title || mask.desc;
   return (
-    <div className="mt-1 flex flex-col gap-3 rounded-2xl border border-edge-soft bg-canvas/30 p-4">
+    <div className="flex flex-col gap-4 rounded-[12px] bg-elevated p-4">
       <div className="flex items-center justify-between gap-2">
-        <span className="text-[10.5px] font-bold uppercase tracking-[0.16em] text-ink-subtle">
-          {t("Preview")}
+        <span className="harbor-settings-label">
+          {t("Unwatched episodes")}
         </span>
         {active && (
-          <span className="flex items-center gap-1.5 text-[11px] text-ink-subtle">
+          <span className="flex items-center gap-2 text-[15.5px] leading-[22px] text-ink-subtle">
             <span className="h-1.5 w-1.5 rounded-full bg-accent" />
             {t("Hover to peek")}
           </span>
         )}
       </div>
-      <div className="flex gap-4">
+      <div className="flex flex-col gap-5">
         <PreviewCard
           mask={mask}
           n={7}
-          title={t("The Last Stand")}
+          title={first.name}
           rating="8.9"
           runtime={48}
-          img={still1}
+          img={first.background || first.poster || ""}
           imgPos="object-center"
-          synopsis={t(
-            "With the city surrounded, an unlikely alliance forms as a long-buried secret finally comes to light.",
-          )}
+          synopsis={first.description || ""}
         />
         <PreviewCard
           mask={mask}
           n={8}
-          title={t("No Way Out")}
+          title={second.name}
           rating="9.1"
           runtime={51}
-          img={still2}
+          img={second.background || second.poster || ""}
           imgPos="object-center"
-          synopsis={t(
-            "Loyalties shatter as the survivors realize the enemy has been among them all along.",
-          )}
+          synopsis={second.description || ""}
         />
       </div>
     </div>
@@ -79,9 +78,9 @@ function PreviewCard({
   const t = useT();
   return (
     <div className="group min-w-0 flex-1 cursor-default select-none">
-      <div className="relative aspect-video overflow-hidden rounded-xl">
+      <div className="relative aspect-video overflow-hidden rounded-md">
         <div className={`absolute inset-0 ${mask.thumb ? SPOILER_THUMB_CLASS : ""}`}>
-          <img src={img} alt="" draggable={false} className={`h-full w-full object-cover ${imgPos}`} />
+          <PreviewImage src={img} className={`h-full w-full object-cover ${imgPos}`} />
         </div>
         <span className="absolute start-2 top-2 rounded-md bg-canvas/95 px-1.5 py-0.5 text-[11px] font-semibold text-ink">
           {n}
@@ -94,14 +93,14 @@ function PreviewCard({
         </span>
       </div>
       <div className="mt-2.5 flex flex-col gap-0.5 px-0.5">
-        <span className={`text-[13.5px] font-semibold text-ink ${mask.title ? SPOILER_TEXT_CLASS : ""}`}>
+        <span className={`text-[15px] font-semibold text-ink ${mask.title ? SPOILER_TEXT_CLASS : ""}`}>
           {title}
         </span>
-        <span className="text-[11.5px] text-ink-subtle">
+        <span className="text-[13px] text-ink-subtle">
           E{n} · {t("{n} min", { n: runtime })}
         </span>
         <p
-          className={`mt-0.5 line-clamp-2 min-h-[40px] text-[12px] leading-relaxed text-ink-muted ${
+          className={`mt-0.5 line-clamp-2 text-[14px] leading-[20px] text-ink-muted ${
             mask.desc ? SPOILER_TEXT_CLASS : ""
           }`}
         >

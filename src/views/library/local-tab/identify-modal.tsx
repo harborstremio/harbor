@@ -1,10 +1,11 @@
 import { useEffect, useMemo, useState } from "react";
 import { createPortal } from "react-dom";
-import { Loader2, Search, X } from "lucide-react";
+import { Loader2, X } from "lucide-react";
+import { Search } from "@/components/icons/search-icon";
 import { get, IMG } from "@/lib/providers/tmdb/tmdb-client";
 import { useSettings } from "@/lib/settings";
 import { useT } from "@/lib/i18n";
-import type { LocalEntry } from "@/lib/local-library";
+import { parseFilename, type LocalEntry } from "@/lib/local-library";
 
 type Candidate = {
   tmdbId: number;
@@ -24,11 +25,7 @@ export type IdentifyResolution = {
   type: "movie" | "show";
 };
 
-async function searchTmdb(
-  key: string,
-  kind: "movie" | "tv",
-  query: string,
-): Promise<Candidate[]> {
+async function searchTmdb(key: string, kind: "movie" | "tv", query: string): Promise<Candidate[]> {
   const data = await get<{ results?: any[] }>(key, `search/${kind}`, {
     query,
     include_adult: "false",
@@ -86,8 +83,9 @@ export function IdentifyModal({
 
   useEffect(() => {
     if (!head) return;
-    setKind(head.type === "show" ? "tv" : "movie");
-    setQuery(seedQuery(head.title ?? ""));
+    const inferred = parseFilename(head.filename);
+    setKind(inferred.type === "show" || head.type === "show" ? "tv" : "movie");
+    setQuery(seedQuery(inferred.type === "show" ? inferred.title : (head.title ?? "")));
     setResults([]);
   }, [head?.id]);
 
@@ -148,15 +146,20 @@ export function IdentifyModal({
 
   return createPortal(
     <div
-      className="pointer-events-auto fixed inset-0 z-[120] flex items-start justify-center overflow-y-auto bg-black/72 py-[8vh] backdrop-blur-md animate-in fade-in duration-200"
+      role="dialog"
+      aria-modal="true"
+      aria-label={t("What is this title?")}
+      className="pointer-events-auto fixed inset-0 z-[170] flex items-start justify-center overflow-y-auto bg-black/72 py-[8vh] backdrop-blur-md animate-in fade-in duration-200"
       onClick={(e) => {
         if (e.target === e.currentTarget) onClose();
       }}
     >
-      <div className="flex w-full max-w-[560px] flex-col gap-5 rounded-[24px] border border-edge-soft bg-elevated/95 px-7 py-7 shadow-[0_30px_80px_-25px_rgba(0,0,0,0.85)] animate-in zoom-in-95 fade-in duration-200">
+      <div className="flex w-full max-w-[560px] flex-col gap-5 rounded-3xl border border-edge-soft bg-elevated/95 px-7 py-7 shadow-[0_30px_80px_-25px_rgba(0,0,0,0.85)] animate-in zoom-in-95 fade-in duration-200">
         <div className="flex items-start justify-between gap-4">
           <div className="flex min-w-0 flex-col gap-0.5">
-            <h2 className="text-[18px] font-medium tracking-tight text-ink">{t("What is this title?")}</h2>
+            <h2 className="text-[18px] font-medium tracking-tight text-ink">
+              {t("What is this title?")}
+            </h2>
             <p className="truncate text-[12px] text-ink-subtle" title={head.filename}>
               {target.length > 1
                 ? t("{n} episodes · {file}", { n: target.length, file: head.filename })
@@ -164,6 +167,9 @@ export function IdentifyModal({
             </p>
           </div>
           <button
+            autoFocus
+            data-tv-initial-focus
+            data-tv-modal-close
             onClick={onClose}
             className="flex h-9 w-9 shrink-0 items-center justify-center rounded-full bg-canvas/40 text-ink-subtle transition-colors hover:bg-canvas/60 hover:text-ink"
             aria-label={t("Cancel")}
@@ -179,7 +185,9 @@ export function IdentifyModal({
               type="button"
               onClick={() => setKind(k)}
               className={`rounded-full px-3.5 py-1.5 text-[12.5px] font-semibold transition-colors ${
-                kind === k ? "bg-ink text-canvas" : "bg-canvas/50 text-ink-muted ring-1 ring-edge-soft hover:text-ink"
+                kind === k
+                  ? "bg-ink text-canvas"
+                  : "bg-canvas/50 text-ink-muted ring-1 ring-edge-soft hover:text-ink"
               }`}
             >
               {k === "movie" ? t("Movie") : t("Series")}
@@ -190,7 +198,6 @@ export function IdentifyModal({
         <div className="flex items-center gap-2.5 rounded-2xl border border-edge-soft bg-canvas/50 px-3.5">
           <Search size={16} className="shrink-0 text-ink-subtle" />
           <input
-            autoFocus
             value={query}
             onChange={(e) => setQuery(e.target.value)}
             placeholder={t("Search TMDB…")}
@@ -206,7 +213,9 @@ export function IdentifyModal({
         ) : (
           <div className="flex max-h-[42vh] flex-col gap-1 overflow-y-auto">
             {results.length === 0 && !loading && query.trim() && (
-              <p className="px-1 py-6 text-center text-[13px] text-ink-muted">{t("No matches. Try a different search.")}</p>
+              <p className="px-1 py-6 text-center text-[13px] text-ink-muted">
+                {t("No matches. Try a different search.")}
+              </p>
             )}
             {results.map((c) => (
               <button
@@ -218,16 +227,31 @@ export function IdentifyModal({
               >
                 <div className="h-[72px] w-[48px] shrink-0 overflow-hidden rounded-lg bg-canvas ring-1 ring-edge-soft">
                   {c.poster ? (
-                    <img src={c.poster} alt="" className="h-full w-full object-cover" loading="lazy" />
+                    <img
+                      src={c.poster}
+                      alt=""
+                      className="h-full w-full object-cover"
+                      loading="lazy"
+                    />
                   ) : null}
                 </div>
                 <div className="flex min-w-0 flex-col gap-0.5">
                   <span className="flex items-center gap-2 text-[13.5px] font-semibold text-ink">
                     <span className="truncate">{c.title}</span>
-                    {c.year && <span className="shrink-0 text-[12px] font-normal text-ink-subtle">{c.year}</span>}
-                    {picking === c.tmdbId && <Loader2 size={13} className="shrink-0 animate-spin text-ink-subtle" />}
+                    {c.year && (
+                      <span className="shrink-0 text-[12px] font-normal text-ink-subtle">
+                        {c.year}
+                      </span>
+                    )}
+                    {picking === c.tmdbId && (
+                      <Loader2 size={13} className="shrink-0 animate-spin text-ink-subtle" />
+                    )}
                   </span>
-                  {c.overview && <span className="line-clamp-2 text-[11.5px] leading-snug text-ink-muted">{c.overview}</span>}
+                  {c.overview && (
+                    <span className="line-clamp-2 text-[11.5px] leading-snug text-ink-muted">
+                      {c.overview}
+                    </span>
+                  )}
                 </div>
               </button>
             ))}

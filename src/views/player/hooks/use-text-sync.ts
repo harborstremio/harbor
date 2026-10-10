@@ -1,10 +1,11 @@
 import { useCallback, useEffect, useRef, useState } from "react";
 import { invoke } from "@tauri-apps/api/core";
-import type { PlayerBridge } from "@/lib/player/bridge";
+import type { PlayerBridge, TrackInfo } from "@/lib/player/bridge";
 import { getPlaybackPosition } from "@/lib/player/playback-clock";
 import type { SubCue } from "@/lib/subtitles/parser";
 import { getCuesAnySource } from "@/lib/subtitles/extract";
 import { toSrt, toVtt } from "@/lib/subtitles/serialize";
+import type { SubChoiceInput } from "@/lib/subtitles/subtitle-memory";
 import { applyLinear, deltaFn, type SyncPoint, type SyncSegment } from "@/lib/subtitles/text-sync";
 import { writePlayerPrefs } from "@/lib/player-prefs";
 
@@ -21,6 +22,7 @@ interface State {
   rangeStart: number | null;
   rangeEnd: number | null;
   sourceFormat: "srt" | "vtt";
+  sourceTrack: TrackInfo | null;
 }
 
 const INITIAL: State = {
@@ -34,11 +36,16 @@ const INITIAL: State = {
   rangeStart: null,
   rangeEnd: null,
   sourceFormat: "srt",
+  sourceTrack: null,
 };
 
 export type SaveResult = { ok: true } | { ok: false; reason: string };
 
-export function useTextSync(bridge: PlayerBridge | null, metaId: string) {
+export function useTextSync(
+  bridge: PlayerBridge | null,
+  metaId: string,
+  onSavedTrack?: (choice: SubChoiceInput) => void,
+) {
   const [state, setState] = useState<State>(INITIAL);
   const bridgeRef = useRef(bridge);
   bridgeRef.current = bridge;
@@ -47,6 +54,11 @@ export function useTextSync(bridge: PlayerBridge | null, metaId: string) {
   const stateRef = useRef(state);
   stateRef.current = state;
   const regenTimer = useRef<number | null>(null);
+  const previewGeneration = useRef(0);
+  const sessionGeneration = useRef(0);
+  const previewSelected = useRef(false);
+  const onSavedTrackRef = useRef(onSavedTrack);
+  onSavedTrackRef.current = onSavedTrack;
 
   const constant = state.points.length <= 1 && state.segments.length === 0;
 
@@ -55,20 +67,34 @@ export function useTextSync(bridge: PlayerBridge | null, metaId: string) {
     const b = bridgeRef.current;
     if (!b) return;
     if (constant) {
+      previewGeneration.current += 1;
+      if (previewSelected.current && state.sourceTrack) {
+        b.setSubtitleTrack(state.sourceTrack.id);
+        previewSelected.current = false;
+      }
       b.setSubDelay(deltaFn(state.points, state.nudge)(0));
       return;
     }
     if (regenTimer.current) window.clearTimeout(regenTimer.current);
     const { cues, points, nudge, segments, sourceFormat } = state;
+    const generation = ++previewGeneration.current;
     regenTimer.current = window.setTimeout(() => {
       void (async () => {
         try {
           const corrected = applyLinear(cues, points, nudge, segments);
           const text = sourceFormat === "vtt" ? toVtt(corrected) : toSrt(corrected);
-          const path = await writeTemp(text, sourceFormat);
-          if (path) {
-            await b.addSubtitle(path, undefined, "Preview", true);
-            b.setSubDelay(0);
+          const path = await writeSubtitleFile(
+            text,
+            sourceFormat,
+            `preview-${crypto.randomUUID()}`,
+          );
+          if (path && generation === previewGeneration.current) {
+            previewSelected.current = true;
+            await b.addSubtitle(path, state.sourceTrack?.lang, "Preview", true, {
+              provider: "Harbor Live Sync",
+              providerDerived: false,
+            });
+            if (generation === previewGeneration.current) b.setSubDelay(0);
           }
         } catch {
           /* preview best-effort */
@@ -76,22 +102,46 @@ export function useTextSync(bridge: PlayerBridge | null, metaId: string) {
       })();
     }, 220);
     return () => {
+      previewGeneration.current += 1;
       if (regenTimer.current) window.clearTimeout(regenTimer.current);
     };
-  }, [state.syncMode, state.points, state.nudge, state.segments, state.cues, constant]);
+  }, [
+    state.syncMode,
+    state.points,
+    state.nudge,
+    state.segments,
+    state.cues,
+    state.sourceTrack,
+    state.sourceFormat,
+    constant,
+  ]);
 
   const enter = useCallback(async (sourceUrl: string | null, headers?: Record<string, string>) => {
     const b = bridgeRef.current;
     if (!b) return;
-    setState({ ...INITIAL, syncMode: "loading" });
+    const session = ++sessionGeneration.current;
+    previewGeneration.current += 1;
+    previewSelected.current = false;
     let baseOffset = 0;
+    let sourceTrack: TrackInfo | null = null;
     const unsub = b.subscribe((s) => {
       baseOffset = s.subDelaySec;
+      sourceTrack = s.subtitleTracks.find((track) => track.selected) ?? null;
     });
     unsub();
+    setState({ ...INITIAL, syncMode: "loading", baseOffset, sourceTrack });
     const res = await getCuesAnySource(b, sourceUrl, headers);
+    if (session !== sessionGeneration.current || b !== bridgeRef.current) return;
     if (!res.ok) {
-      setState({ ...INITIAL, error: res.reason });
+      setState({ ...INITIAL, syncMode: "active", baseOffset, sourceTrack, error: res.reason });
+      return;
+    }
+    let selectedId: string | null = null;
+    b.subscribe((s) => {
+      selectedId = s.subtitleTracks.find((track) => track.selected)?.id ?? null;
+    })();
+    if (selectedId !== (sourceTrack as TrackInfo | null)?.id) {
+      setState(INITIAL);
       return;
     }
     setState({
@@ -101,6 +151,7 @@ export function useTextSync(bridge: PlayerBridge | null, metaId: string) {
       baseOffset,
       nudge: baseOffset,
       sourceFormat: res.source.format,
+      sourceTrack,
     });
   }, []);
 
@@ -126,7 +177,7 @@ export function useTextSync(bridge: PlayerBridge | null, metaId: string) {
   }, []);
 
   const setRangeStart = useCallback((i: number) => {
-    setState((prev) => ({ ...prev, rangeStart: i, rangeEnd: i }));
+    setState((prev) => ({ ...prev, rangeStart: i, rangeEnd: null }));
   }, []);
   const setRangeEnd = useCallback((i: number) => {
     setState((prev) => (prev.rangeStart == null ? prev : { ...prev, rangeEnd: i }));
@@ -143,7 +194,14 @@ export function useTextSync(bridge: PlayerBridge | null, metaId: string) {
   }, []);
 
   const reset = useCallback(() => {
-    setState((prev) => ({ ...prev, points: [], nudge: 0, segments: [], rangeStart: null, rangeEnd: null }));
+    setState((prev) => ({
+      ...prev,
+      points: [],
+      nudge: 0,
+      segments: [],
+      rangeStart: null,
+      rangeEnd: null,
+    }));
   }, []);
 
   const seekTo = useCallback((cueIndex: number) => {
@@ -152,38 +210,94 @@ export function useTextSync(bridge: PlayerBridge | null, metaId: string) {
   }, []);
 
   const exit = useCallback(() => {
+    sessionGeneration.current += 1;
+    previewGeneration.current += 1;
+    if (regenTimer.current) window.clearTimeout(regenTimer.current);
+    regenTimer.current = null;
     setState(INITIAL);
   }, []);
 
   const discard = useCallback(() => {
     const b = bridgeRef.current;
-    const mid = metaIdRef.current;
+    if (stateRef.current.sourceTrack) {
+      b?.setSubtitleTrack(stateRef.current.sourceTrack.id);
+      previewSelected.current = false;
+    }
     b?.setSubDelay(stateRef.current.baseOffset);
-    if (mid) writePlayerPrefs(mid, { subDelaySec: stateRef.current.baseOffset });
     exit();
   }, [exit]);
 
   const save = useCallback(async (): Promise<SaveResult> => {
     const b = bridgeRef.current;
-    const mid = metaIdRef.current;
     const cur = stateRef.current;
-    if (cur.syncMode !== "active" || !cur.cues) return { ok: false, reason: "not-active" };
+    const session = sessionGeneration.current;
+    if (!b || cur.syncMode !== "active" || !cur.cues) {
+      return { ok: false, reason: "not-active" };
+    }
     try {
+      previewGeneration.current += 1;
+      if (regenTimer.current) window.clearTimeout(regenTimer.current);
+      regenTimer.current = null;
       const corrected = applyLinear(cur.cues, cur.points, cur.nudge, cur.segments);
       const text = cur.sourceFormat === "vtt" ? toVtt(corrected) : toSrt(corrected);
-      const path = await writeTemp(text, cur.sourceFormat, `synced-${Date.now()}`);
-      let applied = false;
-      if (path) {
-        const ok = await b?.addSubtitle(path, undefined, `Synced (${cur.sourceFormat.toUpperCase()})`, true);
-        applied = ok === true;
+      const fileName = `${syncedFileName(metaIdRef.current, cur.sourceTrack)}-${crypto.randomUUID()}`;
+      const path = await writeSubtitleFile(text, cur.sourceFormat, fileName, true);
+      if (session !== sessionGeneration.current || b !== bridgeRef.current) {
+        return { ok: false, reason: "cancelled" };
+      }
+      if (!path) return { ok: false, reason: "saved-write-failed" };
+
+      const source = cur.sourceTrack;
+      const release = source?.release?.trim() || undefined;
+      const sourceName = release || source?.title?.trim() || undefined;
+      const title = sourceName
+        ? `Synced (${cur.sourceFormat.toUpperCase()}) · ${sourceName}`
+        : `Synced (${cur.sourceFormat.toUpperCase()})`;
+      const previewDelay =
+        cur.points.length <= 1 && cur.segments.length === 0 ? deltaFn(cur.points, cur.nudge)(0) : 0;
+
+      // The timing is baked into the saved file, so clear the temporary mpv
+      // delay before selecting it. Restore the preview if loading fails.
+      b.setSubDelay(0);
+      const syncedSubId = source?.subId
+        ? `synced:${source.subId}`
+        : `synced:${fileName}.${cur.sourceFormat}`;
+      const applied = await b.addSubtitle(path, source?.lang, title, true, {
+        format: cur.sourceFormat,
+        release,
+        provider: "Harbor Live Sync",
+        providerDerived: false,
+        fps: source?.fps,
+        downloads: source?.downloads,
+        author: source?.author,
+        matchScore: 10_000,
+        matchConfidence: "exact",
+        matchReasons: ["timing synchronized to this video"],
+        subId: syncedSubId,
+      });
+      if (session !== sessionGeneration.current || b !== bridgeRef.current) {
+        return { ok: false, reason: "cancelled" };
       }
       if (!applied) {
-        const { downloadText } = await import("@/lib/download-text");
-        const saved = await downloadText(`subtitle.synced.${cur.sourceFormat}`, text, [cur.sourceFormat], "Subtitle");
-        if (!saved) return { ok: false, reason: "save-cancelled" };
+        b.setSubDelay(previewDelay);
+        return { ok: false, reason: "subtitle-load-failed" };
       }
-      b?.setSubDelay(0);
-      if (mid) writePlayerPrefs(mid, { subDelaySec: 0 });
+      onSavedTrackRef.current?.({
+        source: path,
+        url: path,
+        external: true,
+        imported: true,
+        lang: source?.lang,
+        title,
+        subId: syncedSubId,
+        provider: "Harbor Live Sync",
+        providerDerived: false,
+        release,
+        format: cur.sourceFormat,
+        matchScore: 10_000,
+        matchConfidence: "exact",
+      });
+      writePlayerPrefs(metaIdRef.current, { subDelaySec: 0 });
       exit();
       return { ok: true };
     } catch (e) {
@@ -191,7 +305,17 @@ export function useTextSync(bridge: PlayerBridge | null, metaId: string) {
     }
   }, [exit]);
 
-  const dirty = state.points.length > 0 || state.nudge !== state.baseOffset || state.segments.length > 0;
+  useEffect(
+    () => () => {
+      sessionGeneration.current += 1;
+      previewGeneration.current += 1;
+      if (regenTimer.current) window.clearTimeout(regenTimer.current);
+    },
+    [bridge, metaId],
+  );
+
+  const dirty =
+    state.points.length > 0 || state.nudge !== state.baseOffset || state.segments.length > 0;
 
   return {
     ...state,
@@ -212,12 +336,27 @@ export function useTextSync(bridge: PlayerBridge | null, metaId: string) {
   };
 }
 
-async function writeTemp(text: string, ext: "srt" | "vtt", name?: string): Promise<string | null> {
+function syncedFileName(metaId: string, track: TrackInfo | null): string {
+  const value = `${metaId}|${track?.subId ?? ""}|${track?.url ?? track?.externalFilename ?? ""}`;
+  let hash = 0x811c9dc5;
+  for (let i = 0; i < value.length; i++) {
+    hash ^= value.charCodeAt(i);
+    hash = Math.imul(hash, 0x01000193);
+  }
+  return `synced-${(hash >>> 0).toString(16).padStart(8, "0")}`;
+}
+
+async function writeSubtitleFile(
+  text: string,
+  ext: "srt" | "vtt",
+  name?: string,
+  persistent = false,
+): Promise<string | null> {
   if (typeof window === "undefined" || !("__TAURI_INTERNALS__" in window)) return null;
   try {
     const pathMod = await import("@tauri-apps/api/path");
-    const tmpDir = await pathMod.tempDir();
-    const dir = await pathMod.join(tmpDir, "harbor-subs");
+    const root = persistent ? await pathMod.appDataDir() : await pathMod.tempDir();
+    const dir = await pathMod.join(root, "harbor-subs", persistent ? "saved" : "preview");
     const fileName = `${name ?? "preview"}.${ext}`;
     const filePath = await pathMod.join(dir, fileName);
     await invoke("save_text_file", { path: filePath, contents: text });

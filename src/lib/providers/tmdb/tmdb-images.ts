@@ -1,7 +1,9 @@
 import { lruSet } from "@/lib/cache";
 import { registerCache } from "@/lib/memory-profiler";
-import { get, IMG } from "./tmdb-client";
-import { imageLangParam, imageLangRank, pickedImageLangs } from "./tmdb-image-lang";
+import { loadStoredSettings } from "@/lib/settings/load";
+import { get } from "./tmdb-client";
+import { tmdbBackdropUrl, tmdbLogoUrl, tmdbPosterUrl } from "./tmdb-image-rungs";
+import { imageLangParam, imageLangPriority, imageLangRank } from "./tmdb-image-lang";
 
 export type LogoEntry = { file_path: string; iso_639_1: string | null; vote_average?: number };
 
@@ -25,7 +27,7 @@ export async function fetchMovieAssets(
   if (!key) return null;
   const match = metaId.match(/^tmdb:(movie|tv):(\d+)$/);
   if (!match) return null;
-  const cacheKey = originalLang ? `${metaId}|${originalLang}` : metaId;
+  const cacheKey = `${metaId}|${originalLang ?? ""}|${imageLangParam(originalLang)}`;
   const cached = movieAssetsCache.get(cacheKey);
   if (cached) return cached;
   const inflight = movieAssetsInflight.get(cacheKey);
@@ -51,25 +53,70 @@ export const pickLogo = (logos: LogoEntry[], originalLang?: string | null): stri
     return base + isPng + (l.vote_average ?? 0);
   };
   const best = [...logos].sort((a, b) => score(b) - score(a))[0];
-  return best?.file_path ? `${IMG}/w342${best.file_path}` : undefined;
+  return tmdbLogoUrl(best?.file_path);
 };
 
-export async function tmdbLocalizedPoster(key: string, metaId: string): Promise<string | undefined> {
-  const picks = pickedImageLangs();
-  if (!picks.length) return undefined;
-  const assets = await fetchMovieAssets(key, metaId);
-  const posters = (assets?.posters ?? []).filter(
-    (p) => typeof p.iso_639_1 === "string" && picks.includes(p.iso_639_1),
-  );
+export async function tmdbLocalizedPoster(
+  key: string,
+  metaId: string,
+  originalLang?: string | null,
+): Promise<string | undefined> {
+  const st = loadStoredSettings();
+  const metaBase = (st.tmdbLanguage ?? "").split("-")[0]?.toLowerCase() ?? "";
+  // Artwork language is an independent preference. Use its configured order first,
+  // then the metadata language and stable fallbacks when no matching artwork exists.
+  const want: string[] = [];
+  const add = (c: string | null) => {
+    const code = c ?? "";
+    if (!want.includes(code)) want.push(code);
+  };
+  for (const c of imageLangPriority()) {
+    if (c === null) {
+      add(originalLang ? (originalLang.split("-")[0]?.toLowerCase() ?? null) : null);
+      add(null);
+    } else add(c);
+  }
+  if (metaBase) add(metaBase);
+  add("en");
+  add(originalLang ? (originalLang.split("-")[0]?.toLowerCase() ?? null) : null);
+  add(null);
+  if (want.length === 0) return undefined;
+  const assets = await fetchMovieAssets(key, metaId, originalLang);
+  const posters = assets?.posters ?? [];
   if (!posters.length) return undefined;
   const rank = (iso?: string | null) => {
-    const i = picks.indexOf(iso ?? "");
-    return i === -1 ? -1 : picks.length - i;
+    const i = want.indexOf(iso ?? "");
+    return i === -1 ? -1 : want.length - i;
   };
   const best = [...posters].sort(
-    (a, b) => rank(b.iso_639_1) - rank(a.iso_639_1) || (b.vote_average ?? 0) - (a.vote_average ?? 0),
+    (a, b) =>
+      rank(b.iso_639_1) - rank(a.iso_639_1) || (b.vote_average ?? 0) - (a.vote_average ?? 0),
   )[0];
-  return best?.file_path ? `${IMG}/w342${best.file_path}` : undefined;
+  return tmdbPosterUrl(best?.file_path);
+}
+
+const defaultPosterCache = new Map<string, string | null>();
+registerCache("tmdb:defaultPoster", () => defaultPosterCache.size);
+
+export async function tmdbDefaultPoster(key: string, metaId: string): Promise<string | undefined> {
+  if (!key) return undefined;
+  const match = metaId.match(/^tmdb:(movie|tv):(\d+)$/);
+  if (!match) return undefined;
+  const cached = defaultPosterCache.get(metaId);
+  if (cached !== undefined) return cached ?? undefined;
+  const [, kind, id] = match;
+  const data = await get<RawImages>(key, `${kind}/${id}/images`, {
+    include_image_language: "en,null",
+  }).catch(() => null);
+  const posters = data?.posters ?? [];
+  const rank = (iso?: string | null) => (iso === "en" ? 2 : iso == null || iso === "" ? 1 : 0);
+  const best = [...posters].sort(
+    (a, b) =>
+      rank(b.iso_639_1) - rank(a.iso_639_1) || (b.vote_average ?? 0) - (a.vote_average ?? 0),
+  )[0];
+  const url = tmdbPosterUrl(best?.file_path);
+  lruSet(defaultPosterCache, metaId, url ?? null, MOVIE_ASSETS_MAX);
+  return url;
 }
 
 export async function tmdbMovieImages(key: string, metaId: string): Promise<string[]> {
@@ -79,9 +126,10 @@ export async function tmdbMovieImages(key: string, metaId: string): Promise<stri
   for (const b of (data?.backdrops ?? []).sort(
     (a, b) => (b.vote_average ?? 0) - (a.vote_average ?? 0),
   )) {
-    if (!b.file_path || seen.has(b.file_path)) continue;
+    const url = tmdbBackdropUrl(b.file_path);
+    if (!url || seen.has(b.file_path)) continue;
     seen.add(b.file_path);
-    out.push(`${IMG}/w780${b.file_path}`);
+    out.push(url);
     if (out.length >= 12) break;
   }
   return out;

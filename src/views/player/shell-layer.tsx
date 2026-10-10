@@ -3,12 +3,14 @@ import type { Meta } from "@/lib/cinemeta";
 import type { PlayerBridge, PlayerSnapshot } from "@/lib/player/bridge";
 import { getPlayerShell, type PlayerShellProps } from "@/lib/player-shells/registry";
 import { writePlayerPrefs } from "@/lib/player-prefs";
+import { rememberedChoiceFromLoad, type SubChoiceInput } from "@/lib/subtitles/subtitle-memory";
 import { writePlayerVolume } from "@/lib/player-volume";
 import type { useVideoDownload } from "./hooks/use-video-download";
 
 export const ShellLayer = memo(function ShellLayer({
   shellId,
   shellSnap,
+  isLive,
   snapRef,
   bridgeRef,
   engine,
@@ -44,6 +46,7 @@ export const ShellLayer = memo(function ShellLayer({
   subtitle,
   resolution,
   quality,
+  releaseName,
   hoverTitle,
   hoverSub,
   hasPrevEp,
@@ -61,9 +64,11 @@ export const ShellLayer = memo(function ShellLayer({
   onOpenDvr,
   sleep,
   onVolumeFeedback,
+  homeServerQualityControl,
 }: {
   shellId: string;
   shellSnap: PlayerSnapshot;
+  isLive?: boolean;
   snapRef: RefObject<PlayerSnapshot>;
   bridgeRef: RefObject<PlayerBridge | null>;
   engine: "html5" | "mpv";
@@ -79,7 +84,7 @@ export const ShellLayer = memo(function ShellLayer({
   onPlayPause: () => void;
   onSeek: (sec: number) => void;
   onSeekStep: (delta: number) => void;
-  rememberSubChoice: (t: { lang?: string } | null | undefined) => void;
+  rememberSubChoice: (t: SubChoiceInput | null | undefined) => void;
   onEnterSync?: () => void;
   cropMode?: string;
   onCropMode?: (id: string) => void;
@@ -99,6 +104,7 @@ export const ShellLayer = memo(function ShellLayer({
   subtitle?: string;
   resolution?: string | null;
   quality?: string | null;
+  releaseName?: string | null;
   hoverTitle?: string;
   hoverSub?: string;
   hasPrevEp: boolean;
@@ -116,11 +122,13 @@ export const ShellLayer = memo(function ShellLayer({
   onOpenDvr?: () => void;
   sleep: PlayerShellProps["sleep"];
   onVolumeFeedback?: (volume: number, muted: boolean) => void;
+  homeServerQualityControl?: PlayerShellProps["homeServerQualityControl"];
 }) {
   const ActiveShell = getPlayerShell(shellId).Component;
   return (
     <ActiveShell
       snap={shellSnap}
+      isLive={isLive}
       engine={engine}
       useOverlayPopups={false}
       onMenuOpenChange={onMenuOpenChange}
@@ -176,7 +184,7 @@ export const ShellLayer = memo(function ShellLayer({
           bridgeRef.current?.addSubtitle(url, lang, title2, true, metadata) ??
           Promise.resolve(false);
         void p.then((ok) => {
-          if (ok) rememberSubChoice({ lang });
+          if (ok) rememberSubChoice(rememberedChoiceFromLoad(url, lang, title2, metadata));
         });
         return p;
       }}
@@ -210,6 +218,7 @@ export const ShellLayer = memo(function ShellLayer({
       subtitle={subtitle}
       resolution={resolution}
       quality={quality}
+      releaseName={releaseName}
       hoverTitle={hoverTitle}
       hoverSub={hoverSub}
       hasPrevEp={hasPrevEp}
@@ -230,6 +239,7 @@ export const ShellLayer = memo(function ShellLayer({
       onDownloadReset={download?.reset}
       onOpenDvr={onOpenDvr}
       sleep={sleep}
+      homeServerQualityControl={homeServerQualityControl}
     />
   );
 });

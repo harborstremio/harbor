@@ -1,8 +1,9 @@
-import { get, IMG } from "./tmdb-client";
+import { get } from "./tmdb-client";
+import { tmdbBackdropUrl, tmdbPosterThumbUrl } from "./tmdb-image-rungs";
 
-const poster = (p: string | null | undefined) => (p ? `${IMG}/w342${p}` : null);
-const still = (p: string | null | undefined) => (p ? `${IMG}/w780${p}` : null);
-const backdrop = (p: string | null | undefined) => (p ? `${IMG}/w780${p}` : null);
+const poster = (p: string | null | undefined) => tmdbPosterThumbUrl(p) ?? null;
+const still = (p: string | null | undefined) => tmdbBackdropUrl(p) ?? null;
+const backdrop = (p: string | null | undefined) => tmdbBackdropUrl(p) ?? null;
 
 const ANIMATION_GENRE_ID = 16;
 
@@ -67,6 +68,11 @@ type SeasonDetail = {
     vote_average?: number;
   }>;
 };
+
+export async function tmdbTvPoster(key: string, tvId: number): Promise<string | null> {
+  const tv = await get<TvDetail>(key, `tv/${tvId}`);
+  return tv ? poster(tv.poster_path) : null;
+}
 
 export async function tmdbTvUpcoming(
   key: string,

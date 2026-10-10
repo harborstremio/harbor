@@ -1,0 +1,17 @@
+{
+  "notes": {
+    "0.9.120": {
+      "title": "Harbor Beta 0.9.120",
+      "intro": "A focused macOS compatibility hotfix for the 0.9.119 beta.",
+      "sections": [
+        {
+          "heading": "macOS compatibility",
+          "items": [
+            "Fixed the launch crash on Apple Silicon and Intel Macs by bundling libmpv and its required dynamic libraries inside Harbor — @Talal1011",
+            "Added release-build validation that rejects macOS artifacts containing missing or machine-local Homebrew library references — @Talal1011"
+          ]
+        }
+      ]
+    }
+  }
+}

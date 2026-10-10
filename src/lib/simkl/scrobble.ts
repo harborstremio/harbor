@@ -1,54 +1,53 @@
+import { activeProfileId } from "@/lib/active-profile-id";
+import { getSession } from "./session";
+import { resolveForMeta } from "@/lib/tracker-resolve";
 import { simklRequest } from "./client";
+import {
+  buildBody,
+  buildEpisodeBody,
+  type EpisodeRef,
+  type ScrobbleAction,
+  type ScrobbleInfo,
+} from "./scrobble-body";
 
-export type ScrobbleAction = "start" | "pause" | "stop";
+export { buildBody };
+export type { EpisodeRef, ScrobbleAction, ScrobbleInfo };
 
-export type EpisodeRef = { season?: number; episode?: number } | undefined;
+const ANIME_ID = /^(kitsu|mal|anilist|anidb):/;
 
-export function buildBody(metaId: string, episode: EpisodeRef, progress: number): Record<string, unknown> | null {
-  const p = Math.min(100, Math.max(0, progress));
-
-  if (metaId.startsWith("tt")) {
-    const imdb = metaId.split(":")[0];
-    if (!/^tt\d+$/.test(imdb)) return null;
-    if (episode?.episode != null) {
-      return {
-        progress: p,
-        show: { ids: { imdb } },
-        episode: { season: episode.season ?? 1, number: episode.episode },
-      };
-    }
-    return { progress: p, movie: { ids: { imdb } } };
+async function post(action: ScrobbleAction, body: Record<string, unknown>): Promise<boolean> {
+  try {
+    await simklRequest(`/scrobble/${action}`, { method: "POST", body });
+    return true;
+  } catch {
+    // Background-safe: live scrobble failures must never break playback.
+    return false;
   }
+}
 
-  if (metaId.startsWith("tmdb:movie:")) {
-    const id = Number(metaId.split(":")[2]);
-    if (!Number.isFinite(id)) return null;
-    return { progress: p, movie: { ids: { tmdb: id } } };
-  }
-
-  if (metaId.startsWith("tmdb:tv:")) {
-    const id = Number(metaId.split(":")[2]);
-    if (!Number.isFinite(id) || episode?.episode == null) return null;
-    return {
-      progress: p,
-      show: { ids: { tmdb: id } },
-      episode: { season: episode.season ?? 1, number: episode.episode },
-    };
-  }
-
-  const animePrefix = ["kitsu:", "mal:", "anilist:", "anidb:"].find((pre) => metaId.startsWith(pre));
-  if (animePrefix && episode?.episode != null) {
-    const num = Number(metaId.split(":")[1]);
-    if (!Number.isFinite(num)) return null;
-    const idKey = animePrefix.slice(0, -1);
-    return {
-      progress: p,
-      anime: { ids: { [idKey]: num } },
-      episode: { season: episode.season ?? 1, number: episode.episode },
-    };
-  }
-
-  return null;
+/**
+ * Simkl numbers a merged show differently from Cinemeta when the source keeps the
+ * continuation as its own entry, so a rejected write is retried against the season
+ * Simkl actually holds. Anime is excluded: its ids come from Kitsu/MAL, not from the
+ * English-title catalog this resolves against.
+ */
+async function fallbackBody(
+  metaId: string,
+  episode: EpisodeRef,
+  progress: number,
+): Promise<Record<string, unknown> | null> {
+  if (ANIME_ID.test(metaId)) return null;
+  const season = episode?.season;
+  const number = episode?.episode;
+  if (season == null || number == null) return null;
+  const resolved = await resolveForMeta(metaId, season, number);
+  if (!resolved.ok) return null;
+  return buildEpisodeBody(
+    { ...resolved.episode.showIds },
+    resolved.episode.season,
+    resolved.episode.number,
+    progress,
+  );
 }
 
 export async function simklScrobble(
@@ -56,12 +55,16 @@ export async function simklScrobble(
   metaId: string,
   episode: EpisodeRef,
   progress: number,
-): Promise<void> {
-  const body = buildBody(metaId, episode, progress);
-  if (!body) return;
-  try {
-    await simklRequest(`/scrobble/${action}`, { method: "POST", body });
-  } catch {
-    /* swallow: scrobbling is best-effort */
-  }
+  info?: ScrobbleInfo,
+): Promise<boolean> {
+  const profile = activeProfileId();
+  const session = getSession();
+  const owned = () => session != null && getSession() === session && activeProfileId() === profile;
+  if (!owned()) return false;
+  const body = buildBody(metaId, episode, progress, info);
+  if (body && (await post(action, body))) return true;
+  if (!owned()) return false;
+  const retry = await fallbackBody(metaId, episode, progress);
+  if (!owned() || !retry) return false;
+  return post(action, retry);
 }

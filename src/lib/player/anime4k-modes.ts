@@ -40,8 +40,7 @@ function chainFiles(mode: Anime4kMode, big: "VL" | "M"): string[] {
 
 export function anime4kChain(folder: string, mode: Anime4kMode, tier: Anime4kTier): string[] {
   if (!folder) return [];
-  const sep = folder.includes("\\") ? "\\" : "/";
-  const base = folder.replace(/[\\/]+$/, "");
+  const base = folder.replace(/\\/g, "/").replace(/\/+$/, "");
   const big = tier === "hq" ? "VL" : "M";
-  return chainFiles(mode, big).map((f) => `${base}${sep}${f}`);
+  return chainFiles(mode, big).map((f) => `${base}/${f}`);
 }

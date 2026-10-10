@@ -1,17 +1,22 @@
-import { Check, Loader2, Wifi, X } from "lucide-react";
-import { useEffect, useState } from "react";
+import { Check, Loader2, Wifi, X } from "../icons";
+import { useEffect, useRef, useState } from "react";
 import { useSettings } from "@/lib/settings";
 import { t as tr } from "@/lib/i18n";
 import { useT } from "@/lib/i18n";
-import { ToggleRow, settingsAnchor } from "../shared";
+import { Section, ToggleRow } from "../shared";
+import { ROW_ACTION, ROW_DESC, SettingGroup, SettingRow } from "../kit";
+import { BADGE_BASE } from "./choice";
 
 type TestResult = { ok: boolean; message: string };
 
+const FIELD =
+  "h-11 w-full max-w-[520px] min-w-0 rounded-[10px] border border-edge-soft bg-elevated px-4 font-mono text-[16.5px] text-ink outline-none placeholder:text-ink-subtle/55 focus-visible:border-edge focus-visible:outline focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-accent";
+
 const PILL = {
-  off: { label: "Off", dot: "bg-ink-subtle", chip: "bg-ink-subtle/15 text-ink-muted" },
-  checking: { label: "Checking", dot: "bg-ink-subtle", chip: "bg-ink-subtle/15 text-ink-muted" },
-  connected: { label: "Connected", dot: "bg-emerald-400", chip: "bg-emerald-500/15 text-emerald-400" },
-  unreachable: { label: "Unreachable", dot: "bg-danger", chip: "bg-danger/15 text-danger" },
+  off: { label: "Not set", dot: "bg-ink-subtle", chip: "bg-elevated text-ink-subtle" },
+  checking: { label: "Checking", dot: "bg-ink-subtle", chip: "bg-elevated text-ink-subtle" },
+  connected: { label: "Connected", dot: "bg-success", chip: "bg-elevated text-success" },
+  unreachable: { label: "Unreachable", dot: "bg-danger", chip: "bg-elevated text-danger" },
 };
 
 function normalizeServerUrl(raw: string): string {
@@ -22,16 +27,17 @@ function normalizeServerUrl(raw: string): string {
 
 async function probeServer(url: string): Promise<TestResult> {
   const started = performance.now();
+  const ctrl = new AbortController();
+  const timer = window.setTimeout(() => ctrl.abort(), 1500);
   try {
-    const ctrl = new AbortController();
-    const timer = window.setTimeout(() => ctrl.abort(), 1500);
     const res = await fetch(`${url}/settings`, { method: "GET", signal: ctrl.signal });
-    window.clearTimeout(timer);
     if (!res.ok) return { ok: false, message: tr("The server answered with status {status}. Is that a streaming server?", { status: res.status }) };
     const ms = Math.max(1, Math.round(performance.now() - started));
-    return { ok: true, message: tr("Server reachable in {ms}ms. Harbor will use it for torrent streaming.", { ms }) };
+    return { ok: true, message: tr("The server responded in {ms} ms.", { ms }) };
   } catch {
     return { ok: false, message: tr("Could not reach the server within 1.5 seconds. Check the address and that the server machine is online.") };
+  } finally {
+    window.clearTimeout(timer);
   }
 }
 
@@ -43,19 +49,22 @@ export function RemoteServerSection() {
   const [reach, setReach] = useState<boolean | null>(null);
   const [testing, setTesting] = useState(false);
   const [result, setResult] = useState<TestResult | null>(null);
+  const requestRef = useRef(0);
 
   useEffect(() => setDraft(saved), [saved]);
 
   useEffect(() => {
+    const requestId = ++requestRef.current;
     setReach(null);
     setResult(null);
-    if (!saved) return;
-    let alive = true;
-    void probeServer(saved).then((r) => {
-      if (alive) setReach(r.ok);
-    });
+    setTesting(false);
+    if (saved) {
+      void probeServer(saved).then((r) => {
+        if (requestRef.current === requestId) setReach(r.ok);
+      });
+    }
     return () => {
-      alive = false;
+      requestRef.current++;
     };
   }, [saved]);
 
@@ -67,98 +76,122 @@ export function RemoteServerSection() {
 
   const test = async () => {
     if (!saved || testing) return;
+    const requestId = ++requestRef.current;
     setTesting(true);
+    setResult(null);
     try {
       const r = await probeServer(saved);
+      if (requestRef.current !== requestId) return;
       setResult(r);
       setReach(r.ok);
     } finally {
-      setTesting(false);
+      if (requestRef.current === requestId) setTesting(false);
     }
   };
 
   const pill = !saved ? PILL.off : reach === null ? PILL.checking : reach ? PILL.connected : PILL.unreachable;
 
   return (
-    <section id={settingsAnchor("Remote streaming server")} className="scroll-mt-28 flex flex-col gap-4 rounded-2xl border border-edge-soft bg-elevated/40 p-7">
-      <div className="flex items-start justify-between gap-3">
-        <div className="flex flex-col gap-1">
-          <h2 className="text-[19px] font-medium tracking-tight text-ink">{t("Remote streaming server")}</h2>
-          <p className="text-[13.5px] leading-relaxed text-ink-muted">
-            {t("Point Harbor at a streaming server on another machine, like the Stremio service on a home server. Torrents download and stream from that machine instead of this one.")}
-          </p>
-        </div>
-        <span className={`inline-flex shrink-0 items-center gap-1.5 rounded-full px-2.5 py-1 text-[11px] font-semibold uppercase tracking-wider ${pill.chip}`}>
-          <span className={`h-1.5 w-1.5 rounded-full ${pill.dot}`} />
-          {t(pill.label)}
-        </span>
-      </div>
+    <Section
+      title={t("Remote streaming server")}
+      subtitle={t(
+        "Point Harbor at a streaming server on another machine, like the Stremio service on a home server. P2P streams download and play from that machine instead of this one.",
+      )}
+    >
+      <SettingGroup label={t("Connection")}>
+        <SettingRow
+          wide
+          label={
+            <span className="inline-flex min-w-0 flex-wrap items-center gap-2">
+              <span className="min-w-0">{t("Server address")}</span>
+              <span className={`${BADGE_BASE} gap-1.5 ${pill.chip}`}>
+                <span className={`h-1.5 w-1.5 rounded-full ${pill.dot}`} />
+                {t(pill.label)}
+              </span>
+            </span>
+          }
+          desc={t("The address of the streaming server, including its port.")}
+        >
+          <span className="flex w-full flex-wrap items-center gap-2.5">
+            <input
+              type="text"
+              value={draft}
+              onChange={(e) => setDraft(e.target.value)}
+              onKeyDown={(e) => {
+                if (e.key === "Enter") commit();
+              }}
+              onBlur={commit}
+              placeholder="http://192.168.1.50:11470"
+              spellCheck={false}
+              autoComplete="off"
+              aria-label={t("Server address")}
+              className={FIELD}
+            />
+            {saved && (
+              <button
+                type="button"
+                aria-label={t("Forget remote streaming server")}
+                onClick={() => update({ remoteStreamServerUrl: "" })}
+                className={ROW_ACTION}
+              >
+                {t("Forget")}
+              </button>
+            )}
+          </span>
+        </SettingRow>
 
-      <div className="flex items-center gap-2">
-        <input
-          type="text"
-          value={draft}
-          onChange={(e) => setDraft(e.target.value)}
-          onKeyDown={(e) => {
-            if (e.key === "Enter") commit();
-          }}
-          onBlur={commit}
-          placeholder="http://192.168.1.50:11470"
-          spellCheck={false}
-          autoComplete="off"
-          className="h-11 flex-1 rounded-xl border border-edge bg-canvas px-3.5 font-mono text-[13px] text-ink transition-colors focus:border-accent"
-        />
         {saved && (
-          <button
-            type="button"
-            onClick={() => update({ remoteStreamServerUrl: "" })}
-            className="h-11 shrink-0 rounded-xl border border-edge px-4 text-[13px] text-ink-muted transition-colors hover:bg-elevated hover:text-ink"
-          >
-            {t("Forget")}
-          </button>
-        )}
-      </div>
-
-      {saved && (
-        <>
           <ToggleRow
             label={t("Use exclusively (never fall back to local)")}
-            sub={t("If the server is unreachable, playback fails instead of streaming locally. Use this when your VPN runs on the server machine and torrent traffic must never leave this one.")}
+            sub={t("If the remote server is unavailable, stop playback instead of streaming over P2P from this device.")}
             value={settings.remoteStreamServerStrict}
             onChange={(v) => update({ remoteStreamServerStrict: v })}
           />
-          <div className="flex items-center justify-between gap-3 rounded-xl border border-edge-soft bg-canvas/40 px-4 py-3">
-            <div className="flex min-w-0 flex-col">
-              <span className="text-[13px] font-medium text-ink">{t("Test connection")}</span>
-              <span className="text-[11.5px] text-ink-subtle">
-                {t("Probes the server's settings endpoint from this device.")}
-              </span>
-            </div>
+        )}
+
+        {saved && (
+          <SettingRow
+            label={t("Test connection")}
+            desc={t("Check whether this device can reach the saved server address.")}
+          >
             <button
               type="button"
-              onClick={() => void test()}
+              aria-label={testing ? t("Testing remote streaming server") : t("Test remote streaming server")}
+              onClick={testing ? undefined : () => void test()}
               disabled={testing}
-              className="flex h-9 shrink-0 items-center gap-1.5 rounded-lg border border-edge px-3 text-[12.5px] text-ink-muted transition-colors hover:bg-elevated hover:text-ink disabled:opacity-60"
+              aria-disabled={testing}
+              className={`${ROW_ACTION}${testing ? " pointer-events-none opacity-45" : ""}`}
             >
-              {testing ? <Loader2 size={13} strokeWidth={1.9} className="animate-spin" /> : <Wifi size={13} strokeWidth={1.9} />}
+              {testing ? (
+                <Loader2 size={16} strokeWidth={1.9} className="animate-spin" />
+              ) : (
+                <Wifi size={16} strokeWidth={1.9} />
+              )}
               {testing ? t("Testing") : t("Run test")}
             </button>
-          </div>
-          {result && (
-            <div className={`flex items-start gap-2.5 rounded-xl border px-3.5 py-3 ${result.ok ? "border-accent/40 bg-accent/10" : "border-danger/40 bg-danger/10"}`}>
-              <span className={`mt-0.5 flex h-5 w-5 shrink-0 items-center justify-center rounded-full ${result.ok ? "bg-accent/25 text-accent" : "bg-danger/25 text-danger"}`}>
-                {result.ok ? <Check size={12} strokeWidth={2.4} /> : <X size={12} strokeWidth={2.4} />}
+          </SettingRow>
+        )}
+
+        {saved && result && (
+          <div role="status" aria-live="polite" className="flex items-start gap-2.5 rounded-[10px] bg-elevated px-4 py-3">
+            <span
+              className={`mt-[2px] shrink-0 ${result.ok ? "text-success" : "text-danger"}`}
+            >
+              {result.ok ? <Check size={18} strokeWidth={2.4} /> : <X size={18} strokeWidth={2.4} />}
+            </span>
+            <span className="flex min-w-0 flex-1 flex-col gap-1">
+              <span
+                className={`text-[16.5px] font-medium leading-[24px] ${
+                  result.ok ? "text-ink" : "text-danger"
+                }`}
+              >
+                {result.ok ? t("Server reachable") : t("Test failed")}
               </span>
-              <div className="flex min-w-0 flex-1 flex-col gap-0.5">
-                <span className={`text-[12.5px] font-medium ${result.ok ? "text-ink" : "text-danger"}`}>
-                  {result.ok ? t("Server reachable") : t("Test failed")}
-                </span>
-                <span className="text-[11.5px] text-ink-subtle">{result.message}</span>
-              </div>
-            </div>
-          )}
-        </>
-      )}
-    </section>
+              <span className={`max-w-[66ch] ${ROW_DESC}`}>{result.message}</span>
+            </span>
+          </div>
+        )}
+      </SettingGroup>
+    </Section>
   );
 }

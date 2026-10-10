@@ -7,7 +7,10 @@ import type {
   ThemeLayout,
 } from "@/lib/theme";
 
+import type { NavCustomization } from "@/chrome/nav-items";
+
 export type Draft = {
+  navCustomization: NavCustomization;
   name: string;
   blurb: string;
   layout: ThemeLayout;

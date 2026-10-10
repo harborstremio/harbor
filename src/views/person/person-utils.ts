@@ -11,6 +11,14 @@ export const WRITER_JOBS = new Set([
 ]);
 export const PRODUCER_JOBS = new Set(["Producer", "Executive Producer"]);
 export const DIRECTOR_JOBS = new Set(["Director"]);
+export const CINEMATOGRAPHY_JOBS = new Set([
+  "Director of Photography",
+  "Cinematography",
+  "Cinematographer",
+]);
+export const EDITING_JOBS = new Set(["Editor", "Editing", "Supervising Editor"]);
+export const PRODUCTION_DESIGN_JOBS = new Set(["Production Design", "Production Designer"]);
+export const COSTUME_JOBS = new Set(["Costume Design", "Costume Designer"]);
 
 export function isCameoOrGuest(c: PersonCredit): boolean {
   const ch = (c.character ?? "").toLowerCase().trim();

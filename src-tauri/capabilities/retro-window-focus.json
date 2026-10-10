@@ -1,0 +1,7 @@
+{
+  "$schema": "../gen/schemas/desktop-schema.json",
+  "identifier": "retro-window-focus",
+  "description": "Return focus between the library and its retro player window.",
+  "windows": ["main"],
+  "permissions": ["core:window:allow-show", "core:window:allow-set-focus", "core:window:allow-unminimize"]
+}

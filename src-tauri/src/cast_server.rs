@@ -5,6 +5,7 @@ pub struct CastServerStatus {
     pub bundled: bool,
     pub running: bool,
     pub ready: bool,
+    pub port: Option<u16>,
     pub last_error: Option<String>,
     pub restart_count: u32,
 }
@@ -24,7 +25,9 @@ fn kill_orphan_sidecars() {
     }
     #[cfg(not(windows))]
     {
-        let _ = std::process::Command::new("pkill").args(["-f", "stremio-server"]).output();
+        let _ = std::process::Command::new("pkill")
+            .args(["-f", "stremio-server"])
+            .output();
     }
 }
 
@@ -39,11 +42,12 @@ pub fn stop_stremio_sidecar() {
 
 #[tauri::command]
 pub fn cast_server_status() -> CastServerStatus {
-    let (running, _port, last_error) = crate::torrent_engine::lan_status();
+    let (running, port, last_error) = crate::torrent_engine::lan_status();
     CastServerStatus {
         bundled: running,
         running,
         ready: running,
+        port,
         last_error,
         restart_count: 0,
     }
@@ -51,7 +55,9 @@ pub fn cast_server_status() -> CastServerStatus {
 
 #[tauri::command]
 pub async fn cast_server_restart(app: AppHandle) -> Result<(), String> {
-    crate::torrent_engine::start_lan_server(&app).await.map(|_| ())
+    crate::torrent_engine::start_lan_server(&app)
+        .await
+        .map(|_| ())
 }
 
 #[tauri::command]

@@ -1,6 +1,6 @@
-use tauri::{AppHandle, Manager, Url, WebviewUrl, WebviewWindowBuilder};
 #[cfg(target_os = "linux")]
 use tauri::Emitter;
+use tauri::{AppHandle, Manager, Url, WebviewUrl, WebviewWindowBuilder};
 
 const BROWSER_LABEL: &str = "harbor-browser";
 
@@ -87,21 +87,21 @@ pub async fn browser_open(app: AppHandle, url: String) -> Result<(), String> {
     let target_x = main_pos.x + (main_size.width - target_w) / 2.0;
     let target_y = main_pos.y + (main_size.height - target_h) / 2.0;
 
-    let app_for_main = app.clone();
+    let app_for_window = app.clone();
     #[cfg(target_os = "linux")]
     let init_script = format!("{}\n{}", CHROME_INIT_SCRIPT, STREMIO_CAPTURE_SCRIPT);
     #[cfg(not(target_os = "linux"))]
     let init_script = CHROME_INIT_SCRIPT.to_string();
-    let (tx, rx) = std::sync::mpsc::channel::<Result<(), String>>();
-    app.run_on_main_thread(move || {
+    // Creating WebView2 inside the UI event loop can deadlock all Harbor windows.
+    tauri::async_runtime::spawn_blocking(move || -> Result<(), String> {
         eprintln!(
             "[browser] building {} at ({:.0}, {:.0}) size {:.0}x{:.0}",
             BROWSER_LABEL, target_x, target_y, target_w, target_h
         );
         #[allow(unused_mut)]
         let mut builder =
-            WebviewWindowBuilder::new(&app_for_main, BROWSER_LABEL, WebviewUrl::External(parsed))
-                .title("Harbor Browser")
+            WebviewWindowBuilder::new(&app_for_window, BROWSER_LABEL, WebviewUrl::External(parsed))
+                .title(concat!(crate::product_name!(), " Browser"))
                 .inner_size(target_w, target_h)
                 .position(target_x, target_y)
                 .resizable(true)
@@ -112,7 +112,7 @@ pub async fn browser_open(app: AppHandle, url: String) -> Result<(), String> {
 
         #[cfg(target_os = "linux")]
         {
-            let nav_app = app_for_main.clone();
+            let nav_app = app_for_window.clone();
             builder = builder.on_navigation(move |url| {
                 let s = url.as_str();
                 if url.scheme() == "stremio" || s.contains("/manifest.json") {
@@ -124,7 +124,7 @@ pub async fn browser_open(app: AppHandle, url: String) -> Result<(), String> {
             });
         }
 
-        let result = builder.build();
+        let result = crate::browser_args::match_main(&app_for_window, builder).build();
         match result {
             Ok(window) => {
                 eprintln!("[browser] window built, label={}", window.label());
@@ -134,18 +134,16 @@ pub async fn browser_open(app: AppHandle, url: String) -> Result<(), String> {
                 });
                 let _ = window.show();
                 let _ = window.set_focus();
-                let _ = tx.send(Ok(()));
+                Ok(())
             }
             Err(e) => {
                 eprintln!("[browser] BUILD FAILED: {}", e);
-                let _ = tx.send(Err(format!("build: {}", e)));
+                Err(format!("build: {}", e))
             }
         }
     })
-    .map_err(|e| format!("run_on_main_thread: {}", e))?;
-
-    rx.recv().map_err(|e| format!("channel: {}", e))??;
-    Ok(())
+    .await
+    .map_err(|e| format!("browser window worker: {e}"))?
 }
 
 #[tauri::command]

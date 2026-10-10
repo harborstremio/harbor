@@ -1,6 +1,8 @@
-import { useMemo, useState } from "react";
+import { useMemo } from "react";
 import type { Meta } from "@/lib/cinemeta";
+import { useT } from "@/lib/i18n";
 import { EmptyState, FilteredOutState, NoSourcesState, TheatresEmptyState } from "./empty-states";
+import { SourceOutages } from "./source-outages";
 import type { usePipelineResult } from "./use-pipeline-result";
 
 type PipelineResult = ReturnType<typeof usePipelineResult>["result"];
@@ -38,7 +40,7 @@ export function PickerEmptyLadder({
   onShowAll: () => void;
   onSearchWider: () => void;
 }) {
-  const [openedAt] = useState(Date.now);
+  const t = useT();
   const isStillInTheatres = useMemo(() => {
     if (!result || meta.type !== "movie") return false;
     if (allCount > 0) return false;
@@ -47,7 +49,7 @@ export function PickerEmptyLadder({
       if (meta.releaseDate) {
         const d = new Date(meta.releaseDate);
         if (!Number.isNaN(d.getTime())) {
-          const days = (openedAt - d.getTime()) / (1000 * 60 * 60 * 24);
+          const days = (Date.now() - d.getTime()) / (1000 * 60 * 60 * 24);
           return days >= -30 && days < 90;
         }
       }
@@ -64,14 +66,17 @@ export function PickerEmptyLadder({
         r.reason.startsWith("suspicious-extension:"),
     ).length;
     return trashRejections >= Math.max(3, Math.floor(rawCount * 0.5));
-  }, [result, meta.type, meta.inTheaters, meta.releaseDate, allCount, rawCount, openedAt]);
+  }, [result, meta.type, meta.inTheaters, meta.releaseDate, allCount, rawCount]);
 
   return (
     <>
+      {addonsSettled && allCount === 0 && <SourceOutages />}
       {addonsSettled && (!streamIds || streamIds.length === 0) && (
         <EmptyState
-          message="Harbor couldn't resolve a usable ID for this title. Add a TMDB key in Library settings or sign in to Stremio to broaden coverage."
-          action={{ label: "Open Library settings", onClick: onOpenLibrarySettings }}
+          message={t(
+            "Harbor couldn't resolve a usable ID for this title. Add a TMDB key in Library settings or sign in to Stremio to broaden coverage.",
+          )}
+          action={{ label: t("Open Library settings"), onClick: onOpenLibrarySettings }}
         />
       )}
       {addonsSettled &&
@@ -80,8 +85,10 @@ export function PickerEmptyLadder({
         debridCount === 0 &&
         allCount === 0 && (
           <EmptyState
-            message="No playable streams turned up, and no debrid is configured. Real-Debrid, TorBox, AllDebrid, Premiumize, or Debrid-Link will unlock raw torrent results. Some addons bake debrid in (Sootio, Comet/ElfHosted, MediaFusion/ElfHosted) and play without your own keys."
-            action={{ label: "Set up a debrid", onClick: onOpenStreamingSettings }}
+            message={t(
+              "No playable streams turned up, and no debrid is configured. Real-Debrid, TorBox, AllDebrid, Premiumize, or Debrid-Link will unlock raw torrent results. Some addons bake debrid in (Sootio, Comet/ElfHosted, MediaFusion/ElfHosted) and play without your own keys.",
+            )}
+            action={{ label: t("Set up a debrid"), onClick: onOpenStreamingSettings }}
           />
         )}
       {addonsSettled &&
@@ -92,7 +99,6 @@ export function PickerEmptyLadder({
         rawCount === 0 && (
           <NoSourcesState
             addonCount={addonCount}
-            hasDebrid={debridCount > 0}
             streamIds={streamIds}
             isAnime={meta.id.startsWith("kitsu:") || meta.id.startsWith("mal:")}
           />
@@ -125,15 +131,30 @@ export function PickerEmptyLadder({
         <div className="flex flex-wrap items-center justify-between gap-3 rounded-2xl border border-amber-300/30 bg-amber-300/[0.06] px-5 py-3.5 text-[13px] text-ink">
           <div className="flex min-w-0 flex-1 flex-col">
             <p className="font-semibold text-amber-200">
-              {allCount === 1 ? "Only 1 source after filtering" : "Only 2 sources after filtering"}
+              {allCount === 1
+                ? t("Only 1 source after filtering")
+                : t("Only 2 sources after filtering")}
             </p>
             <p className="text-[12.5px] leading-snug text-ink-muted">
               {allCount === 1
-                ? "Clean releases for this title haven't surfaced yet. The result below may not match the title you're looking for, so confirm the filename and size before playing."
-                : "Clean releases for this title are still scarce. Confirm the filename and size before playing."}
-              {rawCount - allCount > 0 && !forceShowAll
-                ? ` Harbor dropped ${rawCount - allCount} suspicious or mismatched result${rawCount - allCount === 1 ? "" : "s"}.`
-                : ""}
+                ? t(
+                    "Clean releases for this title haven't surfaced yet. The result below may not match the title you're looking for, so confirm the filename and size before playing.",
+                  )
+                : t(
+                    "Clean releases for this title are still scarce. Confirm the filename and size before playing.",
+                  )}
+              {rawCount - allCount > 0 && !forceShowAll && (
+                <>
+                  {" "}
+                  {rawCount - allCount === 1
+                    ? t("JL Media Vision dropped {n} suspicious or mismatched result.", {
+                        n: rawCount - allCount,
+                      })
+                    : t("JL Media Vision dropped {n} suspicious or mismatched results.", {
+                        n: rawCount - allCount,
+                      })}
+                </>
+              )}
             </p>
           </div>
           {rawCount - allCount > 0 && !forceShowAll && (
@@ -141,7 +162,7 @@ export function PickerEmptyLadder({
               onClick={onShowAll}
               className="shrink-0 rounded-full border border-amber-300/40 bg-amber-300/10 px-4 py-2 text-[12.5px] font-semibold text-amber-100 transition-[transform,background-color] hover:scale-[1.02] hover:bg-amber-300/20 active:scale-[0.98]"
             >
-              Show everything anyway
+              {t("Show everything anyway")}
             </button>
           )}
         </div>

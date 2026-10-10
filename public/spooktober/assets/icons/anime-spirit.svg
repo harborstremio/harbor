@@ -1,0 +1,29 @@
+<?xml version="1.0" encoding="utf-8"?>
+<!-- Generator: Adobe Illustrator 30.8.1, SVG Export Plug-In . SVG Version: 9.03 Build 0)  -->
+<svg version="1.1" id="Anime_eyes_and_evil_grin" xmlns="http://www.w3.org/2000/svg" xmlns:xlink="http://www.w3.org/1999/xlink"
+	 x="0px" y="0px" viewBox="0 0 48 48" enable-background="new 0 0 48 48" xml:space="preserve">
+<g id="anime-spirit">
+	<path id="Left_sharp_eye" fill="#E8DCC4" d="M4,11c7,0.5,13,4,17,7.5C15,24,6,21.5,4,11L4,11z"/>
+	<path id="Right_sharp_eye" fill="#E8DCC4" d="M44,9.5c-7,2-14,5-17,8.5C34,23.8,41,21.7,44,9.5L44,9.5z"/>
+	<circle id="Left_pinpoint_pupil" fill="#2E3037" cx="14.35" cy="17.25" r="1.55"/>
+	<circle id="Right_pinpoint_pupil" fill="#2E3037" cx="34.35" cy="16.85" r="1.55"/>
+	
+		<path id="Left_ink_brow" fill="none" stroke="#D7CBB7" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round" stroke-miterlimit="10" d="
+		M3.8,7.8c6.6-0.2,12.2,2.8,15.7,5.8"/>
+	
+		<path id="Right_ink_brow" fill="none" stroke="#D7CBB7" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round" stroke-miterlimit="10" d="
+		M28.4,13.4c4.9-4.6,11.1-6.8,15.2-6.9"/>
+	<path id="Sweeping_grin" fill="#E8DCC4" d="M5,25c9,6.5,28,5.5,38-2c-3,12.5-11.5,19-20,18C14,40,8,33,5,25L5,25z"/>
+	
+		<path id="Fanged_smile_seam" fill="none" stroke="#2E3037" stroke-width="1.65" stroke-linecap="round" stroke-linejoin="round" stroke-miterlimit="10" d="
+		M7.7,28.8c2.6,2.4,4.8,3.6,6.3,4l2,4.2l2-3.1c4,1.2,8,1,11-0.2l2.4,2.9l1.8-4.4c3.2-1.1,5.6-2.7,7.5-5.1"/>
+	
+		<line id="Left_upper_teeth" fill="none" stroke="#2E3037" stroke-width="1.25" stroke-linecap="round" stroke-linejoin="round" stroke-miterlimit="10" x1="11.7" y1="28.1" x2="13.4" y2="32.5"/>
+	
+		<line id="Centre_upper_teeth" fill="none" stroke="#2E3037" stroke-width="1.25" stroke-linecap="round" stroke-linejoin="round" stroke-miterlimit="10" x1="23.3" y1="29.7" x2="23.5" y2="34.7"/>
+	
+		<line id="Right_upper_teeth" fill="none" stroke="#2E3037" stroke-width="1.25" stroke-linecap="round" stroke-linejoin="round" stroke-miterlimit="10" x1="35.6" y1="27.5" x2="34.2" y2="31.8"/>
+	
+		<line id="Centre_lower_teeth" fill="none" stroke="#2E3037" stroke-width="1.25" stroke-linecap="round" stroke-linejoin="round" stroke-miterlimit="10" x1="23.5" y1="34.7" x2="23" y2="41"/>
+</g>
+</svg>

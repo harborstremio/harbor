@@ -1,0 +1,21 @@
+export default {
+  "artwork.title": "صور التحميل وبدء التشغيل",
+  "artwork.hint": "استخدم حركة Lottie أو GIF أو صورة. حتى 8 ميغابايت.",
+  "artwork.loading": "حركة التحميل",
+  "artwork.loadingHint": "تُستخدم في شاشات الاتصال والتحميل.",
+  "artwork.launch": "شعار بدء التشغيل",
+  "artwork.launchHint": "يظهر عند فتح Harbor، بما في ذلك Big Picture.",
+  "artwork.original": "تصميم Harbor الأصلي",
+  "artwork.choose": "اختيار ملف",
+  "artwork.saving": "جارٍ الحفظ…",
+  "artwork.reset": "إعادة ضبط",
+  "artwork.chooseLoading": "اختيار حركة التحميل",
+  "artwork.chooseLaunch": "اختيار شعار بدء التشغيل",
+  "artwork.resetLoading": "إعادة ضبط حركة التحميل",
+  "artwork.resetLaunch": "إعادة ضبط شعار بدء التشغيل",
+  "artwork.local": "يُحفظ على هذا الجهاز. عند تقليل الحركة تُعرض صورة ثابتة.",
+  "artwork.error.large": "اختر ملفًا أصغر: حتى 8 ميغابايت و4096 × 4096 بكسل.",
+  "artwork.error.external": "تستخدم هذه الحركة وسائط خارجية. صدّرها مع تضمين الصور.",
+  "artwork.error.storage": "تعذّر حفظ الملف على هذا الجهاز. لم يتغير اختيارك السابق.",
+  "artwork.error.invalid": "تعذّرت قراءة الملف. اختر Lottie ‏(.json أو .lottie) أو GIF أو PNG أو JPEG أو WebP."
+};

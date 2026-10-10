@@ -17,11 +17,7 @@ export { hydrateSimklItems };
 const PER_RAIL = 24;
 
 export async function buildSimklHomeRows(settings: Settings): Promise<HomeRow[]> {
-  if (!settings.simklHomeRailsEnabled) {
-    void fetchWatchlist().catch(() => []);
-    void fetchWatchingItems().catch(() => []);
-    return [];
-  }
+  if (!settings.simklHomeRailsEnabled) return [];
 
   const tmdbKey = settings.tmdbKey;
   const cache = getLocalCache();
@@ -109,7 +105,7 @@ export async function buildSimklHomeRows(settings: Settings): Promise<HomeRow[]>
     });
   }
 
-  if (planMoviesMetas.length >= 4 && settings.simklGranularFilters.movies.plantowatch) {
+  if (planMoviesMetas.length >= 1 && settings.simklGranularFilters.movies.plantowatch) {
     rows.push({
       key: "simkl-plantowatch-movies",
       type: "movie",
@@ -122,7 +118,7 @@ export async function buildSimklHomeRows(settings: Settings): Promise<HomeRow[]>
     });
   }
 
-  if (planShowsMetas.length >= 4 && settings.simklGranularFilters.shows.plantowatch) {
+  if (planShowsMetas.length >= 1 && settings.simklGranularFilters.shows.plantowatch) {
     rows.push({
       key: "simkl-plantowatch-shows",
       type: "series",
@@ -135,7 +131,7 @@ export async function buildSimklHomeRows(settings: Settings): Promise<HomeRow[]>
     });
   }
 
-  if (planAnimeMetas.length >= 4 && settings.simklGranularFilters.anime.plantowatch) {
+  if (planAnimeMetas.length >= 1 && settings.simklGranularFilters.anime.plantowatch) {
     rows.push({
       key: "simkl-plantowatch-anime",
       type: "series",

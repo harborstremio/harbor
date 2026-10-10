@@ -1,0 +1,8 @@
+.games-hack-watch{background:var(--color-surface);border-radius:10px;overflow:auto}
+.games-hack-watch header{display:flex;align-items:center;justify-content:space-between;gap:20px;padding:20px 24px}
+.games-hack-watch h2{font-size:17px;line-height:1.45;font-weight:600;margin:4px 0 0}
+.games-hack-watch small{font-size:11px;color:var(--color-ink-muted)}
+.games-hack-watch iframe{display:block;width:100%;aspect-ratio:16/9;border:0;background:#000}
+.games-hack-watch footer{display:flex;justify-content:space-between;align-items:center;gap:15px;padding:14px 24px;font-size:12px;color:var(--color-ink-muted)}
+.games-hack-watch footer>a{display:inline-flex;align-items:center;gap:6px;flex:none;color:var(--color-ink)}
+.games-hack-watch :is(button,a):focus-visible{outline:2px solid var(--color-accent);outline-offset:4px;border-radius:4px}

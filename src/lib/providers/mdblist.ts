@@ -1,4 +1,5 @@
 import { useEffect, useState } from "react";
+import { lruGet, lruSet } from "@/lib/cache";
 import { safeFetch } from "@/lib/safe-fetch";
 
 export type MdblistScores = {
@@ -25,7 +26,10 @@ function positive(...vals: (number | null | undefined)[]): number | null {
   return null;
 }
 
-const cache = new Map<string, MdblistScores | null>();
+const CACHE_TTL_MS = 24 * 60 * 60 * 1000;
+const RETRY_MS = 60 * 1000;
+const CACHE_MAX = 256;
+const cache = new Map<string, { scores: MdblistScores | null; expiresAt: number }>();
 const inflight = new Map<string, Promise<MdblistScores | null>>();
 
 function parse(json: ApiShape): MdblistScores {
@@ -80,14 +84,19 @@ export function mdblistScores(
   imdbId: string,
   type: "movie" | "show" = "movie",
 ): Promise<MdblistScores | null> {
-  if (!key || !imdbId.startsWith("tt")) return Promise.resolve(null);
-  const ck = `${type}:${imdbId}`;
-  if (cache.has(ck)) return Promise.resolve(cache.get(ck) ?? null);
+  const apiKey = key.trim();
+  if (!apiKey || !imdbId.startsWith("tt")) return Promise.resolve(null);
+  // A corrected credential must not reuse an earlier failure or pending request.
+  const ck = JSON.stringify([apiKey, type, imdbId]);
+  const hit = lruGet(cache, ck);
+  if (hit && Date.now() < hit.expiresAt) return Promise.resolve(hit.scores);
+  if (hit) cache.delete(ck);
   const pending = inflight.get(ck);
   if (pending) return pending;
-  const p = fetchScores(key, imdbId, type).then((r) => {
+  const p = fetchScores(apiKey, imdbId, type).then((r) => {
     inflight.delete(ck);
-    cache.set(ck, r);
+    const ttl = r && Object.values(r).some((value) => value !== null) ? CACHE_TTL_MS : RETRY_MS;
+    lruSet(cache, ck, { scores: r, expiresAt: Date.now() + ttl }, CACHE_MAX);
     return r;
   });
   inflight.set(ck, p);

@@ -1,4 +1,4 @@
-import { languageName } from "./language.ts";
+import { languageName } from "./language";
 
 type SubtitleTrackLabelInput = {
   id?: string;

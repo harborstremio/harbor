@@ -1,0 +1,30 @@
+#!/usr/bin/env node
+
+import fs from 'fs';
+import path from 'path';
+
+// Change directory to 'dist'
+process.chdir('dist');
+
+// Read and parse the manifest file
+const manifestPath = path.join('.vite', 'manifest.json');
+const manifest = JSON.parse(fs.readFileSync(manifestPath, 'utf-8'));
+
+// Read the 'index.html' file
+let indexHtml = fs.readFileSync('index.html', 'utf-8');
+
+// List of files to process
+const files = [
+    { dst: 'assets/logo.svg', src: manifest['assets/logo.svg'].file },
+    { dst: 'assets/index.css', src: manifest['index.html'].css[0] },
+    { dst: 'assets/index.js', src: manifest['index.html'].file }
+];
+
+// Replace and rename files
+files.forEach(({ dst, src }) => {
+    indexHtml = indexHtml.replace(`/${src}`, dst);
+    fs.renameSync(src, dst);
+});
+
+// Write the updated 'index.html'
+fs.writeFileSync('index.html', indexHtml, 'utf-8');

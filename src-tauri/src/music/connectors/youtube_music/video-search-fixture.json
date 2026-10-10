@@ -1,0 +1,431 @@
+{
+  "contents": [
+    {
+      "musicResponsiveListItemRenderer": {
+        "playlistItemData": {
+          "videoId": "FGBhQbmPwH8"
+        },
+        "flexColumns": [
+          {
+            "musicResponsiveListItemFlexColumnRenderer": {
+              "text": {
+                "runs": [
+                  {
+                    "text": "One More Time",
+                    "navigationEndpoint": {
+                      "clickTrackingParams": "CLgCENNoGAAiEwj0svmS7O6WAxXlal4DHTmjICyaAQMQ9CTKAQR4dw-J",
+                      "watchEndpoint": {
+                        "videoId": "FGBhQbmPwH8",
+                        "playerParams": "0gcJCTMC0OBS9m0t",
+                        "watchEndpointMusicSupportedConfigs": {
+                          "watchEndpointMusicConfig": {
+                            "musicVideoType": "MUSIC_VIDEO_TYPE_OMV"
+                          }
+                        }
+                      }
+                    }
+                  }
+                ]
+              },
+              "displayPriority": "MUSIC_RESPONSIVE_LIST_ITEM_COLUMN_DISPLAY_PRIORITY_HIGH"
+            }
+          },
+          {
+            "musicResponsiveListItemFlexColumnRenderer": {
+              "text": {
+                "runs": [
+                  {
+                    "text": "Daft Punk",
+                    "navigationEndpoint": {
+                      "clickTrackingParams": "CLgCENNoGAAiEwj0svmS7O6WAxXlal4DHTmjICzKAQR4dw-J",
+                      "browseEndpoint": {
+                        "browseId": "UCRr1xG_2WIDs18a6cIiCxeA",
+                        "browseEndpointContextSupportedConfigs": {
+                          "browseEndpointContextMusicConfig": {
+                            "pageType": "MUSIC_PAGE_TYPE_ARTIST"
+                          }
+                        }
+                      }
+                    }
+                  },
+                  {
+                    "text": " • "
+                  },
+                  {
+                    "text": "617M views"
+                  },
+                  {
+                    "text": " • "
+                  },
+                  {
+                    "text": "5:22"
+                  }
+                ],
+                "accessibility": {
+                  "accessibilityData": {
+                    "label": "Daft Punk • 617 million views • 5 minutes, 22 seconds"
+                  }
+                }
+              },
+              "displayPriority": "MUSIC_RESPONSIVE_LIST_ITEM_COLUMN_DISPLAY_PRIORITY_HIGH"
+            }
+          }
+        ],
+        "thumbnail": {
+          "musicThumbnailRenderer": {
+            "thumbnail": {
+              "thumbnails": [
+                {
+                  "url": "https://i.ytimg.com/vi/FGBhQbmPwH8/hqdefault.jpg?sqp=-oaymwEWCJADEOEBIAQqCggAEOADGC0guwJIWg&rs=AMzJL3n3_qY4XRLapf4YMTv5EuAp3xtbfw",
+                  "width": 400,
+                  "height": 225
+                }
+              ]
+            },
+            "thumbnailCrop": "MUSIC_THUMBNAIL_CROP_UNSPECIFIED",
+            "thumbnailScale": "MUSIC_THUMBNAIL_SCALE_ASPECT_FIT",
+            "trackingParams": "CMcCEIS_AiITCPSy-ZLs7pYDFeVqXgMdOaMgLA=="
+          }
+        },
+        "overlay": {
+          "musicItemThumbnailOverlayRenderer": {
+            "background": {
+              "verticalGradient": {
+                "gradientLayerColors": ["3422552064", "3422552064"]
+              }
+            },
+            "content": {
+              "musicPlayButtonRenderer": {
+                "playNavigationEndpoint": {
+                  "clickTrackingParams": "CMYCEMjeAiITCPSy-ZLs7pYDFeVqXgMdOaMgLMoBBHh3D4k=",
+                  "watchEndpoint": {
+                    "videoId": "FGBhQbmPwH8",
+                    "watchEndpointMusicSupportedConfigs": {
+                      "watchEndpointMusicConfig": {
+                        "musicVideoType": "MUSIC_VIDEO_TYPE_OMV"
+                      }
+                    }
+                  }
+                },
+                "trackingParams": "CMYCEMjeAiITCPSy-ZLs7pYDFeVqXgMdOaMgLA==",
+                "playIcon": {
+                  "iconType": "PLAY_ARROW"
+                },
+                "pauseIcon": {
+                  "iconType": "PAUSE"
+                },
+                "iconColor": 4294967295,
+                "backgroundColor": 0,
+                "activeBackgroundColor": 0,
+                "loadingIndicatorColor": 14745645,
+                "playingIcon": {
+                  "iconType": "VOLUME_UP"
+                },
+                "iconLoadingColor": 0,
+                "activeScaleFactor": 1,
+                "buttonSize": "MUSIC_PLAY_BUTTON_SIZE_SMALL",
+                "rippleTarget": "MUSIC_PLAY_BUTTON_RIPPLE_TARGET_SELF",
+                "accessibilityPlayData": {
+                  "accessibilityData": {
+                    "label": "Play One More Time - Daft Punk"
+                  }
+                },
+                "accessibilityPauseData": {
+                  "accessibilityData": {
+                    "label": "Pause One More Time - Daft Punk"
+                  }
+                }
+              }
+            },
+            "contentPosition": "MUSIC_ITEM_THUMBNAIL_OVERLAY_CONTENT_POSITION_CENTERED",
+            "displayStyle": "MUSIC_ITEM_THUMBNAIL_OVERLAY_DISPLAY_STYLE_PERSISTENT"
+          }
+        }
+      }
+    },
+    {
+      "musicResponsiveListItemRenderer": {
+        "playlistItemData": {
+          "videoId": "CCHdMIEGaaM"
+        },
+        "flexColumns": [
+          {
+            "musicResponsiveListItemFlexColumnRenderer": {
+              "text": {
+                "runs": [
+                  {
+                    "text": "Daft Punk - Get Lucky (Official Video) feat. Pharrell Williams and Nile Rodgers",
+                    "navigationEndpoint": {
+                      "clickTrackingParams": "CKkCENNoGAEiEwj0svmS7O6WAxXlal4DHTmjICyaAQMQ9CTKAQR4dw-J",
+                      "watchEndpoint": {
+                        "videoId": "CCHdMIEGaaM",
+                        "watchEndpointMusicSupportedConfigs": {
+                          "watchEndpointMusicConfig": {
+                            "musicVideoType": "MUSIC_VIDEO_TYPE_UGC"
+                          }
+                        }
+                      }
+                    }
+                  }
+                ]
+              },
+              "displayPriority": "MUSIC_RESPONSIVE_LIST_ITEM_COLUMN_DISPLAY_PRIORITY_HIGH"
+            }
+          },
+          {
+            "musicResponsiveListItemFlexColumnRenderer": {
+              "text": {
+                "runs": [
+                  {
+                    "text": "convar HUN",
+                    "navigationEndpoint": {
+                      "clickTrackingParams": "CKkCENNoGAEiEwj0svmS7O6WAxXlal4DHTmjICzKAQR4dw-J",
+                      "browseEndpoint": {
+                        "browseId": "UCH9fakOo40rOv7HGvbGc1rQ",
+                        "browseEndpointContextSupportedConfigs": {
+                          "browseEndpointContextMusicConfig": {
+                            "pageType": "MUSIC_PAGE_TYPE_USER_CHANNEL"
+                          }
+                        }
+                      }
+                    }
+                  },
+                  {
+                    "text": " • "
+                  },
+                  {
+                    "text": "58M views"
+                  },
+                  {
+                    "text": " • "
+                  },
+                  {
+                    "text": "4:08"
+                  }
+                ],
+                "accessibility": {
+                  "accessibilityData": {
+                    "label": "convar HUN • 58 million views • 4 minutes, 8 seconds"
+                  }
+                }
+              },
+              "displayPriority": "MUSIC_RESPONSIVE_LIST_ITEM_COLUMN_DISPLAY_PRIORITY_HIGH"
+            }
+          }
+        ],
+        "thumbnail": {
+          "musicThumbnailRenderer": {
+            "thumbnail": {
+              "thumbnails": [
+                {
+                  "url": "https://i.ytimg.com/vi/CCHdMIEGaaM/hqdefault.jpg?sqp=-oaymwEWCJADEOEBIAQqCggAEOADGC0guwJIWg&rs=AMzJL3khjOKM5r_NGiNeL-bkJzA_hhB9Ow",
+                  "width": 400,
+                  "height": 225
+                }
+              ]
+            },
+            "thumbnailCrop": "MUSIC_THUMBNAIL_CROP_UNSPECIFIED",
+            "thumbnailScale": "MUSIC_THUMBNAIL_SCALE_ASPECT_FIT",
+            "trackingParams": "CLcCEIS_AiITCPSy-ZLs7pYDFeVqXgMdOaMgLA=="
+          }
+        },
+        "overlay": {
+          "musicItemThumbnailOverlayRenderer": {
+            "background": {
+              "verticalGradient": {
+                "gradientLayerColors": ["3422552064", "3422552064"]
+              }
+            },
+            "content": {
+              "musicPlayButtonRenderer": {
+                "playNavigationEndpoint": {
+                  "clickTrackingParams": "CLYCEMjeAiITCPSy-ZLs7pYDFeVqXgMdOaMgLMoBBHh3D4k=",
+                  "watchEndpoint": {
+                    "videoId": "CCHdMIEGaaM",
+                    "watchEndpointMusicSupportedConfigs": {
+                      "watchEndpointMusicConfig": {
+                        "musicVideoType": "MUSIC_VIDEO_TYPE_UGC"
+                      }
+                    }
+                  }
+                },
+                "trackingParams": "CLYCEMjeAiITCPSy-ZLs7pYDFeVqXgMdOaMgLA==",
+                "playIcon": {
+                  "iconType": "PLAY_ARROW"
+                },
+                "pauseIcon": {
+                  "iconType": "PAUSE"
+                },
+                "iconColor": 4294967295,
+                "backgroundColor": 0,
+                "activeBackgroundColor": 0,
+                "loadingIndicatorColor": 14745645,
+                "playingIcon": {
+                  "iconType": "VOLUME_UP"
+                },
+                "iconLoadingColor": 0,
+                "activeScaleFactor": 1,
+                "buttonSize": "MUSIC_PLAY_BUTTON_SIZE_SMALL",
+                "rippleTarget": "MUSIC_PLAY_BUTTON_RIPPLE_TARGET_SELF",
+                "accessibilityPlayData": {
+                  "accessibilityData": {
+                    "label": "Play Daft Punk - Get Lucky (Official Video) feat. Pharrell Williams and Nile Rodgers - convar HUN"
+                  }
+                },
+                "accessibilityPauseData": {
+                  "accessibilityData": {
+                    "label": "Pause Daft Punk - Get Lucky (Official Video) feat. Pharrell Williams and Nile Rodgers - convar HUN"
+                  }
+                }
+              }
+            },
+            "contentPosition": "MUSIC_ITEM_THUMBNAIL_OVERLAY_CONTENT_POSITION_CENTERED",
+            "displayStyle": "MUSIC_ITEM_THUMBNAIL_OVERLAY_DISPLAY_STYLE_PERSISTENT"
+          }
+        }
+      }
+    },
+    {
+      "musicResponsiveListItemRenderer": {
+        "playlistItemData": {
+          "videoId": "a5uQMwRMHcs"
+        },
+        "flexColumns": [
+          {
+            "musicResponsiveListItemFlexColumnRenderer": {
+              "text": {
+                "runs": [
+                  {
+                    "text": "Instant Crush (feat. Julian Casablancas)",
+                    "navigationEndpoint": {
+                      "clickTrackingParams": "CJkCENNoGAIiEwj0svmS7O6WAxXlal4DHTmjICyaAQMQ9CTKAQR4dw-J",
+                      "watchEndpoint": {
+                        "videoId": "a5uQMwRMHcs",
+                        "watchEndpointMusicSupportedConfigs": {
+                          "watchEndpointMusicConfig": {
+                            "musicVideoType": "MUSIC_VIDEO_TYPE_OMV"
+                          }
+                        }
+                      }
+                    }
+                  }
+                ]
+              },
+              "displayPriority": "MUSIC_RESPONSIVE_LIST_ITEM_COLUMN_DISPLAY_PRIORITY_HIGH"
+            }
+          },
+          {
+            "musicResponsiveListItemFlexColumnRenderer": {
+              "text": {
+                "runs": [
+                  {
+                    "text": "Daft Punk",
+                    "navigationEndpoint": {
+                      "clickTrackingParams": "CJkCENNoGAIiEwj0svmS7O6WAxXlal4DHTmjICzKAQR4dw-J",
+                      "browseEndpoint": {
+                        "browseId": "UCRr1xG_2WIDs18a6cIiCxeA",
+                        "browseEndpointContextSupportedConfigs": {
+                          "browseEndpointContextMusicConfig": {
+                            "pageType": "MUSIC_PAGE_TYPE_ARTIST"
+                          }
+                        }
+                      }
+                    }
+                  },
+                  {
+                    "text": " • "
+                  },
+                  {
+                    "text": "894M views"
+                  },
+                  {
+                    "text": " • "
+                  },
+                  {
+                    "text": "5:40"
+                  }
+                ],
+                "accessibility": {
+                  "accessibilityData": {
+                    "label": "Daft Punk • 894 million views • 5 minutes, 40 seconds"
+                  }
+                }
+              },
+              "displayPriority": "MUSIC_RESPONSIVE_LIST_ITEM_COLUMN_DISPLAY_PRIORITY_HIGH"
+            }
+          }
+        ],
+        "thumbnail": {
+          "musicThumbnailRenderer": {
+            "thumbnail": {
+              "thumbnails": [
+                {
+                  "url": "https://i.ytimg.com/vi/a5uQMwRMHcs/hqdefault.jpg?sqp=-oaymwEWCJADEOEBIAQqCggAEOADGC0guwJIWg&rs=AMzJL3lr_-asr943kjNKr21YiUt96WbHUA",
+                  "width": 400,
+                  "height": 225
+                }
+              ]
+            },
+            "thumbnailCrop": "MUSIC_THUMBNAIL_CROP_UNSPECIFIED",
+            "thumbnailScale": "MUSIC_THUMBNAIL_SCALE_ASPECT_FIT",
+            "trackingParams": "CKgCEIS_AiITCPSy-ZLs7pYDFeVqXgMdOaMgLA=="
+          }
+        },
+        "overlay": {
+          "musicItemThumbnailOverlayRenderer": {
+            "background": {
+              "verticalGradient": {
+                "gradientLayerColors": ["3422552064", "3422552064"]
+              }
+            },
+            "content": {
+              "musicPlayButtonRenderer": {
+                "playNavigationEndpoint": {
+                  "clickTrackingParams": "CKcCEMjeAiITCPSy-ZLs7pYDFeVqXgMdOaMgLMoBBHh3D4k=",
+                  "watchEndpoint": {
+                    "videoId": "a5uQMwRMHcs",
+                    "watchEndpointMusicSupportedConfigs": {
+                      "watchEndpointMusicConfig": {
+                        "musicVideoType": "MUSIC_VIDEO_TYPE_OMV"
+                      }
+                    }
+                  }
+                },
+                "trackingParams": "CKcCEMjeAiITCPSy-ZLs7pYDFeVqXgMdOaMgLA==",
+                "playIcon": {
+                  "iconType": "PLAY_ARROW"
+                },
+                "pauseIcon": {
+                  "iconType": "PAUSE"
+                },
+                "iconColor": 4294967295,
+                "backgroundColor": 0,
+                "activeBackgroundColor": 0,
+                "loadingIndicatorColor": 14745645,
+                "playingIcon": {
+                  "iconType": "VOLUME_UP"
+                },
+                "iconLoadingColor": 0,
+                "activeScaleFactor": 1,
+                "buttonSize": "MUSIC_PLAY_BUTTON_SIZE_SMALL",
+                "rippleTarget": "MUSIC_PLAY_BUTTON_RIPPLE_TARGET_SELF",
+                "accessibilityPlayData": {
+                  "accessibilityData": {
+                    "label": "Play Instant Crush - Daft Punk"
+                  }
+                },
+                "accessibilityPauseData": {
+                  "accessibilityData": {
+                    "label": "Pause Instant Crush - Daft Punk"
+                  }
+                }
+              }
+            },
+            "contentPosition": "MUSIC_ITEM_THUMBNAIL_OVERLAY_CONTENT_POSITION_CENTERED",
+            "displayStyle": "MUSIC_ITEM_THUMBNAIL_OVERLAY_DISPLAY_STYLE_PERSISTENT"
+          }
+        }
+      }
+    }
+  ]
+}

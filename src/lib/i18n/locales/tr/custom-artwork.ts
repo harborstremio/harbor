@@ -1,0 +1,21 @@
+export default {
+  "artwork.title": "Yükleme ve açılış görselleri",
+  "artwork.hint": "Lottie animasyonu, GIF veya resim kullanın. En fazla 8 MB.",
+  "artwork.loading": "Yükleme animasyonu",
+  "artwork.loadingHint": "Bağlantı ve yükleme ekranlarında kullanılır.",
+  "artwork.launch": "Açılış logosu",
+  "artwork.launchHint": "Big Picture dahil Harbor açılırken gösterilir.",
+  "artwork.original": "Harbor varsayılanı",
+  "artwork.choose": "Dosya seç",
+  "artwork.saving": "Kaydediliyor…",
+  "artwork.reset": "Sıfırla",
+  "artwork.chooseLoading": "Yükleme animasyonu seç",
+  "artwork.chooseLaunch": "Açılış logosu seç",
+  "artwork.resetLoading": "Yükleme animasyonunu sıfırla",
+  "artwork.resetLaunch": "Açılış logosunu sıfırla",
+  "artwork.local": "Bu cihazda saklanır. Hareket azaltıldığında sabit bir resim kullanılır.",
+  "artwork.error.large": "Daha küçük bir dosya seçin: en fazla 8 MB ve 4096 × 4096 piksel.",
+  "artwork.error.external": "Bu animasyon harici medya kullanıyor. Resimleri gömülü olarak dışa aktarın.",
+  "artwork.error.storage": "Dosya bu cihaza kaydedilemedi. Önceki seçiminiz değişmedi.",
+  "artwork.error.invalid": "Dosya okunamadı. Lottie (.json veya .lottie), GIF, PNG, JPEG ya da WebP seçin."
+};

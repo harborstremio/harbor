@@ -1,0 +1,15 @@
+.games-play-feedback { justify-content:center;min-inline-size:9rem; }
+.games-play-feedback[aria-disabled=true] { cursor:default; }
+.games-play-feedback-mark { display:grid;place-items:center;width:22px;height:22px;flex:none; }
+.games-play-glyph { grid-area:1/1;display:grid;place-items:center;opacity:0;transform:translateX(3px) scale(.85,1.08);transition:opacity 240ms ease-in-out,transform 320ms ease-in-out; }
+.games-play-feedback[data-phase=ready] .is-play,.games-play-feedback[data-phase=launching] .is-launch,.games-play-feedback[data-phase=running] .is-running,.games-play-feedback[data-phase=repair] .is-repair { opacity:1;transform:translateX(0) scale(1); }
+.games-play-glyph.is-running>i { width:9px;height:9px;border-radius:50%;background:currentColor; }
+.games-play-feedback-spinner { display:flex;align-items:center;gap:3px;height:20px; }
+.games-play-feedback-spinner>i { width:3px;height:12px;border-radius:3px;background:currentColor;transform:scaleY(.35); }
+.games-play-feedback[data-phase=launching] .games-play-feedback-spinner>i { animation:games-play-wave 1200ms ease-in-out infinite; }
+.games-play-feedback-spinner>i:nth-child(2) { animation-delay:120ms!important; }
+.games-play-feedback-spinner>i:nth-child(3) { animation-delay:240ms!important; }
+.games-play-feedback-mark[data-activated]+.games-play-feedback-label { animation:games-play-label-enter 300ms ease-in-out both; }
+@keyframes games-play-wave { from,to { transform:scaleY(.35);opacity:.45; } 50% { transform:scaleY(1);opacity:1; } }
+@keyframes games-play-label-enter { from { opacity:.5;transform:translateY(2px); } to { opacity:1;transform:translateY(0); } }
+@media(prefers-reduced-motion:reduce) { .games-play-glyph { transition:none!important; } .games-play-feedback-spinner>i,.games-play-feedback-label { animation:none!important; } }

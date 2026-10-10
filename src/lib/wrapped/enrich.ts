@@ -11,10 +11,12 @@ export async function enrichTopTitles(
 ): Promise<{
   genres: Array<{ genre: string; count: number }>;
   posters: Record<string, string>;
+  actors: Array<{ name: string; count: number }>;
 }> {
-  const targets = titles.slice(0, 15);
-  if (targets.length === 0) return { genres: [], posters: {} };
+  const targets = titles.slice(0, 20);
+  if (targets.length === 0) return { genres: [], posters: {}, actors: [] };
   const counts = new Map<string, number>();
+  const castCounts = new Map<string, number>();
   const posters: Record<string, string> = {};
   await Promise.all(
     targets.map(async (t) => {
@@ -33,6 +35,11 @@ export async function enrichTopTitles(
           const m = await fetchMeta(t.type === "movie" ? "movie" : "series", t.id);
           if (m?.poster) posters[t.id] = m.poster;
           for (const g of m?.genres ?? []) counts.set(g, (counts.get(g) ?? 0) + t.count);
+          const cast = (m as { cast?: string[] } | null)?.cast ?? [];
+          for (const raw of cast.slice(0, 8)) {
+            const name = raw.trim();
+            if (name) castCounts.set(name, (castCounts.get(name) ?? 0) + 1);
+          }
         }
       } catch {
         /* skip */
@@ -43,5 +50,10 @@ export async function enrichTopTitles(
     .map(([genre, count]) => ({ genre, count }))
     .sort((a, b) => b.count - a.count)
     .slice(0, 8);
-  return { genres, posters };
+  const actors = [...castCounts.entries()]
+    .map(([name, count]) => ({ name, count }))
+    .filter((a) => a.count >= 2)
+    .sort((a, b) => b.count - a.count)
+    .slice(0, 9);
+  return { genres, posters, actors };
 }

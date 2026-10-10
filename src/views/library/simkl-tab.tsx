@@ -1,7 +1,12 @@
 import { useEffect, useMemo, useState } from "react";
 import { useSettings } from "@/lib/settings";
 import { useT } from "@/lib/i18n";
-import { getLocalCache, syncWatchlistCache, type SimklCacheItem, type SimklCache } from "@/lib/simkl/activities";
+import {
+  getLocalCache,
+  syncWatchlistCache,
+  type SimklCacheItem,
+  type SimklCache,
+} from "@/lib/simkl/activities";
 import {
   groupAnimeByFranchise,
   enhanceGroupsWithRelations,
@@ -20,6 +25,7 @@ import {
   countByType,
   applyFilter,
 } from "./shared";
+import { useReportFeatured } from "./featured-context";
 
 const STATUS_LABELS: Record<string, string> = {
   watching: "Watching",
@@ -292,7 +298,11 @@ export function SimklTab() {
   }, [cache, subTab, statusFilter, enhancedFranchises]);
 
   const counts = useMemo(() => countByType(filteredItems), [filteredItems]);
-  const visible = useMemo(() => applyFilter(filteredItems, type, query), [filteredItems, type, query]);
+  const visible = useMemo(
+    () => applyFilter(filteredItems, type, query),
+    [filteredItems, type, query],
+  );
+  useReportFeatured(useMemo(() => visible.map((v) => v.meta), [visible]));
 
   return (
     <section className="flex flex-col gap-6">

@@ -1,4 +1,4 @@
-import { Bookmark, Check, ListVideo, Play, Sparkles } from "lucide-react";
+import { Bookmark, Check, ListVideo, Play, Sparkles } from "./icons";
 import type { ReactNode } from "react";
 import { useT } from "@/lib/i18n";
 import { useSettingsPreviewArt, type PreviewArt } from "@/lib/settings-preview-art";
@@ -30,13 +30,15 @@ export function HomeRowPreview({ kind }: { kind: HomeRowKind }) {
 }
 
 function Caption({ children }: { children: ReactNode }) {
-  return <p className="mt-3 text-[12px] leading-relaxed text-ink-muted">{children}</p>;
+  return (
+    <p className="mt-3 max-w-[70ch] text-[15.5px] leading-[22px] text-ink-muted">{children}</p>
+  );
 }
 
 function Panel({ tag, active, children }: { tag: string; active?: boolean; children: ReactNode }) {
   return (
     <div
-      className={`flex flex-col gap-1.5 rounded-lg border p-2.5 ${
+      className={`flex flex-col gap-1.5 rounded-md border p-2.5 ${
         active ? "border-accent/40 bg-accent/[0.07]" : "border-edge-soft/60 bg-canvas/30"
       }`}
     >
@@ -56,9 +58,7 @@ function RailBar({ label, dupe }: { label: string; dupe?: boolean }) {
   return (
     <div
       className={`flex items-center gap-1.5 rounded-md px-2 py-1 text-[10px] font-medium ${
-        dupe
-          ? "bg-accent/15 text-accent ring-1 ring-accent/25"
-          : "bg-canvas/60 text-ink-muted"
+        dupe ? "bg-accent/15 text-accent ring-1 ring-accent/25" : "bg-canvas/60 text-ink-muted"
       }`}
     >
       <span className="h-1 w-1 rounded-full bg-current opacity-60" />
@@ -138,7 +138,7 @@ function WatchlistSaved({ art }: { art: PreviewArt | null }) {
   );
   return (
     <>
-      <div className="flex items-end gap-2 rounded-lg border border-edge-soft/60 bg-canvas/30 p-2.5">
+      <div className="flex items-end gap-2 rounded-md border border-edge-soft/60 bg-canvas/30 p-2.5">
         <MiniPoster img={p[0]} badge={saved} />
         <MiniPoster img={p[1]} badge={saved} />
         <MiniPoster img={p[2]} badge={saved} />
@@ -146,7 +146,7 @@ function WatchlistSaved({ art }: { art: PreviewArt | null }) {
         <MiniPoster img={p[4]} faded dashed badge={auto} />
       </div>
       <Caption>
-        {t("On: only titles you bookmarked. Off: also keeps the ones Stremio added when you hit play.")}
+        {t("On: only titles you bookmarked. Off: also keeps titles added when you hit play.")}
       </Caption>
     </>
   );
@@ -157,9 +157,12 @@ function PlaylistsTab() {
   const items = [t("Home"), t("Library"), t("Discover")];
   return (
     <>
-      <div className="flex flex-col gap-1 rounded-lg border border-edge-soft/60 bg-canvas/30 p-2.5">
+      <div className="flex flex-col gap-1 rounded-md border border-edge-soft/60 bg-canvas/30 p-2.5">
         {items.map((it) => (
-          <div key={it} className="flex items-center gap-2 rounded-md px-2 py-1.5 text-[11px] text-ink-muted">
+          <div
+            key={it}
+            className="flex items-center gap-2 rounded-md px-2 py-1.5 text-[11px] text-ink-muted"
+          >
             <span className="h-3 w-3 rounded-[3px] bg-edge/70" />
             {it}
           </div>
@@ -181,7 +184,7 @@ function AnimeRoom({ art }: { art: PreviewArt | null }) {
   const an = art?.anime ?? [];
   return (
     <>
-      <div className="rounded-lg border border-edge-soft/60 bg-canvas/30 p-2.5">
+      <div className="rounded-md border border-edge-soft/60 bg-canvas/30 p-2.5">
         <div className="mb-1.5 text-[9px] font-bold uppercase tracking-[0.14em] text-ink-subtle">
           {t("Home · Continue Watching")}
         </div>
@@ -200,7 +203,9 @@ function AnimeRoom({ art }: { art: PreviewArt | null }) {
           </span>
         </div>
       </div>
-      <Caption>{t("Anime leaves Home Continue Watching and stays in the Anime tab's own row.")}</Caption>
+      <Caption>
+        {t("Anime leaves Home Continue Watching and stays in the Anime tab's own row.")}
+      </Caption>
     </>
   );
 }
@@ -219,10 +224,17 @@ function CwCard({
   still?: string;
 }) {
   return (
-    <div className={`overflow-hidden rounded-md ring-1 ring-edge-soft/60 ${dim ? "opacity-75" : ""}`}>
+    <div
+      className={`overflow-hidden rounded-md ring-1 ring-edge-soft/60 ${dim ? "opacity-75" : ""}`}
+    >
       <div className="relative h-11 bg-gradient-to-br from-elevated to-canvas">
         {still && (
-          <img src={still} alt="" draggable={false} className="absolute inset-0 h-full w-full object-cover" />
+          <img
+            src={still}
+            alt=""
+            draggable={false}
+            className="absolute inset-0 h-full w-full object-cover"
+          />
         )}
         <span className="absolute bottom-1 start-1 rounded bg-black/55 px-1 py-0.5 text-[8.5px] font-semibold text-ink">
           {ep}
@@ -249,7 +261,9 @@ function CwAdvance({ art }: { art: PreviewArt | null }) {
           <CwCard ep="S1 · E5" meta={t("24m")} progress={6} still={s[1] ?? s[0]} />
         </Panel>
       </div>
-      <Caption>{t("Finish an episode and the card jumps to the next one instead of sitting at 0m left.")}</Caption>
+      <Caption>
+        {t("Finish an episode and the card jumps to the next one instead of sitting at 0m left.")}
+      </Caption>
     </>
   );
 }
@@ -266,7 +280,7 @@ function HideWatched({ art }: { art: PreviewArt | null }) {
   );
   return (
     <>
-      <div className="flex items-end gap-2 rounded-lg border border-edge-soft/60 bg-canvas/30 p-2.5">
+      <div className="flex items-end gap-2 rounded-md border border-edge-soft/60 bg-canvas/30 p-2.5">
         <MiniPoster img={p[3]} />
         <MiniPoster img={p[4]} faded badge={check} />
         <MiniPoster img={p[5]} />
@@ -274,7 +288,9 @@ function HideWatched({ art }: { art: PreviewArt | null }) {
         <MiniPoster img={p[7]} />
       </div>
       <Caption>
-        {t("Movies you've finished and shows in progress leave the catalog rows. Continue Watching is never touched.")}
+        {t(
+          "Movies you've finished and shows in progress leave the catalog rows. Continue Watching is never touched.",
+        )}
       </Caption>
     </>
   );

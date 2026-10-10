@@ -1,0 +1,65 @@
+.games-wow-dungeons > button { text-align: start; cursor: pointer; border: 0; }
+.games-wow-run-dialog { display: flex; flex-direction: column; min-height: 0; overflow: hidden; color: var(--color-ink); }
+.games-wow-run-hero { position: relative; isolation: isolate; min-height: 190px; flex-shrink: 0; padding: 28px; display: flex; justify-content: space-between; align-items: start; gap: 20px; color: #fff; background: #11171b; }
+.games-wow-run-hero > img, .games-wow-run-hero > .games-art-empty { position: absolute; inset: 0; z-index: -2; width: 100%; height: 100%; object-fit: cover; }
+.games-wow-run-hero::after { content: ""; position: absolute; inset: 0; z-index: -1; background: linear-gradient(90deg, #0b1014ed, #0b10146b), linear-gradient(0deg, #0b1014b8, transparent); }
+[dir="rtl"] .games-wow-run-hero::after { background: linear-gradient(270deg, #0b1014ed, #0b10146b), linear-gradient(0deg, #0b1014b8, transparent); }
+.games-wow-run-hero h2 { font-size: clamp(26px, 3vw, 36px); line-height: 1.2; letter-spacing: -.03em; margin: 12px 0; font-weight: 650; }
+.games-wow-run-hero p { margin: 0; font-size: 13px; color: #d6dfdf; }
+.games-wow-run-hero span { display: flex; align-items: center; gap: 7px; font-size: 13px; }
+.games-wow-run-hero > button { background: #151a1fe0; color: #fff; flex-shrink: 0; }
+.games-wow-run-filters { display: flex; align-items: center; justify-content: space-between; flex-wrap: wrap; gap: 14px; padding: 20px 26px; flex-shrink: 0; border-bottom: 1px solid var(--color-edge-soft); }
+.games-wow-run-filters h3 { font-size: 18px; font-weight: 600; margin: 0; }
+.games-wow-run-filters > div { display: flex; gap: 5px; }
+.games-wow-run-filters .games-button { background: transparent; font-size: 13px; }
+.games-wow-run-filters .games-button[aria-pressed="true"] { background: var(--color-elevated); }
+.games-wow-run-body { overflow-y: auto; overscroll-behavior: contain; min-height: 0; padding: 18px 26px 26px; scrollbar-gutter: stable; }
+.games-wow-run-toolbar, .games-wow-run-equipment > header { display: flex; align-items: center; justify-content: space-between; gap: 12px; }
+.games-wow-run-toolbar h4, .games-wow-run-party h4 { margin: 0; font-size: 15px; font-weight: 600; }
+.games-wow-run-note { font-size: 12px; line-height: 1.7; color: var(--color-ink-muted); margin: 12px 0 16px; }
+.games-wow-run-retry { text-decoration: underline; color: var(--color-ink); }
+.games-wow-run { border-bottom: 1px solid var(--color-edge-soft); }
+.games-wow-run > summary { display: grid; grid-template-columns: 28px 48px 90px minmax(0, 1fr) 75px 18px; gap: 15px; align-items: center; padding: 16px 10px; min-height: 78px; cursor: pointer; list-style: none; border-radius: 5px; }
+.games-wow-run > summary::-webkit-details-marker { display: none; }
+.games-wow-run > summary:hover, .games-wow-run[open] > summary { background: var(--color-elevated); }
+.games-wow-run-rank { font-size: 12px; color: var(--color-ink-muted); font-variant-numeric: tabular-nums; }
+.games-wow-run > summary > strong { font-size: 24px; font-weight: 650; letter-spacing: -.025em; direction: ltr; unicode-bidi: isolate; }
+.games-wow-run-time, .games-wow-run-score { font-size: 16px; font-variant-numeric: tabular-nums; }
+.games-wow-run-time small, .games-wow-run-score small { display: block; margin-top: 4px; font-size: 11px; color: var(--color-ink-muted); }
+.games-wow-run-composition { display: flex; gap: 5px; flex-wrap: wrap; }
+.games-wow-run-spec { display: inline-block; width: 32px; height: 32px; flex-shrink: 0; border-radius: 4px; background-color: var(--color-elevated); background-repeat: no-repeat; }
+.games-wow-run[open] > summary > svg { transform: rotate(180deg); }
+.games-wow-run-details { padding: 6px 12px 24px; }
+.games-wow-run-details a, .games-wow-run-source a { display: inline-flex; align-items: center; gap: 5px; font-size: 12px; }
+.games-wow-run-details a:hover, .games-wow-run-source a:hover { text-decoration: underline; text-underline-offset: 3px; }
+.games-wow-run-affixes { display: flex; flex-wrap: wrap; gap: 12px 20px; margin-bottom: 26px; }
+.games-wow-run-affixes > span { display: inline-flex; align-items: center; gap: 8px; font-size: 12px; color: var(--color-ink-muted); }
+.games-wow-run-affixes img, .games-wow-run-affixes .games-art-empty { width: 28px; height: 28px; border-radius: 4px; }
+.games-wow-run-party > ul { list-style: none; padding: 0; margin: 0 0 20px; }
+.games-wow-run-party li { display: grid; grid-template-columns: 32px minmax(0, 1fr) auto; gap: 12px; align-items: center; padding-block: 13px; border-bottom: 1px solid var(--color-edge-soft); }
+.games-wow-run-member { min-width: 0; }
+.games-wow-run-member strong { font-size: 14px; font-weight: 600; overflow-wrap: anywhere; }
+.games-wow-run-member small { display: block; font-size: 12px; color: var(--color-ink-muted); line-height: 1.6; margin-top: 3px; overflow-wrap: anywhere; }
+.games-wow-run-member-actions { display: flex; flex-wrap: wrap; gap: 7px; }
+.games-wow-run-member-actions .games-button { font-size: 12px; }
+.games-wow-run-member-actions .games-button[aria-pressed="true"] { background: var(--color-raised); }
+.games-wow-run-copy small { display: block; font-size: 12px; color: var(--color-ink-muted); max-width: 180px; }
+.games-wow-run-equipment { margin-bottom: 26px; padding-top: 14px; }
+.games-wow-run-equipment > header { margin-bottom: 16px; }
+.games-wow-run-pagination { display: flex; justify-content: space-between; gap: 16px; margin-top: 20px; }
+.games-wow-run-source { display: flex; flex-wrap: wrap; gap: 10px 18px; margin-top: 24px; font-size: 11px; line-height: 1.6; color: var(--color-ink-muted); }
+.games-wow-run-loading { display: grid; gap: 12px; margin-block: 20px; }
+.games-wow-run-loading i { height: 68px; border-radius: 5px; }
+.games-wow-run-dialog :is(button, a, summary):focus-visible { outline: 2px solid var(--color-accent); outline-offset: 2px; }
+@media (max-width: 650px) {
+  .games-wow-run-backdrop { padding: 12px; }
+  .games-wow-run-hero { padding: 20px; min-height: 175px; }
+  .games-wow-run-filters { padding: 16px; }
+  .games-wow-run-body { padding: 14px 16px 20px; }
+  .games-wow-run > summary { grid-template-columns: 22px 45px minmax(0, 1fr) 58px 16px; gap: 9px; padding: 14px 7px; }
+  .games-wow-run-composition { grid-column: 2 / -1; grid-row: 2; }
+  .games-wow-run-details { padding-inline: 4px; }
+  .games-wow-run-party li { grid-template-columns: 32px minmax(0, 1fr); }
+  .games-wow-run-member-actions { grid-column: 2; }
+  .games-wow-run-filters .games-button { padding-inline: 10px; }
+}

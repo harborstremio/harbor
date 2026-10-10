@@ -1,4 +1,5 @@
-import { Check } from "lucide-react";
+import { Check } from "../../icons";
+import { useT } from "@/lib/i18n";
 import type { ThemeLayout } from "@/lib/theme";
 
 type LayoutDef = {
@@ -29,8 +30,8 @@ const LAYOUTS: LayoutDef[] = [
   },
   {
     id: "stremio",
-    name: "Stremio rail",
-    blurb: "Stremio-style narrow rail.",
+    name: "Classic rail",
+    blurb: "Classic narrow rail.",
     diagram: (a) => <Diagram active={a} kind="stremio" />,
   },
   {
@@ -60,6 +61,7 @@ export function LayoutPicker({
   value: ThemeLayout;
   onChange: (v: ThemeLayout) => void;
 }) {
+  const t = useT();
   return (
     <div className="grid grid-cols-2 gap-2.5">
       {LAYOUTS.map((l) => {
@@ -72,7 +74,7 @@ export function LayoutPicker({
             className={`group relative flex flex-col gap-2 overflow-hidden rounded-lg border p-3 text-start transition-colors ${
               active
                 ? "border-accent/80 bg-accent-soft"
-                : "border-edge-soft bg-canvas/40 hover:border-edge hover:bg-white/[0.04]"
+                : "border-edge-soft bg-canvas/40 hover:border-edge hover:bg-elevated/40"
             }`}
           >
             <div className="aspect-[4/3] w-full overflow-hidden rounded-lg border border-edge-soft bg-surface">
@@ -80,8 +82,10 @@ export function LayoutPicker({
             </div>
             <div className="flex items-center justify-between">
               <div className="flex flex-col">
-                <span className="text-[13.5px] font-semibold text-ink">{l.name}</span>
-                <span className="text-[11.5px] text-ink-subtle">{l.blurb}</span>
+                <span className="text-[15.5px] font-semibold leading-[22px] text-ink">
+                  {t(l.name)}
+                </span>
+                <span className="text-[15.5px] leading-[22px] text-ink-subtle">{t(l.blurb)}</span>
               </div>
               {active && (
                 <span className="flex h-5 w-5 items-center justify-center rounded-full bg-accent text-canvas">
@@ -96,13 +100,7 @@ export function LayoutPicker({
   );
 }
 
-function Diagram({
-  active,
-  kind,
-}: {
-  active: boolean;
-  kind: ThemeLayout;
-}) {
+export function Diagram({ active, kind }: { active: boolean; kind: ThemeLayout }) {
   const accent = active ? "var(--color-accent)" : "var(--color-ink-subtle)";
   const dim = "var(--color-edge)";
   if (kind === "sidebar") {
@@ -186,7 +184,18 @@ function Diagram({
   }
   return (
     <svg viewBox="0 0 80 60" className="h-full w-full">
-      <rect x="3" y="3" width="74" height="54" rx="2" fill={accent} opacity="0.08" stroke={accent} strokeWidth="0.6" strokeDasharray="2 2" />
+      <rect
+        x="3"
+        y="3"
+        width="74"
+        height="54"
+        rx="2"
+        fill={accent}
+        opacity="0.08"
+        stroke={accent}
+        strokeWidth="0.6"
+        strokeDasharray="2 2"
+      />
       <text
         x="40"
         y="28"
@@ -198,14 +207,7 @@ function Diagram({
       >
         {"<your chrome/>"}
       </text>
-      <text
-        x="40"
-        y="40"
-        textAnchor="middle"
-        fill={dim}
-        fontSize="6.5"
-        fontFamily="monospace"
-      >
+      <text x="40" y="40" textAnchor="middle" fill={dim} fontSize="6.5" fontFamily="monospace">
         HTML · CSS · JS
       </text>
     </svg>

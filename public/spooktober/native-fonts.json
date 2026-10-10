@@ -1,0 +1,18 @@
+[
+  {
+    "family": "SpookJakarta",
+    "source": "url('/spooktober/assets/fonts/jakarta-latin.woff2')",
+    "descriptors": {
+      "weight": "200 800",
+      "style": "normal",
+      "display": "swap"
+    }
+  },
+  {
+    "family": "SpookNightmare",
+    "source": "url('/spooktober/assets/fonts/nightmare.otf')",
+    "descriptors": {
+      "display": "swap"
+    }
+  }
+]

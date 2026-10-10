@@ -1,0 +1,54 @@
+.games-rivals-guide-open { margin-bottom:14px; }
+.games-rivals-guide { display:flex;flex-direction:column;max-height:min(820px,85vh);color:var(--color-ink); }
+.games-rivals-guide>header { display:flex;gap:14px;align-items:center;padding:22px 24px 16px; }
+.games-rivals-guide>header>img,.games-rivals-guide>header>.games-art-empty { width:58px;height:58px;object-fit:contain;flex:none; }
+.games-rivals-guide>header>div { min-width:0;flex:1; }
+.games-rivals-guide h2 { font-size:23px;line-height:1.2;font-weight:650; }
+.games-rivals-guide>header p { font-size:12px;line-height:1.6;color:var(--color-ink-muted);margin-top:7px; }
+.games-rivals-guide-tools { display:flex;align-items:center;gap:12px;flex-wrap:wrap;padding:0 24px 16px; }
+.games-rivals-guide-form { min-width:0;max-width:100%; }
+.games-rivals-guide-tools>span { font-size:11px;color:var(--color-ink-muted);margin-inline-start:auto; }
+.games-rivals-guide-tools>button:last-child { flex:none; }
+.games-rivals-ability-icon { display:block;flex:none;width:36px;height:36px;background:var(--color-ink);mask-size:contain;mask-position:center;mask-repeat:no-repeat; }
+.games-rivals-guide-status { display:flex;align-items:center;flex-wrap:wrap;gap:12px;padding:12px 24px;font-size:13px;line-height:1.6;color:var(--color-ink-muted); }
+.games-rivals-guide-body { min-height:0;display:grid;grid-template-columns:250px minmax(0,1fr);border-top:1px solid var(--color-edge-soft); }
+.games-rivals-guide-body>nav,.games-rivals-guide-body>article { overflow-y:auto;overscroll-behavior:contain;scrollbar-width:thin;padding:20px; }
+.games-rivals-guide-body>nav { background:var(--color-surface); }
+.games-rivals-guide-body nav h3 { font-size:12px;color:var(--color-ink-muted);margin:0 8px 10px;font-weight:550; }
+.games-rivals-guide-body nav>div+div { margin-top:22px; }
+.games-rivals-guide-body nav button { display:flex;gap:10px;text-align:start;align-items:center;width:100%;border-radius:6px;padding:9px 8px;margin-top:3px;font-size:12px;line-height:1.4; }
+.games-rivals-guide-body nav button:hover { background:var(--color-elevated); }
+.games-rivals-guide-body nav button[aria-pressed=true] { background:var(--color-raised); }
+.games-rivals-guide-body nav button img,.games-rivals-guide-body nav button .games-art-empty { width:36px;height:36px;object-fit:contain;flex:none; }
+.games-rivals-guide-body nav button small { display:block;margin-top:3px;font-size:11px;color:var(--color-ink-muted); }
+.games-rivals-guide-base { padding-bottom:22px;margin-bottom:24px;border-bottom:1px solid var(--color-edge-soft); }
+.games-rivals-guide-base>h3 { font-size:12px;color:var(--color-ink-muted);margin-bottom:12px; }
+.games-rivals-guide-base .games-rivals-guide-fields { display:flex;flex-wrap:wrap;gap:14px 30px; }
+.games-rivals-guide-base .games-rivals-guide-fields>div { display:block;padding:0;border:0; }
+.games-rivals-guide-base .games-rivals-guide-fields dd { margin-top:5px;font-size:16px; }
+.games-rivals-guide-ability { display:flex;align-items:center;gap:14px; }
+.games-rivals-guide-ability>img,.games-rivals-guide-ability>.games-art-empty { width:56px;height:56px;object-fit:contain;flex:none; }
+.games-rivals-guide-ability>.games-rivals-ability-icon { width:56px;height:56px; }
+.games-rivals-guide-ability h3 { font-size:22px;font-weight:600;line-height:1.25; }
+.games-rivals-guide-ability span { font-size:12px;color:var(--color-ink-muted); }
+.games-rivals-guide-ability>.games-rivals-guide-partner { width:36px;height:36px;margin-inline-start:auto; }
+.games-rivals-guide-body article>p { font-size:14px;line-height:1.7;margin:18px 0 22px; }
+.games-rivals-guide-fields>div { display:grid;grid-template-columns:minmax(100px,1fr) minmax(0,1.7fr);gap:12px;padding:12px 0;border-top:1px solid var(--color-edge-soft);font-size:13px;line-height:1.6; }
+.games-rivals-guide-fields dt { color:var(--color-ink-muted); }
+.games-rivals-guide-fields dd { overflow-wrap:anywhere; }
+.games-rivals-guide-fields .is-heading { display:block;padding-top:24px;font-weight:600; }
+.games-rivals-guide-loading { display:grid;grid-template-columns:1fr 2fr;gap:20px;padding:20px 24px; }
+.games-rivals-guide-loading>i { min-height:350px;border-radius:8px; }
+@media(max-width:650px) {
+  .games-rivals-guide>header { padding:18px 16px 12px;gap:10px; }
+  .games-rivals-guide>header>img { width:44px;height:44px; }
+  .games-rivals-guide h2 { font-size:20px; }
+  .games-rivals-guide-tools { padding-inline:16px; }
+  .games-rivals-guide-form { width:100%; }
+  .games-rivals-guide-body { display:block;overflow-y:auto;overscroll-behavior:contain; }
+  .games-rivals-guide-body>nav { max-height:220px;border-bottom:1px solid var(--color-edge-soft); }
+  .games-rivals-guide-body nav>div { display:grid;grid-template-columns:repeat(2,minmax(0,1fr));gap:4px; }
+  .games-rivals-guide-body nav h3 { grid-column:1/-1; }
+  .games-rivals-guide-body>article { overflow:visible;padding:18px 16px; }
+  .games-rivals-guide-fields>div { grid-template-columns:minmax(80px,1fr) minmax(0,1.5fr); }
+}

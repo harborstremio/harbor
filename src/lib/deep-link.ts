@@ -1,11 +1,24 @@
 import { makeSafeTauriUnlisten } from "@/lib/tauri-unlisten";
+import { focusWindow } from "@/lib/window";
+import {
+  isMusicDeepLink,
+  parseMusicDeepLink,
+  takeMusicBounce,
+  type MusicDeepLink,
+} from "@/lib/music/deep-link";
 
 const EVENT = "harbor:deeplink-install";
 const OPEN_EVENT = "harbor:deeplink-open";
+const OPEN_LIST_EVENT = "harbor:deeplink-open-list";
+const OPEN_MUSIC_EVENT = "harbor:deeplink-open-music";
+const PROFILE_EDIT_EVENT = "harbor:deeplink-profile-edit";
 
 type DeepLinkDetail = { rawUrl: string };
 type DeepLinkOpen = { type: string; id: string; videoId?: string };
 type DeepLinkOpenDetail = { open: DeepLinkOpen };
+export type DeepLinkList = { handle: string; listId: string };
+type DeepLinkListDetail = { list: DeepLinkList };
+type DeepLinkMusicDetail = { music: MusicDeepLink };
 
 let pendingUrl: string | null = null;
 
@@ -50,6 +63,55 @@ export function onDeepLinkOpen(handler: (open: DeepLinkOpen) => void): () => voi
   return () => window.removeEventListener(OPEN_EVENT, listener);
 }
 
+export function emitDeepLinkOpenList(list: DeepLinkList): void {
+  window.dispatchEvent(new CustomEvent<DeepLinkListDetail>(OPEN_LIST_EVENT, { detail: { list } }));
+}
+
+export function onDeepLinkOpenList(handler: (list: DeepLinkList) => void): () => void {
+  const listener = (e: Event) => {
+    const ev = e as CustomEvent<DeepLinkListDetail>;
+    if (ev.detail?.list) handler(ev.detail.list);
+  };
+  window.addEventListener(OPEN_LIST_EVENT, listener);
+  return () => window.removeEventListener(OPEN_LIST_EVENT, listener);
+}
+
+export function emitDeepLinkOpenMusic(music: MusicDeepLink): void {
+  window.dispatchEvent(
+    new CustomEvent<DeepLinkMusicDetail>(OPEN_MUSIC_EVENT, { detail: { music } }),
+  );
+}
+
+export function onDeepLinkOpenMusic(handler: (music: MusicDeepLink) => void): () => void {
+  const listener = (e: Event) => {
+    const ev = e as CustomEvent<DeepLinkMusicDetail>;
+    if (ev.detail?.music) handler(ev.detail.music);
+  };
+  window.addEventListener(OPEN_MUSIC_EVENT, listener);
+  return () => window.removeEventListener(OPEN_MUSIC_EVENT, listener);
+}
+
+function routeMusic(url: string): boolean {
+  const music = parseMusicDeepLink(url);
+  if (!music) return false;
+  emitDeepLinkOpenMusic(music);
+  return true;
+}
+
+export function emitOpenProfileEdit(): void {
+  window.dispatchEvent(new CustomEvent(PROFILE_EDIT_EVENT));
+}
+
+export function onOpenProfileEdit(handler: () => void): () => void {
+  const listener = () => handler();
+  window.addEventListener(PROFILE_EDIT_EVENT, listener);
+  return () => window.removeEventListener(PROFILE_EDIT_EVENT, listener);
+}
+
+export function isProfileEditUrl(url: string): boolean {
+  return url.startsWith("harbor://profile");
+}
+
 const OPEN_FILE_EVENT = "harbor:open-local-file";
 
 export function emitOpenLocalFile(path: string): void {
@@ -86,7 +148,30 @@ export function parseStremioOpen(url: string): DeepLinkOpen | null {
   return null;
 }
 
+export function shareDeepLink(type: string, id: string): string {
+  return `harbor://detail/${encodeURIComponent(type)}/${encodeURIComponent(id)}`;
+}
+
+export function parseHarborOpen(url: string): DeepLinkOpen | null {
+  if (!url.startsWith("harbor://")) return null;
+  return parseDetailPath(url.slice("harbor://".length));
+}
+
+export function parseHarborList(url: string): DeepLinkList | null {
+  if (!url.startsWith("harbor://")) return null;
+  const parts = url
+    .slice("harbor://".length)
+    .split("/")
+    .filter((p) => p.length > 0);
+  if (parts[0] !== "list" || parts.length < 3) return null;
+  const handle = decodeURIComponent(parts[1]);
+  const listId = decodeURIComponent(parts[2]);
+  if (!handle || !listId) return null;
+  return { handle, listId };
+}
+
 function shouldForward(url: string): boolean {
+  if (isMusicDeepLink(url)) return false;
   if (url.startsWith("harbor://")) return true;
   if (url.startsWith("stremio://")) {
     if (window.__harborInstallerOpen) return true;
@@ -95,18 +180,58 @@ function shouldForward(url: string): boolean {
   return url.includes("manifest.json");
 }
 
+// Windows can relaunch the app with its original deep-link argv (app-restart
+// features, self-restarts), redelivering an old install URL on every start.
+const LAUNCH_SEEN_KEY = "harbor.deeplink.launchseen.v1";
+const LAUNCH_SEEN_MAX = 50;
+
+function loadLaunchSeen(): Record<string, number> {
+  try {
+    const raw = localStorage.getItem(LAUNCH_SEEN_KEY);
+    const parsed = raw ? (JSON.parse(raw) as Record<string, number>) : {};
+    return parsed && typeof parsed === "object" ? parsed : {};
+  } catch {
+    return {};
+  }
+}
+
+function saveLaunchSeen(map: Record<string, number>): void {
+  try {
+    const entries = Object.entries(map)
+      .sort((a, b) => b[1] - a[1])
+      .slice(0, LAUNCH_SEEN_MAX);
+    localStorage.setItem(LAUNCH_SEEN_KEY, JSON.stringify(Object.fromEntries(entries)));
+  } catch {
+    return;
+  }
+}
+
 export async function startDeepLinkBridge(): Promise<() => void> {
   const isTauri =
     typeof window !== "undefined" && ("__TAURI__" in window || "__TAURI_INTERNALS__" in window);
-  if (!isTauri) return () => {};
+  if (!isTauri) {
+    const bounce = takeMusicBounce();
+    if (bounce) window.location.replace(bounce);
+    return () => {};
+  }
   try {
     const mod = await import("@tauri-apps/plugin-deep-link");
     const handle = (urls: string[]) => {
       for (const u of urls) {
         if (typeof u !== "string" || u.length === 0) continue;
-        const open = parseStremioOpen(u);
+        const open = parseStremioOpen(u) || parseHarborOpen(u);
         if (open) {
           emitDeepLinkOpen(open);
+          continue;
+        }
+        const list = parseHarborList(u);
+        if (list) {
+          emitDeepLinkOpenList(list);
+          continue;
+        }
+        if (routeMusic(u)) continue;
+        if (isProfileEditUrl(u)) {
+          emitOpenProfileEdit();
           continue;
         }
         if (shouldForward(u)) emitDeepLinkInstall(u);
@@ -118,12 +243,33 @@ export async function startDeepLinkBridge(): Promise<() => void> {
       await listen<string>("harbor:stremio-deeplink", (e) => {
         const u = e.payload;
         if (typeof u !== "string" || !u) return;
-        const open = parseStremioOpen(u);
+        const open = parseStremioOpen(u) || parseHarborOpen(u);
         if (open) {
           emitDeepLinkOpen(open);
           return;
         }
+        const list = parseHarborList(u);
+        if (list) {
+          emitDeepLinkOpenList(list);
+          return;
+        }
+        if (routeMusic(u)) return;
+        if (isProfileEditUrl(u)) {
+          emitOpenProfileEdit();
+          return;
+        }
         if (shouldForward(u)) emitDeepLinkInstall(u);
+      }),
+    );
+    const unlistenNotificationClick = makeSafeTauriUnlisten(
+      await listen<string>("harbor:notification-click", (e) => {
+        const u = e.payload;
+        if (typeof u !== "string" || !u) return;
+        const open = parseHarborOpen(u);
+        if (open) {
+          emitDeepLinkOpen(open);
+          void focusWindow();
+        }
       }),
     );
     let lastCap = "";
@@ -131,9 +277,19 @@ export async function startDeepLinkBridge(): Promise<() => void> {
     const forwardLinuxBrowserInstall = async (e: { payload: string }) => {
       const u = e.payload;
       if (typeof u !== "string" || !u) return;
-      const open = parseStremioOpen(u);
+      const open = parseStremioOpen(u) || parseHarborOpen(u);
       if (open) {
         emitDeepLinkOpen(open);
+        return;
+      }
+      const list = parseHarborList(u);
+      if (list) {
+        emitDeepLinkOpenList(list);
+        return;
+      }
+      if (routeMusic(u)) return;
+      if (isProfileEditUrl(u)) {
+        emitOpenProfileEdit();
         return;
       }
       const now = Date.now();
@@ -159,7 +315,18 @@ export async function startDeepLinkBridge(): Promise<() => void> {
     } catch {}
     try {
       const initial = await mod.getCurrent();
-      if (initial && initial.length > 0) handle(initial);
+      if (initial && initial.length > 0) {
+        const seen = loadLaunchSeen();
+        const now = Date.now();
+        const fresh: string[] = [];
+        for (const u of initial) {
+          if (typeof u !== "string" || !u) continue;
+          if (!seen[u]) fresh.push(u);
+          seen[u] = now;
+        }
+        saveLaunchSeen(seen);
+        if (fresh.length > 0) handle(fresh);
+      }
     } catch {}
     return () => {
       try {
@@ -167,6 +334,9 @@ export async function startDeepLinkBridge(): Promise<() => void> {
       } catch {}
       try {
         unlistenNative();
+      } catch {}
+      try {
+        unlistenNotificationClick();
       } catch {}
       try {
         unlistenBrowserCap();

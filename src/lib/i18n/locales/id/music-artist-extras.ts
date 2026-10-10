@@ -1,0 +1,20 @@
+const musicArtistExtras: Record<string, string> = {
+  "music.extras.merch": "Merchandise",
+  "music.extras.tour": "Pertunjukan langsung",
+  "music.extras.store": "Kunjungi toko",
+  "music.extras.tourLink": "Informasi tur",
+  "music.extras.official": "Situs artis",
+  "music.extras.loading": "Memuat kabar artis…",
+  "music.extras.source": "Dari {source}",
+  "music.extras.event": "Detail acara",
+  "music.credits.title": "Kredit",
+  "music.credits.main": "Artis utama",
+  "music.credits.featured": "Artis tamu",
+  "music.credits.composer": "Komposer",
+  "music.credits.lyricist": "Penulis lirik",
+  "music.credits.producer": "Produser",
+  "music.credits.performer": "Penampil",
+  "music.artist.readMore": "Baca selengkapnya",
+  "music.artist.readLess": "Tampilkan lebih sedikit",
+};
+export default musicArtistExtras;

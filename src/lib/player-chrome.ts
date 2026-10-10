@@ -3,6 +3,7 @@ import {
   updateActiveProfileConfig,
   type SaveResult,
 } from "./player-chrome-profiles";
+import { DEFAULT_PLAYER_ICONS } from "./default-player-icons";
 
 export type PlayerSlot =
   | "top-left"
@@ -16,6 +17,7 @@ export type PlayerSlot =
 export type PlayerControlId =
   | "back"
   | "title-info"
+  | "local-time"
   | "time-start"
   | "time-end"
   | "volume"
@@ -24,20 +26,26 @@ export type PlayerControlId =
   | "prev-episode"
   | "seek-back"
   | "play-pause"
+  | "stop"
   | "seek-forward"
   | "next-episode"
   | "pick-another"
+  | "home-server-quality"
   | "audio-menu"
   | "subtitle-menu"
   | "speed-menu"
   | "aspect-menu"
   | "anime4k-menu"
+  | "shader-menu"
   | "hdr-toggle"
   | "rtx-hdr-toggle"
+  | "rtx-vsr-toggle"
   | "draw-toggle"
+  | "picture"
   | "screenshot"
   | "song-id"
   | "pip"
+  | "hero"
   | "cast"
   | "fullscreen"
   | "window-controls";
@@ -86,7 +94,7 @@ export function isVariantAware(id: PlayerControlId): boolean {
   return VARIANT_AWARE_CONTROLS.includes(id);
 }
 
-export type VolumeStyle = "slider" | "stepper" | "icon-only";
+export type VolumeStyle = "slider" | "vertical" | "stepper" | "icon-only";
 export type TimeFormat = "start-end" | "remaining" | "elapsed-only";
 
 export type CustomIconMap = Record<string, string>;
@@ -129,12 +137,13 @@ export function getCustomIcon(
   id: PlayerControlId,
   state?: string,
 ): string | undefined {
-  if (!map) return undefined;
   if (state) {
     const k = iconKey(id, state);
-    if (map[k]) return map[k];
+    if (map?.[k]) return map[k];
+    if (DEFAULT_PLAYER_ICONS[k]) return DEFAULT_PLAYER_ICONS[k];
   }
-  return map[id];
+  if (map?.[id]) return map[id];
+  return DEFAULT_PLAYER_ICONS[id];
 }
 
 export const ICON_REPLACEABLE_CONTROLS: readonly PlayerControlId[] = [
@@ -171,6 +180,7 @@ export const DEFAULT_DEFAULT_CONFIG: PlayerChromeConfig = {
   controls: [
     { id: "back", slot: "top-left", order: 0 },
     { id: "title-info", slot: "top-left", order: 10 },
+    { id: "local-time", slot: "top-right", order: 90 },
     { id: "window-controls", slot: "top-right", order: 100 },
     { id: "time-start", slot: "seek-leading", order: 0 },
     { id: "time-end", slot: "seek-trailing", order: 0 },
@@ -180,20 +190,25 @@ export const DEFAULT_DEFAULT_CONFIG: PlayerChromeConfig = {
     { id: "prev-episode", slot: "bottom-center", order: 0 },
     { id: "seek-back", slot: "bottom-center", order: 10 },
     { id: "play-pause", slot: "bottom-center", order: 20 },
+    { id: "stop", slot: "bottom-center", order: 25 },
     { id: "seek-forward", slot: "bottom-center", order: 30 },
     { id: "next-episode", slot: "bottom-center", order: 40 },
     { id: "pick-another", slot: "bottom-right", order: 0 },
+    { id: "home-server-quality", slot: "bottom-right", order: 5 },
     { id: "audio-menu", slot: "bottom-right", order: 10 },
     { id: "subtitle-menu", slot: "bottom-right", order: 20 },
     { id: "aspect-menu", slot: "bottom-right", order: 25, hidden: true },
     { id: "anime4k-menu", slot: "bottom-right", order: 27 },
     { id: "hdr-toggle", slot: "bottom-right", order: 28, hidden: true },
     { id: "rtx-hdr-toggle", slot: "bottom-right", order: 29, hidden: true },
+    { id: "rtx-vsr-toggle", slot: "bottom-right", order: 29, hidden: true },
+    { id: "shader-menu", slot: "bottom-right", order: 30, hidden: true },
     { id: "speed-menu", slot: "bottom-right", order: 30 },
     { id: "draw-toggle", slot: "bottom-right", order: 40 },
     { id: "screenshot", slot: "bottom-right", order: 45, hidden: true },
     { id: "song-id", slot: "bottom-right", order: 46 },
     { id: "pip", slot: "bottom-right", order: 50 },
+    { id: "hero", slot: "bottom-right", order: 55 },
     { id: "cast", slot: "bottom-right", order: 60 },
     { id: "fullscreen", slot: "bottom-right", order: 70 },
   ],
@@ -208,8 +223,10 @@ export const DEFAULT_STREMIO_CONFIG: PlayerChromeConfig = {
     { id: "back", slot: "top-left", order: 0 },
     { id: "title-info", slot: "top-left", order: 10 },
     { id: "fullscreen", slot: "top-right", order: 0 },
+    { id: "local-time", slot: "top-right", order: 90 },
     { id: "window-controls", slot: "top-right", order: 100 },
     { id: "play-pause", slot: "bottom-left", order: 0 },
+    { id: "stop", slot: "bottom-left", order: 5 },
     { id: "volume", slot: "bottom-left", order: 10 },
     { id: "time-start", slot: "bottom-left", order: 20 },
     { id: "time-end", slot: "bottom-left", order: 30 },
@@ -219,16 +236,20 @@ export const DEFAULT_STREMIO_CONFIG: PlayerChromeConfig = {
     { id: "seek-forward", slot: "bottom-center", order: 20 },
     { id: "next-episode", slot: "bottom-center", order: 30 },
     { id: "speed-menu", slot: "bottom-right", order: 0 },
+    { id: "home-server-quality", slot: "bottom-right", order: 5 },
     { id: "audio-menu", slot: "bottom-right", order: 10 },
     { id: "subtitle-menu", slot: "bottom-right", order: 20 },
     { id: "aspect-menu", slot: "bottom-right", order: 25, hidden: true },
     { id: "anime4k-menu", slot: "bottom-right", order: 27 },
     { id: "hdr-toggle", slot: "bottom-right", order: 28, hidden: true },
     { id: "rtx-hdr-toggle", slot: "bottom-right", order: 29, hidden: true },
+    { id: "rtx-vsr-toggle", slot: "bottom-right", order: 29, hidden: true },
+    { id: "shader-menu", slot: "bottom-right", order: 30, hidden: true },
     { id: "draw-toggle", slot: "bottom-right", order: 30 },
     { id: "screenshot", slot: "bottom-right", order: 35, hidden: true },
     { id: "song-id", slot: "bottom-right", order: 36 },
     { id: "cast", slot: "bottom-right", order: 40 },
+    { id: "hero", slot: "bottom-right", order: 45 },
     { id: "pick-another", slot: "bottom-right", order: 50 },
     { id: "pip", slot: "bottom-right", order: 60 },
   ],
@@ -244,6 +265,7 @@ export const CONTROL_META: Record<
 > = {
   back: { label: "Back", group: "actions", defaultSlot: "top-left" },
   "title-info": { label: "Title & info", group: "info", defaultSlot: "top-left" },
+  "local-time": { label: "Local time", group: "info", defaultSlot: "top-right" },
   "time-start": { label: "Time elapsed", group: "info", defaultSlot: "seek-leading" },
   "time-end": { label: "Time remaining or duration", group: "info", defaultSlot: "seek-trailing" },
   volume: { label: "Volume", group: "transport", defaultSlot: "bottom-left" },
@@ -252,11 +274,17 @@ export const CONTROL_META: Record<
   "prev-episode": { label: "Previous episode", group: "transport", defaultSlot: "bottom-center" },
   "seek-back": { label: "Seek back", group: "transport", defaultSlot: "bottom-center" },
   "play-pause": { label: "Play / Pause", group: "transport", defaultSlot: "bottom-center" },
+  stop: { label: "Stop", group: "transport", defaultSlot: "bottom-center" },
   "seek-forward": { label: "Seek forward", group: "transport", defaultSlot: "bottom-center" },
   "next-episode": { label: "Next episode", group: "transport", defaultSlot: "bottom-center" },
   "pick-another": {
     label: "Switch stream / TV Guide",
     group: "actions",
+    defaultSlot: "bottom-right",
+  },
+  "home-server-quality": {
+    label: "Home server quality",
+    group: "menus",
     defaultSlot: "bottom-right",
   },
   "audio-menu": { label: "Audio tracks", group: "menus", defaultSlot: "bottom-right" },
@@ -268,12 +296,24 @@ export const CONTROL_META: Record<
     defaultSlot: "bottom-right",
   },
   "anime4k-menu": { label: "Anime4K", group: "menus", defaultSlot: "bottom-right" },
+  "shader-menu": {
+    label: "Shaders (Anime4K + installed)",
+    group: "menus",
+    defaultSlot: "bottom-right",
+  },
   "hdr-toggle": { label: "HDR to SDR toggle", group: "menus", defaultSlot: "bottom-right" },
   "rtx-hdr-toggle": { label: "RTX Video HDR toggle", group: "menus", defaultSlot: "bottom-right" },
+  "rtx-vsr-toggle": {
+    label: "RTX Super Resolution toggle",
+    group: "menus",
+    defaultSlot: "bottom-right",
+  },
   "draw-toggle": { label: "Draw on video", group: "actions", defaultSlot: "bottom-right" },
+  picture: { label: "Picture adjustments", group: "actions", defaultSlot: "bottom-right" },
   screenshot: { label: "Screenshot", group: "actions", defaultSlot: "bottom-right" },
   "song-id": { label: "Identify song", group: "actions", defaultSlot: "bottom-right" },
   pip: { label: "Picture-in-picture", group: "actions", defaultSlot: "bottom-right" },
+  hero: { label: "Pin video (keep watching while you browse)", group: "actions", defaultSlot: "bottom-right" },
   cast: { label: "Cast", group: "actions", defaultSlot: "bottom-right" },
   fullscreen: { label: "Fullscreen", group: "transport", defaultSlot: "bottom-right" },
   "window-controls": {
@@ -289,9 +329,18 @@ function baselineFor(theme: ThemeId): PlayerChromeConfig {
   return theme === "stremio" ? DEFAULT_STREMIO_CONFIG : DEFAULT_DEFAULT_CONFIG;
 }
 
+// Layouts saved before a control existed don't list it; add it at its baseline spot so new
+// controls (like Stop) show up without resetting anyone's layout.
+function withNewControls(config: PlayerChromeConfig, baseline: PlayerChromeConfig): PlayerChromeConfig {
+  const have = new Set(config.controls.map((c) => c.id));
+  const missing = baseline.controls.filter((c) => !have.has(c.id));
+  return missing.length ? { ...config, controls: [...config.controls, ...missing] } : config;
+}
+
 export function readPlayerChromeConfig(theme: ThemeId): PlayerChromeConfig {
   const active = getActiveProfile(theme);
-  return active?.config ?? baselineFor(theme);
+  const baseline = baselineFor(theme);
+  return active?.config ? withNewControls(active.config, baseline) : baseline;
 }
 
 export function writePlayerChromeConfig(theme: ThemeId, config: PlayerChromeConfig): SaveResult {

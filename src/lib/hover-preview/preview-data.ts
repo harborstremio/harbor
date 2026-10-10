@@ -1,5 +1,6 @@
 import type { Meta } from "../cinemeta";
 import { animeKitsuMeta } from "../providers/anime-kitsu-addon";
+import { harborImdbTitleCached } from "../providers/harbor-imdb";
 import { omdbScoresCached } from "../providers/omdb";
 import { tmdbImdbCached } from "../providers/tmdb";
 import { tmdbLiteMeta } from "../providers/tmdb/tmdb-lite";
@@ -7,13 +8,15 @@ import { resolveResume, type PreviewResume } from "./resume-index";
 import { previewMeta } from "./synopsis-cache";
 import { LATE_ART_SWAP_WINDOW_MS } from "./timing";
 
+import { releaseText } from "@/lib/release-info";
 export type PreviewArt = { mode: "backdrop" | "poster" | "plate"; src?: string };
 
 export type PreviewData = {
   meta: Meta;
   art: PreviewArt;
   chip: "In Cinema" | "New" | null;
-  rating: { kind: "mal" | "imdb" | "tmdb"; value: string } | null;
+  rating: { kind: "mal" | "imdb"; value: string } | null;
+  contentRating: string | null;
   year: string | null;
   length: string | null;
   genre: string | null;
@@ -104,12 +107,21 @@ function deriveRating(meta: Meta, isAnime: boolean): PreviewData["rating"] {
     return meta.imdbRating ? { kind: "mal", value: meta.imdbRating } : null;
   }
   const imdbId = meta.id.startsWith("tt") ? meta.id : tmdbImdbCached(meta.id) ?? undefined;
-  const real = imdbId ? omdbScoresCached(imdbId)?.imdbRating : undefined;
-  if (real) return { kind: "imdb", value: real };
-  if (meta.imdbRating) {
-    return { kind: meta.id.startsWith("tt") ? "imdb" : "tmdb", value: meta.imdbRating };
+  if (imdbId) {
+    const harbor = harborImdbTitleCached(imdbId);
+    if (typeof harbor === "number" && harbor > 0) return { kind: "imdb", value: harbor.toFixed(1) };
+    const real = omdbScoresCached(imdbId)?.imdbRating;
+    if (real) return { kind: "imdb", value: real };
+  }
+  if (meta.id.startsWith("tt") && meta.imdbRating) {
+    return { kind: "imdb", value: meta.imdbRating };
   }
   return null;
+}
+
+function deriveContentRating(meta: Meta): string | null {
+  const imdbId = meta.id.startsWith("tt") ? meta.id : tmdbImdbCached(meta.id) ?? undefined;
+  return imdbId ? omdbScoresCached(imdbId)?.rated ?? null : null;
 }
 
 export function assemblePreviewData(meta: Meta): PreviewAssembly {
@@ -126,12 +138,14 @@ export function assemblePreviewData(meta: Meta): PreviewAssembly {
   const resume = resolveResume(meta);
   const chip = deriveChip(meta);
   const rating = deriveRating(meta, isAnime);
-  const year = meta.releaseInfo?.trim() ? meta.releaseInfo.trim() : null;
-  const length = deriveLength(meta);
+  const contentRating = deriveContentRating(meta);
+  const year = releaseText(meta.releaseInfo).trim() || null;
+  let length = isTt && meta.type === "series" ? null : deriveLength(meta);
   const genre = meta.genres?.[0] ?? null;
 
   let synopsis: string | null = meta.description?.trim() ? meta.description.trim() : null;
   let synopsisFinal = true;
+  let lengthFinal = true;
 
   const posterUrl = meta.poster ? rewriteTmdbRung(meta.poster) : null;
   let backdropSrc: string | null = null;
@@ -144,7 +158,7 @@ export function assemblePreviewData(meta: Meta): PreviewAssembly {
 
   const settle = () => {
     if (cancelled) return;
-    if (artSettled() && synopsisFinal) for (const cb of finalCbs.splice(0)) cb();
+    if (artSettled() && synopsisFinal && lengthFinal) for (const cb of finalCbs.splice(0)) cb();
   };
 
   const tryPoster = () => {
@@ -188,9 +202,10 @@ export function assemblePreviewData(meta: Meta): PreviewAssembly {
     });
   };
 
+  const needSeasons = meta.type === "series";
   const kitsuFetch =
     isAnime && (!meta.background || !synopsis) ? animeKitsuMeta(meta.id).catch(() => null) : null;
-  const ttFetch = isTt && !synopsis ? previewMeta(meta.type, meta.id) : null;
+  const ttFetch = isTt && (!synopsis || needSeasons) ? previewMeta(meta.type, meta.id) : null;
 
   if (!synopsis && kitsuFetch) {
     synopsisFinal = false;
@@ -199,11 +214,16 @@ export function assemblePreviewData(meta: Meta): PreviewAssembly {
       synopsisFinal = true;
       settle();
     });
-  } else if (!synopsis && ttFetch) {
-    synopsisFinal = false;
+  } else if (ttFetch) {
+    if (!synopsis) synopsisFinal = false;
+    if (needSeasons) lengthFinal = false;
     void ttFetch.then((pm) => {
-      if (pm?.description?.trim()) synopsis = pm.description.trim();
+      if (!synopsis && pm?.description?.trim()) synopsis = pm.description.trim();
+      if (needSeasons && pm?.seasonCount) {
+        length = pm.seasonCount === 1 ? "1 season" : `${pm.seasonCount} seasons`;
+      }
       synopsisFinal = true;
+      lengthFinal = true;
       settle();
     });
   }
@@ -240,6 +260,7 @@ export function assemblePreviewData(meta: Meta): PreviewAssembly {
       art: currentArt(),
       chip,
       rating,
+      contentRating,
       year,
       length,
       genre,

@@ -1,0 +1,36 @@
+const musicCast: Record<string, string> = {
+  "music.cast.title": "网络音箱",
+  "music.cast.body": "请保持音箱处于唤醒状态，并与 Harbor 连接同一网络。",
+  "music.cast.discover": "搜索音箱",
+  "music.cast.discovering": "正在搜索音箱…",
+  "music.cast.empty": "未找到兼容音箱。请检查网络后重新搜索。",
+  "music.cast.compatibility":
+    "Sonos 和 Marantz 的支持情况取决于型号。Harbor 使用 DLNA 或 Chromecast，暂不支持 AirPlay 2。",
+  "music.cast.airplay": "Harbor 暂不支持 AirPlay 2 音频。",
+  "music.cast.unsupportedDevice": "音乐功能暂不支持此设备的协议。",
+  "music.cast.invalidDevice": "设备信息不完整。请重新搜索。",
+  "music.cast.noTrack": "请先选择歌曲，再发送到音箱。",
+  "music.cast.playOn": "在 {device} 上播放",
+  "music.cast.loadFailed": "无法在音箱上开始播放这首歌。请检查支持的格式并尝试其他来源。",
+  "music.cast.discoveryFailed": "搜索音箱失败。请检查网络后重试。",
+  "music.cast.controlFailed": "音箱未确认此命令。请检查音箱后重试。",
+  "music.cast.desktop": "请使用 Harbor 桌面应用搜索网络音箱。",
+  "music.cast.spotify":
+    "无法通过此方式发送受保护的 Spotify 音频。请在 Spotify 中使用 Spotify Connect。",
+  "music.cast.local": "Harbor 暂时无法向音箱共享本地文件。请选择在线音频来源。",
+  "music.cast.unsupportedStream": "此来源未提供支持的音频流。请选择其他来源。",
+  "music.cast.disconnected": "音箱连接已断开。请检查音箱后重新连接，或在此电脑上继续播放。",
+  "music.cast.cancelled": "音箱请求已取消。",
+  "music.cast.stop": "停止投放",
+  "music.cast.selected": "已选择",
+  "music.cast.eqHelp": "Harbor 的均衡器和增益仅作用于此电脑。请在音箱上调节音量。",
+  "music.cast.loading": "正在连接音箱…",
+  "music.cast.playing": "正在音箱上播放",
+  "music.cast.paused": "已在音箱上暂停",
+  "music.cast.buffering": "音箱正在缓冲…",
+  "music.cast.stopped": "音箱已停止",
+  "music.cast.unknown": "正在等待音箱状态…",
+  "music.cast.computer": "在此电脑上播放",
+};
+
+export default musicCast;

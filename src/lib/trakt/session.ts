@@ -1,4 +1,6 @@
 import { activeProfileId, activeProfileIsPrimary } from "@/lib/active-profile-id";
+import { getSecret, setSecret } from "@/lib/secret-store";
+import { clearPendingStops } from "./pending-sync";
 import { REFRESH_THRESHOLD_SEC } from "./config";
 import type { TraktSession } from "./types";
 
@@ -15,12 +17,12 @@ let loaded = false;
 function read(): TraktSession | null {
   try {
     const key = keyFor();
-    let raw = localStorage.getItem(key);
+    let raw = getSecret(key);
     if (!raw) {
-      const legacy = localStorage.getItem(BASE_KEY);
+      const legacy = getSecret(BASE_KEY);
       if (legacy && activeProfileIsPrimary()) {
-        localStorage.setItem(key, legacy);
-        localStorage.removeItem(BASE_KEY);
+        setSecret(key, legacy);
+        setSecret(BASE_KEY, null);
         raw = legacy;
       }
     }
@@ -38,7 +40,11 @@ function read(): TraktSession | null {
     const settingsRaw = activeProfileIsPrimary() ? localStorage.getItem("harbor.settings") : null;
     if (settingsRaw) {
       const s = JSON.parse(settingsRaw);
-      if (typeof s?.traktAccessToken === "string" && typeof s?.traktRefreshToken === "string" && typeof s?.traktExpiresAt === "number") {
+      if (
+        typeof s?.traktAccessToken === "string" &&
+        typeof s?.traktRefreshToken === "string" &&
+        typeof s?.traktExpiresAt === "number"
+      ) {
         const now = Date.now();
         const expiresInSec = Math.floor((s.traktExpiresAt - now) / 1000);
         const session: TraktSession = {
@@ -62,8 +68,8 @@ function read(): TraktSession | null {
 
 function write(session: TraktSession | null): void {
   try {
-    if (session) localStorage.setItem(keyFor(), JSON.stringify(session));
-    else localStorage.removeItem(keyFor());
+    if (session) setSecret(keyFor(), JSON.stringify(session));
+    else setSecret(keyFor(), null);
   } catch {
     return;
   }
@@ -88,6 +94,9 @@ export function getSession(): TraktSession | null {
 
 export function setSession(session: TraktSession | null): void {
   ensureLoaded();
+  if (!session || !cached || session.username !== cached.username) {
+    clearPendingStops();
+  }
   cached = session;
   write(session);
   for (const fn of subscribers) fn();

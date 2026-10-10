@@ -1,4 +1,4 @@
-import { Check, AlertCircle, Replace } from "lucide-react";
+import { Check, AlertCircle } from "lucide-react";
 import { useT } from "@/lib/i18n";
 import { useActiveKid } from "@/lib/profiles";
 
@@ -7,14 +7,14 @@ type Variant = "check" | "stalled" | "failed";
 export function StreamCheckPill({
   variant,
   visible,
-  onLooksGood,
+  onDismiss,
   onPickAnother,
   compact,
   live,
 }: {
   variant: Variant;
   visible: boolean;
-  onLooksGood?: () => void;
+  onDismiss: () => void;
   onPickAnother: () => void;
   compact?: boolean;
   live?: boolean;
@@ -53,20 +53,17 @@ export function StreamCheckPill({
         <span className="text-[11px] text-white/55">{copy.sub}</span>
       </div>
       <div className="flex items-center gap-1.5 ps-1">
-        {variant === "check" && onLooksGood && (
-          <button
-            onClick={onLooksGood}
-            className="flex h-7 items-center gap-1 rounded-full px-3 text-[11.5px] font-semibold text-white/75 transition-colors hover:bg-white/8 hover:text-white"
-            aria-label={t("Dismiss")}
-          >
-            {t("Looks good")}
-          </button>
-        )}
+        <button
+          onClick={onDismiss}
+          className="flex h-7 items-center gap-1 rounded-full px-3 text-[11.5px] font-semibold text-white/75 transition-colors hover:bg-white/8 hover:text-white"
+          aria-label={t("Dismiss")}
+        >
+          {variant === "check" ? t("Looks good") : t("Dismiss")}
+        </button>
         <button
           onClick={onPickAnother}
           className="flex h-7 items-center gap-1.5 rounded-full bg-white/12 px-3 text-[11.5px] font-semibold text-white transition-colors hover:bg-white/22"
         >
-          <Replace size={11.5} strokeWidth={2.4} />
           {live ? t("Other sources") : t("Pick another")}
         </button>
       </div>

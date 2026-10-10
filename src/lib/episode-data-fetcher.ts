@@ -4,6 +4,8 @@
  */
 
 import type { Meta } from "@/lib/cinemeta";
+import { meta as fetchCinemetaMeta } from "@/lib/cinemeta";
+import type { PlayEpisode } from "@/lib/view";
 import type { Settings } from "@/lib/settings";
 import { tmdbEpisodeDetail } from "@/lib/providers/tmdb/tmdb-episode-details";
 import { getCachedEpisode, cacheEpisode } from "@/lib/providers/tmdb/tmdb-episode-cache";
@@ -72,6 +74,7 @@ export async function fetchEpisodeData(
   season: number,
   episode: number,
   settings: Settings,
+  selectedEpisode?: PlayEpisode,
 ): Promise<EpisodeDetail | null> {
   // 1. Check cache first (fastest path)
   const cached = getCachedEpisode(seriesId, season, episode);
@@ -106,8 +109,12 @@ export async function fetchEpisodeData(
   
   // 3. Fallback to Cinemeta
   try {
-    const cinemetaData = await cinemetaEpisodeDetail(
-      seriesMeta,
+    // Never look up canonical coordinates in another cour's entry-relative videos.
+    const fallbackMeta = seriesMeta.id === seriesId
+      ? seriesMeta
+      : await fetchCinemetaMeta("series", seriesId);
+    const cinemetaData = fallbackMeta && await cinemetaEpisodeDetail(
+      fallbackMeta,
       season,
       episode,
     );
@@ -140,6 +147,26 @@ export async function fetchEpisodeData(
     console.error(`[episode-fetcher] Cinemeta fetch failed:`, cinemetaError);
   }
   
+  // Anime rows can have details even when the provider has no episode endpoint.
+  // Do not cache this partial row as a successful canonical provider response.
+  if (selectedEpisode) {
+    return {
+      id: 0,
+      seasonNumber: season,
+      episodeNumber: episode,
+      name: selectedEpisode.name || `Episode ${episode}`,
+      overview: selectedEpisode.overview || "",
+      stillPath: selectedEpisode.still ?? null,
+      airDate: selectedEpisode.airDate ?? null,
+      runtime: selectedEpisode.runtime ?? null,
+      voteAverage: null,
+      voteCount: 0,
+      imdbId: null,
+      guestStars: [],
+      crew: [],
+      stills: [],
+    };
+  }
   console.error(`[episode-fetcher] All fetch attempts failed for ${seriesId} S${season}E${episode}`);
   return null;
 }

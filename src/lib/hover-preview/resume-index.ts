@@ -1,5 +1,6 @@
 import type { Meta } from "../cinemeta";
 import { lastPlayedEpisode, readResumeEntry } from "../resume";
+import { isMovieWatchedLocal } from "../movie-watched";
 import { tmdbImdbCached } from "../providers/tmdb";
 import { episodeFromVideoId, type LibraryItem } from "../stremio";
 import { FRESH_FRACTION, RESUME_MEMO_TTL_MS } from "./timing";
@@ -35,7 +36,7 @@ export function publishResumeStates(items: LibraryItem[]): void {
       fraction: dur > 0 ? Math.min(1, off / dur) : null,
       remainingMs: dur > 0 ? Math.max(0, dur - off) : null,
       upNext: item.upNext === true,
-      external: item.external === "simkl",
+      external: !!item.external,
     });
   }
 }
@@ -64,13 +65,27 @@ function fallbackLookup(meta: Meta): PreviewResume | null {
     for (const id of ids) {
       const last = lastPlayedEpisode(id);
       if (!last || last.ms <= 0) continue;
-      const fraction = minutes ? Math.min(1, last.ms / (minutes * 60000)) : null;
+      const pct = last.pct;
+      const hasPct = typeof pct === "number" && Number.isFinite(pct);
+      const clampedPct = hasPct ? Math.min(1, Math.max(0, pct)) : null;
+      const fraction =
+        clampedPct != null
+          ? clampedPct
+          : minutes
+            ? Math.min(1, last.ms / (minutes * 60000))
+            : null;
       if (fraction !== null && fraction >= FRESH_FRACTION) return null;
+      const remainingMs =
+        clampedPct != null && minutes != null
+          ? Math.max(0, (1 - clampedPct) * minutes * 60000)
+          : minutes
+            ? Math.max(0, minutes * 60000 - last.ms)
+            : null;
       return {
-        season: last.season,
+        season: last.displaySeason ?? last.season,
         episode: last.episode,
         fraction,
-        remainingMs: minutes ? Math.max(0, minutes * 60000 - last.ms) : null,
+        remainingMs,
         upNext: false,
         external: false,
       };
@@ -80,11 +95,25 @@ function fallbackLookup(meta: Meta): PreviewResume | null {
   for (const id of ids) {
     const entry = readResumeEntry(id);
     if (!entry || entry.ms <= 0) continue;
-    const fraction = minutes ? Math.min(1, entry.ms / (minutes * 60000)) : null;
+    const pct = entry.pct;
+    const hasPct = typeof pct === "number" && Number.isFinite(pct);
+    const clampedPct = hasPct ? Math.min(1, Math.max(0, pct)) : null;
+    const fraction =
+      clampedPct != null
+        ? clampedPct
+        : minutes
+          ? Math.min(1, entry.ms / (minutes * 60000))
+          : null;
     if (fraction !== null && fraction >= FRESH_FRACTION) return null;
+    const remainingMs =
+      clampedPct != null && minutes != null
+        ? Math.max(0, (1 - clampedPct) * minutes * 60000)
+        : minutes
+          ? Math.max(0, minutes * 60000 - entry.ms)
+          : null;
     return {
       fraction,
-      remainingMs: minutes ? Math.max(0, minutes * 60000 - entry.ms) : null,
+      remainingMs,
       upNext: false,
       external: false,
     };
@@ -93,6 +122,18 @@ function fallbackLookup(meta: Meta): PreviewResume | null {
 }
 
 export function resolveResume(meta: Meta): PreviewResume | null {
+  if (meta.type === "movie") {
+    const alt = tmdbImdbCached(meta.id);
+    if (isMovieWatchedLocal(meta.id) || (alt && isMovieWatchedLocal(alt))) {
+      // Completion can happen after this card was indexed or its fallback was memoized.
+      // Retire both entries so a later rewatch starts from its new playback position.
+      for (const id of alt ? [meta.id, alt] : [meta.id]) {
+        index.delete(id);
+        fallbackMemo.delete(id);
+      }
+      return null;
+    }
+  }
   const hit = index.get(meta.id);
   if (hit) return hit;
   const cached = fallbackMemo.get(meta.id);

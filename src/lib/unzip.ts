@@ -1,4 +1,4 @@
-async function inflateRaw(bytes: Uint8Array<ArrayBuffer>): Promise<Uint8Array> {
+async function inflateRaw(bytes: Uint8Array): Promise<Uint8Array> {
   const stream = new Blob([bytes]).stream().pipeThrough(new DecompressionStream("deflate-raw"));
   return new Uint8Array(await new Response(stream).arrayBuffer());
 }

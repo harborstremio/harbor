@@ -40,7 +40,9 @@ export function HeroBackdrop({ url }: { url: string }) {
   const nextId = useRef(1);
   useEffect(() => {
     const id = nextId.current++;
-    setLayers((prev) => (prev[prev.length - 1]?.url === url ? prev : [...prev, { id, url }]));
+    setLayers((prev) =>
+      prev[prev.length - 1]?.url === url ? prev : [...prev, { id, url }],
+    );
   }, [url]);
   const settle = (id: number) =>
     setLayers((prev) => {

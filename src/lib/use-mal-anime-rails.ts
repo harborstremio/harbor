@@ -1,4 +1,4 @@
-import { useEffect, useState } from "react";
+import { useCallback, useEffect, useRef, useState } from "react";
 import type { Meta } from "@/lib/cinemeta";
 import { useMal } from "@/lib/mal/provider";
 import { fetchMalList } from "@/lib/mal/lists";
@@ -29,22 +29,38 @@ function malEntryToMeta(entry: MalListEntry): Meta | null {
   };
 }
 
+export type MalRailsState = { rails: MalRail[]; loading: boolean; error: boolean };
+
+const IDLE: MalRailsState = { rails: [], loading: false, error: false };
+
 export function useMalAnimeRails(): MalRail[] {
-  const { isConnected } = useMal();
-  const [rails, setRails] = useState<MalRail[]>([]);
+  return useMalAnimeRailsState().rails;
+}
+
+export function useMalAnimeRailsState(): MalRailsState & { retry: () => void } {
+  const { isConnected, session } = useMal();
+  const [state, setState] = useState<MalRailsState>(IDLE);
+  const [attempt, setAttempt] = useState(0);
+  const retry = useCallback(() => setAttempt(value => value + 1), []);
+  const owner = useRef<string | undefined>(undefined);
 
   useEffect(() => {
     if (!isConnected) {
-      setRails([]);
+      owner.current = undefined;
+      setState(IDLE);
       return;
     }
     let cancelled = false;
+    const sameOwner = owner.current === session?.userName;
+    owner.current = session?.userName;
+    setState(previous => ({ rails: sameOwner ? previous.rails : [], loading: true, error: false }));
     (async () => {
       let groups: MalListGroup[];
       try {
         groups = await fetchMalList();
       } catch (e) {
         console.error("Failed to fetch MAL list", e);
+        if (!cancelled) setState(previous => ({ ...previous, loading: false, error: true }));
         return;
       }
       if (cancelled) return;
@@ -62,12 +78,12 @@ export function useMalAnimeRails(): MalRail[] {
         if (metas.length >= MIN_PER_RAIL) out.push({ key: rail.key, title: rail.title, metas });
       }
 
-      if (!cancelled) setRails(out);
+      if (!cancelled) setState({ rails: out, loading: false, error: false });
     })();
     return () => {
       cancelled = true;
     };
-  }, [isConnected]);
+  }, [isConnected, session?.userName, session?.accessToken, attempt]);
 
-  return rails;
+  return { ...state, retry };
 }

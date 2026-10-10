@@ -99,7 +99,10 @@ export function CinemetaFallback({ filter }: { filter: MetaFilter }) {
         {items.length === 0 &&
           loading &&
           Array.from({ length: 14 }).map((_, i) => (
-            <div key={i} className="aspect-[2/3] w-full animate-pulse rounded-xl bg-elevated/40" />
+            <div
+              key={i}
+              className="aspect-[2/3] w-full animate-pulse rounded-xl bg-elevated/40"
+            />
           ))}
       </div>
       <div ref={sentinelRef} className="h-px w-full" aria-hidden />
@@ -117,12 +120,9 @@ export function CinemetaFallback({ filter }: { filter: MetaFilter }) {
       )}
       {exhausted && items.length === 0 && (
         <p className="rounded-xl border border-dashed border-edge bg-canvas/30 px-5 py-6 text-center text-[12.5px] text-ink-subtle">
-          {t(
-            "Cinemeta didn't return anything for {genre}. Try a different genre or add a TMDB key.",
-            {
-              genre: genre ?? "",
-            },
-          )}
+          {t("Cinemeta didn't return anything for {genre}. Try a different genre or add a TMDB key.", {
+            genre: genre ?? "",
+          })}
         </p>
       )}
     </div>

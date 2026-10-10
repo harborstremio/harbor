@@ -1,0 +1,134 @@
+.sh-score-unit {
+  display: block;
+  color: var(--color-ink-muted);
+  font-size: 12px;
+  font-weight: 600;
+}
+.sh-score-breakdown {
+  max-width: 100%;
+  overflow-x: auto;
+  margin: 0;
+  border-radius: 0;
+  background: transparent;
+  padding: 12px 18px;
+}
+.sh-score-breakdown:focus-visible {
+  outline: 2px solid var(--color-ink-muted);
+  outline-offset: 3px;
+}
+.sh-score-breakdown table {
+  border-collapse: collapse;
+  width: 100%;
+  font-variant-numeric: tabular-nums;
+  text-align: center;
+}
+.sh-score-breakdown th,
+.sh-score-breakdown td {
+  padding: 10px 12px;
+  white-space: nowrap;
+}
+.sh-score-breakdown thead th {
+  font-size: 11px;
+  font-weight: 500;
+  color: var(--color-ink-muted);
+}
+.sh-score-breakdown tbody th {
+  text-align: start;
+  font-size: 14px;
+  font-weight: 600;
+  white-space: normal;
+  min-width: 120px;
+}
+.sh-score-breakdown tbody td {
+  font-size: 20px;
+  color: var(--color-ink-muted);
+}
+.sh-score-breakdown .is-won,
+.sh-score-breakdown .is-current,
+.sh-score-breakdown .is-total {
+  color: var(--color-ink);
+  font-weight: 700;
+}
+.sh-score-breakdown .is-total {
+  background: var(--color-canvas);
+}
+.sh-score-breakdown sup {
+  font-size: 10px;
+  margin-inline-start: 2px;
+  vertical-align: super;
+}
+.sh-serving-dot {
+  display: inline-block;
+  width: 6px;
+  height: 6px;
+  border-radius: 50%;
+  background: currentColor;
+  margin-inline-start: 8px;
+  vertical-align: middle;
+}
+.sh-score-innings > div {
+  display: flex;
+  align-items: center;
+  flex-wrap: wrap;
+  gap: 16px;
+  padding: 10px 0;
+}
+.sh-score-innings span {
+  font-size: 12px;
+  color: var(--color-ink-muted);
+}
+@media (max-width: 600px) {
+  .sh-score-breakdown {
+    padding: 8px;
+  }
+  .sh-score-breakdown th,
+  .sh-score-breakdown td {
+    padding: 9px 8px;
+  }
+  .sh-score-breakdown tbody th {
+    font-size: 12px;
+  }
+  .sh-score-breakdown tbody td {
+    font-size: 17px;
+  }
+}
+
+.sh-full-score {
+  min-width: 0;
+  width: 100%;
+  margin: 0 0 24px;
+  border-radius: 10px;
+  background: var(--color-elevated);
+  color: var(--color-ink);
+  overflow: hidden;
+}
+.sh-full-score > summary {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 16px;
+  padding: 20px 24px;
+  cursor: pointer;
+  list-style: none;
+}
+.sh-full-score > summary::-webkit-details-marker {
+  display: none;
+}
+.sh-full-score > summary strong {
+  font-size: 16px;
+  font-weight: 600;
+}
+.sh-full-score > summary:focus-visible {
+  outline: 2px solid var(--color-ink);
+  outline-offset: -3px;
+}
+.sh-full-score[open] > summary svg {
+  transform: rotate(180deg);
+}
+.sh-full-score .sh-score-breakdown {
+  padding-bottom: 20px;
+}
+.sh-match-page > .sh-full-score {
+  max-width: 1100px;
+  margin-inline: auto;
+}

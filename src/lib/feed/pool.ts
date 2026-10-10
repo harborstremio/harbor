@@ -26,12 +26,16 @@ export async function getPool(tmdbKey: string): Promise<FeedItem[]> {
   if (poolInflight && poolInflight.date === today && poolInflight.key === tmdbKey) {
     return poolInflight.promise;
   }
-  const promise = buildPool(tmdbKey).then((items) => {
-    poolCache = { date: today, key: tmdbKey, items };
-    poolInflight = null;
-    return items;
-  });
+  const promise = buildPool(tmdbKey);
   poolInflight = { date: today, key: tmdbKey, promise };
+  void promise
+    .then((items) => {
+      poolCache = { date: today, key: tmdbKey, items };
+    })
+    .catch(() => {})
+    .finally(() => {
+      if (poolInflight?.promise === promise) poolInflight = null;
+    });
   return promise;
 }
 

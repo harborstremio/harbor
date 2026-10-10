@@ -1,0 +1,170 @@
+.mods-workspace:has(.mod-project-page,.mc-project-page)>.mods-game-hero,
+.games-sims:has(.mod-project-page)>.mods-tabs,
+.games-sims:has(.mod-project-page)>.games-sims-browse-source,
+.mods-workspace .games-minecraft:has(.mc-project-page)>.mc-world-nav{display:none}
+.mod-project-page{padding-block:24px 64px;min-width:0;container-type:inline-size}
+.mod-project-heading{margin-bottom:28px}
+.mod-project-context{display:flex;align-items:center;gap:12px;flex-wrap:wrap;margin-bottom:22px}
+.mod-project-context .mods-game-logo{width:76px;height:34px;padding:5px}
+.mod-source-badge,.mod-category-badge{display:inline-flex;align-items:center;gap:6px;font-size:12px;line-height:1.4;padding:6px 9px;border-radius:var(--radius-sm);background:var(--color-elevated);color:var(--color-ink-muted);max-width:100%;overflow-wrap:anywhere}
+.mod-project-heading h2{font-size:clamp(28px,4cqw,42px);font-weight:650;letter-spacing:-.035em;line-height:1.14;margin:0;max-width:34ch;overflow-wrap:anywhere}
+.mod-project-heading h2:focus{outline:none}
+.mod-project-author{margin:10px 0 0;color:var(--color-ink-muted);font-size:14px}
+.mod-project-summary{font-size:16px;line-height:1.6;max-width:72ch;margin:18px 0 0;color:var(--color-ink-muted)}
+.mod-project-layout{display:grid;grid-template-columns:minmax(0,1fr) minmax(270px,330px);gap:36px;align-items:start}
+.mod-project-main,.mod-project-sidebar{min-width:0}.mod-project-sidebar{position:sticky;top:28px;display:grid;gap:24px}
+.mod-project-install{padding:22px;background:var(--color-surface);border-radius:var(--radius-md);display:grid;gap:16px;min-width:0}
+.mod-project-install h3,.mod-project-overview h3,.mod-project-facts h3{font-size:19px;line-height:1.3;font-weight:600;margin:0;letter-spacing:-.02em}
+.mod-project-install>p,.mod-project-install>small{margin:0;color:var(--color-ink-muted);font-size:13px;line-height:1.6}
+.mod-project-install .games-button-primary{width:100%;min-height:46px;justify-content:center}
+.mod-project-install .games-sims-mts-choices{display:grid;gap:14px;margin:0}
+.mod-project-install .games-sims-mts-choices small{display:block;margin-bottom:8px;color:var(--color-ink-muted)}
+.mod-project-install .games-sims-mts-choices>div{min-width:0}
+.mod-project-facts{display:grid;gap:14px;padding:0 6px;font-size:13px;color:var(--color-ink-muted)}
+.mod-project-facts dl{margin:0;display:grid;gap:14px}.mod-project-facts dl>div{display:flex;justify-content:space-between;gap:18px}.mod-project-facts dd{margin:0;text-align:end;color:var(--color-ink);overflow-wrap:anywhere}
+.mod-project-overview{padding-top:28px;font-size:15px;line-height:1.75;overflow-wrap:anywhere}.mod-project-overview p{white-space:pre-line;margin:16px 0;color:var(--color-ink-muted)}
+.mod-project-overview .games-sims-creator-content{margin-top:28px}
+.mod-project-loading{display:grid;gap:14px;padding-block:8px}.mod-project-loading i{height:12px;background:var(--color-elevated);border-radius:4px;width:100%}.mod-project-loading i:last-child{width:65%}
+.mod-project-pending{display:flex;align-items:center;gap:9px;color:var(--color-ink-muted);font-size:13px;line-height:1.6}.mod-project-pending svg{flex:none;animation:mods-loading 1s linear infinite}
+.mod-project-file-list{list-style:none;margin:0;padding:0;max-height:260px;overflow:auto}.mod-project-file-list li{padding:12px 0;overflow-wrap:anywhere;border-bottom:1px solid var(--color-edge-soft);font-size:13px}
+.mod-project-sidebar .games-sims-pack-requirements{margin:0}.mod-project-sidebar .games-sims-pack-list{font-size:13px}
+.mod-file-count{font-size:12px;font-weight:500;color:var(--color-ink-muted);margin-inline-start:10px}
+.mods-workspace button>svg{stroke-width:1.65}
+.mods-catalog-order{display:flex;gap:8px;margin-bottom:22px;flex-wrap:wrap}.mods-catalog-order .games-button{background:none;min-height:38px;padding:9px 14px;font-size:13px;color:var(--color-ink-muted)}.mods-catalog-order .games-button[aria-pressed=true]{background:var(--color-elevated);color:var(--color-ink)}
+.mods-catalog-cover,.mods-card-image{position:relative;display:block;width:100%;overflow:hidden;border-radius:var(--radius-md)}
+.mods-workspace .mods-catalog-cover .games-sims-mts-art{aspect-ratio:4/3;margin:0;width:100%}
+.mods-card-image>.mods-image{aspect-ratio:4/3;width:100%}
+.mod-card-pick,.mod-card-game{position:absolute;inset-inline-start:10px;bottom:10px;font-size:11px;font-weight:600;line-height:1.3;border-radius:5px;padding:5px 8px;background:#101313df;color:#fff;max-width:calc(100% - 20px)}
+.mods-card-image>svg{position:absolute;inset-inline-end:10px;top:10px;color:#fff;background:#101313b3;border-radius:50%;padding:4px;box-sizing:content-box}
+.mods-workspace .games-sims-mts-card .mods-card-description{font-size:13px;line-height:1.55;color:var(--color-ink-muted);display:-webkit-box;-webkit-line-clamp:2;-webkit-box-orient:vertical;overflow:hidden}
+.mods-workspace .games-sims-mts-card>strong{font-size:15px;-webkit-line-clamp:2}
+.mods-workspace .games-sims-mts-card .mods-card-footer{display:flex;flex-wrap:wrap;gap:10px;align-items:center;margin-top:auto;padding-top:6px}
+.mods-workspace .games-sims-mts-card .mod-project-stats{display:flex}.mods-workspace .games-sims-mts-card .mod-project-stats strong{font-size:12px;display:inline;font-weight:500}
+.mods-project-card-copy>.mods-project-card-meta{display:flex;align-items:center;gap:8px}.mods-project-card-meta .mod-project-stats{width:100%;padding-bottom:3px}
+.mods-feature-meta .mod-project-stats{margin:0;color:inherit}.mods-feature-meta .mod-project-stats strong{color:#fff}
+.mods-workspace .mc-project-page>header h2:focus{outline:none}.mods-workspace .mc-project-page>header{padding-top:24px;margin-bottom:24px}.mods-workspace .mc-project-page .mod-project-stats{margin:0}
+.mods-catalog-spotlight{display:grid;grid-template-columns:200px minmax(0,1fr) auto;gap:24px;align-items:center;background:var(--color-surface);border-radius:var(--radius-md);padding:18px;margin:20px 0 30px}
+.mods-catalog-spotlight>.mods-image{width:100%;aspect-ratio:16/10;border-radius:var(--radius-sm)}.mods-catalog-spotlight>.mods-image img{object-fit:contain}
+.mods-catalog-spotlight h3{font-size:22px;line-height:1.2;margin:10px 0 5px;letter-spacing:-.02em;overflow-wrap:anywhere}.mods-catalog-spotlight small{font-size:12px;color:var(--color-ink-muted)}.mods-catalog-spotlight p{font-size:13px;line-height:1.6;display:-webkit-box;-webkit-line-clamp:2;-webkit-box-orient:vertical;overflow:hidden;color:var(--color-ink-muted);margin:10px 0}.mods-catalog-spotlight .mod-project-stats{margin-top:10px}.mods-catalog-spotlight>.games-button{min-height:44px}
+@container(max-width:760px){.mods-catalog-spotlight{grid-template-columns:110px minmax(0,1fr);gap:16px}.mods-catalog-spotlight h3{font-size:18px}.mods-catalog-spotlight>.games-button{grid-column:1/-1;justify-content:center}}
+.mod-project-page .mods-project-gallery>.games-sims-mts-art{aspect-ratio:16/10;max-height:540px;background:var(--color-surface)}
+@container(max-width:760px){.mod-project-layout{grid-template-columns:minmax(0,1fr);gap:28px}.mod-project-sidebar{position:static;grid-row:1}.mod-project-heading h2{font-size:30px}.mod-project-context{margin-bottom:18px}.mod-project-install{padding:18px}.mod-project-stats{gap:12px 18px}.mod-project-facts{padding:0}.mod-project-page{padding-top:12px}}
+@container(max-width:760px){.mod-project-main{display:contents}.mod-project-main>.mods-project-gallery{grid-row:1}.mod-project-sidebar{grid-row:2}.mod-project-overview{grid-row:3;padding-top:0}}
+@media(prefers-reduced-motion:reduce){.mod-project-pending svg{animation:none}}
+
+.mods-card-image .mod-card-game{max-width:calc(100% - 110px);white-space:nowrap;text-overflow:ellipsis;overflow:hidden}
+
+.mods-catalog-toolbar{display:flex;align-items:center;gap:20px;justify-content:space-between;margin-block:20px}.mods-catalog-toolbar .mods-catalog-order{margin:0}.mods-catalog-toolbar>[data-dropdown-root],.mods-catalog-toolbar>.relative{min-width:200px}.mods-catalog-toolbar [aria-haspopup=listbox]{min-width:180px}
+@container(max-width:650px){.mods-catalog-toolbar{align-items:stretch;flex-direction:column;gap:10px}.mods-catalog-toolbar [aria-haspopup=listbox]{width:100%}.mods-catalog-order .games-button{padding-inline:10px}}
+
+.mods-catalog-toolbar>fieldset{margin:0;padding:0;border:0;min-width:200px}.mod-project-heading h2:focus-visible{outline:none!important;box-shadow:none}
+
+/* Identity and counts belong in the caption, leaving the project image clear. */
+.mods-project-card-copy>.mods-project-card-meta{flex-wrap:nowrap;gap:10px;margin-top:auto;padding-top:12px}
+.mods-project-card-copy>.mods-project-card-meta>.mod-project-stats{width:auto;flex:1;padding:0;gap:8px}
+.mods-project-card-meta>.mod-project-stats>span:not(:first-child){display:none}
+.mods-project-card-copy{flex:1}
+.mods-project-card:hover .mods-card-image{filter:brightness(1.06)}
+.mod-project-source{display:inline-flex;align-items:center;gap:8px;min-height:44px;background:none;padding:0}
+.mods-game-logo.is-sims4 img{filter:brightness(0) invert(1)}
+html[data-theme-mode="light"] .mods-game-logo.is-sims4 img{filter:none}
+.mods-workspace[data-mod-game="minecraft"]>.mods-game-hero .mods-game-logo{width:190px;height:100px;background:none;padding:0}
+.mods-workspace[data-mod-game="minecraft"]>.mods-game-hero .mods-game-identity h2{font-size:38px}
+.mods-workspace[data-mod-game="minecraft"]>.mods-game-hero .mods-game-identity p{font-size:17px}
+.mods-workspace[data-mod-game="minecraft"]>.mods-game-hero .mods-game-hero-art{opacity:.5}
+.mods-workspace[data-mod-game="minecraft"] .mc-navigation-wordmark{display:none}
+.mods-workspace:has(.mc-project-page)>.mods-game-hero{display:none}
+.mc-project-context{display:flex;align-items:center;gap:12px;flex-wrap:wrap;color:var(--color-ink-muted);font-size:12px;margin-bottom:12px}
+.mc-project-context .mod-game-mark{width:22px;height:22px;margin-inline-start:4px}
+.mc-project-context .mod-game-mark svg{width:22px;height:22px}
+.mc-project-tabs button{min-height:48px;gap:10px;font-size:14px}
+.mc-project-tabs{border-bottom:1px solid var(--color-edge-soft);padding-bottom:16px;margin-bottom:20px}
+.mc-project-scroll:focus-visible{outline:2px solid var(--color-ink);outline-offset:3px}
+.mc-gallery-empty{min-height:330px;display:flex;flex-direction:column;align-items:center;justify-content:center;text-align:center;padding:32px 24px;background:var(--color-surface);border-radius:var(--radius-md)}
+.mc-gallery-empty>svg{color:var(--color-ink-subtle);margin-bottom:20px;stroke-width:1.25}
+.mc-gallery-empty h3{font-size:22px;line-height:1.3;margin:0 0 10px;font-weight:600}
+.mc-gallery-empty p{font-size:14px;line-height:1.6;color:var(--color-ink-muted);margin:0;max-width:42ch}
+.mc-gallery-empty>div{display:flex;justify-content:center;align-items:center;gap:22px;flex-wrap:wrap;margin-top:24px}
+.mc-gallery-empty .games-button{min-height:44px;gap:10px;padding-inline:18px}
+.mc-gallery-empty a{min-height:44px}
+.mc-gallery-enlarge{display:block;width:100%;height:100%;cursor:zoom-in}
+.mc-gallery-enlarge>img{width:100%;height:100%;object-fit:contain}
+.mc-project-gallery.is-expanded>.mc-gallery-enlarge{height:clamp(240px,40vh,460px)}
+.mod-gallery-stage{position:relative}
+.mod-gallery-open{display:block;width:100%;position:relative;border-radius:var(--radius-md);overflow:hidden;cursor:zoom-in}
+.mod-gallery-open>.games-sims-mts-art{width:100%;height:auto;aspect-ratio:16/10;background:var(--color-surface)}
+.mod-gallery-open>.games-sims-mts-art>img{width:100%;height:100%;object-fit:contain}
+.mod-gallery-open>span:last-child{position:absolute;inset-inline-end:16px;bottom:16px;width:44px;height:44px;display:grid;place-items:center;background:#151818d9;color:#fff;border-radius:50%;opacity:0;transition:opacity 160ms ease-out}
+.mod-gallery-arrows{position:absolute;inset-inline:14px;top:50%;transform:translateY(-50%);display:flex;justify-content:space-between;pointer-events:none}
+.mod-gallery-arrows button{width:48px;height:48px;display:grid;place-items:center;border-radius:50%;background:#151818d9;color:#fff;pointer-events:auto;opacity:0;transition:opacity 160ms ease-out}
+.mod-gallery-stage:is(:hover,:focus-within) .mod-gallery-arrows button,.mod-gallery-stage:is(:hover,:focus-within) .mod-gallery-open>span:last-child{opacity:1}
+.mod-gallery-stage:dir(rtl) .mod-gallery-arrows svg{transform:scaleX(-1)}
+.mod-description{font-size:16px;line-height:1.8;max-width:76ch;color:var(--color-ink-muted)}
+.mod-project-overview .mod-description p{margin:0 0 16px;white-space:pre-line}
+.mod-description h4{font-size:21px;line-height:1.4;font-weight:600;color:var(--color-ink);margin:32px 0 16px;padding-top:22px;border-top:1px solid var(--color-edge-soft)}
+.mod-description strong{font-weight:600;color:var(--color-ink)}
+.mod-description :is(ul,ol){list-style:disc;padding-inline-start:24px;margin:16px 0 24px}.mod-description ol{list-style:decimal}.mod-description li+li{margin-top:8px}
+.mod-setup-dialog{padding:28px;min-height:0;overflow-y:auto;overscroll-behavior:contain;color:var(--color-ink)}.mod-setup-dialog header{display:flex;align-items:center;gap:14px}.mod-setup-dialog h2{font-size:24px;line-height:1.3;font-weight:600;margin:0;flex:1}.mod-setup-dialog header>button{flex:none}.mod-setup-dialog>p{font-size:15px;line-height:1.7;color:var(--color-ink-muted);margin:22px 0 14px}.mod-setup-dialog>code{font-size:13px;line-height:1.6;overflow-wrap:anywhere;color:var(--color-ink-muted)}.mod-setup-dialog h3{font-size:15px;font-weight:600;margin:28px 0 12px}.mod-setup-folders{display:grid;gap:10px;max-height:35vh;overflow:auto;margin-block:18px}.mod-setup-folders>button{display:flex;gap:14px;text-align:start;background:var(--color-elevated);padding:16px;border-radius:var(--radius-sm)}.mod-setup-folders svg{flex:none}.mod-setup-folders strong{display:block;overflow-wrap:anywhere;font-size:14px}.mod-setup-folders small{display:block;margin-top:6px;color:var(--color-ink-muted)}.mod-setup-dialog footer{display:flex;flex-wrap:wrap;justify-content:space-between;gap:12px;margin-top:24px}.mod-setup-dialog .games-button{min-height:46px;gap:10px;font-size:14px}.mod-setup-dialog button:focus-visible{outline:2px solid var(--color-ink);outline-offset:3px}
+.mod-project-sidebar .games-sims-pack-list{font-size:14px}.mod-project-sidebar .games-sims-pack-list li{gap:12px;padding-block:14px}
+.games-sims-pack-list .sims-pack-icon{width:32px;flex:none;display:grid;place-items:center}.sims-pack-icon img{object-fit:contain;width:30px;height:34px}.games-sims-pack-list .sims-pack-icon+span{flex:1;min-width:0}.mod-project-sidebar .games-sims-pack-status{font-size:11px}
+@media(hover:none){.mod-gallery-arrows button,.mod-gallery-open>span:last-child{opacity:1}}
+@media(prefers-reduced-motion:reduce){.mod-gallery-arrows button,.mod-gallery-open>span:last-child{transition:none}}
+.mods-workspace .mc-project-page .mc-project-gallery-page{padding-inline:0;padding-top:4px}
+.mc-catalog-summary{align-items:center}
+.mc-provider-heading h2 .mod-provider-logo{font-size:19px;color:var(--color-ink);font-weight:600;gap:10px}
+.mc-provider-heading h2 .mod-provider-logo img{width:26px;height:26px}
+.games-sims-mts-browser.is-discovery.is-grid .games-sims-mts-grid{grid-template-columns:repeat(3,minmax(0,1fr));gap:22px}
+.games-sims-mts-browser.is-discovery.is-grid .games-sims-mts-card.sims-discovery-project{display:flex;flex-direction:column;gap:18px;padding:16px;min-width:0}
+.games-sims-mts-browser.is-discovery.is-grid .sims-discovery-project-art{width:100%}
+.games-sims-mts-browser.is-discovery.is-grid .sims-discovery-project-copy{display:flex;flex:1;width:100%}
+.games-sims-mts-browser.is-discovery.is-grid .sims-discovery-project-title{font-size:21px}
+.games-sims-mts-browser.is-discovery.is-grid .sims-discovery-description{font-size:13px;display:-webkit-box;-webkit-line-clamp:2;-webkit-box-orient:vertical;overflow:hidden}
+.games-sims-mts-browser.is-discovery.is-grid .sims-discovery-project-bottom{margin-top:auto;padding-top:20px;flex-direction:row;align-items:center;justify-content:space-between;gap:10px}
+.games-sims-mts-browser.is-discovery.is-grid .sims-discovery-cta{align-self:flex-end;width:fit-content;max-width:100%;justify-content:center;font-size:14px;min-height:44px}
+.games-sims-mts-browser.is-discovery.is-grid .sims-discovery-downloads strong{font-size:18px}
+.games-sims-mts-browser.is-discovery.is-grid .sims-discovery-project-bottom>.mod-project-stats{display:none}
+@container(max-width:1000px){.games-sims-mts-browser.is-discovery.is-grid .games-sims-mts-grid{grid-template-columns:repeat(2,minmax(0,1fr))}}
+@container(max-width:600px){.games-sims-mts-browser.is-discovery.is-grid .games-sims-mts-grid{grid-template-columns:minmax(0,1fr)}.games-sims-mts-results-head{flex-wrap:wrap;gap:14px}.mc-gallery-empty{padding-inline:16px;min-height:320px}.mc-project-context{gap:8px}.mods-workspace[data-mod-game="minecraft"]>.mods-game-hero .mods-game-logo{width:110px;height:70px}.mods-workspace[data-mod-game="minecraft"]>.mods-game-hero .mods-game-identity h2{font-size:28px}}
+
+@container(max-width:600px){.mods-workspace[data-mod-game^="sims"]>.mods-game-hero .mods-game-identity>.mods-game-logo{width:110px;height:78px}.mods-workspace[data-mod-game^="sims"]>.mods-game-hero .mods-game-identity h2{font-size:26px}.mods-workspace[data-mod-game^="sims"]>.mods-game-hero .mods-game-identity p{font-size:14px}}
+
+/* Full-page Minecraft projects share the Sims reading/install composition. */
+.mc-project-modal-layout{display:contents}
+.mods-workspace .mc-project-page{container-type:inline-size}
+.mc-project-page-layout{display:grid;grid-template-columns:minmax(0,1fr) minmax(270px,320px);gap:32px;align-items:start}
+.mods-workspace .mc-project-page .mc-project-scroll{height:auto;overflow:visible;overscroll-behavior:auto;scrollbar-gutter:auto;min-width:0;min-height:520px}
+.mods-workspace .mc-project-page .mc-project-detail-body{display:block;padding:24px 0 40px;min-width:0}
+.mc-project-page-sidebar{position:sticky;top:28px;display:grid;gap:26px;min-width:0}
+.mc-project-page-sidebar .mod-project-install:empty{display:none}
+.mc-project-page-sidebar footer,.mc-project-page-sidebar .mc-release-footer{display:grid;gap:20px;padding:0;border:0;background:none}
+.mc-project-page-sidebar .mc-release-summary{display:grid;gap:12px;min-width:0}
+.mc-project-page-sidebar .mc-release-review{display:grid;gap:12px;align-items:stretch}
+.mc-project-page-sidebar .mc-release-review .games-button,.mc-project-page-sidebar footer>.games-button{min-height:48px;width:100%;justify-content:center;background:var(--color-ink);color:var(--color-canvas);font-size:15px}
+.mc-project-page-sidebar .mc-release-summary strong{font-size:20px}
+.mc-project-page-sidebar .mc-release-summary span,.mc-project-page-sidebar footer p,.mc-project-page-sidebar small{font-size:14px;line-height:1.6}
+.mc-project-page-sidebar .mc-release-summary button{font-size:14px;min-height:44px;text-align:start;text-decoration:underline;text-underline-offset:4px}
+.mc-project-page-sidebar>aside{display:grid;gap:22px;padding:0 6px;min-width:0}
+.mc-project-page-sidebar h3{font-size:14px;color:var(--color-ink-muted);margin:0 0 8px}
+.mc-project-page-sidebar p{font-size:15px;line-height:1.6;overflow-wrap:anywhere;margin:0}
+.mods-workspace .mc-project-page>header{gap:24px;padding-block:28px}
+.mods-workspace .mc-project-page>header>img{width:100px;height:100px;border-radius:12px}
+.mods-workspace .mc-project-page h2{font-size:clamp(28px,4cqw,42px);line-height:1.15}
+.mods-workspace .mc-project-page>header p{font-size:15px;margin-top:10px}
+.mods-workspace .mc-project-page .mc-project-tabs{margin-bottom:28px;gap:8px}
+.mods-workspace .mc-project-page .mc-project-tabs button{font-size:15px;min-height:48px;padding:12px 18px}
+.mc-project-page .mc-project-tabs svg{width:22px;height:22px}
+.mods-workspace .mc-project-page .mc-project-gallery{margin:0;aspect-ratio:16/9;max-height:440px;border-radius:var(--radius-md);background:var(--color-surface)}
+.mc-project-page .mc-project-gallery img{object-fit:contain}
+.mc-project-page .mc-project-description,.mc-project-page .mc-project-prose{font-size:16px;line-height:1.8}
+.mc-project-page .mc-release-filters label{font-size:14px;gap:10px}
+.mc-project-page .mc-release-filters :is(select,button){font-size:15px;min-height:46px}
+.mc-project-page .mc-release-choice{padding:20px;font-size:15px;gap:14px}
+.mc-project-page .mc-release-identity strong{font-size:18px}
+.mc-project-page .mc-release-identity span,.mc-project-page .mc-release-info,.mc-project-page .mc-release-file>div>strong,.mc-project-page .mc-release-info>.mc-release-dependency-toggle{font-size:14px;line-height:1.65}
+.mc-project-page .mc-release-channel{font-size:12px}
+.mc-project-page a{font-size:14px;overflow-wrap:anywhere}
+.mc-project-page .mc-project-versions.mc-release-list>article{background:var(--color-surface);margin-bottom:12px}
+.mc-project-page .mc-project-versions.mc-release-list>article.is-selected{background:var(--color-elevated)}
+@container(max-width:780px){.mc-project-page-layout{grid-template-columns:minmax(0,1fr);gap:24px}.mc-project-page-sidebar{position:static;grid-row:1}.mc-project-page-sidebar>aside{grid-template-columns:repeat(2,minmax(0,1fr))}.mods-workspace .mc-project-page>header>img{width:72px;height:72px}.mods-workspace .mc-project-page .mc-project-tabs{display:flex;flex-wrap:wrap}.mods-workspace .mc-project-page .mc-project-tabs button{padding:12px}.mods-workspace .mc-project-page .mc-project-scroll{min-height:360px}}
+.mc-project-page-sidebar .mc-release-footer .mc-release-review{margin-inline-start:0;width:100%;justify-items:stretch}
+.mc-project-page-sidebar .mc-release-review>small{max-width:none;text-align:start}

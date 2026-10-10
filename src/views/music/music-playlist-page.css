@@ -1,0 +1,30 @@
+@import "@/components/music/music-library.css";
+
+.music-playlist-page {
+  display: flex;
+  flex-direction: column;
+  gap: 18px;
+}
+.music-playlist-page-back {
+  display: inline-flex;
+  width: fit-content;
+  min-height: 44px;
+  align-items: center;
+  gap: 4px;
+  font-size: 13px;
+  color: var(--color-ink-muted);
+  transition: color 160ms ease-out;
+}
+.music-playlist-page-back:hover {
+  color: var(--color-ink);
+}
+.music-playlist-page-toolbar {
+  display: flex;
+  align-items: center;
+  justify-content: flex-end;
+  gap: 10px;
+  flex-wrap: wrap;
+}
+.music-collection-page-title { font-size: clamp(32px, 4.5vw, 64px); line-height: 1.05; font-weight: 700; letter-spacing: -.035em; overflow-wrap: anywhere; color: var(--color-ink); }
+.music-playlist-page { container-type: inline-size; }
+.music-playlist-page .music-library-playlist-hero:focus-visible { outline: none !important; }

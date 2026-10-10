@@ -35,15 +35,19 @@ export function AiExampleHint({
 }) {
   const t = useT();
   const [i, setI] = useState(() => Math.floor(Math.random() * examples.length));
+  const [cycled, setCycled] = useState(false);
   useEffect(() => {
     if (hidden) return;
-    const id = window.setInterval(() => setI((v) => (v + 1) % examples.length), 6000);
+    const id = window.setInterval(() => {
+      setCycled(true);
+      setI((v) => (v + 1) % examples.length);
+    }, 6000);
     return () => window.clearInterval(id);
   }, [hidden, examples.length]);
   if (hidden) return null;
   return (
     <div className="pointer-events-none absolute inset-y-0 start-0 flex items-center overflow-hidden">
-      <span key={i} className={`animate-ai-status flex whitespace-nowrap ${sizeClass}`}>
+      <span key={i} className={`${cycled ? "animate-ai-status" : ""} flex whitespace-nowrap ${sizeClass}`}>
         {prefix && <span className="text-ink-subtle">{t(prefix)}&nbsp;</span>}
         <span className="ai-text-shimmer">{t(examples[i % examples.length])}</span>
       </span>

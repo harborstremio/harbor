@@ -1,3 +1,44 @@
+#[cfg(windows)]
+mod win {
+    use std::sync::mpsc::{channel, Sender};
+    use std::sync::OnceLock;
+    use windows::Win32::System::Power::{
+        SetThreadExecutionState, ES_CONTINUOUS, ES_DISPLAY_REQUIRED, ES_SYSTEM_REQUIRED,
+    };
+
+    static TX: OnceLock<Sender<bool>> = OnceLock::new();
+
+    fn sender() -> &'static Sender<bool> {
+        TX.get_or_init(|| {
+            let (tx, rx) = channel::<bool>();
+            std::thread::Builder::new()
+                .name("harbor-power".into())
+                .spawn(move || {
+                    let mut held = false;
+                    while let Ok(on) = rx.recv() {
+                        if on == held {
+                            continue;
+                        }
+                        let flags = if on {
+                            ES_CONTINUOUS | ES_SYSTEM_REQUIRED | ES_DISPLAY_REQUIRED
+                        } else {
+                            ES_CONTINUOUS
+                        };
+                        unsafe { SetThreadExecutionState(flags) };
+                        held = on;
+                    }
+                    unsafe { SetThreadExecutionState(ES_CONTINUOUS) };
+                })
+                .ok();
+            tx
+        })
+    }
+
+    pub fn set(on: bool) {
+        let _ = sender().send(on);
+    }
+}
+
 #[cfg(target_os = "macos")]
 mod mac {
     use objc2::msg_send;
@@ -16,7 +57,7 @@ mod mac {
         unsafe {
             let info: *mut AnyObject = msg_send![cls, processInfo];
             let info = info.as_ref()?;
-            let reason = NSString::from_str("Harbor playback");
+            let reason = NSString::from_str(concat!(crate::product_name!(), " playback"));
             let opts: u64 = IDLE_DISPLAY_SLEEP_DISABLED | IDLE_SYSTEM_SLEEP_DISABLED;
             let token: Retained<AnyObject> =
                 msg_send![info, beginActivityWithOptions: opts, reason: &*reason];
@@ -25,7 +66,9 @@ mod mac {
     }
 
     pub fn end(token: Token) {
-        let Some(cls) = AnyClass::get(c"NSProcessInfo") else { return };
+        let Some(cls) = AnyClass::get(c"NSProcessInfo") else {
+            return;
+        };
         unsafe {
             let info: *mut AnyObject = msg_send![cls, processInfo];
             let Some(info) = info.as_ref() else { return };
@@ -43,6 +86,9 @@ mod linux {
 
     use zbus::zvariant::{OwnedObjectPath, Value};
 
+    const GNOME_DESTINATION: &str = "org.gnome.SessionManager";
+    const GNOME_PATH: &str = "/org/gnome/SessionManager";
+    const GNOME_INTERFACE: &str = "org.gnome.SessionManager";
     const SCREENSAVER_DESTINATION: &str = "org.freedesktop.ScreenSaver";
     const SCREENSAVER_PATH: &str = "/org/freedesktop/ScreenSaver";
     const SCREENSAVER_INTERFACE: &str = "org.freedesktop.ScreenSaver";
@@ -53,6 +99,10 @@ mod linux {
     const INHIBIT_SUSPEND_AND_IDLE: u32 = 4 | 8;
 
     pub enum Token {
+        GnomeSession {
+            connection: zbus::Connection,
+            cookie: u32,
+        },
         ScreenSaver {
             connection: zbus::Connection,
             cookie: u32,
@@ -66,11 +116,42 @@ mod linux {
     pub async fn begin() -> Option<Token> {
         let connection = zbus::Connection::session().await.ok()?;
 
-        if let Some(token) = begin_portal(&connection).await {
+        if std::env::var_os("FLATPAK_ID").is_some() {
+            return begin_portal(&connection).await;
+        }
+
+        if let Some(token) = begin_gnome(&connection).await {
             return Some(token);
         }
 
-        begin_screensaver(&connection).await
+        if let Some(token) = begin_screensaver(&connection).await {
+            return Some(token);
+        }
+
+        begin_portal(&connection).await
+    }
+
+    async fn begin_gnome(connection: &zbus::Connection) -> Option<Token> {
+        let proxy = zbus::Proxy::new(connection, GNOME_DESTINATION, GNOME_PATH, GNOME_INTERFACE)
+            .await
+            .ok()?;
+        let cookie = proxy
+            .call(
+                "Inhibit",
+                &(
+                    crate::brand::PRODUCT_NAME,
+                    0u32,
+                    concat!(crate::product_name!(), " playback"),
+                    INHIBIT_SUSPEND_AND_IDLE,
+                ),
+            )
+            .await
+            .ok()?;
+
+        Some(Token::GnomeSession {
+            connection: connection.clone(),
+            cookie,
+        })
     }
 
     async fn begin_screensaver(connection: &zbus::Connection) -> Option<Token> {
@@ -83,7 +164,7 @@ mod linux {
         .await
         .ok()?;
         let cookie = proxy
-            .call("Inhibit", &("Harbor", "Harbor playback"))
+            .call("Inhibit", &("JL Media Vision", "JL Media Vision playback"))
             .await
             .ok()?;
 
@@ -102,7 +183,10 @@ mod linux {
         )
         .await
         .ok()?;
-        let options = HashMap::from([("reason", Value::from("Harbor playback"))]);
+        let options = HashMap::from([(
+            "reason",
+            Value::from(concat!(crate::product_name!(), " playback")),
+        )]);
         let handle = proxy
             .call("Inhibit", &("", INHIBIT_SUSPEND_AND_IDLE, options))
             .await
@@ -116,6 +200,14 @@ mod linux {
 
     pub async fn end(token: Token) {
         match token {
+            Token::GnomeSession { connection, cookie } => {
+                if let Ok(proxy) =
+                    zbus::Proxy::new(&connection, GNOME_DESTINATION, GNOME_PATH, GNOME_INTERFACE)
+                        .await
+                {
+                    let _ = proxy.call::<_, _, ()>("Uninhibit", &(cookie,)).await;
+                }
+            }
             Token::ScreenSaver { connection, cookie } => {
                 if let Ok(proxy) = zbus::Proxy::new(
                     &connection,
@@ -164,12 +256,16 @@ pub async fn power_inhibit(on: bool) {
         let mut guard = TOKEN.lock().await;
         match (on, guard.take()) {
             (true, None) => *guard = linux::begin().await,
-            (true, Some(token)) => *guard = Some(token),
-            (false, Some(token)) => linux::end(token).await,
+            (true, Some(t)) => *guard = Some(t),
+            (false, Some(t)) => linux::end(t).await,
             (false, None) => {}
         }
     }
-    #[cfg(not(any(target_os = "macos", target_os = "linux")))]
+    #[cfg(windows)]
+    {
+        win::set(on);
+    }
+    #[cfg(not(any(target_os = "macos", target_os = "linux", windows)))]
     {
         let _ = on;
     }

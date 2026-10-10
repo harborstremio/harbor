@@ -1,4 +1,4 @@
-import type { Meta } from "@/lib/cinemeta";
+import { meta as cinemetaMeta, type Meta } from "@/lib/cinemeta";
 import { AWARD_CATALOG } from "@/lib/awards-catalog";
 import { readAwardHistory } from "@/lib/awards-history";
 import { get, IMG } from "@/lib/providers/tmdb/tmdb-client";
@@ -22,7 +22,7 @@ export type AwardPeople = {
 export const EMPTY_PEOPLE: AwardPeople = { actors: [], directors: [], writers: [] };
 
 type Role = "film" | "actor" | "director" | "writer" | "other";
-type FilmSeed = { title: string; year: number; kind: "movie" | "series" };
+type FilmSeed = { title: string; year: number; kind: "movie" | "series"; imdb?: string };
 type PersonSeed = { name: string; role: string; work: string | null; year: number; wins: number };
 
 const PRIMARY_FILM_KEYS: Partial<Record<AwardType, string[]>> = {
@@ -44,6 +44,15 @@ const PRIMARY_FILM_KEYS: Partial<Record<AwardType, string[]>> = {
   cannes: ["palme_dor"],
   venice: ["golden_lion"],
   berlin: ["golden_bear"],
+  bafta_tv: ["best_drama_series", "best_scripted_comedy", "best_international"],
+  annie: ["best_animated_feature", "best_tv_production"],
+  spirit: ["best_film", "best_first_film"],
+  saturn: ["best_scifi_film", "best_fantasy_film", "best_horror_film"],
+  cesar: ["best_film"],
+  goya: ["best_film"],
+  blue_dragon: ["best_film"],
+  baeksang: ["best_film", "best_drama"],
+  bifa: ["best_film"],
 };
 
 function classify(name: string): Role {
@@ -131,15 +140,22 @@ function buildSeeds(awardType: AwardType): {
     director: new Map(),
     writer: new Map(),
   };
+  const addFilm = (title: string, year: number, kind: "movie" | "series", imdb?: string) => {
+    if (!title) return;
+    const k = norm(title);
+    const prev = filmByKey.get(k);
+    if (!prev || (!prev.imdb && imdb) || (!!prev.imdb === !!imdb && year > prev.year)) {
+      filmByKey.set(k, { title, year, kind, imdb: imdb ?? prev?.imdb });
+    }
+  };
   for (const group of history) {
     let role: Role = filmKeys.has(group.category.key) ? "film" : classify(group.category.name);
     if (role === "film" && !filmKeys.has(group.category.key)) role = "other";
     const kind = isSeries(group.category.name) ? "series" : "movie";
     for (const e of group.entries) {
       if (role === "film") {
-        const k = norm(e.workTitle);
-        const prev = filmByKey.get(k);
-        if (!prev || e.year > prev.year) filmByKey.set(k, { title: e.workTitle, year: e.year, kind });
+        addFilm(e.workTitle, e.year, kind, e.imdb);
+        for (const nom of e.nominees ?? []) addFilm(nom.title, e.year, kind, nom.imdb);
       } else if (role === "actor" || role === "director" || role === "writer") {
         const names = e.recipients.flatMap(splitRecipients);
         for (const name of names) {
@@ -163,7 +179,10 @@ function buildSeeds(awardType: AwardType): {
   const topPeople = (m: Map<string, PersonSeed>, n: number) =>
     [...m.values()].sort((a, b) => b.wins - a.wins || b.year - a.year).slice(0, n);
   return {
-    films: [...filmByKey.values()].sort((a, b) => b.year - a.year).slice(0, 300),
+    films: [...filmByKey.values()]
+      .filter((f) => f.imdb)
+      .sort((a, b) => b.year - a.year)
+      .slice(0, 800),
     actors: topPeople(people.actor, 18),
     directors: topPeople(people.director, 14),
     writers: topPeople(people.writer, 14),
@@ -185,37 +204,35 @@ type RawResult = {
   known_for_department?: string;
 };
 
-async function searchTitle(key: string, seed: FilmSeed): Promise<Meta | null> {
-  const data = await get<{ results?: RawResult[] }>(key, "search/multi", {
-    query: seed.title,
-    include_adult: "false",
-  });
-  const wantTv = seed.kind === "series";
-  const yearOf = (r: RawResult) => Number((r.release_date ?? r.first_air_date ?? "").slice(0, 4)) || 0;
-  const results = (data?.results ?? []).filter(
-    (r) => (r.media_type === "movie" || r.media_type === "tv") && r.poster_path,
-  );
-  if (results.length === 0) return null;
-  results.sort((a, b) => {
-    const ka = a.media_type === (wantTv ? "tv" : "movie") ? 0 : 1;
-    const kb = b.media_type === (wantTv ? "tv" : "movie") ? 0 : 1;
-    if (ka !== kb) return ka - kb;
-    const da = Math.abs(yearOf(a) - seed.year);
-    const db = Math.abs(yearOf(b) - seed.year);
-    if (da !== db) return da - db;
-    return (b.popularity ?? 0) - (a.popularity ?? 0);
-  });
-  const r = results[0];
-  const isTv = r.media_type === "tv";
+function metaFromImdb(seed: FilmSeed): Meta {
   return {
-    id: `tmdb:${isTv ? "tv" : "movie"}:${r.id}`,
-    type: isTv ? "series" : "movie",
-    name: r.title ?? r.name ?? seed.title,
-    poster: `${IMG}/w342${r.poster_path}`,
-    background: r.backdrop_path ? `${IMG}/w780${r.backdrop_path}` : undefined,
-    releaseInfo: String(yearOf(r) || seed.year),
-    imdbRating: r.vote_average ? r.vote_average.toFixed(1) : undefined,
+    id: seed.imdb!,
+    type: seed.kind === "series" ? "series" : "movie",
+    name: seed.title,
+    poster: `https://images.metahub.space/poster/small/${seed.imdb}/img`,
+    background: `https://images.metahub.space/background/medium/${seed.imdb}/img`,
+    releaseInfo: String(seed.year),
   } as Meta;
+}
+
+function nameMatches(metaName: string | undefined, title: string): boolean {
+  const a = norm(metaName ?? "");
+  const b = norm(title);
+  if (!a || !b) return false;
+  return a === b || tokenMatch(a, b) || tokenMatch(b, a);
+}
+
+async function searchTitle(_key: string, seed: FilmSeed): Promise<Meta | null> {
+  if (!seed.imdb) return null;
+  if (seed.imdb.startsWith("tt")) {
+    const primary = seed.kind === "series" ? "series" : "movie";
+    const secondary = seed.kind === "series" ? "movie" : "series";
+    for (const kind of [primary, secondary] as const) {
+      const m = await cinemetaMeta(kind, seed.imdb).catch(() => null);
+      if (m && m.poster && nameMatches(m.name, seed.title)) return { ...m, id: seed.imdb };
+    }
+  }
+  return metaFromImdb(seed);
 }
 
 function tokenMatch(a: string, b: string): boolean {
@@ -380,7 +397,6 @@ export async function loadAwardFilms(
   awardType: AwardType,
   targetCount: number,
 ): Promise<{ films: Meta[]; done: boolean }> {
-  if (!tmdbKey) return { films: [], done: true };
   const s = filmStateFor(awardType);
   while (s.resolved.length < targetCount && s.next < s.seeds.length) {
     const batch = s.seeds.slice(s.next, s.next + 12);

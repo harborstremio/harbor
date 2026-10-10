@@ -1,0 +1,15 @@
+.games-steam-status { display:flex;align-items:center;gap:12px;padding:12px 14px;margin-bottom:20px;background:var(--color-elevated);border-radius:8px;color:var(--color-ink);font-size:13px; }
+.games-steam-status>span { display:grid;gap:3px;flex:1; }
+.games-steam-status strong { font-weight:600; }
+.games-steam-status small,.games-humble-bundles small,.games-humble-bundles p { color:var(--color-ink-muted);font-size:12px;line-height:1.5; }
+.games-status-link,.games-status-close { display:inline-flex;align-items:center;justify-content:center;gap:5px;flex-shrink:0;padding:8px;border-radius:6px; }
+.games-status-close:hover,.games-status-link:hover { background:var(--color-surface); }
+.games-humble-bundles:empty { display:none; }
+.games-humble-match { display:flex;align-items:center;gap:12px;border-radius:8px;background:var(--color-elevated);padding:14px;margin-top:12px; }
+.games-humble-match>span { display:grid;gap:3px;flex:1;min-width:0; }
+.games-humble-match strong { font-size:13px;font-weight:600; }
+.games-humble-match img { object-fit:contain; }
+.games-humble-bundles p,.games-bundle-status { display:block;margin:8px 4px; }
+@media(max-width:600px) { .games-steam-status { flex-wrap:wrap; }.games-status-link { margin-inline-start:32px; }.games-steam-status>span { flex-basis:calc(100% - 55px); } }
+
+.games-mast > .games-steam-status { grid-column:1/-1; margin:0; min-width:0; }

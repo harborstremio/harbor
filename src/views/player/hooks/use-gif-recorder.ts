@@ -1,5 +1,6 @@
 import { invoke } from "@tauri-apps/api/core";
 import { useCallback, useEffect, useRef, useState } from "react";
+import { t } from "@/lib/i18n";
 import {
   captureBaseTitle,
   captureDir,
@@ -55,11 +56,15 @@ export function useGifRecorder(params: { src: PlayerSrc }): {
       setToast({
         id: Date.now(),
         kind: "ok",
-        text: `GIF saved to ${dir ? "Pictures/Harbor" : "downloads"}`,
+        text: t("GIF saved to {path}", { path: dir ? "Pictures/Harbor" : "downloads" }),
         path: result.path,
       });
     } catch (e) {
-      setToast({ id: Date.now(), kind: "error", text: typeof e === "string" ? e : "GIF export failed" });
+      setToast({
+        id: Date.now(),
+        kind: "error",
+        text: typeof e === "string" ? e : t("GIF export failed"),
+      });
     } finally {
       setPhase("idle");
       setElapsedSec(0);

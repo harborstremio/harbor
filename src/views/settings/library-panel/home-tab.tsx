@@ -1,0 +1,488 @@
+import { SliderRow } from "../theme-panel/display-section";
+import { useEffect, useRef, useState } from "react";
+import harborStyleImg from "@/assets/onboarding/harborstyle.webp";
+import traditionalStyleImg from "@/assets/onboarding/traditional.webp";
+import simklLogo from "@/assets/simkl.png";
+import traktLogo from "@/assets/trakt.svg";
+import {
+  Check,
+  Contrast,
+  Image as ImageIcon,
+  LayoutTemplate,
+  Maximize,
+  Play,
+  Volume2,
+} from "../icons";
+import { useSettings } from "@/lib/settings";
+import { clearAllSnapshots, snapshotCount } from "@/lib/snapshots";
+import { useT } from "@/lib/i18n";
+import { Dropdown, type DropdownOption } from "@/components/dropdown";
+import { ROW_DESC, ROW_TITLE, Section, Segmented, ToggleRow } from "../shared";
+import { Nested, ROW_ACTION_DANGER, SettingGroup, SettingRow } from "../kit";
+import { HomeRowPreview } from "../home-layout-previews";
+import { CwSnapshotShowcase } from "../cw-snapshot-showcase";
+import { PreviewImage } from "../preview-image";
+import { HeroShadowPreview } from "./hero-shadow-preview";
+import { CwEndPreview } from "./cw-end-preview";
+
+export function HomeTab() {
+  const { settings, update } = useSettings();
+  const t = useT();
+  return (
+    <>
+      <Section
+        title={t("Home hero")}
+        subtitle={t("Make the featured banner on Home bigger and sharper.")}
+      >
+        <SettingGroup>
+          <SettingRow
+            wide
+            icon={<LayoutTemplate size={18} strokeWidth={2} />}
+            label={t("Featured source")}
+            desc={t(
+              "What fills the hero. Trending is a fresh top list from Harbor, refreshed through the day. Classic uses your own Home rows.",
+            )}
+          >
+            <Segmented
+              value={settings.heroFeed}
+              options={[
+                { value: "trending", label: t("Trending") },
+                { value: "trakt", label: t("Trakt") },
+                { value: "simkl", label: t("Simkl") },
+                { value: "classic", label: t("Classic") },
+              ]}
+              onChange={(v) =>
+                update({ heroFeed: v as "trending" | "trakt" | "simkl" | "classic" })
+              }
+            />
+          </SettingRow>
+          <ToggleRow
+            label={t("Full hero banner")}
+            sub={t("Stretch the featured hero edge to edge and taller, across every layout.")}
+            value={settings.heroFull}
+            onChange={(v) => update({ heroFull: v })}
+            leading={<Maximize size={18} strokeWidth={2} />}
+          />
+          <ToggleRow
+            label={t("Full quality hero image")}
+            sub={t(
+              "Load the highest-resolution artwork for the featured hero. Uses more bandwidth.",
+            )}
+            value={settings.heroFullQuality}
+            onChange={(v) => update({ heroFullQuality: v })}
+            leading={<ImageIcon size={18} strokeWidth={2} />}
+          />
+        </SettingGroup>
+
+        <SettingGroup label={t("Hero trailers")}>
+          <ToggleRow
+            label={t("Play trailers in the hero")}
+            newId="theme:hero-video"
+            sub={t(
+              "After a moment on a slide, the featured title's trailer plays muted in the background. Uses more bandwidth.",
+            )}
+            value={settings.heroTrailers}
+            onChange={(v) => update({ heroTrailers: v })}
+            leading={<Play size={18} strokeWidth={2} />}
+          />
+          {settings.heroTrailers && (
+            <Nested>
+              <ToggleRow
+                label={t("Home hero audio")}
+                sub={t(
+                  "The home hero trailer plays with sound and a mute button in the corner, then shows a replay button when it ends. Auto-rotation pauses so it stays on the featured title.",
+                )}
+                value={settings.heroTrailerAudio}
+                onChange={(v) => update({ heroTrailerAudio: v })}
+                leading={<Volume2 size={18} strokeWidth={2} />}
+              />
+            </Nested>
+          )}
+        </SettingGroup>
+      </Section>
+
+      <Section
+        title={t("Home hero shadow")}
+        subtitle={t(
+          "How dark the gradient behind the featured title on Home is. 100% is the classic look.",
+        )}
+      >
+        <HeroShadowPreview />
+        <SettingGroup>
+          <SliderRow
+            label={t("Shadow strength")}
+            desc={t("Lower it to let more of the artwork show through.")}
+            icon={<Contrast size={18} strokeWidth={2} />}
+            value={settings.heroShadow}
+            min={0}
+            max={100}
+            step={5}
+            readout={`${settings.heroShadow}%`}
+            resetTo={100}
+            onChange={(heroShadow) => update({ heroShadow })}
+          />
+        </SettingGroup>
+      </Section>
+
+      <Section title={t("Home layout")} subtitle={t("How the Home page assembles its rails.")}>
+        <SettingGroup label={t("Home style")}>
+          <p className={`max-w-[70ch] ${ROW_DESC}`}>
+            {t("The shape of the whole Home page. Everything below tunes the rows inside it.")}
+          </p>
+          <HomeModePicker value={settings.homeMode} onChange={(v) => update({ homeMode: v })} />
+        </SettingGroup>
+
+        <SettingGroup label={t("Rows")}>
+          <ToggleRow
+            label={t("New Episodes row")}
+            sub={t(
+              "Adds a row under Continue Watching listing episodes that aired recently for shows you were already watching. Dismiss them one at a time or clear the whole row. Off by default.",
+            )}
+            value={settings.homeNewEpisodes}
+            onChange={(v) => update({ homeNewEpisodes: v })}
+          />
+          <ToggleRow
+            label={t("Show every addon row")}
+            sub={t(
+              "By default, addon rails that duplicate the built-in ones (Trending, Popular, Top Rated, etc.) are merged so you don't see the same row twice. Turn this on to show every one, duplicates and all.",
+            )}
+            value={settings.homeShowAllAddonRows}
+            onChange={(v) => update({ homeShowAllAddonRows: v })}
+            preview={<HomeRowPreview kind="all-addon-rows" />}
+          />
+          <ToggleRow
+            label={t("Hide watched titles in catalogs")}
+            sub={t(
+              "Movies you've watched and shows you've made progress on stop appearing in the built-in catalog rows, using your local watch history (and Trakt if connected). Continue Watching is never touched.",
+            )}
+            value={settings.hideWatchedInCatalogs}
+            onChange={(v) => update({ hideWatchedInCatalogs: v })}
+            preview={<HomeRowPreview kind="hide-watched" />}
+          />
+          <ToggleRow
+            label={t("Hide unreleased titles")}
+            sub={t(
+              "Movies and shows with a future release date stop appearing in the built-in home catalog rows, so Home only shows what you can watch right now.",
+            )}
+            value={settings.hideUnreleased}
+            onChange={(v) => update({ hideUnreleased: v })}
+          />
+          <ToggleRow
+            label={t("Watchlist shows only saved titles")}
+            sub={t(
+              "Keep the Library Watchlist tab limited to titles you bookmarked. Turn this off to also include anything automatically added when you pressed play.",
+            )}
+            value={settings.libraryBookmarkedOnly}
+            onChange={(v) => update({ libraryBookmarkedOnly: v })}
+            preview={<HomeRowPreview kind="watchlist-saved" />}
+          />
+        </SettingGroup>
+
+        <SettingGroup label={t("Continue Watching")}>
+          <ToggleRow
+            label={t("Advance Continue Watching to the next episode")}
+            sub={t(
+              "When you finish an episode, the Home Continue Watching card moves on to the next episode instead of sitting at 0 minutes left.",
+            )}
+            value={settings.cwAdvanceNext}
+            onChange={(v) => update({ cwAdvanceNext: v })}
+            preview={<HomeRowPreview kind="cw-advance" />}
+          />
+          <ToggleRow
+            label={t("Remove shows once you're caught up")}
+            sub={t(
+              "On by default: once you've watched every episode that has aired, the show leaves Continue Watching and returns when a new episode drops. Turn it off to keep caught-up shows on the row.",
+            )}
+            value={settings.cwHideCaughtUp}
+            onChange={(v) => update({ cwHideCaughtUp: v })}
+          />
+          <SettingRow
+            label={t("When the latest episode ends")}
+            desc={t(
+              "Hide until the next episode airs, or keep showing a countdown to when it drops.",
+            )}
+          >
+            <Segmented
+              value={settings.animeCwEnd}
+              options={[
+                { value: "hide", label: t("Hide") },
+                { value: "timer", label: t("Timer") },
+              ]}
+              onChange={(v) => update({ animeCwEnd: v as "hide" | "timer" })}
+            />
+          </SettingRow>
+          <CwEndPreview mode={settings.animeCwEnd} />
+          <ToggleRow
+            label={t("Keep anime in the Anime room only")}
+            sub={t(
+              "Hides anime from the Home Continue Watching row. It still appears in the Anime tab's own Continue Watching.",
+            )}
+            value={settings.animeOnlyInAnimeRoom}
+            onChange={(v) => update({ animeOnlyInAnimeRoom: v })}
+            preview={<HomeRowPreview kind="anime-room" />}
+          />
+          <ToggleRow
+            label={t("Keep Continue Watching private to each profile")}
+            sub={t(
+              "Only show Continue Watching for the profile that's active. Each profile sees just its own progress, so what you watch stays hidden from the other profiles that share this device.",
+            )}
+            value={settings.cwPerProfile}
+            onChange={(v) => update({ cwPerProfile: v })}
+          />
+        </SettingGroup>
+
+        <SettingGroup label={t("Continue Watching sources")}>
+          <p className={`${ROW_DESC} -mt-1 mb-1`}>
+            {t(
+              "Choose which services feed your Continue Watching row. Turn on as many as you like and Harbor merges them, keeping the most recent progress for each title. What you watch is still scrobbled to every connected service regardless of what you pick here.",
+            )}
+          </p>
+          <ToggleRow
+            label={t("Harbor library")}
+            sub={t("Your own Harbor account progress. The primary source for almost everyone.")}
+            value={settings.cwSources.library}
+            onChange={(v) => update({ cwSources: { ...settings.cwSources, library: v } })}
+            lockReason={
+              settings.cwPerProfile
+                ? t("Unavailable while Continue Watching is kept private to each profile.")
+                : undefined
+            }
+          />
+          <ToggleRow
+            label={t("Downloads")}
+            sub={t("Titles you are part-way through in your local downloads, even offline.")}
+            value={settings.cwSources.local}
+            onChange={(v) => update({ cwSources: { ...settings.cwSources, local: v } })}
+          />
+          <ToggleRow
+            label={t("Trakt progress")}
+            leading={<img src={traktLogo} alt="" className="size-[18px] object-contain" />}
+            sub={t(
+              "Pulls what you have part-watched on Trakt into the row, marked with the Trakt logo. Requires a connected Trakt account.",
+            )}
+            value={settings.cwSources.trakt}
+            onChange={(v) => update({ cwSources: { ...settings.cwSources, trakt: v } })}
+            lockReason={
+              settings.cwPerProfile
+                ? t(
+                    "Unavailable while Continue Watching is kept private to each profile, because Trakt progress is shared across every profile on this account.",
+                  )
+                : undefined
+            }
+          />
+          <ToggleRow
+            label={t("Simkl progress")}
+            leading={<img src={simklLogo} alt="" className="size-[18px] object-contain" />}
+            sub={t(
+              "Pulls what you have part-watched on Simkl into the row, marked with the Simkl logo. Requires a connected Simkl account.",
+            )}
+            value={settings.cwSources.simkl}
+            onChange={(v) => update({ cwSources: { ...settings.cwSources, simkl: v } })}
+            lockReason={
+              settings.cwPerProfile
+                ? t(
+                    "Unavailable while Continue Watching is kept private to each profile, because Simkl progress is shared across every profile on this account.",
+                  )
+                : undefined
+            }
+          />
+        </SettingGroup>
+
+        <SettingGroup label={t("Navigation")}>
+          <ToggleRow
+            label={t("Show Playlists tab")}
+            sub={t(
+              "Adds a Playlists item to the navigation for browsing movies and shows from your M3U or Xtream playlists (the same ones you add for Live TV). Off by default to keep the nav tidy.",
+            )}
+            value={settings.showPlaylistsTab}
+            onChange={(v) => update({ showPlaylistsTab: v })}
+            preview={<HomeRowPreview kind="playlists-tab" />}
+          />
+          <ToggleRow
+            label={t("Smooth scrolling")}
+            sub={t(
+              "Eases mouse-wheel scrolling instead of jumping line by line. Turn off if you prefer an instant response or notice any lag.",
+            )}
+            value={settings.smoothScroll}
+            onChange={(v) => update({ smoothScroll: v })}
+          />
+        </SettingGroup>
+      </Section>
+
+      <Section
+        title={t("Continue Watching screenshots")}
+        subtitle={t(
+          "When you back out of a title, Harbor saves a frame so the Continue Watching card looks like the spot you left. Tune how long they stick around, or wipe them all.",
+        )}
+      >
+        <CwSnapshotShowcase />
+        <RetentionPicker
+          value={settings.cwSnapshotRetentionDays}
+          onChange={(v) => update({ cwSnapshotRetentionDays: v })}
+        />
+        <ToggleRow
+          label={t("Full quality frames")}
+          sub={t(
+            "Save sharper frames instead of light thumbnails. They look crisper on the card but take more space, so fewer are kept before the oldest roll off.",
+          )}
+          value={settings.cwSnapshotFullQuality}
+          onChange={(v) => update({ cwSnapshotFullQuality: v })}
+        />
+        <ToggleRow
+          label={t("Prefer episode still artwork")}
+          newId="home:prefer-episode-still"
+          sub={t(
+            "Show the detail page's episode still on the card instead of your saved frame. The saved frame is kept as a fallback when no still exists.",
+          )}
+          value={settings.cwPreferEpisodeStill}
+          onChange={(v) => update({ cwPreferEpisodeStill: v })}
+        />
+        <ClearSnapshotsButton />
+      </Section>
+    </>
+  );
+}
+
+function HomeModePicker({
+  value,
+  onChange,
+}: {
+  value: "harbor" | "classic";
+  onChange: (v: "harbor" | "classic") => void;
+}) {
+  const t = useT();
+  const options: Array<{ id: "harbor" | "classic"; label: string; sub: string; img: string }> = [
+    {
+      id: "harbor",
+      label: t("Harbor curated"),
+      sub: t(
+        "Hero carousel, Top 10, Trending, In Theaters, per-service rails. Addon catalogs append underneath, deduped.",
+      ),
+      img: harborStyleImg,
+    },
+    {
+      id: "classic",
+      label: t("Classic rows"),
+      sub: t(
+        "Continue Watching, then your installed addons. Every catalog renders as its own row, install order, no dedup, no hero.",
+      ),
+      img: traditionalStyleImg,
+    },
+  ];
+  return (
+    <div
+      role="radiogroup"
+      aria-label={t("Home style")}
+      className="grid w-full grid-cols-1 gap-3 sm:grid-cols-2"
+    >
+      {options.map((opt) => {
+        const selected = value === opt.id;
+        return (
+          <button
+            key={opt.id}
+            type="button"
+            role="radio"
+            aria-checked={selected}
+            onClick={() => onChange(opt.id)}
+            className="group flex flex-col gap-2.5 rounded-[10px] text-start"
+          >
+            <span
+              className={`block overflow-hidden rounded-[10px] border transition-colors duration-200 ease-out ${
+                selected ? "border-accent" : "border-edge-soft group-hover:border-edge"
+              }`}
+            >
+              <PreviewImage
+                src={opt.img}
+                className="block aspect-[16/10] w-full select-none object-cover object-top"
+              />
+            </span>
+            <span className="flex flex-col gap-1">
+              <span className={`flex flex-wrap items-center gap-2 ${ROW_TITLE}`}>
+                {opt.label}
+                {selected && <Check size={18} strokeWidth={2.4} className="shrink-0 text-accent" />}
+              </span>
+              <span className={`max-w-[66ch] ${ROW_DESC}`}>{opt.sub}</span>
+            </span>
+          </button>
+        );
+      })}
+    </div>
+  );
+}
+
+function RetentionPicker({ value, onChange }: { value: number; onChange: (v: number) => void }) {
+  const t = useT();
+  const options: DropdownOption[] = [
+    { value: "0", label: t("None") },
+    { value: "7", label: t("1 week") },
+    { value: "30", label: t("30 days") },
+    { value: "90", label: t("3 months") },
+    { value: "180", label: t("6 months") },
+    { value: "365", label: t("1 year") },
+  ];
+  return (
+    <SettingRow
+      label={t("Keep frames for")}
+      desc={t("How long a saved frame sticks around before the oldest roll off.")}
+    >
+      <Dropdown
+        className="w-[280px] max-w-full"
+        value={String(value)}
+        options={options}
+        onChange={(v) => onChange(Number(v))}
+      />
+    </SettingRow>
+  );
+}
+
+function ClearSnapshotsButton() {
+  const t = useT();
+  const [count, setCount] = useState<number>(() => snapshotCount());
+  const [confirming, setConfirming] = useState(false);
+  const [spent, setSpent] = useState(false);
+  const startedEmpty = useRef(count === 0).current;
+  useEffect(() => {
+    if (!confirming) return;
+    const timer = window.setTimeout(() => setConfirming(false), 4000);
+    return () => window.clearTimeout(timer);
+  }, [confirming]);
+  const onClick = () => {
+    if (spent) return;
+    if (!confirming) {
+      setConfirming(true);
+      return;
+    }
+    const cleared = clearAllSnapshots();
+    setCount(0);
+    setConfirming(false);
+    setSpent(true);
+    void cleared;
+  };
+  return (
+    <SettingRow
+      label={t("Clear all saved frames")}
+      desc={
+        count > 0
+          ? count === 1
+            ? t("1 frame stored. Wiping rebuilds them next time you watch.")
+            : t("{n} frames stored. Wiping rebuilds them next time you watch.", { n: count })
+          : t("No frames stored yet. They'll appear here as you watch things.")
+      }
+      warn={
+        confirming
+          ? t("Every saved frame goes. Press again to confirm, or wait to cancel.")
+          : undefined
+      }
+    >
+      <button
+        type="button"
+        onClick={onClick}
+        disabled={startedEmpty}
+        aria-disabled={spent || undefined}
+        className={ROW_ACTION_DANGER}
+      >
+        {spent ? t("Cleared") : confirming ? t("Confirm clear") : t("Clear all")}
+      </button>
+    </SettingRow>
+  );
+}

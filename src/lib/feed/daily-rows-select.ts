@@ -53,15 +53,21 @@ export function weightedPickWithoutReplacement<T>(
 }
 
 export function applyExclusions(metas: Meta[]): Meta[] {
-  const voted = new Set<string>([...getDownvotedIds(), ...getUpvotedIds()]);
+  const down = new Set<string>(getDownvotedIds());
+  const up = new Set<string>(getUpvotedIds());
   const watched = recentlyPlayed();
-  return metas.filter((m) => {
-    if (!m.poster) return false;
-    if (voted.has(m.id)) return false;
-    if (watched.ids.has(m.id)) return false;
-    if (watched.titles.has(watchTitleKey(m.name))) return false;
-    return true;
-  });
+  const fresh: Meta[] = [];
+  const seen: Meta[] = [];
+  for (const m of metas) {
+    if (!m.poster) continue;
+    if (down.has(m.id)) continue;
+    if (up.has(m.id) || watched.ids.has(m.id) || watched.titles.has(watchTitleKey(m.name))) {
+      seen.push(m);
+    } else {
+      fresh.push(m);
+    }
+  }
+  return [...fresh, ...seen];
 }
 
 async function runRow(

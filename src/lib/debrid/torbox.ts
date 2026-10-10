@@ -135,24 +135,71 @@ export function createTorbox(apiKey: string): DebridStore {
     return { ok: true, data: merged };
   }
 
-  async function playableUrl(
-    magnet: string,
-    fileIdx: number | undefined,
+  const knownIds = new Map<string, number>();
+  let rawListCache: { at: number; data: TbTorrent[] } | null = null;
+
+  async function rawList(signal: AbortSignal): Promise<TbTorrent[] | null> {
+    if (rawListCache && Date.now() - rawListCache.at < 20_000) return rawListCache.data;
+    const r = await get<TbEnvelope<TbTorrent[]>>("/torrents/mylist?bypass_cache=true", signal);
+    if (!r.ok) return null;
+    const list = r.data.data ?? [];
+    rawListCache = { at: Date.now(), data: list };
+    return list;
+  }
+
+  function rankTb(t: TbTorrent): number {
+    if (t.download_finished || t.download_present) return 2;
+    if (t.download_state === "error" || t.download_state === "stalled") return 0;
+    return 1;
+  }
+
+  async function findInAccount(
+    hash: string,
     signal: AbortSignal,
-    hint?: EpisodeHint,
-  ): Promise<DebridResult<DirectLink>> {
-    const fullMagnet = magnetFromHash(magnet);
-    const hash = hashFromMagnet(magnet);
+  ): Promise<{ keep: TbTorrent; extras: TbTorrent[] } | null> {
+    const list = await rawList(signal);
+    if (!list) return null;
+    const matches = list.filter((t) => (t.hash ?? "").toLowerCase() === hash);
+    if (matches.length === 0) return null;
+    const sorted = matches
+      .slice()
+      .sort(
+        (a, b) =>
+          rankTb(b) - rankTb(a) || (b.progress ?? 0) - (a.progress ?? 0) || a.id - b.id,
+      );
+    return { keep: sorted[0], extras: sorted.slice(1) };
+  }
 
-    const add = await postForm<TbEnvelope<TbCreate>>(
-      "/torrents/createtorrent",
-      { magnet: fullMagnet, allow_zip: "false", as_queued: "false" },
-      signal,
+  async function deleteTorrent(id: number, signal: AbortSignal): Promise<void> {
+    await wrap<TbEnvelope<unknown>>(() =>
+      fetch(`${BASE}/torrents/controltorrent`, {
+        method: "POST",
+        headers: headers({ "Content-Type": "application/json" }),
+        body: JSON.stringify({ torrent_id: id, operation: "delete" }),
+        signal,
+      }),
     );
-    if (!add.ok) return add;
-    const id = add.data.data?.torrent_id ?? add.data.data?.queued_id;
-    if (!id) return { ok: false, code: "no-id", status: 0, raw: add.data };
+  }
 
+  async function cleanupDuplicates(extras: TbTorrent[], signal: AbortSignal): Promise<void> {
+    if (extras.length === 0) return;
+    for (const t of extras.slice(0, 15)) {
+      if (signal.aborted) break;
+      await deleteTorrent(t.id, signal).catch(() => {});
+    }
+    rawListCache = null;
+    LIBRARY_CACHE.delete(apiKey);
+    dlog(`[torbox] removed ${Math.min(extras.length, 15)} duplicate torrent(s)`);
+  }
+
+  async function finishResolve(
+    id: number,
+    fileIdx: number | undefined,
+    hint: EpisodeHint | undefined,
+    hash: string,
+    signal: AbortSignal,
+    bailOnMissing: boolean,
+  ): Promise<DebridResult<DirectLink>> {
     let info: TbTorrent | null = null;
     for (let attempt = 0; attempt < POLL_MAX_ATTEMPTS; attempt++) {
       if (signal.aborted) return { ok: false, code: "aborted", status: 0 };
@@ -160,6 +207,7 @@ export function createTorbox(apiKey: string): DebridStore {
       if (!r.ok) return r;
       info = r.data.data ?? null;
       if (!info) {
+        if (bailOnMissing && attempt >= 1) return { ok: false, code: "missing", status: 0 };
         await sleep(POLL_DELAY_MS, signal);
         continue;
       }
@@ -192,6 +240,50 @@ export function createTorbox(apiKey: string): DebridStore {
         filesize: file.size,
       },
     };
+  }
+
+  async function playableUrl(
+    magnet: string,
+    fileIdx: number | undefined,
+    signal: AbortSignal,
+    hint?: EpisodeHint,
+  ): Promise<DebridResult<DirectLink>> {
+    const fullMagnet = magnetFromHash(magnet);
+    const hash = hashFromMagnet(magnet);
+
+    const known = knownIds.get(hash);
+    if (known != null) {
+      const reused = await finishResolve(known, fileIdx, hint, hash, signal, true);
+      if (reused.ok || reused.code !== "missing") return reused;
+      knownIds.delete(hash);
+    }
+
+    const found = await findInAccount(hash, signal).catch(() => null);
+    if (found) {
+      if (rankTb(found.keep) === 0) {
+        void cleanupDuplicates([found.keep, ...found.extras], signal);
+      } else {
+        knownIds.set(hash, found.keep.id);
+        if (found.extras.length) void cleanupDuplicates(found.extras, signal);
+        dlog(`[torbox] reusing existing torrent ${found.keep.id} for ${hash}`);
+        const reused = await finishResolve(found.keep.id, fileIdx, hint, hash, signal, true);
+        if (reused.ok || reused.code !== "missing") return reused;
+        knownIds.delete(hash);
+      }
+    }
+
+    const add = await postForm<TbEnvelope<TbCreate>>(
+      "/torrents/createtorrent",
+      { magnet: fullMagnet, allow_zip: "false", as_queued: "false" },
+      signal,
+    );
+    if (!add.ok) return add;
+    const id = add.data.data?.torrent_id ?? add.data.data?.queued_id;
+    if (!id) return { ok: false, code: "no-id", status: 0, raw: add.data };
+    knownIds.set(hash, id);
+    rawListCache = null;
+
+    return finishResolve(id, fileIdx, hint, hash, signal, false);
   }
 
   async function listLibrary(signal: AbortSignal): Promise<DebridResult<LibraryEntry[]>> {
@@ -229,6 +321,20 @@ export function createTorbox(apiKey: string): DebridStore {
     signal: AbortSignal,
   ): Promise<DebridResult<{ id: string }>> {
     const fullMagnet = magnetFromHash(magnet);
+    const hash = hashFromMagnet(magnet);
+
+    const found = await findInAccount(hash, signal).catch(() => null);
+    if (found) {
+      if (rankTb(found.keep) === 0) {
+        void cleanupDuplicates([found.keep, ...found.extras], signal);
+      } else {
+        knownIds.set(hash, found.keep.id);
+        if (found.extras.length) void cleanupDuplicates(found.extras, signal);
+        dlog(`[torbox] already in account, skipping add for ${hash}`);
+        return { ok: true, data: { id: String(found.keep.id) } };
+      }
+    }
+
     const add = await postForm<TbEnvelope<TbCreate>>(
       "/torrents/createtorrent",
       { magnet: fullMagnet, allow_zip: "false", as_queued: "true" },
@@ -237,6 +343,8 @@ export function createTorbox(apiKey: string): DebridStore {
     if (!add.ok) return add;
     const id = add.data.data?.torrent_id ?? add.data.data?.queued_id;
     if (!id) return { ok: false, code: "no-id", status: 0, raw: add.data };
+    knownIds.set(hash, id);
+    rawListCache = null;
     LIBRARY_CACHE.delete(apiKey);
     return { ok: true, data: { id: String(id) } };
   }
@@ -296,11 +404,15 @@ function pickTbFile(files: TbFile[], fileIdx: number | undefined, hint?: Episode
 
 function sleep(ms: number, signal: AbortSignal): Promise<void> {
   return new Promise((resolve) => {
-    const t = setTimeout(resolve, ms);
-    signal.addEventListener("abort", () => {
+    const onAbort = () => {
       clearTimeout(t);
       resolve();
-    });
+    };
+    const t = setTimeout(() => {
+      signal.removeEventListener("abort", onAbort);
+      resolve();
+    }, ms);
+    signal.addEventListener("abort", onAbort, { once: true });
   });
 }
 

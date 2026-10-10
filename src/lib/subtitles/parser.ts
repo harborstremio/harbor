@@ -174,9 +174,7 @@ function cleanInline(s: string): string {
 
 function toSec(h: string, m: string, s: string, ms: string): number {
   const padded = (ms + "000").slice(0, 3);
-  return (
-    parseInt(h, 10) * 3600 + parseInt(m, 10) * 60 + parseInt(s, 10) + parseInt(padded, 10) / 1000
-  );
+  return parseInt(h, 10) * 3600 + parseInt(m, 10) * 60 + parseInt(s, 10) + parseInt(padded, 10) / 1000;
 }
 
 export function findActiveCue(cues: SubCue[], timeSec: number): SubCue | null {

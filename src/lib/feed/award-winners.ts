@@ -3,6 +3,7 @@ import type { AwardCategory } from "@/lib/awards-catalog";
 import { readAwardHistory } from "@/lib/awards-history";
 import { tmdbSearchMovie } from "@/lib/providers/tmdb";
 import type { AwardType } from "@/lib/providers/wikidata";
+import { HARBOR_API_BASE } from "@/lib/config/endpoints";
 
 const CACHE_KEY = "harbor.discover.awards.v1";
 const MAX_TITLES = 150;
@@ -24,7 +25,10 @@ const SOURCES: Array<[AwardType, AwardCategory]> = [
 ];
 
 function normTitle(s: string): string {
-  return s.toLowerCase().replace(/[^a-z0-9]+/g, " ").trim();
+  return s
+    .toLowerCase()
+    .replace(/[^a-z0-9]+/g, " ")
+    .trim();
 }
 
 function winnerTitles(): Array<{ title: string; year: number }> {
@@ -97,9 +101,29 @@ async function resolveAll(tmdbKey: string): Promise<Meta[]> {
   }
 }
 
+const HOSTED_URL = `${HARBOR_API_BASE}/feed/award-winners.json`;
+let hostedMemo: Meta[] | null = null;
+let hostedTried = false;
+
+async function resolveHosted(): Promise<Meta[] | null> {
+  if (hostedMemo) return hostedMemo;
+  if (hostedTried) return null;
+  hostedTried = true;
+  try {
+    const res = await fetch(HOSTED_URL);
+    if (!res.ok) return null;
+    const arr = (await res.json()) as unknown;
+    if (Array.isArray(arr) && arr.length >= 20) {
+      hostedMemo = arr as Meta[];
+      return hostedMemo;
+    }
+  } catch {}
+  return null;
+}
+
 export async function fetchAwardWinners(tmdbKey: string, page = 1): Promise<Meta[]> {
-  if (!tmdbKey) return [];
-  const all = await resolveAll(tmdbKey);
+  const hosted = await resolveHosted();
+  const all = hosted ?? (tmdbKey ? await resolveAll(tmdbKey) : []);
   const start = (page - 1) * PER_PAGE;
   return all.slice(start, start + PER_PAGE);
 }

@@ -8,6 +8,8 @@ const ANIME_HASH_RX = /\[([0-9A-F]{8})\]/i;
 const REPACK_RX = /\bREPACK(\d+)?\b/i;
 const YEAR_RANGE_RX = /\b(19\d\d|20\d\d)[\-\.](19\d\d|20\d\d)\b/;
 const DISC_RX = /\bDISC\s*(\d+)\b/i;
+const BATCH_RX = /\b(?:batch|season[\s\._]?pack)\b/i;
+const EPISODE_RANGE_RX = /\b(\d{1,4})\s*[-~]\s*(\d{1,4})\b/;
 const EDITION_RX =
   /\b(IMAX|EXTENDED|DIRECTORS?[.\s]?CUT|THEATRICAL|UNRATED|UNCUT|REMASTERED|RESTORATION|CRITERION|OPEN[.\s]?MATTE|HYBRID)\b/i;
 
@@ -80,11 +82,25 @@ export function parseYearRange(text: string): [number, number] | null {
   return null;
 }
 
-export function parseSeasonPack(text: string, ptt: DefaultParserResult): boolean {
-  if (ptt.season != null && ptt.episode == null) {
+function hasBatchMarker(text: string): boolean {
+  if (BATCH_RX.test(text)) return true;
+  const m = text.match(EPISODE_RANGE_RX);
+  if (!m) return false;
+  const lo = Number(m[1]);
+  const hi = Number(m[2]);
+  return Number.isFinite(lo) && Number.isFinite(hi) && hi - lo >= 2 && hi <= 999;
+}
+
+export function parseSeasonPack(
+  text: string,
+  ptt: DefaultParserResult,
+  releaseName?: string,
+): boolean {
+  if (ptt.episode != null) return false;
+  if (ptt.season != null) {
     return /\b(complete|season[\s\.]?pack|s\d{1,2}\b(?!e))\b/i.test(text);
   }
-  return false;
+  return hasBatchMarker(releaseName && releaseName.length > 0 ? releaseName : text);
 }
 
 export function parseDisc(text: string): number | null {

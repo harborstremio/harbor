@@ -1,6 +1,7 @@
 import { lruSet } from "@/lib/cache";
 import type { Meta } from "@/lib/cinemeta";
 import { registerEvictable } from "@/lib/maintenance";
+import { safeFetch } from "@/lib/safe-fetch";
 import { adultContentHidden } from "@/lib/addons-store/adult-filter";
 
 const KITSU = "https://kitsu.io/api/edge";
@@ -65,7 +66,7 @@ async function get<T>(path: string): Promise<T | null> {
   const hit = cache.get(url);
   if (hit && Date.now() - hit.t < TTL) return hit.v as T;
   try {
-    const r = await fetch(url, { headers: { Accept: "application/vnd.api+json" } });
+    const r = await safeFetch(url, { headers: { Accept: "application/vnd.api+json" } });
     if (!r.ok) return null;
     const j = (await r.json()) as T;
     cache.set(url, { v: j, t: Date.now() });
@@ -117,6 +118,7 @@ export type KitsuAnimeDetail = {
   id: number;
   slug: string;
   title: string;
+  altTitles: string[];
   synopsis: string;
   poster?: string;
   backdrop?: string;
@@ -154,6 +156,10 @@ export type KitsuStreamer = {
 
 function pickImg(img?: Img | null): string | undefined {
   return img?.original ?? img?.large ?? img?.medium ?? img?.small ?? undefined;
+}
+
+function pickPoster(img?: Img | null): string | undefined {
+  return img?.medium ?? img?.large ?? img?.original ?? img?.small ?? undefined;
 }
 
 function ratingToTen(raw?: string | null): string | undefined {
@@ -209,8 +215,11 @@ export async function kitsuAnime(id: number): Promise<KitsuAnimeDetail | null> {
     id: Number(j.data.id),
     slug: a.slug ?? "",
     title: a.titles?.en || a.canonicalTitle || a.titles?.en_jp || "Unknown",
+    altTitles: [a.titles?.en, a.titles?.en_jp, a.titles?.ja_jp, a.canonicalTitle].filter(
+      (t): t is string => !!t,
+    ),
     synopsis: a.synopsis || a.description || "",
-    poster: pickImg(a.posterImage),
+    poster: pickPoster(a.posterImage),
     backdrop: pickImg(a.coverImage),
     rating: ratingToTen(a.averageRating),
     episodeCount: a.episodeCount ?? undefined,
@@ -236,7 +245,7 @@ function attrsToMeta(id: string, a: KitsuAnimeAttrs): Meta {
     id: `kitsu:${id}`,
     type: a.subtype === "movie" ? "movie" : "series",
     name: a.titles?.en || a.canonicalTitle || a.titles?.en_jp || "Unknown",
-    poster: pickImg(a.posterImage),
+    poster: pickPoster(a.posterImage),
     background: pickImg(a.coverImage),
     description: a.synopsis || a.description || "",
     releaseInfo: a.startDate ? a.startDate.slice(0, 4) : undefined,
@@ -250,7 +259,7 @@ export async function kitsuSimilarByGenres(
   limit = 18,
 ): Promise<Meta[]> {
   if (genreSlugs.length === 0) return [];
-  const slug = genreSlugs.slice(0, 4).join(",");
+  const slug = genreSlugs[0];
   const ageFilter = adultContentHidden() ? "&filter[ageRating]=G,PG,R" : "";
   const params = `filter[genres]=${encodeURIComponent(slug)}${ageFilter}&sort=-userCount&page[limit]=${limit + 6}`;
   const j = await get<Doc<Resource<KitsuAnimeAttrs>[]>>(`/anime?${params}`);
@@ -438,7 +447,7 @@ export async function kitsuRelated(id: number): Promise<KitsuRelated[]> {
         id: `kitsu:${a.id}`,
         type: at.subtype === "movie" ? "movie" : "series",
         name: at.titles?.en || at.canonicalTitle || at.titles?.en_jp || "Unknown",
-        poster: pickImg(at.posterImage),
+        poster: pickPoster(at.posterImage),
         background: pickImg(at.coverImage),
         description: at.synopsis || at.description || "",
         releaseInfo: at.startDate ? at.startDate.slice(0, 4) : undefined,
@@ -458,10 +467,20 @@ export async function kitsuMainTvSeries(id: number): Promise<number | null> {
   );
   let best: number | null = null;
   let bestEps = -1;
+  const animeById = new Map<string, { subtype?: string; episodeCount?: number }>();
   for (const inc of j?.included ?? []) {
-    if (inc.type !== "anime" || inc.attributes?.subtype !== "TV") continue;
-    const nid = Number(inc.id);
-    const eps = Number(inc.attributes?.episodeCount ?? 0);
+    if (inc.type === "anime") animeById.set(inc.id, inc.attributes ?? {});
+  }
+  for (const rel of j?.data ?? []) {
+    const role = (rel.attributes?.role ?? "").toLowerCase();
+    if (role !== "parent_story" && role !== "full_story") continue;
+    const destRef = rel.relationships?.destination?.data;
+    const destId = destRef && !Array.isArray(destRef) ? destRef.id : undefined;
+    if (!destId) continue;
+    const a = animeById.get(destId);
+    if (a?.subtype !== "TV") continue;
+    const nid = Number(destId);
+    const eps = Number(a?.episodeCount ?? 0);
     if (Number.isFinite(nid) && nid !== id && eps > bestEps) {
       bestEps = eps;
       best = nid;

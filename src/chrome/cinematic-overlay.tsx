@@ -1,5 +1,10 @@
 import { useState } from "react";
-import { Search } from "lucide-react";
+import { usePreviewNavCustomization } from "@/lib/theme-preview";
+import { Monitor } from "lucide-react";
+import { useContextMenu } from "@/lib/context-menu";
+import { NavHiddenTray, NavEditableItem, NavEditClose, useNavDrag } from "@/chrome/nav-edit";
+import { useNavEditMode } from "@/chrome/nav-edit-mode";
+import { Search } from "@/components/icons/search-icon";
 import { HarborMark } from "@/components/icons/harbor-mark";
 import { RecordingPill } from "@/chrome/recording-pill";
 import { TogetherButton } from "@/chrome/topbar";
@@ -12,11 +17,12 @@ import { useView, type View } from "@/lib/view";
 import { ParentalPinModal } from "@/components/parental-pin-modal";
 import { close, minimize, toggleMaximize, useMaximized } from "@/lib/window";
 import { OverflowNav, type NavEntry } from "@/chrome/nav-overflow";
-import { NAV_ITEMS, applyNavCustomization, type NavItem } from "@/chrome/nav-items";
-import { ProfileChipCompact } from "@/chrome/cinematic-overlay/profile-chip-compact";
+import { useAvailableNavItems, applyNavCustomization, type NavItem } from "@/chrome/nav-items";
+import { NotificationCenter } from "@/components/notification-center/notification-center";
+import { AccountMenu } from "@/chrome/account-menu/account-menu";
+import { useBigPictureEntry } from "@/chrome/use-big-picture-entry";
 
-const IS_TAURI =
-  typeof window !== "undefined" && "__TAURI_INTERNALS__" in window;
+const IS_TAURI = typeof window !== "undefined" && "__TAURI_INTERNALS__" in window;
 
 export function CinematicOverlay() {
   const { view, setView, chromeHidden } = useView();
@@ -26,11 +32,16 @@ export function CinematicOverlay() {
   const t = useT();
   const [pinFor, setPinFor] = useState<View | null>(null);
   const maxed = useMaximized();
+  const bigPicture = useBigPictureEntry();
+  const editing = useNavEditMode();
+  const { open: openContextMenu } = useContextMenu();
+  const openEmptyMenu = (e: React.MouseEvent) => {
+    if ((e.target as HTMLElement).closest("button")) return;
+    openContextMenu(e, { kind: "nav" });
+  };
 
   const themePreset =
-    settings.theme.preset !== "custom"
-      ? getThemeById(settings.theme.preset)
-      : null;
+    settings.theme.preset !== "custom" ? getThemeById(settings.theme.preset) : null;
   const customMark = themePreset?.logo?.mark ?? null;
 
   const navigate = (item: NavItem) => {
@@ -42,8 +53,8 @@ export function CinematicOverlay() {
   };
 
   const navEntries: NavEntry[] = applyNavCustomization(
-    NAV_ITEMS,
-    settings.navCustomization,
+    useAvailableNavItems(),
+    usePreviewNavCustomization(settings.navCustomization),
   )
     .filter(
       (item) =>
@@ -61,60 +72,42 @@ export function CinematicOverlay() {
         label,
         active,
         onSelect: () => navigate(item),
-        node: (
-          <button
-            type="button"
-            data-harbor-nav={item.view}
-            onClick={() => navigate(item)}
-            className={`relative h-9 whitespace-nowrap rounded-full px-3 text-[12.5px] font-medium transition-colors ${
-              active ? "text-ink" : "text-ink-muted hover:text-ink"
-            }`}
-          >
-            {active && (
-              <span
-                aria-hidden
-                className="absolute inset-0 -z-10 rounded-full bg-white/15 ring-1 ring-white/25 shadow-[inset_0_1px_0_rgba(255,255,255,0.35),0_4px_12px_-2px_rgba(0,0,0,0.3)] backdrop-blur-md"
-              />
-            )}
-            {label}
-          </button>
-        ),
+        node: <CinematicNavButton item={item} active={active} label={label} navigate={navigate} />,
       };
     });
 
   return (
     <>
       <header
+        data-tv-focus-scope={editing || undefined}
+        data-tv-top-chrome
         aria-hidden={chromeHidden}
-        className={`fixed inset-x-0 top-0 z-[60] flex h-24 items-start px-6 pt-3 transition-opacity duration-300 ${
+        className={`fixed inset-x-0 top-(--harbor-top-inset) z-[60] flex h-24 items-start px-6 pt-3 transition-opacity duration-300 ${
           chromeHidden ? "pointer-events-none opacity-0" : "opacity-100"
         }`}
       >
         <div className="pointer-events-none absolute inset-x-0 top-0 h-32 bg-gradient-to-b from-black/85 via-black/45 to-transparent" />
         <div
           data-tauri-drag-region
-          data-tv-top-chrome
+          onContextMenu={openEmptyMenu}
           className="pointer-events-auto relative flex h-14 w-full items-center gap-2 px-1"
         >
           <button
             type="button"
+            tabIndex={-1}
+            data-tv-skip="true"
             onClick={() => setView("home")}
             className="flex shrink-0 items-center gap-2 text-ink"
             aria-label={t("chrome.harborHome")}
           >
             {customMark ? (
-              <img
-                src={customMark}
-                alt=""
-                draggable={false}
-                className="h-7 w-7 object-contain"
-              />
+              <img src={customMark} alt="" draggable={false} className="h-7 w-7 object-contain" />
             ) : (
               <HarborMark className="h-7 w-7" />
             )}
             {themePreset?.id === "crunch" && (
               <span className="font-display text-[22px] font-bold leading-none text-ink">
-                Harbor
+                Media Vision
               </span>
             )}
           </button>
@@ -130,21 +123,25 @@ export function CinematicOverlay() {
 
           <div className="ms-2 flex shrink-0 items-center gap-1">
             <RecordingPill />
-            {view !== "live" && (
-              <TogetherButton variant="ghost" connectStyle="tab" />
+            <NotificationCenter />
+            {view !== "live" && <TogetherButton variant="ghost" connectStyle="tab" />}
+            {bigPicture.offer && (
+              <IconBtn onClick={bigPicture.open} label={bigPicture.label} active={false}>
+                <Monitor size={15} strokeWidth={2.2} />
+              </IconBtn>
             )}
-            <IconBtn
-              onClick={() => setSearchOpen(true)}
-              label={t("common.search")}
-              active={false}
-            >
+            <IconBtn onClick={() => setSearchOpen(true)} label={t("common.search")} active={false}>
               <Search size={15} strokeWidth={2.2} />
             </IconBtn>
-            <ProfileChipCompact
+            <AccountMenu
+              trigger="pill"
+              placement="down"
+              align="end"
+              showSettings
               onOpenSettings={() => setView("settings")}
               settingsActive={view === "settings"}
             />
-            {IS_TAURI && !settings.useNativeTitleBar && (
+            {IS_TAURI && !settings.useNativeTitleBar && !settings.hybridTitleBar && (
               <div className="ms-1 flex items-center gap-0.5">
                 <WinBtn onClick={minimize} label={t("chrome.minimize")}>
                   <path
@@ -200,7 +197,15 @@ export function CinematicOverlay() {
             )}
           </div>
         </div>
+        {editing && <NavEditClose />}
       </header>
+      {editing && (
+        <div className="fixed inset-x-0 top-[calc(var(--harbor-top-inset)+6rem)] z-[59] flex justify-center px-4">
+          <div className="w-full max-w-2xl rounded-2xl border border-white/15 bg-black/70 p-2 shadow-2xl backdrop-blur-xl">
+            <NavHiddenTray orientation="horizontal" />
+          </div>
+        </div>
+      )}
       {pinFor !== null && (
         <ParentalPinModal
           mode={{
@@ -216,6 +221,56 @@ export function CinematicOverlay() {
         />
       )}
     </>
+  );
+}
+
+function CinematicNavButton({
+  item,
+  active,
+  label,
+  navigate,
+}: {
+  item: NavItem;
+  active: boolean;
+  label: string;
+  navigate: (item: NavItem) => void;
+}) {
+  const { open: openContextMenu } = useContextMenu();
+  const editing = useNavEditMode();
+  const drag = useNavDrag(item.id, "horizontal");
+  return (
+    <NavEditableItem itemId={item.id}>
+      <button
+        type="button"
+        onClick={() => navigate(item)}
+        onContextMenu={(e) =>
+          openContextMenu(e, {
+            kind: "nav",
+            itemId: item.id,
+            view: item.view,
+            label,
+            onOpen: () => navigate(item),
+          })
+        }
+        data-tauri-drag-region={editing ? "false" : undefined}
+        onPointerDown={drag.onPointerDown}
+        onKeyDown={drag.onKeyDown}
+        data-nav-drop-id={item.id}
+        aria-label={label}
+        data-harbor-nav={item.id}
+        className={`relative h-9 whitespace-nowrap rounded-full px-3 text-[12.5px] font-medium transition-colors ${
+          drag.over ? "ring-2 ring-accent" : ""
+        } ${active ? "text-ink" : "text-ink-muted hover:text-ink"}`}
+      >
+        {active && (
+          <span
+            aria-hidden
+            className="absolute inset-0 -z-10 rounded-full bg-white/15 ring-1 ring-white/25 shadow-[inset_0_1px_0_rgba(255,255,255,0.35),0_4px_12px_-2px_rgba(0,0,0,0.3)] backdrop-blur-md"
+          />
+        )}
+        {label}
+      </button>
+    </NavEditableItem>
   );
 }
 

@@ -1,4 +1,5 @@
 import { get, IMG } from "@/lib/providers/tmdb/tmdb-client";
+import { matchVodMetadata } from "./vod-match";
 
 export type VodEnrichment = {
   poster: string | null;
@@ -10,6 +11,10 @@ export type VodEnrichment = {
 
 type RawHit = {
   id?: number;
+  title?: string;
+  name?: string;
+  original_title?: string;
+  original_name?: string;
   poster_path?: string | null;
   backdrop_path?: string | null;
   overview?: string | null;
@@ -49,7 +54,7 @@ async function run(
   const params: Record<string, string> = { query: title, include_adult: "false" };
   if (year) params[kind === "series" ? "first_air_date_year" : "year"] = String(year);
   const data = await get<Page>(tmdbKey, path, params).catch(() => null);
-  const hit = data?.results?.[0];
+  const hit = matchVodMetadata(data?.results ?? [], title, year);
   if (!hit) return null;
   const date = hit.release_date || hit.first_air_date || "";
   const hitYear = date ? Number(date.slice(0, 4)) : null;

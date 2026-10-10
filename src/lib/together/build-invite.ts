@@ -11,6 +11,8 @@ export function toEpisodeRef(ep: PlayEpisode): EpisodeRef {
     imdbId: ep.imdbId,
     imdbSeason: ep.imdbSeason,
     imdbEpisode: ep.imdbEpisode,
+    absoluteNumber: ep.absoluteNumber,
+    tvdbEpisodeId: ep.tvdbEpisodeId,
   };
 }
 

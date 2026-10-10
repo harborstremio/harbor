@@ -1,0 +1,163 @@
+[
+  {
+    "id": 1942,
+    "age_ratings": [
+      {
+        "id": 222156,
+        "organization": {
+          "id": 7,
+          "name": "ACB"
+        },
+        "rating_category": {
+          "id": 38,
+          "rating": "R 18+"
+        }
+      },
+      {
+        "id": 32441,
+        "organization": {
+          "id": 2,
+          "name": "PEGI"
+        },
+        "rating_category": {
+          "id": 12,
+          "rating": "18"
+        },
+        "rating_content_descriptions": [
+          {
+            "id": 50,
+            "description": "Violence"
+          },
+          {
+            "id": 55,
+            "description": "Bad Language"
+          },
+          {
+            "id": 51,
+            "description": "Sex"
+          }
+        ]
+      },
+      {
+        "id": 67455,
+        "organization": {
+          "id": 3,
+          "name": "CERO"
+        },
+        "rating_category": {
+          "id": 17,
+          "rating": "Z"
+        },
+        "rating_content_descriptions": [
+          {
+            "id": 61,
+            "description": "Violence"
+          }
+        ]
+      },
+      {
+        "id": 78139,
+        "organization": {
+          "id": 6,
+          "name": "CLASS_IND"
+        },
+        "rating_category": {
+          "id": 32,
+          "rating": "16"
+        },
+        "rating_content_descriptions": [
+          {
+            "id": 75,
+            "description": "Violência (Violence)"
+          },
+          {
+            "id": 77,
+            "description": "Conteúdo Sexual (Sexual Content)"
+          },
+          {
+            "id": 82,
+            "description": "Drogas Lícitas (Legal Drugs)"
+          }
+        ]
+      },
+      {
+        "id": 46963,
+        "organization": {
+          "id": 4,
+          "name": "USK"
+        },
+        "rating_category": {
+          "id": 22,
+          "rating": "18"
+        }
+      },
+      {
+        "id": 78138,
+        "organization": {
+          "id": 5,
+          "name": "GRAC"
+        },
+        "rating_category": {
+          "id": 26,
+          "rating": "19+"
+        },
+        "rating_content_descriptions": [
+          {
+            "id": 68,
+            "description": "Sexuality"
+          },
+          {
+            "id": 69,
+            "description": "Violence"
+          },
+          {
+            "id": 71,
+            "description": "Language"
+          },
+          {
+            "id": 72,
+            "description": "Alcohol, Tobacco, Drug"
+          }
+        ]
+      },
+      {
+        "id": 187952,
+        "organization": {
+          "id": 1,
+          "name": "ESRB"
+        },
+        "rating_category": {
+          "id": 6,
+          "rating": "M"
+        },
+        "rating_content_descriptions": [
+          {
+            "id": 21,
+            "description": "Strong Language"
+          },
+          {
+            "id": 23,
+            "description": "Strong Sexual Content"
+          },
+          {
+            "id": 4,
+            "description": "Blood and Gore"
+          },
+          {
+            "id": 10,
+            "description": "Intense Violence"
+          },
+          {
+            "id": 26,
+            "description": "Use of Alcohol"
+          },
+          {
+            "id": 14,
+            "description": "Nudity"
+          }
+        ]
+      }
+    ],
+    "name": "The Witcher 3: Wild Hunt"
+  }
+]

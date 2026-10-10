@@ -4,23 +4,20 @@ export function StremioBtn({
   ariaLabel,
   active,
   disabled,
-  playPause,
 }: {
   children: React.ReactNode;
   onClick?: () => void;
   ariaLabel: string;
   active?: boolean;
   disabled?: boolean;
-  playPause?: boolean;
 }) {
   return (
     <button
       type="button"
       onClick={onClick}
       disabled={disabled}
-      data-player-play-pause={playPause ? "" : undefined}
       aria-label={ariaLabel}
-      className={`pointer-events-auto relative flex h-16 w-16 items-center justify-center rounded-xl transition-colors duration-150 ${
+      className={`pointer-events-auto flex h-16 w-16 items-center justify-center rounded-xl transition-colors duration-150 ${
         disabled
           ? "cursor-not-allowed text-white/30"
           : active

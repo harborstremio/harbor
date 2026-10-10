@@ -12,6 +12,8 @@ export function airedWithinDays(date: string | null | undefined, days: number): 
   return d != null && d <= 0 && d >= -days;
 }
 
+export { airedOnly } from "@/lib/aired";
+
 export function isNewSeason(
   s: Season,
   lastEpisodeAir?: { seasonNumber: number; airDate: string | null },

@@ -1,0 +1,195 @@
+{
+  "projects": [
+    {
+      "slug": "core-library",
+      "title": "Core Library",
+      "subtitle": "Supercharge your own creations with scripting capabilties, without the scripting.",
+      "version": "1.43",
+      "icon": "https://lot51.cc/sites/default/files/2025-02/icon-core-lg.png",
+      "image": "https://lot51.cc/sites/default/files/2025-02/icon-core-lg.png",
+      "page": "https://lot51.cc/mods/core-library"
+    },
+    {
+      "slug": "custom-channel-injector",
+      "title": "Custom Channel Injector",
+      "subtitle": "Originally by SashaT1804",
+      "version": "1.2",
+      "icon": "https://lot51.cc/sites/default/files/2025-02/icon-channel-injector%402x.png",
+      "image": "https://lot51.cc/sites/default/files/2025-02/icon-channel-injector%402x.png",
+      "page": "https://lot51.cc/mods/custom-channel-injector"
+    },
+    {
+      "slug": "telephone",
+      "title": "Plum Telephone Company",
+      "subtitle": "The First Transcontinental Telephone & Telegraph System in Llama Nation",
+      "version": "1.0.4",
+      "icon": "https://lot51.cc/sites/default/files/2026-03/icon-plumtel-tr.png",
+      "image": "https://lot51.cc/sites/default/files/styles/wide/public/2026-02/landline-accent_0.png.webp?itok=7-WWraOH",
+      "page": "https://lot51.cc/mods/telephone"
+    },
+    {
+      "slug": "bird-life",
+      "title": "Bird Life",
+      "subtitle": "Ambience for Ornithophiles",
+      "version": "1.1.3",
+      "icon": "https://lot51.cc/sites/default/files/2025-02/icon-bird-life.png",
+      "image": "https://lot51.cc/sites/default/files/styles/wide/public/2025-02/birb-2.png.webp?itok=sYak1dix",
+      "page": "https://lot51.cc/mods/bird-life"
+    },
+    {
+      "slug": "bug-life",
+      "title": "Bug Life",
+      "subtitle": "Bring your gardens to life.",
+      "version": "3.1",
+      "icon": "https://lot51.cc/sites/default/files/2025-02/icon-bug-life-lg.png",
+      "image": "https://lot51.cc/sites/default/files/styles/wide/public/2025-02/buggedout-renders.png.webp?itok=pNURXiqP",
+      "page": "https://lot51.cc/mods/bug-life"
+    },
+    {
+      "slug": "come-thru-thy-window",
+      "title": "Come Thru Thy Window",
+      "subtitle": "Invite your Romeo or Juliet to sneak over",
+      "version": "1.1",
+      "icon": "https://lot51.cc/sites/default/files/2025-02/icon-window%402x.png",
+      "image": "https://lot51.cc/sites/default/files/styles/wide/public/2025-02/window-objects.png.webp?itok=yCprTKal",
+      "page": "https://lot51.cc/mods/come-thru-thy-window"
+    },
+    {
+      "slug": "smart-doorbell",
+      "title": "Ding & Ditch Smart Doorbell",
+      "subtitle": "Never miss a visitor or delivery again",
+      "version": "3.2.3",
+      "icon": "https://lot51.cc/sites/default/files/2025-02/icon-smart-doorbell.png",
+      "image": "https://lot51.cc/sites/default/files/styles/wide/public/2025-02/doorbell-objects-2.png.webp?itok=a9moEQ0R",
+      "page": "https://lot51.cc/mods/smart-doorbell"
+    },
+    {
+      "slug": "disable-telemetry",
+      "title": "Disable EA Telemetry",
+      "subtitle": "Protect your Sims' privacy from their corporate overlords",
+      "version": "1.0",
+      "icon": "",
+      "image": "",
+      "page": "https://lot51.cc/mods/disable-telemetry"
+    },
+    {
+      "slug": "dust-buster-mod",
+      "title": "Dust Buster Mod",
+      "subtitle": "Control the Dust",
+      "version": "7",
+      "icon": "",
+      "image": "",
+      "page": "https://lot51.cc/mods/dust-buster-mod"
+    },
+    {
+      "slug": "fashion-authority",
+      "title": "Fashion Authority",
+      "subtitle": "Dictate the fashion in your world",
+      "version": "2.5.1",
+      "icon": "https://lot51.cc/sites/default/files/2025-02/icon-fashion-authority%402x.png",
+      "image": "https://lot51.cc/sites/default/files/styles/wide/public/2025-02/fashion-objects.png.webp?itok=G9XGmtGf",
+      "page": "https://lot51.cc/mods/fashion-authority"
+    },
+    {
+      "slug": "feral-run-werewolf-tweak",
+      "title": "Feral Run Werewolf Tweak",
+      "subtitle": "Tap into your inner beast",
+      "version": "2.0",
+      "icon": "",
+      "image": "",
+      "page": "https://lot51.cc/mods/feral-run-werewolf-tweak"
+    },
+    {
+      "slug": "fire-extinguisher-cheat",
+      "title": "Fire Extinguisher Cheat",
+      "subtitle": "Save your Sims' souls",
+      "version": "1.0",
+      "icon": "https://lot51.cc/sites/default/files/2025-02/icon-extinguisher%40400.png",
+      "image": "https://lot51.cc/sites/default/files/2025-02/icon-extinguisher%40400.png",
+      "page": "https://lot51.cc/mods/fire-extinguisher-cheat"
+    },
+    {
+      "slug": "flicbuster",
+      "title": "FlicBuster",
+      "subtitle": "DVD Player & Movie Rental Box",
+      "version": "2.2",
+      "icon": "https://lot51.cc/sites/default/files/2025-02/icon-flicbuster-lg.png",
+      "image": "https://lot51.cc/sites/default/files/styles/wide/public/2025-02/flicbuster-objects.png.webp?itok=dEdj8kyt",
+      "page": "https://lot51.cc/mods/flicbuster"
+    },
+    {
+      "slug": "free-range",
+      "title": "Free-Range",
+      "subtitle": "Liberate your Cows & Llamas",
+      "version": "1.8.2",
+      "icon": "https://lot51.cc/sites/default/files/2025-02/icon-freerange.png",
+      "image": "https://lot51.cc/sites/default/files/styles/wide/public/2025-02/free-range-objects.png.webp?itok=wPOBwlUX",
+      "page": "https://lot51.cc/mods/free-range"
+    },
+    {
+      "slug": "mini-weather-controller",
+      "title": "Mini Weather Controller",
+      "subtitle": "EcoDisc 52X",
+      "version": "4",
+      "icon": "https://lot51.cc/sites/default/files/2025-02/icon-mini-weather-controller%402x.png",
+      "image": "https://lot51.cc/sites/default/files/2025-02/icon-mini-weather-controller%402x.png",
+      "page": "https://lot51.cc/mods/mini-weather-controller"
+    },
+    {
+      "slug": "plumbbros",
+      "title": "PlumbBros",
+      "subtitle": "Heating • Cooling • Plumbing",
+      "version": "2.4",
+      "icon": "https://lot51.cc/sites/default/files/2025-02/icon-plumbbros%402x.png",
+      "image": "https://lot51.cc/sites/default/files/styles/wide/public/2025-02/plumbbros-objects-3.png.webp?itok=2ytmVeAz",
+      "page": "https://lot51.cc/mods/plumbbros"
+    },
+    {
+      "slug": "simzlink",
+      "title": "Simzlink",
+      "subtitle": "Internet • TV • Music",
+      "version": "1.10.5",
+      "icon": "https://lot51.cc/sites/default/files/2025-02/icon-simzlink-new%402x.png",
+      "image": "https://lot51.cc/sites/default/files/styles/wide/public/2025-02/router.png.webp?itok=l9bngfd1",
+      "page": "https://lot51.cc/mods/simzlink"
+    },
+    {
+      "slug": "slower-stories",
+      "title": "Slower Stories",
+      "subtitle": "Control the speed of Story Progression",
+      "version": "1",
+      "icon": "https://lot51.cc/sites/default/files/2025-02/slower-stories-icon.png",
+      "image": "https://lot51.cc/sites/default/files/2025-02/slower-stories-icon.png",
+      "page": "https://lot51.cc/mods/slower-stories"
+    },
+    {
+      "slug": "smarter-phone-use",
+      "title": "Smarter Phone Use",
+      "subtitle": "Better phone autonomy",
+      "version": "2.2.1",
+      "icon": "https://lot51.cc/sites/default/files/2025-02/texting-driving-icon.png",
+      "image": "https://lot51.cc/sites/default/files/2025-02/texting-driving-icon.png",
+      "page": "https://lot51.cc/mods/smarter-phone-use"
+    },
+    {
+      "slug": "suite-life",
+      "title": "Suite Life",
+      "subtitle": "Hotels & Resorts • Build the vacation destination of your dreams!",
+      "version": "1.11",
+      "icon": "https://lot51.cc/sites/default/files/2025-02/icon-hotels%402x.png",
+      "image": "https://lot51.cc/sites/default/files/styles/wide/public/2025-02/preview4-1.png.webp?itok=t3byVEvp",
+      "page": "https://lot51.cc/mods/suite-life"
+    },
+    {
+      "slug": "sunrise",
+      "title": "Sunrise",
+      "subtitle": "Wake up on your own schedule",
+      "version": "1.4",
+      "icon": "https://lot51.cc/sites/default/files/2025-02/icon-sunrise-lg.png",
+      "image": "https://lot51.cc/sites/default/files/styles/wide/public/2025-02/alarm-clock.png.webp?itok=FWiqzDTf",
+      "page": "https://lot51.cc/mods/sunrise"
+    }
+  ],
+  "observedAt": 1790989467,
+  "cached": true
+}

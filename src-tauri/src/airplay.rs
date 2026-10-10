@@ -73,7 +73,9 @@ pub async fn discover(timeout_ms: u64) -> Vec<AirPlayDevice> {
 
 async fn discover_mdns(timeout_ms: u64) -> Vec<AirPlayDevice> {
     tokio::task::spawn_blocking(move || -> Vec<AirPlayDevice> {
-        let Ok(daemon) = ServiceDaemon::new() else { return Vec::new() };
+        let Ok(daemon) = ServiceDaemon::new() else {
+            return Vec::new();
+        };
         let Ok(receiver) = daemon.browse(AIRPLAY_SERVICE_TYPE) else {
             return Vec::new();
         };
@@ -83,7 +85,9 @@ async fn discover_mdns(timeout_ms: u64) -> Vec<AirPlayDevice> {
             match receiver.recv_timeout(Duration::from_millis(120)) {
                 Ok(ServiceEvent::ServiceResolved(info)) => {
                     let addrs = info.get_addresses();
-                    let Some(addr) = pick_address(addrs) else { continue };
+                    let Some(addr) = pick_address(addrs) else {
+                        continue;
+                    };
                     let port = info.get_port();
                     let host = addr.to_string();
                     let props: HashMap<String, String> = info
@@ -96,10 +100,7 @@ async fn discover_mdns(timeout_ms: u64) -> Vec<AirPlayDevice> {
                         .trim_end_matches(AIRPLAY_SERVICE_TYPE)
                         .trim_end_matches('.')
                         .to_string();
-                    let model = props
-                        .get("model")
-                        .or_else(|| props.get("am"))
-                        .cloned();
+                    let model = props.get("model").or_else(|| props.get("am")).cloned();
                     let id = format!("airplay-{}-{}", host, port);
                     devices.insert(
                         id.clone(),
@@ -181,7 +182,11 @@ pub async fn load(
 pub async fn scrub(host: &str, port: u16, sec: f64) -> Result<(), String> {
     let client = airplay_client();
     let resp = client
-        .post(airplay_endpoint(host, port, &format!("/scrub?position={:.6}", sec.max(0.0))))
+        .post(airplay_endpoint(
+            host,
+            port,
+            &format!("/scrub?position={:.6}", sec.max(0.0)),
+        ))
         .header("User-Agent", "MediaControl/1.0")
         .send()
         .await
@@ -203,7 +208,11 @@ pub async fn pause(host: String, port: u16) -> Result<(), String> {
 async fn rate(host: &str, port: u16, value: f32) -> Result<(), String> {
     let client = airplay_client();
     let resp = client
-        .post(airplay_endpoint(host, port, &format!("/rate?value={}", value)))
+        .post(airplay_endpoint(
+            host,
+            port,
+            &format!("/rate?value={}", value),
+        ))
         .header("User-Agent", "MediaControl/1.0")
         .send()
         .await

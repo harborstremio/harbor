@@ -3,16 +3,24 @@ import taafData from "@/data/taaf-awards.json";
 import jmafData from "@/data/japan-media-arts-awards.json";
 import kobeData from "@/data/animation-kobe-awards.json";
 import rAnimeData from "@/data/r-anime-awards.json";
-import crunchyrollIcon from "@/assets/awards/crunchyroll-awards.png";
-import crunchyrollIconFull from "@/assets/awards/crunchyroll-awards-full.png";
-import taafIcon from "@/assets/awards/taaf.png";
-import taafIconSmall from "@/assets/awards/taaf-icon.png";
-import jmafIcon from "@/assets/awards/japan-media-arts.webp";
-import jmafIconSmall from "@/assets/awards/jmaf-icon.png";
-import kobeIcon from "@/assets/awards/animation-kobe.svg";
-import rAnimeIcon from "@/assets/awards/r-anime-awards.png";
-import rAnimeIconSmall from "@/assets/awards/r-anime-icon.png";
+import animeAwardIds from "@/data/anime-award-ids.json";
 import { animeFranchiseKey, stripFranchiseSuffix } from "@/lib/providers/jikan";
+import { peekAwardWinsById } from "@/lib/anime-awards-source";
+
+const ANIME_AWARD_IDS = animeAwardIds as Record<string, { id?: string } | null>;
+
+function awardIdNorm(s: string): string {
+  return s
+    .normalize("NFKD")
+    .replace(/\p{Diacritic}/gu, "")
+    .toLowerCase()
+    .replace(/[^a-z0-9]+/g, " ")
+    .trim();
+}
+
+export function animeAwardId(title: string): string | null {
+  return ANIME_AWARD_IDS[awardIdNorm(title)]?.id ?? null;
+}
 
 export function stripAwardSequelNumber(base: string): string {
   const m = base.match(/(?<!\S)(\d{1,2})$/);
@@ -70,40 +78,40 @@ const SOURCE_META: Record<
     id: "crunchyroll",
     name: "Crunchyroll Anime Awards",
     shortName: "CR",
-    icon: crunchyrollIconFull,
-    iconSmall: crunchyrollIcon,
+    icon: "/awards/animeaward.webp",
+    iconSmall: "/awards/animeaward.webp",
     prestige: 100,
   },
   taaf: {
     id: "taaf",
     name: "Tokyo Anime Award Festival",
     shortName: "TAAF",
-    icon: taafIcon,
-    iconSmall: taafIconSmall,
+    icon: "/awards/taaf_logo.webp",
+    iconSmall: "/awards/taaf.webp",
     prestige: 95,
   },
   jmaf: {
     id: "jmaf",
     name: "Japan Media Arts Festival",
     shortName: "JMAF",
-    icon: jmafIcon,
-    iconSmall: jmafIconSmall,
+    icon: "/awards/jmaf_logo.webp",
+    iconSmall: "/awards/jmaf.webp",
     prestige: 90,
   },
   r_anime: {
     id: "r_anime",
     name: "r/anime Awards",
     shortName: "r/anime",
-    icon: rAnimeIcon,
-    iconSmall: rAnimeIconSmall,
+    icon: "/awards/r_anime_logo.webp",
+    iconSmall: "/awards/r_anime.webp",
     prestige: 70,
   },
   animation_kobe: {
     id: "animation_kobe",
     name: "Animation Kobe",
     shortName: "Kobe",
-    icon: kobeIcon,
-    iconSmall: kobeIcon,
+    icon: "/awards/animation_kobe_logo.svg",
+    iconSmall: "/awards/animation_kobe.svg",
     prestige: 60,
   },
 };
@@ -244,7 +252,13 @@ function gateByReleaseYear(wins: AwardWin[], releaseYear?: number): AwardWin[] {
   return plausible ? wins : [];
 }
 
-export function findAnyAwardWins(animeName: string, releaseYear?: number): AwardWin[] {
+export function findAnyAwardWins(
+  animeName: string,
+  releaseYear?: number,
+  id?: string | null,
+): AwardWin[] {
+  const byId = peekAwardWinsById(id);
+  if (byId && byId.length > 0) return [...byId].sort(compareWinsForBadge);
   if (!animeName) return [];
   const fk = awardFranchiseKey(animeName);
   const direct = INDEX.get(fk);
@@ -257,16 +271,24 @@ export function findAnyAwardWins(animeName: string, releaseYear?: number): Award
   return [];
 }
 
-export function findTopAward(animeName: string, releaseYear?: number): AwardWin | null {
-  const wins = findAnyAwardWins(animeName, releaseYear);
+export function findTopAward(
+  animeName: string,
+  releaseYear?: number,
+  id?: string | null,
+): AwardWin | null {
+  const wins = findAnyAwardWins(animeName, releaseYear, id);
   return wins[0] ?? null;
 }
 
-export function groupWinsBySource(animeName: string, releaseYear?: number): Array<{
+export function groupWinsBySource(
+  animeName: string,
+  releaseYear?: number,
+  id?: string | null,
+): Array<{
   source: AwardSourceId;
   wins: AwardWin[];
 }> {
-  const wins = findAnyAwardWins(animeName, releaseYear);
+  const wins = findAnyAwardWins(animeName, releaseYear, id);
   if (wins.length === 0) return [];
   const map = new Map<AwardSourceId, AwardWin[]>();
   for (const w of wins) {

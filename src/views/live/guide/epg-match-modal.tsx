@@ -1,6 +1,8 @@
-import { useMemo, useState } from "react";
-import { Link2, Search, Unlink, X } from "lucide-react";
+import { useId, useMemo, useRef, useState } from "react";
+import { Link2, Unlink, X } from "lucide-react";
+import { Search } from "@/components/icons/search-icon";
 import { useT } from "@/lib/i18n";
+import { useEscape } from "@/components/modal-shell";
 import { getEpgOverride, setEpgOverride } from "@/lib/iptv/epg-map";
 import type { EpgIndex, IptvChannel } from "@/lib/iptv/types";
 
@@ -14,6 +16,9 @@ export function EpgMatchModal({
   onClose: () => void;
 }) {
   const t = useT();
+  const dialogRef = useRef<HTMLDivElement>(null);
+  const titleId = useId();
+  useEscape(onClose, true, dialogRef);
   const [query, setQuery] = useState(channel.name);
   const current = getEpgOverride(channel.id);
 
@@ -44,22 +49,26 @@ export function EpgMatchModal({
 
   return (
     <div
-      className="absolute inset-0 z-[80] flex items-center justify-center bg-canvas/70 backdrop-blur-sm"
+      className="absolute inset-0 z-[80] flex items-center justify-center bg-canvas/70 p-4 backdrop-blur-sm"
       onClick={onClose}
     >
       <div
+        ref={dialogRef}
+        role="dialog"
+        aria-modal="true"
+        aria-labelledby={titleId}
         onClick={(e) => e.stopPropagation()}
-        className="flex max-h-[70vh] w-[520px] flex-col overflow-hidden rounded-2xl border border-edge bg-surface shadow-2xl"
+        className="flex max-h-[70vh] w-[520px] max-w-full flex-col overflow-hidden rounded-lg bg-elevated ring-1 ring-edge-soft shadow-[0_10px_30px_-12px_rgba(0,0,0,0.6)]"
       >
         <div className="flex items-center gap-3 border-b border-edge-soft/55 px-5 py-4">
           <div className="flex min-w-0 flex-1 flex-col">
-            <span className="text-[15px] font-semibold text-ink">{t("Match EPG channel")}</span>
+            <span id={titleId} className="text-[15px] font-semibold text-ink">{t("Match EPG channel")}</span>
             <span className="truncate text-[12px] text-ink-muted">{channel.name}</span>
           </div>
           {current && (
             <button
               onClick={() => assign(null)}
-              className="flex h-9 items-center gap-1.5 rounded-lg border border-edge-soft/60 px-3 text-[12.5px] font-medium text-ink-muted transition-colors hover:text-ink"
+              className="flex h-9 items-center gap-1.5 rounded-md bg-white/[0.06] px-3 text-[12.5px] font-medium text-ink-muted transition-colors duration-150 hover:bg-white/[0.10] hover:text-ink"
             >
               <Unlink size={13} strokeWidth={2} />
               {t("Clear match")}
@@ -68,7 +77,7 @@ export function EpgMatchModal({
           <button
             onClick={onClose}
             aria-label={t("Close")}
-            className="flex h-9 w-9 items-center justify-center rounded-lg text-ink-muted transition-colors hover:bg-elevated hover:text-ink"
+            className="flex h-9 w-9 items-center justify-center rounded-md bg-white/[0.06] text-ink-subtle transition-colors duration-150 hover:bg-white/[0.10] hover:text-ink"
           >
             <X size={16} strokeWidth={2.2} />
           </button>

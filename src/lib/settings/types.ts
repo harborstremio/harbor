@@ -1,8 +1,15 @@
+import type { CalendarPosterSize } from "@/lib/calendar";
+import type { ControllerCursorId } from "@/lib/gamepad/cursor";
 import type { ThemeSettings } from "@/lib/theme";
 import type { CustomList } from "@/lib/lists/types";
 import type { SourceRow } from "@/lib/custom-sources";
 import type { CustomStreamFilter } from "@/lib/streams/custom-filters";
-import type { UiLanguage } from "@/lib/i18n";
+import type { SyncIndicatorPosition } from "@/lib/sync-toast-position";
+import type { FullscreenClockFormat, FullscreenClockStyle } from "@/lib/local-time";
+import type { SubtitleOffsetPosition, SubtitleOffsetSize } from "@/lib/player/subtitle-offset";
+import type { BufferSizeId } from "@/lib/player/buffer-profile";
+import type { UiLanguage } from "@/lib/i18n/languages";
+import type { DisplaySelection } from "@/lib/monitors";
 
 export type StreamingService =
   | "netflix"
@@ -13,7 +20,25 @@ export type StreamingService =
   | "max"
   | "paramount"
   | "peacock"
-  | "crunchyroll";
+  | "crunchyroll"
+  | "amcplus"
+  | "starz"
+  | "shudder"
+  | "tubi"
+  | "plutotv"
+  | "roku"
+  | "fubo"
+  | "mgmplus"
+  | "philo"
+  | "britbox"
+  | "acorntv"
+  | "mubi"
+  | "curiositystream"
+  | "kanopy"
+  | "hoopla"
+  | "pbs"
+  | "cw"
+  | "hidive";
 
 export type WebhookTrigger =
   | { event: "newMovie" }
@@ -27,9 +52,10 @@ export type WebhookTrigger =
   | { event: "fromTraktWatchlist" }
   | { event: "liveTvEvent"; channelIds?: string[]; favoritesOnly?: boolean; leadMinutes?: number };
 
-export type ContentCategory = "anime" | "liveTv" | "sports" | "adult";
+export type ContentCategory = "anime" | "sports" | "adult";
 
 export type ContentFilters = Record<ContentCategory, boolean>;
+
 export type LetterboxdSettings = {
   enabled: boolean;
   mode: "public" | "full";
@@ -56,18 +82,32 @@ export interface SimklGranularFilters {
   };
 }
 
+export type ProfileAudioMode = "auto" | "click" | "off";
+
+export type StreamPriorityEntry = { key: string; name: string };
+
+export type ScreensaverMediaKind = "image" | "gif" | "video";
+
+export type ScreensaverMedia = {
+  id: string;
+  name: string;
+  path: string;
+  kind: ScreensaverMediaKind;
+};
+
+export type MusicSpeedPreset = {
+  id: string;
+  name: string;
+  speed: number;
+  pitch: number;
+  reverb: number;
+  keepPitch: boolean;
+};
+
 export type Settings = {
   soundTheme: "none" | "glass" | "modern" | "retro" | "cinematic";
   sfxVolume: number;
   playerVolumeSfx: boolean;
-  experimentalLiquidGlassEnabled: boolean;
-  experimentalLiquidGlassOpacity: number;
-  defaultLiquidGlassBlur: number;
-  defaultLiquidGlassTint: number;
-  posterBackdropExpansion: boolean;
-  posterFocusedCard: boolean;
-  posterDockMagnification: boolean;
-  posterDockTransitionMs: number;
   blurComments: boolean;
   blurEpisodes: boolean;
   tmdbKey: string;
@@ -75,6 +115,25 @@ export type Settings = {
   rpdbKey: string;
   imdbApiFallback: boolean;
   fanartKey: string;
+  /** Sports keys each viewer brings (Settings → Sports plugins & keys). Empty = feature off. */
+  allsportsKey: string;
+  thesportsdbKey: string;
+  oddsApiKey: string;
+  cfbdKey: string;
+  /** Sports plugins (Settings → Sports plugins & keys). */
+  sportsTopGames: boolean;
+  sportsChannelFinder: boolean;
+  sportsScoreTicker: boolean;
+  /** The live-score crawl across the top of the hubs (Tickarr). */
+  sportsTickerBar: boolean;
+  /** Your sports in order (league tags); left-out sports stay out of the Top 10. */
+  sportsPriority: string[];
+  /** Sports that lead on each weekday ("Sat": ["NCAAF"]). */
+  sportsDayFocus: Partial<Record<"Mon" | "Tue" | "Wed" | "Thu" | "Fri" | "Sat" | "Sun", string[]>>;
+  /** Seconds the live field waits so its plays line up with a delayed stream. */
+  sportsFieldDelaySec: number;
+  sportsOdds: boolean;
+  sportsKeysHintDismissed: boolean;
   tvdbKey: string;
   rdKey: string;
   tbKey: string;
@@ -85,6 +144,7 @@ export type Settings = {
   preferredLanguages: string[];
   requirePreferredLanguage: boolean;
   showImdbBadge: boolean;
+  showSubtitleIndicator: boolean;
   showTmdbBadge: boolean;
   showRtBadge: boolean;
   showMalBadge: boolean;
@@ -105,23 +165,51 @@ export type Settings = {
   showMdblistDetail: boolean;
   showTraktComments: boolean;
   showSimklBadge: boolean;
+  showSimklDetail: boolean;
   showDubBadge: boolean;
   simklShowCommunityRatings: boolean;
   simklEnableUserRatings: boolean;
   simklGranularFilters: SimklGranularFilters;
   cardBadgeLimit: number;
   showQualityBadge: boolean;
+  qualityBadgeStyle: "bar" | "chips";
   showCardBadges: boolean;
   homeLanguages: string[];
   posterScale: number;
   posterRadius: number;
   posterEffect: "blur" | "fade" | "off";
+  posterQuality: "balanced" | "high" | "max";
+  liquidGlass: boolean;
+  defaultLiquidGlassBlur: number;
+  defaultLiquidGlassTint: number;
+  experimentalLiquidGlassEnabled: boolean;
+  experimentalLiquidGlassOpacity: number;
+  posterBackdropExpansion: boolean;
+  posterFocusedCard: boolean;
+  posterDockMagnification: boolean;
+  posterDockTransitionMs: number;
+  top10Ribbon: boolean;
+  top10RibbonSide: "left" | "right";
+  awardTabs: boolean;
+  awardTabPosition: "above" | "below" | "top";
   rowTitleScale: number;
   playerTitleScale: number;
   playerTitleSeriesFirst: boolean;
   uiScale: number;
   serveWebUi: boolean;
   remoteControlEnabled: boolean;
+  controllerSupportEnabled: boolean;
+  controllerBackgroundInput: boolean;
+  controllerDeadzone: number;
+  controllerCursorSpeed: number;
+  controllerCursor: ControllerCursorId;
+  controllerCursorImage: string;
+  controllerCursorSize: number;
+  controllerCursorEnabled: boolean;
+  controllerCursorHideMs: number;
+  controllerKeyboardSize: number;
+  controllerRepeatMs: number;
+  controllerInitialDelayMs: number;
   trailerQuality: "auto" | "360p" | "720p" | "1080p" | "best";
   detailTrailerAutoplay: boolean;
   heroBackdropCarousel: boolean;
@@ -129,23 +217,39 @@ export type Settings = {
   heroShadow: number;
   heroFull: boolean;
   heroFullQuality: boolean;
+  heroFeed: "trending" | "trakt" | "simkl" | "classic";
+  heroTrailers: boolean;
+  heroTrailerAudio: boolean;
+  navIconAnimations: boolean;
+  bigPicturePlayerUi: "tenFoot" | "desktop";
+  screensaver: boolean;
+  screensaverStyle: "ambient" | "catBoat" | "halloween" | "custom";
+  screensaverMedia: ScreensaverMedia[];
+  screensaverMediaId: string | null;
+  screensaverDelayMin: number;
   resumePrompt: boolean;
   resumePlayback: boolean;
   keepFullscreenOnExit: boolean;
   fullscreenRestorePosition: boolean;
   contentAdvisoryToast: boolean;
+  contentAdvisoryTheme: "colored" | "monochrome";
+  contentAdvisoryShowIgnore: boolean;
   playerVolumeHud: boolean;
   playerVolumeHudPosition: "center" | "top" | "top-left" | "top-right";
   customPlaybackSpeeds: number[];
   customSleepMinutes: number[];
+  defaultPlaybackSpeed: number;
+  navbarSleepTimer: boolean;
   badgePlacement: "top" | "bottom";
   watchlistBadge: "off" | "topStart" | "topEnd" | "bottomStart" | "bottomEnd";
   showWatchedButton: boolean;
   showPopcornBadge: boolean;
   episodeLayout: "list" | "strip" | "grid";
+  episodeCardScale: number;
   episodeSort: "oldest" | "newest";
   showEpisodeRating: boolean;
   showEpisodeDescription: boolean;
+  episodeHiding: boolean;
   hdEpisodeImages: boolean;
   episodeArcGroups: boolean;
   episodeOrderProvider: "default" | "tmdb" | "tvdb";
@@ -156,7 +260,8 @@ export type Settings = {
     | "absolute"
     | "tvdbabsolute"
     | "alternate"
-    | "regional";
+    | "regional"
+    | "tmdb";
   tvdbOrderPanel: boolean;
   tvdbPin: string;
   harborAvatar: string | null;
@@ -190,17 +295,26 @@ export type Settings = {
   discordShowPoster: boolean;
   discordShowTimestamp: boolean;
   discordShowPartyJoin: boolean;
+  discordMusicPresence: boolean;
   playerEngine: "auto" | "html5" | "mpv";
+  /** resize shrinks the Harbor window; native floats the video in its own window. */
+  pipBehavior: "resize" | "native";
   playerShellId: string;
   playerChromeTheme: "auto" | "default" | "stremio";
   playerMenuBlack: boolean;
+  playerScreenLockEnabled: boolean;
   seekPreviewEnabled: boolean;
   instantPlay: boolean;
+  instantPlaybackPreparation: boolean;
+  autoNextStreamOnStall: boolean;
+  autoNextStreamOnStallSec: number;
+  fullscreenMode: "fullscreen" | "borderless" | "maximized";
   seasonSourceLock: boolean;
   rememberLastStream: boolean;
   keepSourceNextEpisode: boolean;
   playerHdrToSdr: boolean;
   playerRtxHdr: boolean;
+  playerRtxVsr: boolean;
   playerMacEdr: boolean;
   playerDisplayPanel: "auto" | "oled" | "lcd";
   playerMotionInterp: boolean;
@@ -208,17 +322,28 @@ export type Settings = {
   playerAnime4kAnimeOnly: boolean;
   playerAnime4kIndicator: boolean;
   playerMpvEmbed: boolean;
+  /** Where a pinned video plays while browsing: behind the whole page, or in the hub hero box. */
+  heroDockMode: "wallpaper" | "hero";
+  /** Where the separate mpv window opens. Windows only; see src/lib/monitors.ts. */
+  playerSeparateDisplay: DisplaySelection;
+  /** Fill the whole monitor (cover the taskbar) for the separate mpv window. */
+  playerSeparateCoverTaskbar: boolean;
   playerP2pChip: boolean;
   showQualityInfo: boolean;
   stremioServerTranscode: boolean;
   directTorrentStream: boolean;
   torrentsDisabled: boolean;
   torrentFullDownload: boolean;
+  keepStreamDownloadsInBackground: boolean;
+  deferTorrentEngine: boolean;
   p2pAutoConsent: boolean;
+  streamMode: "both" | "addons" | "p2p";
+  queueDrivesNav: boolean;
   streamCacheRetentionHours: number;
   streamCacheMaxGb: number;
   deleteWatchedDownloads: boolean;
   streamCacheDir: string;
+  playbackCacheDir: string;
   remoteStreamServerUrl: string;
   remoteStreamServerStrict: boolean;
   castAlwaysTranscode: boolean;
@@ -227,6 +352,7 @@ export type Settings = {
   playerAnime4kTier: string;
   playerAnime4kFolder: string;
   playerAnime4kOverride: string;
+  playerShaders: Record<string, { enabled: boolean; variant?: string; dir?: string }>;
   preferredSubLangs: string[];
   preferredAudioLangs: string[];
   subFontSize: number;
@@ -236,17 +362,45 @@ export type Settings = {
   subMarginY: number;
   subAlignX: "left" | "center" | "right";
   subAssOverride: "no" | "yes" | "force" | "scale" | "strip";
+  subAssNormalizeSize: boolean;
   subStyle: "shadow" | "outline" | "box";
   subFontFamily: string;
   subBold: boolean;
-  customFonts: Array<{ id: string; name: string; format: string; dataUrl?: string }>;
+  customFonts: Array<{
+    id: string;
+    name: string;
+    format: string;
+    family?: string;
+    dataUrl?: string;
+  }>;
   subBoxOpacity: number;
   subBoxColor: string;
   subOpacity: number;
   subLineSpacing: number;
-  subProvidersEnabled: { wyzie: boolean; opensubtitles: boolean; jimaku: boolean; addons: boolean };
+  subProvidersEnabled: {
+    wyzie: boolean;
+    opensubtitles: boolean;
+    jimaku: boolean;
+    addons: boolean;
+    subdl?: boolean;
+    subsource?: boolean;
+  };
+  subOffsetIndicatorEnabled: boolean;
+  subOffsetIndicatorPosition: SubtitleOffsetPosition;
+  subOffsetIndicatorSize: SubtitleOffsetSize;
   subShowInPip: boolean;
+  subHideSdh: boolean;
+  secondarySubLang: string;
+  subSecondaryPlacement: "top" | "bottom";
+  subSecondaryScale: number;
   subtitleAutoSync: boolean;
+  autoSyncApplyStructural: boolean;
+  autoSyncDrift: boolean;
+  subtitleAutoSyncAsr: boolean;
+  subtitleAutoSyncPivot: boolean;
+  subtitleAutoSyncCrowd: boolean;
+  communitySyncUrl: string;
+  communitySyncOptOut: boolean;
   subtitlesOffByDefault: boolean;
   preferEmbeddedSubs: boolean;
   subtitleAutoUpgrade: boolean;
@@ -266,20 +420,49 @@ export type Settings = {
   nfoBackdropSize: string;
   nfoLogoSize: string;
   showLocalLibraryBadge: boolean;
+  showWatchedBadge: boolean;
   localPlaybackMode: "ask" | "local" | "stream";
+  playbackSourcePreference: "ask" | "local" | "online" | "home-server";
+  preferredMediaServerId: string | null;
   localMinFileSizeMb: number;
+  /** Re-scan the folders already in the local library on open, adding only files it has not seen.
+   * Existing entries are never rebuilt, so anything corrected with Identify stays corrected. */
+  localAutoScan: boolean;
+  /** How an auto-scan identifies a new file, remembered from the last manual scan. */
+  localScanMode: "tmdb" | "nfo" | null;
   catalogsPinned: string[];
   catalogsHidden: string[];
   posterBaseUrl: string;
   hidePosterTitles: boolean;
   hoverPreviewEnabled: boolean;
   hoverPreviewPlacement: "over" | "side";
-  cardHoverStyle: "none" | "default" | "elegant" | "frosted" | "cinema" | "spotlight" | "custom";
+  cardHoverStyle:
+    | "none"
+    | "default"
+    | "marquee"
+    | "elegant"
+    | "frosted"
+    | "cinema"
+    | "spotlight"
+    | "custom";
+  rowCardStyle: "poster" | "tv";
+  tvCardLogoPos: "center" | "bottomStart" | "bottomEnd";
+  scrollUpTrailer: boolean;
+  cardHoverShine: boolean;
   customHoverId: string;
   mdblistKey: string;
   auddKey: string;
+  songIdProvider: "audd" | "ai";
+  songIdAiKey: string;
+  songIdAiModel: string;
   aiSearchKey: string;
+  steamSearchShortcut: boolean;
+  gameAgeRatingAgency: "ESRB" | "PEGI";
+  gameArtworkSelection: "first" | "random" | "manual";
+  gameArtworkScreenshots: boolean;
+  gameArtworkCoverIcon: boolean;
   aiSearchModel: string;
+  aiSearchProvider: "openrouter" | "groq";
   aiGroqKey: string;
   jinaKey: string;
   aiWebSearch: boolean;
@@ -287,37 +470,83 @@ export type Settings = {
   mpvExtraOptions: string;
   mpvQuality: "balanced" | "performance" | "quality";
   mpvHwdec: "auto" | "on" | "off";
+  mpvRenderer: "gpu-next" | "gpu";
+  uiGraphicsBackend: "auto" | "d3d11" | "opengl" | "vulkan" | "software";
+  mpvForceYuv420p: boolean;
   mpvBufferBoost: boolean;
+  mpvBufferSize: BufferSizeId;
   mpvDownmixStereo: boolean;
+  volumeBoostMax: number;
   mpvTweaks: Record<string, string>;
   playerSvp: boolean;
   svpVpyPath: string;
   svpScope: "all" | "anime" | "non-anime";
+  svpTargetFps: "double" | "48" | "60" | "display";
   seekBackStepSec: number;
   seekForwardStepSec: number;
+  seekBackStepShortSec: number;
+  seekForwardStepShortSec: number;
+  shareWatchPresence: boolean;
   playerHdrOpaqueWindow: boolean;
   playerEscExitsFullscreen: boolean;
   playerConfirmLeave: boolean;
   tvNavigation: boolean;
   playerTvNavigation: boolean;
+  bigPictureButton: boolean;
+  bigPictureAutoStart: boolean;
+  /** Which monitor Big Picture opens on at startup. Windows only. */
+  bigPictureDisplay: DisplaySelection;
+  bigPictureSound: "none" | "glass" | "modern" | "retro" | "cinematic";
+  bigPictureMosaic: boolean;
+  bigPictureBackdropZoom: boolean;
+  tabHotkeys: boolean;
+  /**
+   * Fraction of each edge a television is assumed to crop, 0 to 0.1. Read at
+   * import time by bp-safe-area straight out of localStorage, which is why it
+   * has to exist here: it was being read for months with nothing able to write
+   * it.
+   *
+   * null means nobody has chosen, and that is not the same as 0. It is what
+   * lets bp-safe-area fall through to its ten-foot default on a television
+   * while a desktop stays at no inset. A concrete default here would hand
+   * every desktop window a crop margin it never had.
+   */
+  bigPictureOverscan: number | null;
   playerHdrStage: "auto" | "off" | "always";
   opensubtitlesApiKey: string;
+  theIntroDbKey: string;
   jimakuToken: string;
+  subdlApiKey: string;
+  subsourceApiKey: string;
   audioNormalize: boolean;
   audioProfile: "off" | "bass" | "voice" | "bass-reduce" | "night";
   audioDevice: string;
   bandwidthMbps: number;
   nextEpisodeLeadSec: number;
   autoPlayNextEpisode: boolean;
+  stillWatching: boolean;
+  stillWatchingAfter: number;
   keyboardPauseShowsControls: boolean;
   hideWatchedInCatalogs: boolean;
   hideUnreleased: boolean;
   localEpisodeSortDesc: boolean;
+  /** Review count when the banner was last dismissed; it returns only if more turn up. */
+  localReviewDismissedCount: number;
+  smoothScroll: boolean;
+  showSimklCard: boolean;
+  showLetterboxdCard: boolean;
+  externalContinueWatching: boolean;
+  cwSources: { library: boolean; trakt: boolean; simkl: boolean; local: boolean };
   showPlaylistsTab: boolean;
   skipProfileScreen: boolean;
   profilePromptInterval: "launch" | "15m" | "30m" | "never";
   defaultProfileId: string;
   sportsLeagues: string[];
+  /** Pop-up alerts for followed teams, athletes and Top 10 games. */
+  sportsAlerts: boolean;
+  sportsShowOdds: boolean;
+  /** Scores and schedules need no provider; streams do. Off until asked for. */
+  sportsWithoutProvider: boolean;
   hideSpoilers: boolean;
   spoilerHideThumbnails: boolean;
   spoilerHideTitles: boolean;
@@ -332,20 +561,57 @@ export type Settings = {
   customLogoMark: string;
   customLogoWordmark: string;
   customAppIcon: string;
+  customAppIconPreset: string;
+  musicArtworkAppIcon: boolean;
+  musicSeekThumb: boolean;
+  musicSeekThumbHover: boolean;
+  musicSpeedPresets: MusicSpeedPreset[];
   homeMode: "harbor" | "classic";
   homeShowAllAddonRows: boolean;
+  homeNewEpisodes: boolean;
   libraryBookmarkedOnly: boolean;
   librarySort: "recent" | "title" | "year";
   preferCustomMetaAddon: boolean;
+  cinemetaEnabled: boolean;
   animeOnlyInAnimeRoom: boolean;
+  animeCwEnd: "hide" | "timer";
   cwAdvanceNext: boolean;
+  cwHideCaughtUp: boolean;
   useNativeTitleBar: boolean;
+  fullscreenClockEnabled: boolean;
+  fullscreenClockFormat: FullscreenClockFormat;
+  fullscreenClockStyle: FullscreenClockStyle;
+  fullscreenClockShowSeconds: boolean;
+  fullscreenClockShowEndTime: boolean;
+  fullscreenClockWindowed: boolean;
+  fullscreenClockSizePx: number;
+  hybridTitleBar: boolean;
+  topbarScrollBlur: boolean;
+  transparentTopBar: boolean;
+  topbarAppearance: "transparent" | "glass" | "filled";
+  dragAnywhere: boolean;
+  resumeDetailScroll: boolean;
+  pluginsEnabled: boolean;
+  /** Whether anything outside the Plugins page may ask a plugin that stands up rows of its own.
+   * Off by default, so those extensions are asked on their own page only. A plugin with no rows of
+   * its own is asked either way, because nothing else would ever reach it. */
+  pluginsOutsideTab: boolean;
+  pluginsGroupByRepo: boolean;
+  pluginsAutoCheck: boolean;
+  pluginsBackground: boolean;
+  /** Badges on the Plugins tab's posters, read out of the listing titles a provider sends. Off by
+   * default: a provider's title carries whatever it wants to say, and not everyone wants a poster
+   * with a language strip on it. */
+  pluginsPosterLanguages: boolean;
+  pluginsPosterQuality: boolean;
+  cwPerProfile: boolean;
   closeToTray: boolean;
   trayAlwaysOnTop: boolean;
   pauseMinimized: boolean;
   pauseUnfocused: boolean;
   cwSnapshotRetentionDays: number;
   cwSnapshotFullQuality: boolean;
+  cwPreferEpisodeStill: boolean;
   streamFilterLevel: "strict" | "balanced" | "off";
   blockTrackers: boolean;
   homeRows: {
@@ -356,8 +622,21 @@ export type Settings = {
     heroSource: string | null;
     customSources: SourceRow[];
     listRows?: string[];
+    playButtonSquare?: boolean;
+    secondaryMoreInfo?: boolean;
+    cwTop?: boolean;
   };
   navCustomization: {
+    order: string[];
+    hidden: string[];
+    renamed: Record<string, string>;
+  };
+  navCustomizationOwn: {
+    order: string[];
+    hidden: string[];
+    renamed: Record<string, string>;
+  } | null;
+  animeRows: {
     order: string[];
     hidden: string[];
     renamed: Record<string, string>;
@@ -369,12 +648,18 @@ export type Settings = {
   animePicksDismissedAt: number;
   animeAnilistRowsHidden: string[];
   animeMalRowsHidden: string[];
+  addonTimeoutSec: number;
+  profileAudio: ProfileAudioMode;
+  syncIndicator: boolean;
+  syncIndicatorPosition: SyncIndicatorPosition;
   pickerLayout: "condensed" | "stremio";
   streamSort: "harbor" | "addon";
+  streamPriority: StreamPriorityEntry[];
   fullStreamDescription: boolean;
   pickerShowFilename: boolean;
   pickerRefreshNextToBack: boolean;
   customStreamFilters: CustomStreamFilter[];
+  activeStreamFilterId: string | null;
   seekBarStyle: "flat" | "glass" | "pinstripe" | "rainbow" | "image";
   seekBarHeight: number;
   seekBarColor: string;
@@ -382,6 +667,7 @@ export type Settings = {
   seekBarFill: boolean;
   seekBarFillOpacity: number;
   seekDotShape: "circle" | "square" | "image" | "hidden";
+  seekDotHover: boolean;
   seekDotSize: number;
   seekDotImage: string;
   customCss: string;
@@ -390,6 +676,7 @@ export type Settings = {
   webhooks: {
     discordUrl: string;
     telegramUrl: string;
+    desktopEnabled: boolean;
     notifyMovies: boolean;
     notifyTv: boolean;
     notifyAnime: boolean;
@@ -408,13 +695,16 @@ export type Settings = {
     | "anticipated"
     | "custom"
     | "simkl"
-    | "simkl-anticipated";
+    | "simkl-anticipated"
+    | "anime"
+    | "games";
   simklHomeRailsEnabled: boolean;
   simklUpNextRailEnabled: boolean;
   simklTrendingRailEnabled: boolean;
   simklScrobbleEnabled: boolean;
   simklAnimeTitleLanguage: "english" | "romaji" | "native";
   weekStartsMonday: boolean;
+  calendarPosterSize: CalendarPosterSize;
   customCalendar: {
     trackedPeople: Array<{
       id: number;
@@ -434,10 +724,14 @@ export type Settings = {
     name: string;
     enabled: boolean;
     trigger: WebhookTrigger;
-    channels: { discord: boolean; telegram: boolean };
+    channels: { discord: boolean; telegram: boolean; desktop: boolean };
   }>;
   downloadDir: string;
   downloadCreateFolders: boolean;
+  ebookDownloadDir: string;
+  ebookDownloadCreateFolders: boolean;
+  nytKey: string;
+  sportsApiKey: string;
   stremioDeeplinkInstall: boolean;
   iptvPlaylists: Array<{
     id: string;
@@ -451,13 +745,19 @@ export type Settings = {
       password: string;
     };
   }>;
+
   iptvLiveContainer: "ts" | "m3u8";
   iptvForceProxy: boolean;
   iptvEpgOffsetHours: number;
   sidebarCollapsed: boolean;
+  showQuickGameLibrary: boolean;
+  gamesOpenInLibrary: boolean;
   wrappedButton: boolean;
+  libraryHero: boolean;
+  mangaEnabled: boolean;
   feedLocaleBias: boolean;
   uiLanguage: UiLanguage;
+  arabicWelcomeSeen: boolean;
   cropMode: string;
   customLists: CustomList[];
   pauseListStatusOnPause: boolean;
@@ -467,4 +767,7 @@ export type Settings = {
   adSkipEnabled: boolean;
   adReportAlwaysShow: boolean;
   adReportFirstSeen: boolean;
+  xrayEnabled: boolean;
+  xrayLiveScan: boolean;
+  auddApiKey: string;
 };

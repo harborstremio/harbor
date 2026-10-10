@@ -20,7 +20,7 @@ export function P2pConfirmModal({
   const title = stream.parsedTitle || stream.title || stream.name || "This source";
   const summary = streamSummaryParts(stream).filter((p) => !/seed/i.test(p));
   return (
-    <main data-tv-focus-scope className="fixed inset-0 z-[120] overflow-hidden bg-black">
+    <main className="fixed inset-0 z-[120] overflow-hidden bg-black">
       {backdrop && (
         <img
           src={backdrop}
@@ -35,7 +35,7 @@ export function P2pConfirmModal({
           Stream this via peer-to-peer?
         </h1>
         <p className="max-w-xl text-[14.5px] leading-relaxed text-white/75">
-          This source isn&apos;t cached on your debrid, so Harbor would pull it directly from peers.
+          This source isn&apos;t cached on your debrid, so JL Media Vision would pull it directly from peers.
           It can take a moment to start and may buffer on low-seed torrents.
         </p>
         <div className="flex max-w-xl flex-col items-center gap-2 rounded-2xl border border-white/10 bg-white/[0.06] px-5 py-3.5">
@@ -72,7 +72,6 @@ export function P2pConfirmModal({
           <button
             type="button"
             onClick={onCancel}
-            data-tv-modal-close
             className="flex h-12 items-center gap-2 rounded-xl border border-white/15 bg-white/5 px-6 text-[14px] font-medium text-white/75 backdrop-blur-md transition-all hover:border-white/30 hover:bg-white/10 hover:text-white"
           >
             <X size={15} strokeWidth={2.2} />

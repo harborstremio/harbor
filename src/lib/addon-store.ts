@@ -1,13 +1,85 @@
-import { safeFetch as fetch } from "@/lib/safe-fetch";
-import { readActiveStremioAuthKey } from "./auth";
-import { setUserAddons, userAddons, type Addon } from "./addons";
-import { applyOrderToItems } from "./addons-store/reorder";
+import { safeFetch as fetch, safeFetchLocal } from "@/lib/safe-fetch";
+import { isLocalNetworkUrl } from "@/lib/local-network";
+import type { Addon } from "./addons";
+import {
+  applyOrderToItems,
+  loadDisplayOrder,
+  replaceUrlsInOrder,
+  saveDisplayOrder,
+} from "./addons-store/reorder";
 
-const STORAGE_KEY = "harbor.installed-addons";
+const PROFILES_KEY = "harbor.profiles.v1";
+
+const STORAGE_KEY_PREFIX = "harbor.installed-addons.";
+const LEGACY_STORAGE_KEY = "harbor.installed-addons";
 const SEEDED_KEY = "harbor.addons.seeded.v1";
-const DISABLED_KEY = "harbor.addons.disabled";
+const DISABLED_KEY_PREFIX = "harbor.addons.disabled.";
+const LEGACY_DISABLED_KEY = "harbor.addons.disabled";
 
 const DEFAULT_ADDONS: Array<{ id: string; transportUrl: string }> = [];
+
+function activeProfileId(): string {
+  try {
+    const raw = localStorage.getItem(PROFILES_KEY);
+    if (!raw) return "";
+    const s = JSON.parse(raw) as {
+      activeId?: string;
+      profiles?: Array<{ id?: string; isPrimary?: boolean; shareStremioWith?: string | null }>;
+    };
+    const profiles = Array.isArray(s.profiles) ? s.profiles : [];
+    const active = profiles.find((p) => p.id === s.activeId) ?? null;
+    const own = active?.id ?? profiles.find((p) => p?.isPrimary)?.id ?? "";
+    if (!own) return "";
+    if (active && typeof active.shareStremioWith === "string" && active.shareStremioWith) {
+      const shared = profiles.find((p) => p.id === active.shareStremioWith);
+      if (shared?.id) return shared.id;
+    }
+    return own;
+  } catch {
+    return "";
+  }
+}
+
+function primaryProfileId(): string {
+  try {
+    const raw = localStorage.getItem(PROFILES_KEY);
+    const s = raw
+      ? (JSON.parse(raw) as { profiles?: Array<{ id?: string; isPrimary?: boolean }> })
+      : null;
+    const primary = s?.profiles?.find((p) => p?.isPrimary);
+    return (primary && typeof primary.id === "string" && primary.id) || activeProfileId();
+  } catch {
+    return activeProfileId();
+  }
+}
+
+function storeKey(kind: "installed" | "disabled"): string {
+  const id = activeProfileId();
+  if (kind === "installed") return id ? STORAGE_KEY_PREFIX + id : LEGACY_STORAGE_KEY;
+  return id ? DISABLED_KEY_PREFIX + id : LEGACY_DISABLED_KEY;
+}
+
+function migrateLegacy(): void {
+  try {
+    const pid = primaryProfileId();
+    if (!pid) return;
+    for (const [legacyKey, prefix] of [
+      [LEGACY_STORAGE_KEY, STORAGE_KEY_PREFIX],
+      [LEGACY_DISABLED_KEY, DISABLED_KEY_PREFIX],
+    ] as const) {
+      const legacy = localStorage.getItem(legacyKey);
+      if (legacy === null) continue;
+      const perKey = prefix + pid;
+      if (localStorage.getItem(perKey) === null) localStorage.setItem(perKey, legacy);
+      // Conflicting or unconfirmed copies remain recoverable without changing
+      // the active profile's configured URLs or enabled state.
+      if (localStorage.getItem(perKey) !== legacy) return;
+      localStorage.removeItem(legacyKey);
+    }
+  } catch {
+    /* noop */
+  }
+}
 
 export async function seedDefaultAddonsIfFirstRun(): Promise<void> {
   try {
@@ -34,23 +106,6 @@ export async function seedDefaultAddonsIfFirstRun(): Promise<void> {
     localStorage.setItem(SEEDED_KEY, "1");
   } catch (e) {
     console.warn("[addons] seed default failed", e);
-  }
-}
-
-function readAuthKey(): string | null {
-  return readActiveStremioAuthKey();
-}
-
-async function pushToStremio(addon: Addon, mode: "install" | "uninstall"): Promise<boolean> {
-  const authKey = readAuthKey();
-  if (!authKey) return true;
-  try {
-    const current = await userAddons(authKey);
-    const filtered = current.filter((a) => a.transportUrl !== addon.transportUrl);
-    const next = mode === "install" ? [...filtered, addon] : filtered;
-    return await setUserAddons(authKey, next);
-  } catch {
-    return false;
   }
 }
 
@@ -97,10 +152,16 @@ function slimManifest(manifest: Addon["manifest"] | undefined): Addon["manifest"
         id: c.id,
         type: c.type,
         name: c.name,
+        extraSupported: Array.isArray(c.extraSupported)
+          ? c.extraSupported.filter((name): name is string => typeof name === "string")
+          : undefined,
         extra: Array.isArray(c.extra)
           ? (c.extra as Array<Record<string, unknown>>).map((e) => ({
               name: e.name,
               isRequired: e.isRequired,
+              options: Array.isArray(e.options)
+                ? e.options.filter((option): option is string => typeof option === "string")
+                : undefined,
             }))
           : undefined,
       }));
@@ -112,7 +173,8 @@ function slimManifest(manifest: Addon["manifest"] | undefined): Addon["manifest"
 }
 
 export function loadInstalled(): InstalledAddon[] {
-  const raw = localStorage.getItem(STORAGE_KEY);
+  migrateLegacy();
+  const raw = localStorage.getItem(storeKey("installed"));
   if (!raw) return [];
   try {
     return JSON.parse(raw) as InstalledAddon[];
@@ -121,10 +183,10 @@ export function loadInstalled(): InstalledAddon[] {
   }
 }
 
-function saveInstalled(list: InstalledAddon[]) {
+export function saveInstalled(list: InstalledAddon[]) {
   const slim = list.map((a) => ({ ...a, manifest: slimManifest(a.manifest) }));
   try {
-    localStorage.setItem(STORAGE_KEY, JSON.stringify(slim));
+    localStorage.setItem(storeKey("installed"), JSON.stringify(slim));
   } catch (e) {
     if (e instanceof DOMException && (e.name === "QuotaExceededError" || e.code === 22)) {
       const stripped = list.map((a) => ({
@@ -132,11 +194,7 @@ function saveInstalled(list: InstalledAddon[]) {
         transportUrl: a.transportUrl,
         installedAt: a.installedAt,
       }));
-      try {
-        localStorage.setItem(STORAGE_KEY, JSON.stringify(stripped));
-      } catch (e2) {
-        console.warn("[addons] localStorage still full after stripping manifests", e2);
-      }
+      localStorage.setItem(storeKey("installed"), JSON.stringify(stripped));
     } else {
       throw e;
     }
@@ -149,9 +207,19 @@ export function reorderInstalled(urlSequence: string[]): void {
   saveInstalled(applyOrderToItems(items, urlSequence));
 }
 
+function preserveOrderOnReplace(oldUrls: string[], newUrl: string): void {
+  let order = loadDisplayOrder();
+  if (order.length === 0) {
+    order = loadInstalled().map((a) => a.transportUrl);
+  }
+  if (order.length === 0) return;
+  saveDisplayOrder(replaceUrlsInOrder(order, oldUrls, newUrl));
+}
+
 export function loadDisabledAddons(): Set<string> {
+  migrateLegacy();
   try {
-    const raw = localStorage.getItem(DISABLED_KEY);
+    const raw = localStorage.getItem(storeKey("disabled"));
     if (!raw) return new Set();
     const parsed: unknown = JSON.parse(raw);
     if (!Array.isArray(parsed)) return new Set();
@@ -163,7 +231,7 @@ export function loadDisabledAddons(): Set<string> {
 
 function saveDisabledAddons(set: Set<string>): void {
   try {
-    localStorage.setItem(DISABLED_KEY, JSON.stringify([...set]));
+    localStorage.setItem(storeKey("disabled"), JSON.stringify([...set]));
   } catch (e) {
     console.warn("[addons] couldn't persist disabled addons", e);
   }
@@ -194,23 +262,29 @@ export function transportUrlFor(id: string): string | null {
   return loadInstalled().find((a) => a.id === id)?.transportUrl ?? null;
 }
 
-function transportHost(url: string): string | null {
+// Identifies an addon instance by host + base path, ignoring manifest.json /
+// configure suffixes and query strings, so distinct manifests on the same host
+// (e.g. /p/1/manifest.json vs /p/2/manifest.json) stay separate addons.
+function transportBaseKey(url: string): string | null {
   try {
-    return new URL(url).host.toLowerCase();
+    const u = new URL(url);
+    const path = u.pathname
+      .replace(/\/manifest\.json$/i, "")
+      .replace(/\/configure$/i, "")
+      .replace(/\/+$/, "");
+    return `${u.host.toLowerCase()}${path}`;
   } catch {
     return null;
   }
 }
 
 export function findHostnameMatch(transportUrl: string): InstalledAddon | null {
-  const host = transportHost(transportUrl);
-  if (!host) return null;
-  return loadInstalled().find((a) => transportHost(a.transportUrl) === host) ?? null;
+  const base = transportBaseKey(transportUrl);
+  if (!base) return null;
+  return loadInstalled().find((a) => transportBaseKey(a.transportUrl) === base) ?? null;
 }
 
-export type AddonUrlParse =
-  | { kind: "ok"; url: string }
-  | { kind: "error"; message: string };
+export type AddonUrlParse = { kind: "ok"; url: string } | { kind: "error"; message: string };
 
 export function parseAddonUrl(input: string): AddonUrlParse {
   let raw = input.trim();
@@ -222,27 +296,35 @@ export function parseAddonUrl(input: string): AddonUrlParse {
   if (!/^https?:\/\//i.test(raw)) {
     return { kind: "error", message: "URL must start with https:// or stremio://" };
   }
-  if (!/manifest\.json(\?.*)?$/i.test(raw)) {
-    raw = raw + "/manifest.json";
-  }
   try {
-    new URL(raw);
+    const url = new URL(raw);
+    if (!/\/manifest\.json$/i.test(url.pathname)) {
+      url.pathname = url.pathname.replace(/\/(?:configure)?\/?$/i, "") + "/manifest.json";
+    }
+    return { kind: "ok", url: url.href };
   } catch {
     return { kind: "error", message: "That doesn't look like a valid URL." };
   }
-  return { kind: "ok", url: raw };
 }
 
-function validateManifest(m: unknown): { ok: true; manifest: Addon["manifest"] } | { ok: false; error: string } {
+function validateManifest(
+  m: unknown,
+): { ok: true; manifest: Addon["manifest"] } | { ok: false; error: string } {
   if (!m || typeof m !== "object") return { ok: false, error: "Manifest is not a JSON object." };
   const obj = m as Record<string, unknown>;
-  if (typeof obj.id !== "string" || obj.id.length === 0) return { ok: false, error: "Manifest is missing an `id`." };
-  if (typeof obj.name !== "string" || obj.name.length === 0) return { ok: false, error: "Manifest is missing a `name`." };
+  if (typeof obj.id !== "string" || obj.id.length === 0)
+    return { ok: false, error: "Manifest is missing an `id`." };
+  if (typeof obj.name !== "string" || obj.name.length === 0)
+    return { ok: false, error: "Manifest is missing a `name`." };
   return { ok: true, manifest: obj as Addon["manifest"] };
 }
 
 export async function fetchManifestAt(transportUrl: string): Promise<Addon["manifest"]> {
-  const res = await fetch(transportUrl, { headers: { Accept: "application/json" } });
+  // A self-hosted addon lives on loopback/LAN, which the guarded bridge fetch
+  // rejects outright ("blocked internal target"). The URL came from the user, so
+  // it may reach the local network — public URLs keep the DNS-rebinding guard.
+  const doFetch = isLocalNetworkUrl(transportUrl) ? safeFetchLocal : fetch;
+  const res = await doFetch(transportUrl, { headers: { Accept: "application/json" } });
   if (!res.ok) throw new Error(`Manifest fetch failed (HTTP ${res.status}). Check the URL.`);
   let json: unknown;
   try {
@@ -257,53 +339,60 @@ export async function fetchManifestAt(transportUrl: string): Promise<Addon["mani
 
 export type InstallResult = {
   addon: Addon;
-  syncedToStremio: boolean;
+  savedLocally: true;
   replaced: boolean;
 };
 
 export async function installAddon(id: string, transportUrl: string): Promise<Addon> {
+  const owner = storeKey("installed");
   const manifest = await fetchManifestAt(transportUrl);
+  if (owner !== storeKey("installed"))
+    throw new Error("Profile changed during addon installation. Retry in the intended profile.");
   const canonicalId = manifest.id || id;
-  const next = loadInstalled().filter((a) => a.transportUrl !== transportUrl);
+  const before = loadInstalled();
+  // Exact URLs identify installations. Distinct configurations with the same ID coexist.
+  const next = before.filter((a) => a.transportUrl !== transportUrl);
+  const replaced = before.filter((a) => a.transportUrl === transportUrl);
+  const replacedUrls = replaced.map((a) => a.transportUrl);
+  if (replaced.length > 0) {
+    preserveOrderOnReplace(replacedUrls, transportUrl);
+  }
   next.push({ id: canonicalId, transportUrl, installedAt: Date.now(), manifest });
   saveInstalled(next);
   const addon: Addon = { manifest, transportUrl };
-  await pushToStremio(addon, "install");
   return addon;
 }
 
 export async function installFromUrl(
   rawUrl: string,
-  options: { replaceId?: string } = {},
+  options: { replaceId?: string; replaceUrl?: string } = {},
 ): Promise<InstallResult> {
   const parsed = parseAddonUrl(rawUrl);
   if (parsed.kind === "error") throw new Error(parsed.message);
+  const owner = storeKey("installed");
   const manifest = await fetchManifestAt(parsed.url);
+  if (owner !== storeKey("installed"))
+    throw new Error("Profile changed during addon installation. Retry in the intended profile.");
   const id = manifest.id;
   const before = loadInstalled();
-  const replaceId = options.replaceId && options.replaceId !== id ? options.replaceId : null;
-  const replacedById = before.some((a) => a.id === id);
-  const replacedByOld = replaceId != null && before.some((a) => a.id === replaceId);
-  const next = before.filter((a) => a.transportUrl !== parsed.url && (!replaceId || a.id !== replaceId));
+  const byId = options.replaceId ? before.filter((a) => a.id === options.replaceId) : [];
+  if (!options.replaceUrl && byId.length > 1)
+    throw new Error(
+      "Choose the addon configuration to replace. Other configurations will be kept.",
+    );
+  const replaceUrl = options.replaceUrl ?? byId[0]?.transportUrl;
+  const replaced = before.filter(
+    (a) => a.transportUrl === parsed.url || a.transportUrl === replaceUrl,
+  );
+  const next = before.filter((a) => !replaced.includes(a));
+  const replacedUrls = replaced.map((a) => a.transportUrl);
+  if (replaced.length > 0) {
+    preserveOrderOnReplace(replacedUrls, parsed.url);
+  }
   next.push({ id, transportUrl: parsed.url, installedAt: Date.now(), manifest });
   saveInstalled(next);
   const addon: Addon = { manifest, transportUrl: parsed.url };
-  const syncedToStremio = await pushToStremio(addon, "install");
-  if (replaceId && replaceId !== id) {
-    const authKey = readAuthKey();
-    if (authKey) {
-      try {
-        const current = await userAddons(authKey);
-        const trimmed = current.filter((a) => a.manifest.id !== replaceId);
-        if (trimmed.length !== current.length) {
-          await setUserAddons(authKey, trimmed);
-        }
-      } catch {
-        /* noop */
-      }
-    }
-  }
-  return { addon, syncedToStremio, replaced: replacedById || replacedByOld };
+  return { addon, savedLocally: true, replaced: replaced.length > 0 };
 }
 
 export async function uninstallAddon(id: string, transportUrl?: string): Promise<void> {
@@ -320,18 +409,10 @@ export async function uninstallAddon(id: string, transportUrl?: string): Promise
     for (const a of removed) if (disabled.delete(a.transportUrl)) touched = true;
     if (touched) saveDisabledAddons(disabled);
   }
-  const authKey = readAuthKey();
-  if (!authKey) return;
-  const current = await userAddons(authKey).catch(() => [] as Addon[]);
-  const filtered = transportUrl
-    ? current.filter((a) => a.transportUrl !== transportUrl)
-    : current.filter((a) => a.manifest.id !== id);
-  if (filtered.length !== current.length) {
-    await setUserAddons(authKey, filtered).catch(() => {});
-  }
 }
 
 export async function fetchInstalledAddons(): Promise<Addon[]> {
+  const owner = storeKey("installed");
   const list = loadInstalled();
   if (list.length === 0) return [];
   const tasks = list.map(async (entry): Promise<Addon | null> => {
@@ -340,8 +421,9 @@ export async function fetchInstalledAddons(): Promise<Addon[]> {
     }
     try {
       const manifest = await fetchManifestAt(entry.transportUrl);
+      if (owner !== storeKey("installed")) return null;
       const updated = loadInstalled().map((e) =>
-        e.id === entry.id ? { ...e, manifest } : e,
+        e.transportUrl === entry.transportUrl ? { ...e, manifest } : e,
       );
       saveInstalled(updated);
       return { manifest, transportUrl: entry.transportUrl };
@@ -357,7 +439,10 @@ export function manifestToConfigureUrl(transportUrl: string): string {
   return transportUrl.replace(/manifest\.json(\?.*)?$/i, "configure");
 }
 
-export function manifestToShareUrl(transportUrl: string, scheme: "https" | "stremio" = "https"): string {
+export function manifestToShareUrl(
+  transportUrl: string,
+  scheme: "https" | "stremio" = "https",
+): string {
   if (scheme === "stremio") {
     return transportUrl.replace(/^https?:\/\//i, "stremio://");
   }

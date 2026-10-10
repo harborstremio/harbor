@@ -1,5 +1,6 @@
 import { useEffect, useRef, useState } from "react";
-import { Info, Play, Tv } from "lucide-react";
+import { Info, Link2, Tv } from "lucide-react";
+import { Play } from "@/components/icons/play-filled";
 import type { Meta } from "@/lib/cinemeta";
 import { useT } from "@/lib/i18n";
 import { useFavorites } from "@/lib/iptv/favorites";
@@ -12,6 +13,7 @@ export function GuideChannelCell({
   channel,
   onPlay,
   onInfo,
+  onMatch,
   index,
   hydrated,
   current,
@@ -20,6 +22,7 @@ export function GuideChannelCell({
   channel: IptvChannel;
   onPlay: (ch: IptvChannel) => void;
   onInfo?: (meta: Meta) => void;
+  onMatch?: (trigger: HTMLButtonElement) => void;
   index: number;
   hydrated?: Meta | null;
   current?: boolean;
@@ -60,7 +63,7 @@ export function GuideChannelCell({
           >
             {String(index + 1).padStart(3, "0")}
           </span>
-          <div className="flex h-12 w-12 shrink-0 items-center justify-center overflow-hidden rounded-lg bg-elevated">
+          <div className="flex h-12 w-12 shrink-0 items-center justify-center overflow-hidden rounded-md bg-canvas ring-1 ring-inset ring-edge-soft">
             {posterUrl ? (
               <img
                 src={posterUrl}
@@ -109,12 +112,25 @@ export function GuideChannelCell({
           </div>
         </button>
       </HoverTooltip>
-      <FavoriteButton
-        active={isFav}
-        onToggle={() => favorites.toggle(channel)}
-        size={15}
-        variant="inline"
-      />
+      <div className="flex shrink-0 flex-col items-center gap-1">
+        <FavoriteButton
+          active={isFav}
+          onToggle={() => favorites.toggle(channel)}
+          size={15}
+          variant="inline"
+        />
+        {onMatch && (
+          <button
+            type="button"
+            onClick={(e) => onMatch(e.currentTarget)}
+            aria-label={`${t("Match EPG")}: ${displayName}`}
+            title={t("Match EPG")}
+            className="flex h-7 w-7 items-center justify-center rounded-md text-ink-subtle transition-colors hover:bg-elevated hover:text-ink"
+          >
+            <Link2 size={14} strokeWidth={1.9} />
+          </button>
+        )}
+      </div>
       {hydrated && onInfo && (
         <button
           onClick={() => onInfo(hydrated)}

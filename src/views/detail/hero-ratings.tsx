@@ -18,15 +18,21 @@ function ScoreItem({
   label,
   sublabel,
   onClick,
+  compact = false,
   children,
 }: {
   label: string;
   sublabel?: string;
   onClick?: () => void;
+  compact?: boolean;
   children: ReactNode;
 }) {
   const inner = (
-    <span className="flex items-center gap-1.5 px-2.5 py-1 text-[13px] font-semibold text-ink">
+    <span
+      className={`flex items-center font-semibold text-ink ${
+        compact ? "gap-1 px-1.5 py-0.5 text-[11.5px]" : "gap-1.5 px-2.5 py-1 text-[13px]"
+      }`}
+    >
       {children}
     </span>
   );
@@ -68,6 +74,7 @@ export function HeroRatings({
   ratingSource = "imdb",
   animeImdbRating,
   bare = false,
+  compact = false,
   tmdbRating,
 }: {
   rating?: string;
@@ -80,6 +87,7 @@ export function HeroRatings({
   ratingSource?: "imdb" | "tmdb";
   animeImdbRating?: string | null;
   bare?: boolean;
+  compact?: boolean;
   tmdbRating?: string | null;
 }) {
   const t = useT();
@@ -98,7 +106,7 @@ export function HeroRatings({
 
   if (rating && showPrimary && primaryProviderOn) {
     items.push(
-      <ScoreItem
+      <ScoreItem compact={compact}
         key="imdb"
         label={isAnime ? t("MyAnimeList") : ratingSource === "tmdb" ? t("TMDB") : t("IMDb")}
         sublabel={isAnime ? t("Score /10") : t("Rating /10")}
@@ -122,7 +130,7 @@ export function HeroRatings({
 
   if (isAnime && animeImdbRating && showPrimary && settings.showImdbDetail) {
     items.push(
-      <ScoreItem
+      <ScoreItem compact={compact}
         key="anime-imdb"
         label={t("IMDb")}
         sublabel={t("Rating /10")}
@@ -136,7 +144,7 @@ export function HeroRatings({
 
   if (tmdbRating && showPrimary && settings.showTmdbDetail && ratingSource !== "tmdb" && !isAnime) {
     items.push(
-      <ScoreItem key="tmdb" label={t("TMDB")} sublabel={t("Rating /10")}>
+      <ScoreItem compact={compact} key="tmdb" label={t("TMDB")} sublabel={t("Rating /10")}>
         <span className="text-[10px] font-bold tracking-tight text-ink-muted">TMDB</span>
         <span>{tmdbRating}</span>
       </ScoreItem>,
@@ -145,7 +153,7 @@ export function HeroRatings({
 
   if (settings.showDetailRatings && settings.showRtDetail && scores?.rtCritics != null) {
     items.push(
-      <ScoreItem key="rt-critics" label={t("Rotten Tomatoes Critics")} sublabel={t("Tomatometer")}>
+      <ScoreItem compact={compact} key="rt-critics" label={t("Rotten Tomatoes Critics")} sublabel={t("Tomatometer")}>
         <RtBadge score={scores.rtCritics} className="h-[16px] w-auto" />
         <span>{scores.rtCritics}%</span>
       </ScoreItem>,
@@ -154,7 +162,7 @@ export function HeroRatings({
 
   if (settings.showDetailRatings && settings.showRtAudienceDetail && mdblist?.rtAudience != null) {
     items.push(
-      <ScoreItem key="rt-audience" label={t("Rotten Tomatoes Audience")} sublabel={t("Popcornmeter")}>
+      <ScoreItem compact={compact} key="rt-audience" label={t("Rotten Tomatoes Audience")} sublabel={t("Popcornmeter")}>
         <Popcorn
           size={15}
           strokeWidth={2}
@@ -167,7 +175,7 @@ export function HeroRatings({
 
   if (settings.showDetailRatings && settings.showLetterboxdDetail && mdblist?.letterboxd != null) {
     items.push(
-      <ScoreItem
+      <ScoreItem compact={compact}
         key="letterboxd"
         label={t("Letterboxd")}
         sublabel={t("Average /5")}
@@ -185,9 +193,9 @@ export function HeroRatings({
 
   if (settings.showDetailRatings && settings.showMetacriticDetail && metacritic != null) {
     items.push(
-      <ScoreItem key="metacritic" label={t("Metacritic")} sublabel={t("Metascore")}>
+      <ScoreItem compact={compact} key="metacritic" label={t("Metacritic")} sublabel={t("Metascore")}>
         <span
-          className={`flex h-[18px] min-w-[22px] items-center justify-center rounded-[4px] px-1 text-[11px] font-bold text-white ${metacriticBand(metacritic)}`}
+          className={`flex h-[18px] min-w-[22px] items-center justify-center rounded-sm px-1 text-[11px] font-bold text-canvas ${metacriticBand(metacritic)}`}
         >
           {metacritic}
         </span>
@@ -197,7 +205,7 @@ export function HeroRatings({
 
   if (settings.showDetailRatings && settings.showTraktDetail && mdblist?.trakt != null) {
     items.push(
-      <ScoreItem
+      <ScoreItem compact={compact}
         key="trakt"
         label={t("Trakt")}
         onClick={imdbId ? () => onOpenUrl(`https://trakt.tv/search/imdb/${imdbId}`) : undefined}
@@ -210,13 +218,13 @@ export function HeroRatings({
 
   const effectiveSimklRating = simklCommunityRating ?? mdblist?.simkl ?? null;
 
-  if (settings.showSimklBadge && settings.simklShowCommunityRatings && effectiveSimklRating != null) {
+  if (settings.showDetailRatings && settings.showSimklDetail && effectiveSimklRating != null) {
     items.push(
-      <ScoreItem
+      <ScoreItem compact={compact}
         key="simkl"
         label={t("SIMKL")}
         sublabel={t("Average /10")}
-        onClick={imdbId ? () => onOpenUrl(`https://simkl.com/search/id/?i=${imdbId}`) : undefined}
+        onClick={imdbId ? () => onOpenUrl(`https://api.simkl.com/redirect?to=simkl&imdb=${imdbId}`) : undefined}
       >
         <img
           src={simklLogo}
@@ -230,7 +238,7 @@ export function HeroRatings({
 
   if (settings.showDetailRatings && settings.showMdblistDetail && mdblist?.score != null) {
     items.push(
-      <ScoreItem
+      <ScoreItem compact={compact}
         key="mdblist"
         label={t("MDBList")}
         onClick={imdbId ? () => onOpenUrl(`https://mdblist.com/${mediaType}/${imdbId}`) : undefined}
@@ -261,7 +269,7 @@ export function HeroRatings({
   }
 
   return (
-    <div className="inline-flex items-center rounded-full border border-edge-soft bg-canvas/70 px-1 py-0.5">
+    <div className="inline-flex items-center rounded-full bg-canvas/80 px-1 py-0.5">
       {items.map((item, i) => (
         <span key={i} className="flex items-center">
           {i > 0 && <Divider />}

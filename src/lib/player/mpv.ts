@@ -1,13 +1,34 @@
 import { invoke } from "@tauri-apps/api/core";
-import { subtitleDownloadArgs } from "./subtitle-load";
+import { SubtitlePreparationError, prepareSubtitle } from "@/lib/subtitles/prepare";
+import { subtitleTrackDownloadHeaders } from "@/lib/subtitles/provider-auth";
+import { takePreparedSubtitle } from "@/lib/subtitles/prepared-registry";
+import { markLimitReached } from "@/lib/subtitles/limit-signal";
+import { clearPendingSub, markPendingSub } from "@/lib/subtitles/pending-subs";
+import { registerTranslationJob } from "@/lib/subtitles/translation-jobs";
 import { mpvFailureSnapshot } from "./mpv-failure";
 import { isLinuxDesktop, isMacDesktop, isWindowsDesktop } from "@/lib/platform";
+import type { MonitorInfo } from "@/lib/monitors";
 import { makeSafeTauriUnlisten } from "@/lib/tauri-unlisten";
 import { listen, type UnlistenFn } from "@tauri-apps/api/event";
+import type { SubtitleLoadMetadata } from "@/lib/subtitles/types";
+import type { SubCue } from "@/lib/subtitles/parser";
 import {
-  emptySnapshot,
+  invalidateMpvSubtitleFpsContext,
+  markMpvSubtitleFpsSessionRecreated,
+  resetMpvSubtitleFpsForTransition,
+} from "./mpv-properties";
+import { SUBTITLE_FPS_TRANSITION_FAILED_EVENT } from "./subtitle-fps";
+import { finishPlaybackTrace, markPlaybackTrace } from "@/lib/perf/playback-trace";
+import { PreparedSubtitleCleanupRegistry } from "./prepared-subtitle-cleanups";
+import { SubtitleSelectionCoordinator } from "./subtitle-selection";
+import { PreparedSubtitleSeedBatch } from "@/lib/subtitles/seed-batch";
+import { isSafeProviderSubtitleUrl } from "@/lib/subtitles/provider-url";
+import {
+  initialPlayerSnapshot,
   type PlayerBridge,
+  type PlayerEmbedRect,
   type PlayerCapabilities,
+  type PlayerSeekPrecision,
   type PlayerSnapshot,
   type PlayerSource,
   type TrackInfo,
@@ -20,7 +41,23 @@ export type MpvProbe = {
   error: string | null;
 };
 
-export async function probeMpv(): Promise<MpvProbe> {
+let mpvProbePromise: Promise<MpvProbe> | null = null;
+
+type RetainedMpv = {
+  configKey: string;
+  isLive: boolean;
+  startupProfile: "standard" | "high-bitrate";
+};
+let retainedMpv: RetainedMpv | null = null;
+let retainedMpvRelease: Promise<void> | null = null;
+
+export function probeMpv(): Promise<MpvProbe> {
+  if (mpvProbePromise) return mpvProbePromise;
+  mpvProbePromise = runMpvProbe();
+  return mpvProbePromise;
+}
+
+async function runMpvProbe(): Promise<MpvProbe> {
   try {
     return await invoke<MpvProbe>("mpv_probe");
   } catch (e) {
@@ -55,26 +92,77 @@ type MpvEvent =
   | { event: "file-loaded" }
   | { event: string; [k: string]: unknown };
 
-export type MpvRect = {
-  cssLeft: number;
-  cssTop: number;
-  cssWidth: number;
-  cssHeight: number;
-  cssViewW: number;
-  cssViewH: number;
+type ExternalSubtitleMetadata = {
+  url: string;
+  lang?: string;
+  title?: string;
+  cues?: SubCue[];
+  originalUrl?: string;
+  downloadAuth?: SubtitleLoadMetadata["downloadAuth"];
+  format?: SubtitleLoadMetadata["format"];
+  release?: string;
+  provider?: string;
+  providerDerived?: boolean;
+  fps?: number;
+  downloads?: number;
+  author?: string;
+  uploadedAt?: string;
+  rating?: SubtitleLoadMetadata["rating"];
+  productionType?: string;
+  releaseType?: string;
+  hearingImpaired?: boolean;
+  forced?: boolean;
+  foreignOnly?: boolean;
+  machineTranslated?: boolean;
+  fromTrusted?: boolean;
+  providerMatch?: SubtitleLoadMetadata["providerMatch"];
+  timingStatus?: SubtitleLoadMetadata["timingStatus"];
+  timingMeasurementStatus?: SubtitleLoadMetadata["timingMeasurementStatus"];
+  matchExplanation?: SubtitleLoadMetadata["matchExplanation"];
+  prepared?: boolean;
+  autoSelectionEligible?: boolean;
+  matchScore?: number;
+  matchConfidence?: SubtitleLoadMetadata["matchConfidence"];
+  matchReasons?: string[];
+  subId?: string;
 };
+
+export type MpvRect = PlayerEmbedRect;
 
 export type MpvOptions = {
   anime4k: boolean;
   hdrToSdr: boolean;
   rtxHdr?: boolean;
+  rtxVsr?: boolean;
   embed?: boolean;
   anime4kShaders?: string[];
   d3d11Flip?: boolean;
   macEdr?: boolean;
+  renderer?: "gpu-next" | "gpu";
+  forceYuv420p?: boolean;
   extraOptions?: string;
+  fullDownload?: boolean;
+  separateDisplay?: MonitorInfo | null;
+  separateCoverTaskbar?: boolean;
   getEmbedRect?: () => Promise<MpvRect | null> | MpvRect | null;
 };
+
+function mpvReuseConfigKey(options: MpvOptions | undefined, hdrToSdr: boolean): string {
+  return JSON.stringify({
+    anime4k: options?.anime4k === true,
+    hdrToSdr,
+    rtxHdr: options?.rtxHdr === true,
+    rtxVsr: options?.rtxVsr === true,
+    embed: options?.embed === true,
+    anime4kShaders: options?.anime4kShaders ?? [],
+    d3d11Flip: options?.d3d11Flip === true,
+    macEdr: options?.macEdr === true,
+    renderer: options?.renderer ?? "gpu-next",
+    forceYuv420p: options?.forceYuv420p === true,
+    extraOptions: options?.extraOptions ?? "",
+    fullDownload: options?.fullDownload === true,
+  });
+}
 
 const AUDIO_PROFILE_AF: Record<string, string> = {
   bass: "lavfi=[bass=g=7:f=110:w=0.6]",
@@ -84,6 +172,69 @@ const AUDIO_PROFILE_AF: Record<string, string> = {
 };
 
 const DEFAULT_UA = "VLC/3.0.20 LibVLC/3.0.20";
+
+type BufferPhase = "startup" | "steady";
+
+function hasCustomBufferPolicy(extraOptions: string | undefined): boolean {
+  return /(?:^|\n)\s*(?:cache(?:-[\w-]+)?|demuxer-(?:max|readahead)[\w-]*|stream-buffer-size)\s*=/im.test(
+    extraOptions ?? "",
+  );
+}
+
+function defaultVodBufferProperties(
+  profile: "standard" | "high-bitrate",
+  phase: BufferPhase,
+): Array<[string, string]> {
+  const highBitrate = profile === "high-bitrate";
+  if (phase === "startup") {
+    return [
+      ["cache-secs", highBitrate ? "45" : "30"],
+      ["cache-pause-wait", highBitrate ? "2" : "1"],
+      ["demuxer-max-bytes", highBitrate ? "256MiB" : "128MiB"],
+      ["demuxer-max-back-bytes", highBitrate ? "64MiB" : "32MiB"],
+      ["demuxer-readahead-secs", highBitrate ? "45" : "30"],
+      ["stream-buffer-size", highBitrate ? "32MiB" : "16MiB"],
+    ];
+  }
+  return [
+    ["cache-secs", "300"],
+    ["cache-pause-wait", highBitrate ? "2" : "1"],
+    ["demuxer-max-bytes", highBitrate ? "768MiB" : "512MiB"],
+    ["demuxer-max-back-bytes", "64MiB"],
+    ["demuxer-readahead-secs", "300"],
+    ["stream-buffer-size", highBitrate ? "64MiB" : "32MiB"],
+  ];
+}
+
+async function resetSubtitleFpsBeforeMpvTransition(): Promise<void> {
+  await resetMpvSubtitleFpsForTransition();
+}
+
+let appliedAudioDevice: string | null = null;
+
+async function applyAudioDevice(want: string): Promise<void> {
+  let target = want;
+  if (target !== "auto") {
+    try {
+      const devices = await invoke<Array<{ name: string }>>("mpv_audio_devices");
+      if (devices.length > 0 && !devices.some((d) => d.name === target)) {
+        console.warn(`[audio] device "${target}" is no longer present, falling back to auto`);
+        target = "auto";
+        appliedAudioDevice = "auto";
+      }
+    } catch {
+      /* device list unavailable, try the stored value anyway */
+    }
+  }
+  try {
+    await invoke("mpv_set_property", { name: "audio-device", value: target });
+  } catch (e) {
+    if (target === "auto") return;
+    console.warn(`[audio] could not select "${target}", falling back to auto`, e);
+    appliedAudioDevice = "auto";
+    await invoke("mpv_set_property", { name: "audio-device", value: "auto" }).catch(() => {});
+  }
+}
 
 async function applyHeaderProps(headers?: Record<string, string>): Promise<void> {
   let ua = DEFAULT_UA;
@@ -98,14 +249,18 @@ async function applyHeaderProps(headers?: Record<string, string>): Promise<void>
   );
 }
 
+function normalizeMediaPath(path: string): string {
+  return path.replace(/\\/g, "/");
+}
+
 export function createMpvBridge(mpvOptions?: MpvOptions): PlayerBridge {
   let host: HTMLElement | null = null;
-  let snap: PlayerSnapshot = { ...emptySnapshot };
+  let snap: PlayerSnapshot = initialPlayerSnapshot();
   let profileAf = "";
   let hdrToSdr = mpvOptions?.hdrToSdr ?? true;
   const applyAudioFilters = () => {
     const parts: string[] = [];
-    if (snap.audioNormalize) parts.push("dynaudnorm=f=500:g=31:p=0.9:m=4");
+    if (snap.audioNormalize) parts.push("dynaudnorm=f=500:g=31:p=0.9:m=4:b=1");
     if (profileAf) parts.push(profileAf);
     if (parts.length > 0) parts.push("lavfi=[alimiter=limit=0.97]");
     invoke("mpv_command", { cmd: ["af", "set", parts.join(",")] }).catch(() => {});
@@ -114,15 +269,279 @@ export function createMpvBridge(mpvOptions?: MpvOptions): PlayerBridge {
   let unlistenEvent: UnlistenFn | null = null;
   let unlistenLog: UnlistenFn | null = null;
   let pendingTracks: Record<string, unknown[]> = {};
-  let geomTimer: number | null = null;
+  let stopGeometryTracking: (() => void) | null = null;
+  let moveEmbeddedSurface: PlayerBridge["moveEmbeddedSurface"];
   let geomKickHandler: ((e?: Event) => void) | null = null;
   let geomForceHandler: (() => void) | null = null;
   let geomResizeObserver: ResizeObserver | null = null;
   let geomTauriUnlisten: Array<() => void> = [];
   let mpvStarted = false;
+  let currentIsLive: boolean | null = null;
+  let currentStartupProfile: "standard" | "high-bitrate" | null = null;
+  let mediaLoadId = 0;
+  let steadyBufferLoadId = 0;
+  let activeTraceId: string | null = null;
+  let expectedMediaPath: string | null = null;
+  let observedMediaPath: string | null = null;
+  let mediaRevision = 0;
   let suppressEndFileUntil = 0;
   let svpFilterFailed = false;
-  const urlByExternalFilename = new Map<string, string>();
+  let secondarySid: string | null = null;
+  let primarySubtitleOff = false;
+  const confirmPrimarySubtitleVisibility = (off: boolean) => {
+    primarySubtitleOff = off;
+    if (off) {
+      // mpv may not deliver an empty sub-text event when the track is disabled.
+      snap.subText = "";
+      snap.subStartSec = 0;
+    }
+  };
+  let subtitleAddSelectionId = 0;
+  const mainSubtitleSelection = new SubtitleSelectionCoordinator();
+  const secondarySubtitleSelection = new SubtitleSelectionCoordinator();
+  let pendingSubtitlePick: { id: string | null; origin: string } | null = null;
+  let subtitleTransitionQueue: Promise<void> = Promise.resolve();
+  const enqueueSubtitleTransition = <T>(task: () => Promise<T>): Promise<T> => {
+    const result = subtitleTransitionQueue.then(task, task);
+    subtitleTransitionQueue = result.then(
+      () => undefined,
+      () => undefined,
+    );
+    return result;
+  };
+  const invalidateSubtitleSelections = () => {
+    mainSubtitleSelection.invalidate();
+    secondarySubtitleSelection.invalidate();
+    pendingSubtitlePick = null;
+  };
+  let observedPaused: boolean | null = null;
+  const applyDefaultVodBufferPhase = async (
+    profile: "standard" | "high-bitrate",
+    phase: BufferPhase,
+  ) => {
+    if (mpvOptions?.fullDownload || hasCustomBufferPolicy(mpvOptions?.extraOptions)) return;
+    await Promise.all(
+      defaultVodBufferProperties(profile, phase).map(async ([name, value]) => {
+        try {
+          await invoke("mpv_set_property", { name, value });
+        } catch (error) {
+          console.warn(`[mpv] could not set ${name} for the ${phase} buffer phase`, error);
+        }
+      }),
+    );
+  };
+  const urlByExternalFilename = new Map<string, ExternalSubtitleMetadata>();
+  const preparedSubtitleCleanups = new PreparedSubtitleCleanupRegistry();
+  const clearPreparedSubtitles = () => preparedSubtitleCleanups.clearAll();
+
+  const addSeedSubtitles = async (subtitles: PlayerSource["subtitles"], expectedLoadId: number) => {
+    const orderedSeeds = subtitles ?? [];
+    const seedBatch = new PreparedSubtitleSeedBatch(orderedSeeds);
+    const metadataBySeed = new Map<(typeof orderedSeeds)[number], ExternalSubtitleMetadata>();
+    for (const subtitle of orderedSeeds) {
+      if (expectedLoadId !== mediaLoadId) return;
+      const originalUrl = subtitle.url;
+      if (subtitle.trustedSource !== true && !isSafeProviderSubtitleUrl(originalUrl)) continue;
+      let mpvUrl = originalUrl;
+      let cleanup: (() => void) | null = null;
+      let preparedFormat: SubtitleLoadMetadata["format"];
+      let preparedCues: SubCue[] | undefined;
+      if (/^https?:/i.test(mpvUrl)) {
+        try {
+          const prepared = await prepareSubtitle({
+            url: mpvUrl,
+            language: subtitle.lang,
+            requestHeaders: subtitleTrackDownloadHeaders(
+              undefined,
+              mpvUrl,
+              subtitle.trustedSource !== true,
+            ),
+          });
+          mpvUrl = prepared.playableUrl;
+          cleanup = prepared.cleanup;
+          preparedFormat = prepared.format;
+          preparedCues = prepared.cues;
+        } catch (error) {
+          console.warn("[mpv] seed subtitle preparation failed", {
+            error: error instanceof Error ? error.name : "unknown",
+          });
+          continue;
+        }
+      }
+      if (expectedLoadId !== mediaLoadId) {
+        cleanup?.();
+        return;
+      }
+      mpvUrl = mpvUrl.replace(/\\/g, "/");
+      const externalMetadata: ExternalSubtitleMetadata = {
+        url: originalUrl,
+        lang: subtitle.lang,
+        cues: preparedCues,
+        originalUrl,
+        format: preparedFormat,
+        prepared: cleanup != null,
+        autoSelectionEligible: false,
+      };
+      metadataBySeed.set(subtitle, externalMetadata);
+      urlByExternalFilename.set(mpvUrl, externalMetadata);
+      try {
+        await invoke("mpv_sub_add", {
+          url: mpvUrl,
+          lang: subtitle.lang ?? null,
+          title: null,
+          select: false,
+        });
+        if (expectedLoadId !== mediaLoadId) {
+          if (urlByExternalFilename.get(mpvUrl) === externalMetadata) {
+            urlByExternalFilename.delete(mpvUrl);
+          }
+          cleanup?.();
+          return;
+        }
+        if (cleanup) {
+          preparedSubtitleCleanups.register(cleanup, expectedLoadId);
+        }
+        seedBatch.markReady(subtitle);
+      } catch {
+        if (urlByExternalFilename.get(mpvUrl) === externalMetadata) {
+          urlByExternalFilename.delete(mpvUrl);
+        }
+        cleanup?.();
+        /* one unavailable subtitle must not block media startup */
+      }
+    }
+    seedBatch.commit(
+      () => expectedLoadId === mediaLoadId,
+      (readySeeds) => {
+        const readyMetadata = new Set(
+          readySeeds
+            .map((subtitle) => metadataBySeed.get(subtitle))
+            .filter((metadata): metadata is ExternalSubtitleMetadata => metadata != null),
+        );
+        for (const metadata of readyMetadata) {
+          metadata.prepared = true;
+          metadata.autoSelectionEligible = true;
+        }
+        snap.subtitleTracks = snap.subtitleTracks.map((track) => {
+          const externalFilename = track.externalFilename?.replace(/\\/g, "/");
+          const metadata = externalFilename
+            ? urlByExternalFilename.get(externalFilename)
+            : undefined;
+          return metadata && readyMetadata.has(metadata)
+            ? { ...track, prepared: true, autoSelectionEligible: true }
+            : track;
+        });
+        emit();
+      },
+    );
+  };
+
+  const ensureGeometryTracking = async (opts: MpvOptions) => {
+    if (!opts.embed || !opts.getEmbedRect || geomKickHandler != null || isLinuxDesktop()) return;
+
+    let lastRect: MpvRect | null = null;
+    let frame: number | null = null;
+    let active = true;
+    let inFlight = false;
+    let queued = false;
+    let force = false;
+    let pendingMove: { rect: MpvRect; commit: () => void } | null = null;
+    const schedule = () => {
+      if (!active) return;
+      queued = true;
+      if (inFlight || frame != null) return;
+      frame = window.requestAnimationFrame(() => {
+        frame = null;
+        void tick();
+      });
+    };
+    const tick = async () => {
+      if (!active) return;
+      if (inFlight) { queued = true; return; }
+      inFlight = true;
+      queued = false;
+      const forced = force;
+      force = false;
+      const move = pendingMove;
+      pendingMove = null;
+      try {
+        const r = move?.rect ?? await opts.getEmbedRect!();
+        if (!active || !r) return;
+        if (
+          !forced &&
+          lastRect &&
+          lastRect.cssLeft === r.cssLeft &&
+          lastRect.cssTop === r.cssTop &&
+          lastRect.cssWidth === r.cssWidth &&
+          lastRect.cssHeight === r.cssHeight &&
+          lastRect.cssViewW === r.cssViewW &&
+          lastRect.cssViewH === r.cssViewH
+        ) {
+          move?.commit();
+          return;
+        }
+        await invoke("mpv_set_geometry", { geom: r });
+        if (active) {
+          lastRect = r;
+          move?.commit();
+        }
+      } catch {
+        lastRect = null;
+      } finally {
+        inFlight = false;
+        if (active && queued) void tick();
+      }
+    };
+
+    // A trailing debounce never runs during a continuous drag. Coalesce frames,
+    // with one native write in flight and the latest bounds queued behind it.
+    // Dock movement is already batched by useDockDrag. Send its new bounds in
+    // that same frame instead of making native video trail the chrome by a frame.
+    geomKickHandler = () => { void tick(); };
+    moveEmbeddedSurface = (rect, commit) => {
+      if (!active) return false;
+      pendingMove = { rect, commit };
+      void tick();
+      return true;
+    };
+    geomForceHandler = () => {
+      force = true;
+      schedule();
+    };
+    stopGeometryTracking = () => {
+      active = false;
+      queued = false;
+      pendingMove = null;
+      moveEmbeddedSurface = undefined;
+      if (frame != null) window.cancelAnimationFrame(frame);
+      frame = null;
+    };
+    window.addEventListener("resize", geomKickHandler);
+    window.addEventListener("harbor:mpv-refresh-geom", geomKickHandler);
+    window.addEventListener("harbor:mpv-force-geom", geomForceHandler);
+    if (host && typeof ResizeObserver !== "undefined") {
+      try {
+        geomResizeObserver = new ResizeObserver(schedule);
+        geomResizeObserver.observe(host);
+      } catch {
+        /* noop */
+      }
+    }
+    try {
+      const { getCurrentWindow } = await import("@tauri-apps/api/window");
+      const win = getCurrentWindow();
+      const unResized = await win.onResized(() => geomForceHandler?.());
+      const unMoved = await win.onMoved(() => geomForceHandler?.());
+      if (!active) { unResized(); unMoved(); return; }
+      geomTauriUnlisten.push(makeSafeTauriUnlisten(unResized), makeSafeTauriUnlisten(unMoved));
+    } catch {
+      /* noop */
+    }
+
+    // A retained Windows mpv child was hidden when the previous player view
+    // unmounted. Reapplying geometry also makes that native surface visible.
+    await tick();
+  };
 
   const handleSvpFilterFailure = () => {
     if (svpFilterFailed) return;
@@ -138,6 +557,72 @@ export function createMpvBridge(mpvOptions?: MpvOptions): PlayerBridge {
     const next: PlayerSnapshot = { ...snap };
     listeners.forEach((l) => l(next));
   };
+
+  // mpv's WASAPI output re-roots to the OS default audio device via its own
+  // hotplug notification. For device-topology changes (e.g. HDMI <-> Bluetooth,
+  // which differ in sample rate and format) that internal reload is unreliable
+  // and can leave audio routed to a now-unavailable endpoint, producing silence
+  // until the stream is restarted. When `audio-device-list` changes (mpv fires
+  // a property-change on every hotplug / default-device switch) we re-assert the
+  // device and force an `ao-reload`, which re-initializes the audio output onto
+  // the current default device — the same re-init a stream restart performs.
+  //
+  // After screensaver / system sleep, Windows can release the WASAPI endpoint
+  // without firing a hotplug event, leaving mpv with a stale device ID.  The
+  // `visibilitychange` listener below catches that case: when the app becomes
+  // visible again we schedule the same device re-assertion + ao-reload and
+  // re-select whichever audio track was active before the failure.
+  let audioDeviceReloadTimer: number | null = null;
+  const scheduleAudioDeviceReload = () => {
+    if (!isWindowsDesktop()) return;
+    if (!mpvStarted) return;
+    if (snap.status !== "playing" && snap.status !== "paused") return;
+    if (audioDeviceReloadTimer != null) window.clearTimeout(audioDeviceReloadTimer);
+    audioDeviceReloadTimer = window.setTimeout(() => {
+      audioDeviceReloadTimer = null;
+      void (async () => {
+        // Remember the selected audio track so we can restore it after the
+        // output reload deselects it (mpv drops the track on ao init failure).
+        const prevAid = snap.audioTracks.find((t) => t.selected)?.id ?? null;
+        await applyAudioDevice(appliedAudioDevice ?? "auto").catch(() => {});
+        await invoke("mpv_command", { cmd: ["ao-reload"] }).catch(() => {});
+        if (prevAid) {
+          await invoke("mpv_set_property", { name: "aid", value: prevAid }).catch(() => {});
+        }
+      })();
+    }, 300);
+  };
+
+  // After screensaver / system sleep Windows may silently release the WASAPI
+  // audio endpoint without firing a device-list hotplug event.  When the app
+  // becomes visible again we schedule an audio output reload so mpv re-binds
+  // to the current default device and restores audio.
+  const onVisibilityRestore = () => {
+    if (document.visibilityState !== "visible") return;
+    scheduleAudioDeviceReload();
+  };
+  if (typeof document !== "undefined") {
+    document.addEventListener("visibilitychange", onVisibilityRestore);
+  }
+
+  // A Windows screensaver paints over the window without hiding the document,
+  // so `visibilitychange` never fires for it. Dismissing the screensaver does
+  // return activation to the app window, so a refocus after a long absence is
+  // the wake signal here. The absence gate keeps ordinary alt-tab returns
+  // from paying for an `ao-reload` they don't need.
+  const FOCUS_RELOAD_MIN_ABSENT_MS = 60_000;
+  let lastWindowBlur = Date.now();
+  const onWindowBlur = () => {
+    lastWindowBlur = Date.now();
+  };
+  const onWindowFocusRestore = () => {
+    if (Date.now() - lastWindowBlur < FOCUS_RELOAD_MIN_ABSENT_MS) return;
+    scheduleAudioDeviceReload();
+  };
+  if (typeof window !== "undefined") {
+    window.addEventListener("blur", onWindowBlur);
+    window.addEventListener("focus", onWindowFocusRestore);
+  }
 
   const handleEvent = (raw: MpvEvent) => {
     if (raw.event === "log") {
@@ -155,20 +640,28 @@ export function createMpvBridge(mpvOptions?: MpvOptions): PlayerBridge {
     if (raw.event === "player-failure") {
       const reason = String((raw as { reason?: unknown }).reason ?? "");
       snap = mpvFailureSnapshot(snap, reason);
+      mediaRevision += 1;
+      invalidateSubtitleSelections();
+      clearPreparedSubtitles();
       mpvStarted = false;
+      finishPlaybackTrace(activeTraceId, "failed");
+      activeTraceId = null;
       invoke("mpv_stop").catch(() => {});
       emit();
     } else if (raw.event === "property-change") {
       const name = raw.name;
       const data = raw.data;
       if (name === "time-pos" && typeof data === "number") snap.positionSec = data;
+      if (name === "path" && typeof data === "string") observedMediaPath = data;
       if (name === "duration" && typeof data === "number") snap.durationSec = data;
       if (name === "pause" && typeof data === "boolean") {
+        observedPaused = data;
         snap.status = data ? "paused" : "playing";
       }
       if (name === "eof-reached" && data === true) snap.status = "ended";
       if (name === "volume" && typeof data === "number") snap.volume = data / 100;
       if (name === "mute" && typeof data === "boolean") snap.muted = data;
+      if (name === "audio-device-list") scheduleAudioDeviceReload();
       if (name === "track-list" && Array.isArray(data)) {
         const list = data as Array<Record<string, unknown>>;
         pendingTracks["track-list"] = list;
@@ -191,7 +684,13 @@ export function createMpvBridge(mpvOptions?: MpvOptions): PlayerBridge {
           const forced = t.forced === true;
           const isDefault = t.default === true;
           const hearingImpaired = t["hearing-impaired"] === true;
-          const selected = t.selected === true;
+          const mainSelection =
+            typeof t["main-selection"] === "number" ? (t["main-selection"] as number) : null;
+          const isSecondary =
+            type === "sub" &&
+            t.selected === true &&
+            (mainSelection === 1 || (mainSelection == null && id === secondarySid));
+          const selected = t.selected === true && !isSecondary;
           const codec = codecDesc ? codecDesc.toUpperCase() : undefined;
           const baseLabel = title || lang || `${type} ${id}`;
           const tags: string[] = [];
@@ -201,36 +700,73 @@ export function createMpvBridge(mpvOptions?: MpvOptions): PlayerBridge {
           if (hearingImpaired) tags.push("SDH");
           if (external) tags.push("External");
           const label = tags.length > 0 ? `${baseLabel} · ${tags.join(" · ")}` : baseLabel;
+          const extMeta =
+            external && externalFilename
+              ? urlByExternalFilename.get(externalFilename.replace(/\\/g, "/"))
+              : undefined;
           const info: TrackInfo = {
             id,
             label,
-            lang,
+            // A prepared file can lose (or mis-detect) the provider's language.
+            lang: extMeta?.lang || lang,
             kind: type === "audio" ? "audio" : "subtitle",
             selected,
             codec,
             channels,
             channelCount,
-            title,
+            title: extMeta?.title || title,
             external,
+            prepared: extMeta?.prepared,
+            autoSelectionEligible: extMeta?.autoSelectionEligible,
             externalFilename,
-            forced,
+            forced: forced || extMeta?.forced === true,
             default: isDefault,
-            hearingImpaired,
-            url:
-              external && externalFilename
-                ? (urlByExternalFilename.get(externalFilename) ?? undefined)
-                : undefined,
+            hearingImpaired: hearingImpaired || extMeta?.hearingImpaired === true,
+            secondary: isSecondary,
+            url: external && externalFilename ? extMeta?.url : undefined,
+            originalUrl: extMeta?.originalUrl,
+            downloadAuth: extMeta?.downloadAuth,
+            format: extMeta?.format,
+            release: extMeta?.release,
+            provider: extMeta?.provider,
+            providerDerived: extMeta?.providerDerived,
+            fps: extMeta?.fps,
+            downloads: extMeta?.downloads,
+            author: extMeta?.author,
+            uploadedAt: extMeta?.uploadedAt,
+            rating: extMeta?.rating,
+            productionType: extMeta?.productionType,
+            releaseType: extMeta?.releaseType,
+            foreignOnly: extMeta?.foreignOnly,
+            machineTranslated: extMeta?.machineTranslated,
+            fromTrusted: extMeta?.fromTrusted,
+            providerMatch: extMeta?.providerMatch,
+            timingStatus: extMeta?.timingStatus,
+            timingMeasurementStatus: extMeta?.timingMeasurementStatus,
+            matchExplanation: extMeta?.matchExplanation,
+            matchScore: extMeta?.matchScore,
+            matchConfidence: extMeta?.matchConfidence,
+            matchReasons: extMeta?.matchReasons,
+            subId: extMeta?.subId,
           };
           if (type === "audio") audio.push(info);
           else if (type === "sub") subs.push(info);
         }
         snap.audioTracks = audio;
         snap.subtitleTracks = subs;
+        confirmPrimarySubtitleVisibility(!subs.some((track) => track.selected));
       }
       if (name === "sub-delay" && typeof data === "number") snap.subDelaySec = data;
       if (name === "audio-delay" && typeof data === "number") snap.audioDelaySec = data;
-      if (name === "sub-text") snap.subText = typeof data === "string" ? data : "";
-      if (name === "sub-start" && typeof data === "number") snap.subStartSec = data;
+      if (name === "sub-text") {
+        snap.subText = !primarySubtitleOff && typeof data === "string" ? data : "";
+      }
+      if (name === "sub-start") {
+        snap.subStartSec = !primarySubtitleOff && typeof data === "number" ? data : 0;
+      }
+      if (name === "secondary-sub-text") {
+        snap.secondarySubText = typeof data === "string" ? data : "";
+      }
       if (name === "dwidth" && typeof data === "number") snap.videoWidth = data;
       if (name === "dheight" && typeof data === "number") snap.videoHeight = data;
       if (name === "video-params/gamma" && typeof data === "string" && data) snap.hdrGamma = data;
@@ -264,7 +800,30 @@ export function createMpvBridge(mpvOptions?: MpvOptions): PlayerBridge {
       }
       emit();
     } else if (raw.event === "file-loaded") {
-      snap.status = "playing";
+      markPlaybackTrace(activeTraceId, "file-loaded");
+      snap.status = observedPaused === true ? "paused" : "playing";
+      snap.errorCode = null;
+      snap.errorMessage = null;
+      emit();
+    } else if (raw.event === "playback-restart") {
+      if (
+        expectedMediaPath &&
+        observedMediaPath &&
+        normalizeMediaPath(expectedMediaPath) !== normalizeMediaPath(observedMediaPath)
+      ) {
+        return;
+      }
+      snap.status = observedPaused === true ? "paused" : "playing";
+      snap.buffering = false; // Playback recovered, including when the user remains paused.
+      snap.firstFrameReady = true;
+      if (currentIsLive === false && currentStartupProfile && steadyBufferLoadId !== mediaLoadId) {
+        steadyBufferLoadId = mediaLoadId;
+        const profile = currentStartupProfile;
+        void applyDefaultVodBufferPhase(profile, "steady");
+      }
+      markPlaybackTrace(activeTraceId, "first-frame");
+      finishPlaybackTrace(activeTraceId, "ready");
+      activeTraceId = null;
       snap.errorCode = null;
       snap.errorMessage = null;
       emit();
@@ -272,6 +831,7 @@ export function createMpvBridge(mpvOptions?: MpvOptions): PlayerBridge {
   };
 
   return {
+    moveEmbeddedSurface: (rect, commit) => moveEmbeddedSurface?.(rect, commit) ?? false,
     attach(h) {
       host = h;
       const embed = mpvOptions?.embed === true;
@@ -299,22 +859,64 @@ export function createMpvBridge(mpvOptions?: MpvOptions): PlayerBridge {
       host = null;
     },
     async load(src: PlayerSource) {
+      const activeLoadId = ++mediaLoadId;
+      if (activeTraceId && activeTraceId !== src.traceId) {
+        finishPlaybackTrace(activeTraceId, "replaced");
+      }
+      activeTraceId = src.traceId ?? null;
+      markPlaybackTrace(activeTraceId, "bridge-load");
+      if (retainedMpvRelease) await retainedMpvRelease;
+      const nextIsLive = src.isLive === true;
+      const nextStartupProfile =
+        src.startupProfile ?? currentStartupProfile ?? retainedMpv?.startupProfile ?? "standard";
+      const reuseConfigKey = mpvReuseConfigKey(mpvOptions, hdrToSdr);
+      const canRetain = isWindowsDesktop() && mpvOptions?.embed === true;
+      if (
+        !mpvStarted &&
+        canRetain &&
+        retainedMpv?.configKey === reuseConfigKey &&
+        retainedMpv.isLive === nextIsLive
+      ) {
+        mpvStarted = true;
+        currentIsLive = nextIsLive;
+        currentStartupProfile = nextStartupProfile;
+        retainedMpv = null;
+      } else if (mpvStarted && currentIsLive != null && currentIsLive !== nextIsLive) {
+        mpvStarted = false;
+      }
+      expectedMediaPath = src.url;
+      mediaRevision += 1;
+      invalidateSubtitleSelections();
       svpFilterFailed = false;
       snap.status = "loading";
       snap.errorCode = null;
       snap.errorMessage = null;
       snap.audioTracks = [];
       snap.subtitleTracks = [];
+      primarySubtitleOff = false;
       snap.subText = "";
       snap.subStartSec = 0;
+      snap.secondarySubText = "";
+      secondarySid = null;
       snap.positionSec = 0;
       snap.durationSec = 0;
       snap.bufferedSec = 0;
       snap.buffering = false;
+      snap.firstFrameReady = false;
       snap.hdrGamma = "";
       pendingTracks = {};
       urlByExternalFilename.clear();
       emit();
+      try {
+        await resetSubtitleFpsBeforeMpvTransition();
+      } catch (error) {
+        console.warn(
+          "[mpv] could not reset subtitle FPS before loading media; recreating the mpv session",
+          error,
+        );
+        markMpvSubtitleFpsSessionRecreated();
+        mpvStarted = false;
+      }
       if (!unlistenEvent) {
         unlistenEvent = makeSafeTauriUnlisten(
           await listen<MpvEvent>("mpv://event", (ev) => handleEvent(ev.payload)),
@@ -329,6 +931,14 @@ export function createMpvBridge(mpvOptions?: MpvOptions): PlayerBridge {
           try {
             suppressEndFileUntil = Date.now() + 1500;
             await invoke("mpv_command", { cmd: ["stop"] });
+            secondarySid = null;
+            await Promise.all([
+              invoke("mpv_set_property", { name: "sid", value: "no" }),
+              invoke("mpv_set_property", { name: "secondary-sid", value: "no" }),
+            ]);
+            if (!nextIsLive) {
+              await applyDefaultVodBufferPhase(nextStartupProfile, "startup");
+            }
             await applyHeaderProps(src.headers);
             const startAt =
               typeof src.startAtSec === "number" && src.startAtSec > 0 ? src.startAtSec : 0;
@@ -340,29 +950,13 @@ export function createMpvBridge(mpvOptions?: MpvOptions): PlayerBridge {
               `start=${startAt}`,
             ];
             await invoke("mpv_command", { cmd });
-            for (const s of src.subtitles ?? []) {
-              try {
-                let url = s.url;
-                if (/^https?:/i.test(url)) {
-                  try {
-                    url = await invoke<string>(
-                      "sub_download",
-                      subtitleDownloadArgs(s.url, { lang: s.lang }),
-                    );
-                  } catch {
-                    /* fall back to remote URL */
-                  }
-                }
-                await invoke("mpv_sub_add", {
-                  url,
-                  lang: s.lang ?? null,
-                  title: null,
-                  select: false,
-                });
-              } catch {
-                /* noop */
-              }
-            }
+            preparedSubtitleCleanups.clearBefore(activeLoadId);
+            currentIsLive = nextIsLive;
+            currentStartupProfile = nextStartupProfile;
+            markPlaybackTrace(activeTraceId, "loadfile-accepted");
+            await invoke("mpv_restore_media_surface");
+            await ensureGeometryTracking(opts);
+            void addSeedSubtitles(src.subtitles, activeLoadId);
             window.dispatchEvent(new Event("harbor:mpv-refresh-geom"));
             return;
           } catch (err) {
@@ -370,85 +964,46 @@ export function createMpvBridge(mpvOptions?: MpvOptions): PlayerBridge {
             mpvStarted = false;
           }
         }
+        retainedMpv = null;
         await invoke("mpv_start", {
           args: {
             url: src.url,
             startAtSec: src.startAtSec ?? null,
-            subtitles: (src.subtitles ?? []).map((s) => ({ url: s.url, lang: s.lang ?? null })),
+            subtitles: [],
             anime4k: opts.anime4k,
             hdrToSdr,
             rtxHdr: opts.rtxHdr === true,
+            rtxVsr: opts.rtxVsr === true,
             embed: opts.embed === true,
             anime4kShaders: opts.anime4kShaders ?? [],
             d3d11Flip: opts.d3d11Flip === true,
             macEdr: opts.macEdr === true,
             isLive: src.isLive === true,
+            fullDownload: opts.fullDownload === true,
+            startupProfile: nextStartupProfile,
             headers: src.headers ?? null,
+            renderer: opts.renderer ?? "gpu-next",
+            forceYuv420p: opts.forceYuv420p === true,
             extraOptions: opts.extraOptions || undefined,
+            separateDisplay: opts.embed === true ? null : (opts.separateDisplay ?? null),
+            separateCoverTaskbar: opts.separateCoverTaskbar ?? true,
           },
         });
+        preparedSubtitleCleanups.clearBefore(activeLoadId);
+        markPlaybackTrace(activeTraceId, "loadfile-accepted");
         mpvStarted = true;
+        currentIsLive = nextIsLive;
+        currentStartupProfile = nextStartupProfile;
+        void addSeedSubtitles(src.subtitles, activeLoadId);
         if (opts.embed) {
           await invoke("mpv_set_property", { name: "sub-visibility", value: false }).catch(
             () => {},
           );
         }
-        if (opts.embed && opts.getEmbedRect && geomTimer == null && !isLinuxDesktop()) {
-          let lastRect: MpvRect | null = null;
-          let geomDebounce: number | null = null;
-          const tick = async () => {
-            try {
-              const r = await opts.getEmbedRect!();
-              if (!r) return;
-              if (
-                lastRect &&
-                lastRect.cssLeft === r.cssLeft &&
-                lastRect.cssTop === r.cssTop &&
-                lastRect.cssWidth === r.cssWidth &&
-                lastRect.cssHeight === r.cssHeight &&
-                lastRect.cssViewW === r.cssViewW &&
-                lastRect.cssViewH === r.cssViewH
-              ) {
-                return;
-              }
-              lastRect = r;
-              await invoke("mpv_set_geometry", { geom: r });
-            } catch {}
-          };
-          tick();
-          geomKickHandler = () => {
-            if (geomDebounce != null) window.clearTimeout(geomDebounce);
-            geomDebounce = window.setTimeout(() => void tick(), 40);
-          };
-          geomForceHandler = () => {
-            lastRect = null;
-            geomKickHandler?.();
-          };
-          window.addEventListener("resize", geomKickHandler);
-          window.addEventListener("harbor:mpv-refresh-geom", geomKickHandler);
-          window.addEventListener("harbor:mpv-force-geom", geomForceHandler);
-          if (host && typeof ResizeObserver !== "undefined") {
-            try {
-              geomResizeObserver = new ResizeObserver(() => void tick());
-              geomResizeObserver.observe(host);
-            } catch {
-              /* noop */
-            }
-          }
-          try {
-            const { getCurrentWindow } = await import("@tauri-apps/api/window");
-            const win = getCurrentWindow();
-            const unResized = await win.onResized(() => geomKickHandler?.());
-            const unMoved = await win.onMoved(() => geomKickHandler?.());
-            geomTauriUnlisten.push(
-              makeSafeTauriUnlisten(unResized),
-              makeSafeTauriUnlisten(unMoved),
-            );
-          } catch {
-            /* noop */
-          }
-        }
+        await ensureGeometryTracking(opts);
       } catch (e) {
+        finishPlaybackTrace(activeTraceId, "failed");
+        activeTraceId = null;
         snap.status = "error";
         snap.errorCode = "source";
         snap.errorMessage = e instanceof Error ? e.message : String(e);
@@ -461,19 +1016,26 @@ export function createMpvBridge(mpvOptions?: MpvOptions): PlayerBridge {
     pause() {
       invoke("mpv_set_property", { name: "pause", value: true }).catch(() => {});
     },
-    seek(sec) {
+    seek(sec, precision: PlayerSeekPrecision = "exact") {
       snap.subText = "";
       snap.subStartSec = 0;
+      snap.secondarySubText = "";
       emit();
-      invoke("mpv_command", { cmd: ["seek", sec, "absolute", "exact"] }).catch(() => {});
+      const flags = precision === "keyframes" ? "absolute+keyframes" : "absolute+exact";
+      invoke("mpv_command", { cmd: ["seek", sec, flags] }).catch(() => {});
     },
     frameStep(dir) {
       invoke("mpv_command", { cmd: [dir > 0 ? "frame-step" : "frame-back-step"] }).catch(() => {});
     },
     setVolume(v) {
+      snap.volume = v;
+      if (v > 0) snap.muted = false;
+      emit();
       invoke("mpv_set_property", { name: "volume", value: Math.round(v * 100) }).catch(() => {});
     },
     setMuted(m) {
+      snap.muted = m;
+      emit();
       invoke("mpv_set_property", { name: "mute", value: m }).catch(() => {});
     },
     setRate(r) {
@@ -484,18 +1046,91 @@ export function createMpvBridge(mpvOptions?: MpvOptions): PlayerBridge {
     setAudioTrack(id) {
       invoke("mpv_set_property", { name: "aid", value: Number(id) || id }).catch(() => {});
     },
-    setSubtitleTrack(id) {
-      if (id == null) {
-        invoke("mpv_set_property", { name: "sid", value: "no" }).catch(() => {});
-        snap.subText = "";
-        snap.subStartSec = 0;
+    canAutoSelectSubtitle: () => mainSubtitleSelection.canAutoSelect(mediaRevision),
+    setSubtitleTrack(id, origin = "manual") {
+      if (!mainSubtitleSelection.claim(mediaRevision, origin)) return;
+      const requestMediaRevision = mediaRevision;
+      mainSubtitleSelection.begin(
+        requestMediaRevision,
+        id ?? "__harbor-subtitles-off__",
+        snap.subtitleTracks.find((track) => track.selected)?.id ?? null,
+      );
+      if (pendingSubtitlePick?.id === id && pendingSubtitlePick.origin === origin) return;
+      const pick = { id, origin };
+      pendingSubtitlePick = pick;
+      const canCommit = () =>
+        requestMediaRevision === mediaRevision &&
+        (origin === "manual" || mainSubtitleSelection.canAutoSelect(mediaRevision));
+      void enqueueSubtitleTransition(async () => {
+        if (!canCommit()) return;
+        await resetSubtitleFpsBeforeMpvTransition();
+        if (!canCommit()) return;
+        await invoke("mpv_set_property", {
+          name: "sid",
+          value: id == null ? "no" : Number(id) || id,
+        });
+        if (requestMediaRevision !== mediaRevision) return;
+        const selectedSid = await invoke<string | number | boolean>("mpv_get_property", {
+          name: "sid",
+        });
+        if (requestMediaRevision !== mediaRevision) return;
+        confirmPrimarySubtitleVisibility(
+          selectedSid === false ||
+            selectedSid === "no" ||
+            selectedSid === "" ||
+            selectedSid == null,
+        );
+        snap.subtitleTracks = snap.subtitleTracks.map((track) => ({
+          ...track,
+          selected: track.id === String(selectedSid),
+        }));
         emit();
-      } else {
-        invoke("mpv_set_property", { name: "sid", value: Number(id) || id }).catch(() => {});
-        snap.subText = "";
-        snap.subStartSec = 0;
-        emit();
-      }
+      })
+        .catch((error) => {
+          if (requestMediaRevision === mediaRevision) {
+            console.warn("[mpv] could not select a subtitle after resetting subtitle FPS", error);
+            window.dispatchEvent(new Event(SUBTITLE_FPS_TRANSITION_FAILED_EVENT));
+          }
+        })
+        .finally(() => {
+          if (pendingSubtitlePick === pick) pendingSubtitlePick = null;
+        });
+    },
+    setSecondarySubtitleTrack(id) {
+      const requestMediaRevision = mediaRevision;
+      const previousSecondarySid = secondarySid;
+      const request = secondarySubtitleSelection.begin(
+        requestMediaRevision,
+        id ?? "__harbor-secondary-subtitles-off__",
+        previousSecondarySid,
+      );
+      snap.secondarySubText = "";
+      emit();
+      void enqueueSubtitleTransition(async () => {
+        if (requestMediaRevision !== mediaRevision) return;
+        await resetSubtitleFpsBeforeMpvTransition();
+        if (requestMediaRevision !== mediaRevision) return;
+        secondarySid = id;
+        try {
+          await invoke("mpv_set_property", {
+            name: "secondary-sid",
+            value: id == null ? "no" : Number(id) || id,
+          });
+        } catch (error) {
+          if (secondarySubtitleSelection.isCurrent(request, mediaRevision)) {
+            secondarySid = previousSecondarySid;
+          }
+          throw error;
+        }
+      }).catch((error) => {
+        if (secondarySubtitleSelection.isCurrent(request, mediaRevision)) {
+          console.warn(
+            "[mpv] could not select a secondary subtitle after resetting subtitle FPS",
+            error,
+          );
+          window.dispatchEvent(new Event(SUBTITLE_FPS_TRANSITION_FAILED_EVENT));
+        }
+      });
     },
     setSubVisible(on) {
       invoke("mpv_set_property", { name: "sub-visibility", value: on }).catch(() => {});
@@ -524,43 +1159,210 @@ export function createMpvBridge(mpvOptions?: MpvOptions): PlayerBridge {
     },
     setAnime4kShaders(shaders) {
       const sep = isWindowsDesktop() ? ";" : ":";
-      invoke("mpv_set_property", {
-        name: "glsl-shaders",
-        value: shaders.filter(Boolean).join(sep),
-      }).catch(() => {});
+      const value = shaders
+        .filter(Boolean)
+        .map((s) => s.replace(/\\/g, "/"))
+        .join(sep);
+      invoke("mpv_set_property", { name: "glsl-shaders", value }).catch((e) =>
+        console.warn("[shaders] glsl-shaders apply failed", e),
+      );
     },
-    async addSubtitle(url, lang, title, select, metadata): Promise<boolean> {
+    setShaderProps(props) {
+      for (const [name, value] of Object.entries(props)) {
+        invoke("mpv_set_property", { name, value }).catch((e) =>
+          console.warn("[shaders] companion prop failed", name, e),
+        );
+      }
+    },
+    async addSubtitle(url, lang, title, select, metadata, origin = "manual"): Promise<boolean> {
+      const requestMediaRevision = mediaRevision;
+      const requestLoadId = mediaLoadId;
+      const wantsSelection = (select ?? true) && mainSubtitleSelection.claim(mediaRevision, origin);
+      const selectionRequest = wantsSelection
+        ? mainSubtitleSelection.begin(
+            mediaRevision,
+            `__harbor-added-subtitle-${++subtitleAddSelectionId}__`,
+            snap.subtitleTracks.find((track) => track.selected)?.id ?? null,
+          )
+        : null;
       let mpvUrl = url;
-      if (/^https?:/i.test(url)) {
-        try {
-          mpvUrl = await invoke<string>(
-            "sub_download",
-            subtitleDownloadArgs(url, { ...metadata, lang }),
+      const transferredPrepared = takePreparedSubtitle(url);
+      const providerDerived = metadata?.providerDerived ?? Boolean(metadata?.provider);
+      if (!transferredPrepared && providerDerived && !isSafeProviderSubtitleUrl(url)) {
+        return false;
+      }
+      // A provider subtitle can be re-fetched (e.g. a translating addon that only serves
+      // the finished file later). Replace the previous track for the same source rather
+      // than stacking a duplicate. mpv's sub-remove only touches external subtitle files,
+      // which is the only case that can match here.
+      const sourceUrl = metadata?.originalUrl ?? url;
+      const prior = transferredPrepared
+        ? undefined
+        : snap.subtitleTracks.find(
+            (track) =>
+              track.kind === "subtitle" &&
+              track.external === true &&
+              (track.originalUrl === sourceUrl || track.url === sourceUrl),
           );
+      if (prior) {
+        try {
+          await invoke("mpv_sub_remove", { id: prior.id });
+        } catch {
+          // Track already gone; adding the refreshed file below still works.
+        }
+        const priorFile = prior.externalFilename?.replace(/\\/g, "/");
+        if (priorFile) urlByExternalFilename.delete(priorFile);
+      }
+      let preparedCleanup: (() => void) | null = transferredPrepared?.cleanup ?? null;
+      let preparedCues: SubCue[] | undefined = transferredPrepared?.cues;
+      let registeredMetadata: ExternalSubtitleMetadata | null = null;
+      if (/^https?:/i.test(url) && !transferredPrepared) {
+        try {
+          const prepared = await prepareSubtitle({
+            url,
+            language: lang,
+            format: metadata?.format,
+            encoding: metadata?.encoding,
+            release: metadata?.release,
+            filename: metadata?.rawFilename,
+            requestHeaders: subtitleTrackDownloadHeaders(
+              metadata?.downloadAuth,
+              url,
+              providerDerived,
+            ),
+          });
+          mpvUrl = prepared.playableUrl;
+          preparedCleanup = prepared.cleanup;
+          preparedCues = prepared.cues;
+          metadata = {
+            ...metadata,
+            format: prepared.format,
+            encoding: prepared.encoding,
+            rawFilename: prepared.rawFilename,
+            archive: prepared.archive,
+            prepared: true,
+          };
+          clearPendingSub(url);
         } catch (e) {
-          console.warn("[mpv] sub_download failed, falling back to URL", e);
+          const message = e instanceof Error ? e.message : String(e);
+          console.warn("[mpv] subtitle preparation failed", {
+            error: e instanceof Error ? e.name : "unknown",
+          });
+          preparedCleanup?.();
+          if (/status 429/.test(message)) {
+            markLimitReached(url);
+          }
+          if (
+            metadata?.refreshable === true &&
+            e instanceof SubtitlePreparationError &&
+            (e.reason === "invalid-cues" || e.reason === "unsupported-format")
+          ) {
+            // The addon answered before the subtitle was ready. Treat it as a pending
+            // job so the UI says "try again shortly", and never surface the placeholder.
+            markPendingSub(url);
+            registerTranslationJob({ url, lang, title, metadata });
+          }
+          return false;
         }
       }
-      urlByExternalFilename.set(mpvUrl, url);
+      if (requestMediaRevision !== mediaRevision) {
+        preparedCleanup?.();
+        return false;
+      }
+      mpvUrl = mpvUrl.replace(/\\/g, "/");
       try {
-        await invoke("mpv_sub_add", {
-          url: mpvUrl,
-          lang: lang ?? null,
-          title: title ?? null,
-          select: select ?? true,
-        });
+        const externalMetadata: ExternalSubtitleMetadata = {
+          url: metadata?.originalUrl ?? url,
+          lang,
+          title,
+          cues: preparedCues,
+          originalUrl: metadata?.originalUrl ?? url,
+          downloadAuth: metadata?.downloadAuth,
+          format: metadata?.format,
+          release: metadata?.release,
+          provider: metadata?.provider,
+          providerDerived: metadata?.providerDerived,
+          fps: metadata?.fps,
+          downloads: metadata?.downloads,
+          author: metadata?.author,
+          uploadedAt: metadata?.uploadedAt,
+          rating: metadata?.rating,
+          productionType: metadata?.productionType,
+          releaseType: metadata?.releaseType,
+          hearingImpaired: metadata?.hearingImpaired,
+          forced: metadata?.forced,
+          foreignOnly: metadata?.foreignOnly,
+          machineTranslated: metadata?.machineTranslated,
+          fromTrusted: metadata?.fromTrusted,
+          providerMatch: metadata?.providerMatch,
+          timingStatus: metadata?.timingStatus,
+          timingMeasurementStatus: metadata?.timingMeasurementStatus,
+          matchExplanation: metadata?.matchExplanation,
+          prepared: metadata?.prepared,
+          autoSelectionEligible: metadata?.autoSelectionEligible,
+          matchScore: metadata?.matchScore,
+          matchConfidence: metadata?.matchConfidence,
+          matchReasons: metadata?.matchReasons,
+          subId: metadata?.subId,
+        };
+        urlByExternalFilename.set(mpvUrl, externalMetadata);
+        registeredMetadata = externalMetadata;
+        const addToMpv = async (): Promise<boolean> => {
+          if (requestMediaRevision !== mediaRevision) return false;
+          let selectAtCommit = false;
+          if (
+            selectionRequest &&
+            mainSubtitleSelection.isCurrent(selectionRequest, mediaRevision)
+          ) {
+            await resetSubtitleFpsBeforeMpvTransition();
+            if (requestMediaRevision !== mediaRevision) return false;
+            selectAtCommit = mainSubtitleSelection.isCurrent(selectionRequest, mediaRevision);
+          }
+          await invoke("mpv_sub_add", {
+            url: mpvUrl,
+            lang: lang ?? null,
+            title: title ?? null,
+            select: selectAtCommit,
+          });
+          return true;
+        };
+        const added = selectionRequest
+          ? await enqueueSubtitleTransition(addToMpv)
+          : await addToMpv();
+        if (!added) {
+          if (urlByExternalFilename.get(mpvUrl) === externalMetadata) {
+            urlByExternalFilename.delete(mpvUrl);
+          }
+          preparedCleanup?.();
+          return false;
+        }
+        if (requestMediaRevision !== mediaRevision) {
+          if (urlByExternalFilename.get(mpvUrl) === externalMetadata) {
+            urlByExternalFilename.delete(mpvUrl);
+          }
+          preparedCleanup?.();
+          return false;
+        }
+        if (preparedCleanup) preparedSubtitleCleanups.register(preparedCleanup, requestLoadId);
         return true;
       } catch (e) {
+        if (registeredMetadata && urlByExternalFilename.get(mpvUrl) === registeredMetadata) {
+          urlByExternalFilename.delete(mpvUrl);
+        }
+        preparedCleanup?.();
         console.warn("[mpv] sub-add failed", e);
         return false;
       }
     },
     getSelectedTrackCues() {
-      return null;
+      const selected = snap.subtitleTracks.find((track) => track.selected);
+      if (!selected?.externalFilename) return null;
+      return urlByExternalFilename.get(selected.externalFilename.replace(/\\/g, "/"))?.cues ?? null;
     },
     getSelectedTrackUrl() {
       const sel = snap.subtitleTracks.find((t) => t.selected);
       if (!sel || !sel.external) return null;
+      if (sel.prepared && sel.externalFilename) return sel.externalFilename;
       return sel.url ?? sel.externalFilename ?? null;
     },
     setAudioNormalize(on) {
@@ -605,10 +1407,10 @@ export function createMpvBridge(mpvOptions?: MpvOptions): PlayerBridge {
       }
     },
     setAudioDevice(name) {
-      invoke("mpv_set_property", {
-        name: "audio-device",
-        value: name && name !== "auto" ? name : "auto",
-      }).catch(() => {});
+      const want = name && name !== "auto" ? name : "auto";
+      if (want === appliedAudioDevice) return;
+      appliedAudioDevice = want;
+      void applyAudioDevice(want);
     },
     setMediaInfo(info) {
       invoke("mpv_set_property", { name: "force-media-title", value: info.title }).catch(() => {});
@@ -649,15 +1451,51 @@ export function createMpvBridge(mpvOptions?: MpvOptions): PlayerBridge {
     },
     subscribe(l) {
       listeners.add(l);
-      l(snap);
+      l({ ...snap });
       return () => {
         listeners.delete(l);
       };
     },
     destroy() {
-      if (geomTimer != null) {
-        window.clearInterval(geomTimer);
-        geomTimer = null;
+      stopGeometryTracking?.();
+      stopGeometryTracking = null;
+      mediaRevision += 1;
+      invalidateSubtitleSelections();
+      clearPreparedSubtitles();
+      finishPlaybackTrace(activeTraceId, "aborted");
+      activeTraceId = null;
+      const keepNativeSession =
+        mpvStarted && currentIsLive != null && isWindowsDesktop() && mpvOptions?.embed === true;
+      if (keepNativeSession) {
+        invalidateMpvSubtitleFpsContext();
+        const retained: RetainedMpv = {
+          configKey: mpvReuseConfigKey(mpvOptions, hdrToSdr),
+          isLive: currentIsLive!,
+          startupProfile: currentStartupProfile ?? "standard",
+        };
+        const release = invoke<boolean>("mpv_release_media")
+          .then(async (kept) => {
+            if (kept) {
+              retainedMpv = retained;
+              return;
+            }
+            retainedMpv = null;
+            markMpvSubtitleFpsSessionRecreated();
+            await invoke("mpv_stop").catch(() => {});
+          })
+          .catch(async () => {
+            retainedMpv = null;
+            markMpvSubtitleFpsSessionRecreated();
+            await invoke("mpv_stop").catch(() => {});
+          });
+        retainedMpvRelease = release;
+        void release.finally(() => {
+          if (retainedMpvRelease === release) retainedMpvRelease = null;
+        });
+      } else {
+        retainedMpv = null;
+        markMpvSubtitleFpsSessionRecreated();
+        invoke("mpv_stop").catch(() => {});
       }
       if (geomKickHandler) {
         window.removeEventListener("resize", geomKickHandler);
@@ -684,8 +1522,16 @@ export function createMpvBridge(mpvOptions?: MpvOptions): PlayerBridge {
         }
       }
       geomTauriUnlisten = [];
+      document.removeEventListener("visibilitychange", onVisibilityRestore);
+      window.removeEventListener("blur", onWindowBlur);
+      window.removeEventListener("focus", onWindowFocusRestore);
+      if (audioDeviceReloadTimer != null) {
+        window.clearTimeout(audioDeviceReloadTimer);
+        audioDeviceReloadTimer = null;
+      }
       mpvStarted = false;
-      invoke("mpv_stop").catch(() => {});
+      currentIsLive = null;
+      currentStartupProfile = null;
       if (unlistenEvent) {
         unlistenEvent();
         unlistenEvent = null;

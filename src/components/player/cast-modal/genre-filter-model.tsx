@@ -1,4 +1,4 @@
-import { COUNTRIES } from "@/views/calendar/custom-bar/constants";
+import { COUNTRIES } from "@/views/calendar/config/constants";
 import {
   GENRE_MOVIE_TO_TV,
   GENRE_TV_TO_MOVIE,

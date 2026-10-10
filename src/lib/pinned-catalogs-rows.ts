@@ -2,6 +2,7 @@ import { browseFetcher, type BrowseCatalog } from "./catalog-browse";
 import type { Meta } from "./cinemeta";
 import type { HomeRow } from "@/views/home/home-types";
 import type { PinnedCatalog } from "./pinned-catalogs";
+import { isExtensionCatalogueBase } from "./streams/plugins";
 
 const MAX_PER_ROW = 30;
 const PAGE_HINT = 20;
@@ -25,8 +26,17 @@ export function pinnedRowKey(id: string): string {
   return `pinned:${id}`;
 }
 
-export async function buildPinnedCatalogRows(descriptors: PinnedCatalog[]): Promise<HomeRow[]> {
-  const catalogDescs = descriptors.filter((d) => d.source === "catalog");
+export async function buildPinnedCatalogRows(
+  descriptors: PinnedCatalog[],
+  opts: { pluginRows: boolean },
+): Promise<HomeRow[]> {
+  // A pinned row that came from a plugin is still a plugin being asked, so it goes with the rest
+  // when the setting keeps plugins out of the surfaces outside their own page.
+  const catalogDescs = descriptors.filter(
+    (d) =>
+      d.source === "catalog" &&
+      (opts.pluginRows || !isExtensionCatalogueBase(d.params.base ?? "")),
+  );
   const built = await Promise.all(
     catalogDescs.map(async (desc) => {
       const cat = toBrowseCatalog(desc);

@@ -1,8 +1,13 @@
 import { loadStoredSettings } from "@/lib/settings/load";
 import { normalizeLang } from "@/lib/subtitles/language";
 
+const NO_LANGS: string[] = [];
+let lastNames: readonly string[] = NO_LANGS;
+let lastPriority: (string | null)[] | null = null;
+
 export function imageLangPriority(): (string | null)[] {
-  const names = loadStoredSettings().tmdbImageLangs ?? [];
+  const names = loadStoredSettings().tmdbImageLangs ?? NO_LANGS;
+  if (lastPriority && names === lastNames) return lastPriority;
   const out: (string | null)[] = [];
   for (const name of names) {
     if (/^original$/i.test(name.trim())) {
@@ -12,7 +17,9 @@ export function imageLangPriority(): (string | null)[] {
     const code = normalizeLang(name);
     if (code && !out.includes(code)) out.push(code);
   }
-  return out.length ? out : ["en", null];
+  lastNames = names;
+  lastPriority = out.length ? out : ["en", null];
+  return lastPriority;
 }
 
 function effectiveOrder(originalLang?: string | null): (string | null)[] {
@@ -38,7 +45,10 @@ export function imageLangParam(originalLang?: string | null): string {
     .join(",");
 }
 
-export function imageLangRank(iso: string | null | undefined, originalLang?: string | null): number {
+export function imageLangRank(
+  iso: string | null | undefined,
+  originalLang?: string | null,
+): number {
   const order = effectiveOrder(originalLang);
   const idx = order.indexOf(iso ?? null);
   return idx === -1 ? -1 : order.length - idx;
@@ -54,6 +64,12 @@ export function pickedImageLangs(): string[] {
 }
 
 export function shouldLocalizePosters(): boolean {
+  if (imageLangPriority()[0] === null) return true;
   const top = imageRequestLang();
-  return !!top && top !== "en";
+  if (!!top && top !== "en") return true;
+  // Posters should also follow the metadata language (search returns the original-language
+  // poster when the requested translation has none), falling back to English downstream.
+  const meta = loadStoredSettings().tmdbLanguage;
+  const base = (meta ?? "").split("-")[0]?.toLowerCase() ?? "";
+  return base !== "" && base !== "en";
 }

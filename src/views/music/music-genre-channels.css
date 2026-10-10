@@ -1,0 +1,59 @@
+.music-genre-channel-picker {
+  display: flex;
+  flex-wrap: nowrap;
+  gap: 8px;
+  overflow-x: auto;
+  scrollbar-width: none;
+  padding-block-end: 2px;
+}
+
+.music-genre-channel-picker::-webkit-scrollbar {
+  display: none;
+}
+
+.music-genre-channel-picker button {
+  flex: 0 0 auto;
+  min-height: 34px;
+  padding-inline: 14px;
+  border-radius: 999px;
+  background: var(--color-elevated);
+  color: var(--color-ink-muted);
+  font-size: 12.5px;
+  white-space: nowrap;
+  transition:
+    background-color 180ms ease-out,
+    color 180ms ease-out;
+}
+
+.music-genre-channel-picker button:hover {
+  color: var(--color-ink);
+}
+
+.music-genre-channel-picker button[aria-pressed="true"] {
+  background: var(--color-ink);
+  color: var(--color-canvas);
+}
+
+/* Channel identity on each chip. A monogram stands in when no logo URL is known,
+   so the row never shows a broken image. */
+.music-genre-channel-logo {
+  inline-size: 20px;
+  block-size: 20px;
+  flex: none;
+  border-radius: 50%;
+  object-fit: cover;
+  background: color-mix(in srgb, var(--color-ink) 12%, var(--color-elevated));
+}
+.music-genre-channel-logo[data-monogram] {
+  display: grid;
+  place-items: center;
+  font-size: 9px;
+  font-weight: 700;
+  letter-spacing: 0.02em;
+  color: var(--color-ink-muted);
+}
+.music-genre-channel-picker button {
+  display: inline-flex;
+  align-items: center;
+  gap: 7px;
+}

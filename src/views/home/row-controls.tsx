@@ -21,6 +21,7 @@ export function RowControls({
   onToggleHero,
   onDelete,
   kids,
+  canRename = true,
 }: {
   name: string;
   hidden: boolean;
@@ -40,6 +41,7 @@ export function RowControls({
   onToggleHero?: () => void;
   onDelete?: () => void;
   kids?: boolean;
+  canRename?: boolean;
 }) {
   const t = useT();
   const [editing, setEditing] = useState(false);
@@ -216,13 +218,13 @@ export function RowControls({
               {t("Renamed")}
             </button>
           )}
-          <button
+          {canRename && <button
             onClick={() => setEditing(true)}
             title={t("Rename row")}
             className="flex h-7 w-7 items-center justify-center rounded-lg text-ink-muted transition-colors hover:bg-raised hover:text-ink"
           >
             <Pencil size={13} strokeWidth={2.2} />
-          </button>
+          </button>}
         </>
       )}
     </div>

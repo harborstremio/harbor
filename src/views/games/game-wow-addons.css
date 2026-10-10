@@ -1,0 +1,63 @@
+.games-wow-addons { padding-block: 22px 46px; color: var(--color-ink); }
+.games-wow-addons > header { display: flex; justify-content: space-between; align-items: start; gap: 16px; }
+.games-wow-addons h2 { display: flex; align-items: baseline; gap: 12px; font-size: 24px; font-weight: 600; margin: 0; }
+.games-wow-addons h2 > span { color: var(--color-ink-muted); font-size: 14px; font-weight: 400; }
+.games-wow-addons header p, .games-wow-addons-client, .games-wow-addons-message { color: var(--color-ink-muted); font-size: 14px; line-height: 1.7; margin: 9px 0 0; }
+.games-wow-addons-client { margin-block: 16px; }
+.games-wow-addons-tools { display: flex; flex-wrap: wrap; gap: 10px; margin-block: 20px; }
+.games-wow-addons-tools > label { display: flex; flex: 1 1 200px; min-width: 0; gap: 10px; align-items: center; background: var(--color-elevated); border-radius: 6px; padding-inline: 13px; color: var(--color-ink-muted); }
+.games-wow-addons-tools input { min-width: 0; width: 100%; height: 42px; background: transparent; color: var(--color-ink); font-size: 14px; }
+.games-wow-addons .games-wow-addons-tools input:focus { outline: none !important; box-shadow: none !important; }
+.games-wow-addons-tools > label:focus-within { outline: 2px solid var(--color-accent); outline-offset: 2px; }
+.games-wow-addons-tools button[aria-pressed="true"] { color: var(--color-accent); }
+.games-wow-addons-list details { border-bottom: 1px solid var(--color-edge-soft); }
+.games-wow-addons-list summary { display: flex; align-items: center; gap: 18px; cursor: pointer; list-style: none; padding: 18px 12px; border-radius: 6px; }
+.games-wow-addons-list summary::-webkit-details-marker { display: none; }
+.games-wow-addons-list summary:hover { background: var(--color-surface); }
+.games-wow-addons-list summary > div { flex: 1; min-width: 0; }
+.games-wow-addons-list summary strong { font-size: 15px; font-weight: 600; overflow-wrap: anywhere; }
+.games-wow-addons-list summary small { display: block; margin-top: 5px; font-size: 12px; color: var(--color-ink-muted); overflow-wrap: anywhere; }
+.games-wow-addons-list summary > span { font-size: 13px; color: var(--color-ink-muted); overflow-wrap: anywhere; max-width: 30%; }
+.games-wow-addons-list summary > svg { flex-shrink: 0; transition: transform 150ms; }
+.games-wow-addons-list details[open] summary > svg { transform: rotate(180deg); }
+.games-wow-addon-details { padding: 4px 12px 22px; font-size: 14px; line-height: 1.7; }
+.games-wow-addon-details > p { color: var(--color-ink-muted); max-width: 80ch; margin: 0 0 14px; overflow-wrap: anywhere; }
+.games-wow-addon-details dl { display: grid; gap: 12px; margin-bottom: 16px; }
+.games-wow-addon-details dl > div { display: grid; grid-template-columns: 180px minmax(0, 1fr); gap: 20px; }
+.games-wow-addon-details dt { color: var(--color-ink-muted); }
+.games-wow-addon-details dd { margin: 0; overflow-wrap: anywhere; }
+.games-wow-addon-details a { display: inline-flex; gap: 6px; align-items: center; }
+.games-wow-addons .games-wow-addons-attention { color: var(--color-accent); }
+.games-wow-addons-list summary > .games-wow-addons-attention { display: inline-flex; align-items: center; gap: 7px; }
+.games-wow-addons-list summary > .games-wow-addons-attention > svg { flex-shrink: 0; }
+.games-wow-addons-more { margin-top: 20px; }
+.games-wow-addons footer { margin-top: 20px; font-size: 12px; line-height: 1.7; color: var(--color-ink-muted); }
+.games-wow-addons footer p { max-width: 90ch; margin-top: 6px; }
+.games-wow-addons-loading { display: grid; gap: 12px; margin-top: 20px; }
+.games-wow-addons-loading i { height: 75px; border-radius: 6px; }
+.games-wow-addons :is(button, summary, a):focus-visible { outline: 2px solid var(--color-accent); outline-offset: 3px; }
+.games-wow-addon-media { max-width: 760px; margin-top: 24px; }
+.games-wow-addon-media h3 { display: flex; flex-wrap: wrap; align-items: baseline; gap: 10px; margin: 0 0 12px; font-size: 15px; font-weight: 600; }
+.games-wow-addon-media h3 > span { font-size: 12px; font-weight: 400; color: var(--color-ink-muted); }
+.games-wow-addon-media-loading { height: 280px; border-radius: 6px; }
+.games-wow-addon-media figure { margin: 0; }
+.games-wow-addon-media figure > :is(img, .games-art-empty) { display: block; width: 100%; height: clamp(190px, 30vw, 380px); object-fit: contain; background: var(--color-surface); border-radius: 6px; }
+.games-wow-addon-media figcaption { display: flex; flex-wrap: wrap; align-items: baseline; justify-content: space-between; gap: 8px 20px; margin-top: 10px; font-size: 12px; color: var(--color-ink-muted); }
+.games-wow-addon-media figcaption > span { overflow-wrap: anywhere; }
+.games-wow-addon-media figcaption > a { flex-shrink: 0; }
+.games-wow-addon-media-thumbnails { display: flex; flex-wrap: wrap; gap: 8px; margin-top: 16px; }
+.games-wow-addon-media-thumbnails button { width: 94px; height: 62px; padding: 4px; border-radius: 5px; background: var(--color-surface); }
+.games-wow-addon-media-thumbnails button[aria-pressed="true"] { background: var(--color-ink-muted); }
+.games-wow-addon-media-thumbnails :is(img, .games-art-empty) { width: 100%; height: 100%; object-fit: contain; border-radius: 2px; }
+.games-wow-addon-media > p { color: var(--color-ink-muted); }
+.wow-addon-author-notes { margin-top: 22px; }
+.wow-addon-author-meta { display: flex; flex-wrap: wrap; gap: 6px 18px; font-size: 12px; line-height: 1.7; color: var(--color-ink-muted); margin-bottom: 14px; overflow-wrap: anywhere; }
+.wow-addon-author-notes > section { border-top: 1px solid var(--color-edge-soft); }
+.wow-addon-author-notes > section > button { display: flex; align-items: center; justify-content: space-between; gap: 16px; width: 100%; padding-block: 15px; text-align: start; font-size: 14px; font-weight: 600; }
+.wow-addon-author-notes > section > button:hover { color: var(--color-accent); }
+.wow-addon-author-notes > section > button > svg { flex: none; transition: transform 150ms; }
+.wow-addon-author-notes > section > button[aria-expanded=true] > svg { transform: rotate(180deg); }
+.wow-addon-author-notes p { margin: 0; padding-bottom: 18px; font-size: 14px; line-height: 1.8; color: var(--color-ink-muted); white-space: pre-wrap; overflow-wrap: anywhere; }
+.wow-addon-author-notes > a { margin-block: 14px; }
+@media (max-width: 600px) { .games-wow-addon-details dl > div { grid-template-columns: 1fr; gap: 3px; }.games-wow-addons-list summary { gap: 10px; padding-inline: 4px; }.games-wow-addons-list summary > .games-wow-addons-attention > span { position: absolute; width: 1px; height: 1px; overflow: hidden; clip-path: inset(50%); } }
+@media (prefers-reduced-motion: reduce) { .games-wow-addons-list summary > svg, .wow-addon-author-notes > section > button > svg { transition: none; } }

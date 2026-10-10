@@ -1,15 +1,19 @@
+import { usePreviewNavCustomization } from "@/lib/theme-preview";
 import { Lock } from "lucide-react";
 import { useState } from "react";
 import { HarborMark } from "@/components/icons/harbor-mark";
-import { NAV_ITEMS, applyNavCustomization, type NavItem } from "@/chrome/nav-items";
+import { useAvailableNavItems, applyNavCustomization, type NavItem } from "@/chrome/nav-items";
 import { ProfileChip } from "@/chrome/sidebar/profile-chip";
 import { CollapseToggle } from "@/chrome/sidebar/collapse-toggle";
+import { useContextMenu } from "@/lib/context-menu";
+import { NavHiddenTray, NavEditableItem, useNavDrag } from "@/chrome/nav-edit";
+import { useNavEditMode } from "@/chrome/nav-edit-mode";
+import { SidebarBigPictureEntry } from "@/chrome/sidebar/big-picture-entry";
 import { ParentalPinModal } from "@/components/parental-pin-modal";
 import { useT } from "@/lib/i18n";
 import { useParental } from "@/lib/parental";
 import { useSettings } from "@/lib/settings";
 import { useView, type View } from "@/lib/view";
-import { HoverNavIcon } from "@/chrome/hover-nav-icon";
 
 const PRIMARY_IDS = new Set([
   "home",
@@ -19,18 +23,28 @@ const PRIMARY_IDS = new Set([
   "kids",
   "anime",
   "live",
+  "sports",
   "vod",
 ]);
 
 export function DraculaSidebar() {
+  const editing = useNavEditMode();
   const { view, setView, chromeHidden } = useView();
   const { locked, unlock, hiddenTabs } = useParental();
   const { settings } = useSettings();
   const t = useT();
   const collapsed = settings.sidebarCollapsed;
   const [pinFor, setPinFor] = useState<View | null>(null);
+  const { open: openContextMenu } = useContextMenu();
+  const openEmptyMenu = (e: React.MouseEvent) => {
+    if ((e.target as HTMLElement).closest("button")) return;
+    openContextMenu(e, { kind: "nav" });
+  };
 
-  const items = applyNavCustomization(NAV_ITEMS, settings.navCustomization);
+  const items = applyNavCustomization(
+    useAvailableNavItems(),
+    usePreviewNavCustomization(settings.navCustomization),
+  );
   const primary = items.filter((i) => PRIMARY_IDS.has(i.id));
   const collections = items.filter((i) => !PRIMARY_IDS.has(i.id));
 
@@ -53,9 +67,10 @@ export function DraculaSidebar() {
   return (
     <>
       <aside
+        data-tv-focus-scope={editing || undefined}
         aria-hidden={chromeHidden}
-        data-tv-nav-zone
-        className={`relative z-[60] flex w-[78px] shrink-0 flex-col transition-[opacity,transform,width] duration-300 ease-[cubic-bezier(0.16,1,0.3,1)] will-change-[width] ${
+        data-harbor-sidebar
+        className={`relative z-[60] flex w-[78px] shrink-0 flex-col transition-[opacity,transform,width] duration-300 ease-[cubic-bezier(0.16,1,0.3,1)] ${
           collapsed ? "" : "lg:w-64"
         } ${
           chromeHidden
@@ -100,20 +115,16 @@ export function DraculaSidebar() {
                   className="hidden text-[40px] font-medium leading-none tracking-tight lg:inline"
                   style={{ fontFamily: "var(--font-display)", transform: "translateY(1px)" }}
                 >
-                  Harb
-                  <span
-                    className="inline-block"
-                    style={{ transform: "rotate(8deg)", transformOrigin: "50% 65%" }}
-                  >
-                    o
-                  </span>
-                  r
+                  Media Vision
                 </span>
               )}
             </button>
           </div>
 
-          <nav className="flex min-h-0 flex-1 flex-col gap-1.5 overflow-y-auto px-3 pb-4 pt-1 [scrollbar-width:none] lg:px-4 [&::-webkit-scrollbar]:hidden">
+          <nav
+            className="flex min-h-0 flex-1 flex-col gap-1.5 overflow-y-auto px-3 pb-4 pt-1 [scrollbar-width:none] lg:px-4 [&::-webkit-scrollbar]:hidden"
+            onContextMenu={openEmptyMenu}
+          >
             {primary.filter(isVisible).map((item) => (
               <NavPill
                 key={item.id}
@@ -137,11 +148,15 @@ export function DraculaSidebar() {
           </nav>
 
           <div className={`relative px-3 pb-3 pt-1 ${collapsed ? "" : "lg:px-4"}`}>
+            <div className="mb-1 px-1">
+              <NavHiddenTray orientation="vertical" compact={collapsed} />
+            </div>
             <div
               aria-hidden
               className="pointer-events-none mb-2 h-px bg-gradient-to-r from-transparent via-edge-soft to-transparent"
             />
-            <div className={`mb-1 flex ${collapsed ? "justify-center" : ""}`}>
+            <div className={`mb-1 flex flex-col gap-1 ${collapsed ? "items-center" : ""}`}>
+              <SidebarBigPictureEntry collapsed={collapsed} />
               <CollapseToggle collapsed={collapsed} />
             </div>
             {locked ? (
@@ -204,44 +219,65 @@ function NavPill({
 }) {
   const t = useT();
   const label = t(item.label);
+  const { open: openContextMenu } = useContextMenu();
+  const editing = useNavEditMode();
+  const drag = useNavDrag(item.id, "vertical");
   return (
-    <button
-      onClick={onClick}
-      aria-label={gated ? t("chrome.lockedRequiresPin", { label }) : label}
-      title={gated ? t("chrome.lockedShort", { label }) : label}
-      className={`group relative flex h-12 items-center justify-center gap-3.5 rounded-[18px] transition-colors duration-200 ${
-        collapsed ? "" : "lg:justify-start lg:px-4"
-      } ${active ? "text-accent" : "text-ink-muted hover:text-ink"}`}
-    >
-      {active ? (
-        <span
-          aria-hidden
-          className="absolute inset-0 rounded-[18px]"
-          style={{
-            background: "var(--color-accent-soft)",
-            boxShadow:
-              "inset 0 0 0 1px var(--color-accent-soft), 0 6px 20px -14px var(--color-accent)",
-          }}
-        />
-      ) : (
-        <span
-          aria-hidden
-          className="absolute inset-0 rounded-[18px] bg-elevated/0 transition-colors duration-200 group-hover:bg-elevated/50"
-        />
-      )}
-      <span className={`relative ${gated ? "opacity-70" : ""}`}>
-        <HoverNavIcon render={item.render} />
-        {gated && (
-          <span className="absolute -bottom-1 -end-1 flex h-4 w-4 items-center justify-center rounded-full bg-canvas text-ink-subtle ring-1 ring-edge">
-            <Lock size={9} strokeWidth={2.4} />
+    <NavEditableItem itemId={item.id}>
+      <button
+        onClick={onClick}
+        onContextMenu={(e) =>
+          openContextMenu(e, {
+            kind: "nav",
+            itemId: item.id,
+            view: item.view,
+            label,
+            onOpen: onClick,
+          })
+        }
+        data-harbor-nav={item.id}
+        data-tauri-drag-region={editing ? "false" : undefined}
+        onPointerDown={drag.onPointerDown}
+        onKeyDown={drag.onKeyDown}
+        data-nav-drop-id={item.id}
+        aria-label={gated ? t("chrome.lockedRequiresPin", { label }) : label}
+        title={gated ? t("chrome.lockedShort", { label }) : label}
+        className={`group relative flex h-12 items-center justify-center gap-3.5 rounded-[18px] transition-colors duration-200 ${
+          collapsed ? "" : "lg:justify-start lg:px-4"
+        } ${drag.over ? "ring-2 ring-accent" : ""} ${
+          active ? "text-accent" : "text-ink-muted hover:text-ink"
+        }`}
+      >
+        {active ? (
+          <span
+            aria-hidden
+            className="absolute inset-0 rounded-[18px]"
+            style={{
+              background: "var(--color-accent-soft)",
+              boxShadow:
+                "inset 0 0 0 1px var(--color-accent-soft), 0 6px 20px -14px var(--color-accent)",
+            }}
+          />
+        ) : (
+          <span
+            aria-hidden
+            className="absolute inset-0 rounded-[18px] bg-elevated/0 transition-colors duration-200 group-hover:bg-elevated/50"
+          />
+        )}
+        <span className={`relative ${gated ? "opacity-70" : ""}`}>
+          {item.render(active)}
+          {gated && (
+            <span className="absolute -bottom-1 -end-1 flex h-4 w-4 items-center justify-center rounded-full bg-canvas text-ink-subtle ring-1 ring-edge">
+              <Lock size={9} strokeWidth={2.4} />
+            </span>
+          )}
+        </span>
+        {!collapsed && (
+          <span className="relative hidden flex-1 text-[17px] font-medium tracking-tight lg:inline">
+            {label}
           </span>
         )}
-      </span>
-      {!collapsed && (
-        <span className="relative hidden flex-1 text-[17px] font-medium tracking-tight lg:inline">
-          {label}
-        </span>
-      )}
-    </button>
+      </button>
+    </NavEditableItem>
   );
 }

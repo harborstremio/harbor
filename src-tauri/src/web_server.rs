@@ -1,7 +1,3 @@
-use std::collections::HashSet;
-use std::net::SocketAddr;
-use std::sync::atomic::{AtomicBool, AtomicU64, Ordering};
-use std::sync::{Arc, Mutex, OnceLock};
 use axum::body::Body;
 use axum::extract::ws::{Message, WebSocket, WebSocketUpgrade};
 use axum::extract::State;
@@ -9,6 +5,10 @@ use axum::http::{header, HeaderMap, HeaderName, HeaderValue, Response, StatusCod
 use axum::response::IntoResponse;
 use axum::routing::get;
 use futures_util::{SinkExt, StreamExt};
+use std::collections::HashSet;
+use std::net::SocketAddr;
+use std::sync::atomic::{AtomicBool, AtomicU64, Ordering};
+use std::sync::{Arc, Mutex, OnceLock};
 use tauri::{AppHandle, Emitter};
 use tokio::net::TcpListener;
 use tokio::sync::{broadcast, oneshot, Mutex as AsyncMutex};
@@ -46,6 +46,10 @@ fn is_spa_path(raw_path: &str) -> bool {
         || raw_path.is_empty()
         || raw_path == "/remote"
         || raw_path.starts_with("/remote/")
+        || raw_path == "/setup"
+        || raw_path.starts_with("/setup/")
+        || raw_path == "/reader"
+        || raw_path.starts_with("/reader/")
 }
 
 fn serve_bundled_asset(app: &AppHandle, raw_path: &str) -> Response<Body> {
@@ -75,9 +79,10 @@ fn serve_bundled_asset(app: &AppHandle, raw_path: &str) -> Response<Body> {
         None => Response::builder()
             .status(StatusCode::NOT_FOUND)
             .header(header::CONTENT_TYPE, "text/plain")
-            .body(Body::from(
-                "Harbor web assets are not available in this build.",
-            ))
+            .body(Body::from(concat!(
+                crate::product_name!(),
+                " web assets are not available in this build."
+            )))
             .unwrap(),
     }
 }
@@ -117,10 +122,114 @@ async fn proxy_dev_frontend(path_and_query: &str) -> Option<Response<Body>> {
     builder.body(Body::from(bytes)).ok()
 }
 
-async fn serve_http(
-    State(state): State<ServeState>,
-    uri: axum::http::Uri,
-) -> Response<Body> {
+fn pct_hex(b: u8) -> Option<u8> {
+    match b {
+        b'0'..=b'9' => Some(b - b'0'),
+        b'a'..=b'f' => Some(b - b'a' + 10),
+        b'A'..=b'F' => Some(b - b'A' + 10),
+        _ => None,
+    }
+}
+
+fn pct_decode(s: &str) -> String {
+    let bytes = s.as_bytes();
+    let mut out = Vec::with_capacity(bytes.len());
+    let mut i = 0;
+    while i < bytes.len() {
+        if bytes[i] == b'%' && i + 2 < bytes.len() {
+            if let (Some(h), Some(l)) = (pct_hex(bytes[i + 1]), pct_hex(bytes[i + 2])) {
+                out.push(h * 16 + l);
+                i += 3;
+                continue;
+            }
+        }
+        out.push(bytes[i]);
+        i += 1;
+    }
+    String::from_utf8_lossy(&out).into_owned()
+}
+
+fn blocked_host(url: &str) -> bool {
+    let lower = url.to_ascii_lowercase();
+    let after = lower.split("://").nth(1).unwrap_or("");
+    let host = after.split(['/', '?', '#', ':']).next().unwrap_or("");
+    host == "localhost"
+        || host.starts_with("127.")
+        || host.starts_with("0.")
+        || host.starts_with("10.")
+        || host.starts_with("192.168.")
+        || host.starts_with("169.254.")
+        || host.starts_with("[::1]")
+        || (host.starts_with("172.")
+            && host
+                .split('.')
+                .nth(1)
+                .and_then(|o| o.parse::<u8>().ok())
+                .map(|o| (16..=31).contains(&o))
+                .unwrap_or(false))
+}
+
+async fn manga_img_proxy(uri: axum::http::Uri) -> Response<Body> {
+    let query = uri.query().unwrap_or("");
+    let target = query
+        .split('&')
+        .find_map(|pair| pair.strip_prefix("u=").map(pct_decode));
+    let url = match target {
+        Some(u) if (u.starts_with("http://") || u.starts_with("https://")) && !blocked_host(&u) => {
+            u
+        }
+        _ => {
+            return Response::builder()
+                .status(StatusCode::BAD_REQUEST)
+                .body(Body::empty())
+                .unwrap()
+        }
+    };
+    let client = reqwest::Client::new();
+    let upstream = match client
+        .get(&url)
+        .header(
+            "User-Agent",
+            "Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/124.0 Safari/537.36",
+        )
+        .send()
+        .await
+    {
+        Ok(r) => r,
+        Err(_) => {
+            return Response::builder()
+                .status(StatusCode::BAD_GATEWAY)
+                .body(Body::empty())
+                .unwrap()
+        }
+    };
+    let status =
+        StatusCode::from_u16(upstream.status().as_u16()).unwrap_or(StatusCode::BAD_GATEWAY);
+    let ctype = upstream
+        .headers()
+        .get(header::CONTENT_TYPE)
+        .and_then(|v| v.to_str().ok())
+        .unwrap_or("image/jpeg")
+        .to_string();
+    let bytes = match upstream.bytes().await {
+        Ok(b) => b,
+        Err(_) => {
+            return Response::builder()
+                .status(StatusCode::BAD_GATEWAY)
+                .body(Body::empty())
+                .unwrap()
+        }
+    };
+    Response::builder()
+        .status(status)
+        .header(header::CONTENT_TYPE, ctype)
+        .header(header::ACCESS_CONTROL_ALLOW_ORIGIN, "*")
+        .header(header::CACHE_CONTROL, "public, max-age=86400")
+        .body(Body::from(bytes))
+        .unwrap()
+}
+
+async fn serve_http(State(state): State<ServeState>, uri: axum::http::Uri) -> Response<Body> {
     let path_and_query = uri
         .path_and_query()
         .map(|pq| pq.as_str().to_string())
@@ -215,6 +324,7 @@ pub async fn web_serve_start(app: AppHandle) -> Result<u16, String> {
 
     let router = axum::Router::new()
         .route("/api/remote", get(remote_ws_handler))
+        .route("/manga-img", get(manga_img_proxy))
         .fallback(serve_http)
         .with_state(state);
 

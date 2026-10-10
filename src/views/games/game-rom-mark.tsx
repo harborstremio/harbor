@@ -1,0 +1,10 @@
+// Original Harbor navigation marks: cartridge, console, collection, patch and library.
+export function RomMark({ kind }: { kind: "discover" | "consoles" | "collections" | "hacks" | "library" }) {
+  return <svg viewBox="0 0 80 64" fill="none" aria-hidden="true" className="games-rom-mark">
+    {kind === "discover" ? <><path d="M19 9h39l7 8v40H15V17z" fill="currentColor" opacity=".2"/><path d="M19 9h39l7 8v40H15V17zM24 9v25h31V9M26 49h28" stroke="currentColor" strokeWidth="2.5" strokeLinejoin="round"/><path d="m35 17 12 7-12 7z" fill="currentColor"/></>
+    : kind === "consoles" ? <><rect x="9" y="12" width="62" height="38" rx="9" fill="currentColor" opacity=".17"/><rect x="9" y="12" width="62" height="38" rx="9" stroke="currentColor" strokeWidth="2.5"/><path d="M27 22v18M18 31h18M39 25h7M39 31h7M39 37h7" stroke="currentColor" strokeWidth="3" strokeLinecap="round"/><circle cx="59" cy="25" r="4" fill="currentColor"/><circle cx="57" cy="38" r="4" fill="currentColor"/><path d="M24 51v5h32v-5" stroke="currentColor" strokeWidth="2.5"/></>
+    : kind === "collections" ? <><path d="m12 20 20-8 10 37-20 7zM36 9h22v44H36z" fill="currentColor" opacity=".17"/><path d="m12 20 20-8 10 37-20 7zM36 9h22v44H36zM63 20h10v33H63M18 25l12-4M41 16h12M25 45l7-2M41 43h12" stroke="currentColor" strokeWidth="2.5" strokeLinejoin="round"/></>
+    : kind === "hacks" ? <><path d="M13 10h35l8 8v35H13z" fill="currentColor" opacity=".17"/><path d="M13 10h35l8 8v35H13zM22 10v21h24V10M23 45h13" stroke="currentColor" strokeWidth="2.5" strokeLinejoin="round"/><path d="m51 43 15-15 7 7-15 15-10 3z" fill="var(--color-surface)" stroke="currentColor" strokeWidth="2.5"/><path d="m62 32 7 7" stroke="currentColor" strokeWidth="2.5"/></>
+    : <><path d="M10 39h60v17H10zM17 12h20v27H17zM43 18h19v21H43z" fill="currentColor" opacity=".17"/><path d="M10 39h60v17H10zM17 12h20v27H17zM43 18h19v21H43zM23 19h8M49 25h7M33 47h14" stroke="currentColor" strokeWidth="2.5" strokeLinejoin="round" strokeLinecap="round"/></>}
+  </svg>;
+}

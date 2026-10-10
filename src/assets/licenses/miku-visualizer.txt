@@ -1,0 +1,50 @@
+HARBOR MIKU VISUALIZER — CHARACTER AND MODEL NOTICES
+
+Hatsune Miku, © Crypton Future Media, Inc. 2007.
+Character source: https://piapro.net/license
+Official guidance: https://piapro.net/intl/en_for_creators.html
+
+These are new transparent renders of the classic Hatsune Miku ver. 1.3 model
+distributed with MikuMikuDance 9.32 English (64-bit). Harbor did not create the
+original model, character design, or textures.
+
+Original model: Animasa (あにまさ氏).
+Data conversion: Kyo Akito (京 秋人氏).
+Embedded model copyright: CRYPTON FUTURE MEDIA, INC.
+Source: https://sites.google.com/view/evpvp/
+
+The distribution's readme permits publication of images and animations made
+with the tool without a separate report or permission application. It disclaims
+warranties and liability for the software, models, tutorials and related files.
+The embedded model notice identifies Animasa, Kyo Akito and Crypton. Their
+credits are retained here.
+
+Posing, dances and rendering by Harbor.
+
+Harbor adaptations: headphone poses, cuff draping to clear the palms, facial
+expressions, head and hair motion, upper-body dance adaptations from user-provided
+animation references, cel lighting, framing and sprite renders. Reference GIFs
+are working material and are not included in the application.
+No raw MMD model, executable, voicebank, song or third-party video is bundled
+in the application. This is an unofficial fan feature. No endorsement by
+Crypton, Animasa, Kyo Akito or MikuMikuDance is implied.
+
+Crypton's original character illustrations are licensed under Creative Commons
+Attribution-NonCommercial 3.0 Unported (CC BY-NC 3.0). Character and model rights
+are separate: this license does not automatically license another creator's
+3D model or artwork. These assets are separate from Harbor's MIT code.
+Harbor's code license does not grant commercial rights to the character artwork.
+Retain this attribution and identify adaptations when sharing the artwork.
+Commercial use requires separate permission from the relevant rights holders.
+Do not treat this notice as commercial clearance or permission to redistribute
+the original model under a new license. Offering software
+without charge is not, by itself, a determination that a use is noncommercial.
+
+License summary: https://creativecommons.org/licenses/by-nc/3.0/
+Complete legal terms: https://creativecommons.org/licenses/by-nc/3.0/legalcode
+
+The character license does not license Miku songs, voices, videos, or other
+creators' models and illustrations. It does not confer rights to music played
+by Harbor. The visualizer does not synthesize vocals or alter playback audio.
+
+Creator guidance and bundled model/readme notices inspected on 2026-09-27.

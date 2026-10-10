@@ -105,15 +105,12 @@ test("Expanding Cards reflows the row and preserves card overlays", () => {
   assert.match(cardSource, /kids \|\| !settings\.hoverPreviewEnabled \? "none"/);
   assert.doesNotMatch(cardSource, /hoverPreviewEnabled \|\| expandingCard\.enabled/);
   assert.match(cardSource, /if \(!expandingCard\.enabled\) hoverPreviewFocus/);
-  assert.match(
-    cardSource,
-    /onPointerEnter=\{\(e\) => hoverPreviewEnter\(meta, e\.currentTarget, e\.buttons\)\}/,
-  );
+  assert.match(cardSource, /hoverPreviewEnter\(meta, e\.currentTarget, e\.buttons\)/);
 });
 
 test("Focused Card, Expanding Cards, and Poster Dock remain independent", () => {
   const settingsSource = readFileSync(
-    new URL("../src/views/settings/theme-panel/display-section.tsx", import.meta.url),
+    new URL("../src/views/settings/theme-panel/display/poster-card-section.tsx", import.meta.url),
     "utf8",
   );
   const rowSource = readFileSync(new URL("../src/components/row.tsx", import.meta.url), "utf8");
@@ -135,7 +132,7 @@ test("Focused Card, Expanding Cards, and Poster Dock remain independent", () => 
       settingsSource.indexOf('label={t("Expanding Cards")}'),
     "Focused Card must be a separate top-level setting",
   );
-  assert.match(rowSource, /shape === "portrait" && settings\.posterDockMagnification/);
+  assert.match(rowSource, /effShape === "portrait" && settings\.posterDockMagnification/);
   assert.doesNotMatch(rowSource, /posterDockMagnification && !expandingCards/);
   assert.match(defaultsSource, /posterFocusedCard: false/);
   assert.match(loadSource, /normalizePosterCardSettings\(parsed\)/);
@@ -221,10 +218,7 @@ test("pointer hover never expands cards and keeps normal hover styles and previe
   );
   assert.doesNotMatch(cardSource, /expandingCard\.onPointer|posterBackdropExpansionHover/);
   assert.doesNotMatch(cardSource, /hoverPreviewEnabled \|\| expandingCard\.enabled/);
-  assert.match(
-    cardSource,
-    /onPointerEnter=\{\(e\) => hoverPreviewEnter\(meta, e\.currentTarget, e\.buttons\)\}/,
-  );
+  assert.match(cardSource, /hoverPreviewEnter\(meta, e\.currentTarget, e\.buttons\)/);
 });
 
 test("wide artwork is prepared before the row is allowed to expand", () => {
@@ -253,16 +247,4 @@ test("wide artwork is prepared before the row is allowed to expand", () => {
   );
   assert.match(artworkSource, /\|simkl\)/);
   assert.doesNotMatch(hookSource, /meta\.background/);
-});
-
-test("passive artwork loading stays local, while focus enables provider lookups", () => {
-  const artworkSource = readFileSync(
-    new URL("../src/lib/expanding-card-artwork.ts", import.meta.url),
-    "utf8",
-  );
-
-  assert.match(artworkSource, /if \(priority === "auto"\) return undefined/);
-  assert.match(artworkSource, /tmdbId && tmdbKey \? await tmdbMovieImages/);
-  assert.match(artworkSource, /url \?\? prepareExpandingCardArtwork\(meta, tmdbKey, "high"\)/);
-  assert.match(artworkSource, /const decoded = new Map<string, number>\(\)/);
 });

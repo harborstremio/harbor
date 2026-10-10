@@ -1,0 +1,119 @@
+.music-jump-grid {
+  display: grid;
+  grid-template-columns: repeat(2, minmax(0, 1fr));
+  gap: 8px;
+}
+@media (min-width: 880px) {
+  .music-jump-grid {
+    grid-template-columns: repeat(3, minmax(0, 1fr));
+  }
+}
+@media (min-width: 1280px) {
+  .music-jump-grid {
+    grid-template-columns: repeat(4, minmax(0, 1fr));
+  }
+}
+.music-jump-tile {
+  display: flex;
+  align-items: center;
+  gap: 12px;
+  min-height: 60px;
+  padding-inline-end: 12px;
+  border-radius: 10px;
+  background: var(--color-elevated);
+  text-align: start;
+  overflow: hidden;
+  transition: background-color 180ms ease-in-out, transform 180ms ease-in-out;
+}
+.music-jump-tile:nth-child(9) { display: none; }
+@media (min-width: 880px) and (max-width: 1279.98px) {
+  .music-jump-tile:nth-child(9) { display: flex; }
+}
+.music-jump-tile:hover,
+.music-jump-tile:focus-visible {
+  background: var(--color-raised);
+}
+.music-jump-tile:active {
+  transform: scale(0.99);
+}
+.music-jump-art {
+  position: relative;
+  flex-shrink: 0;
+  inline-size: 60px;
+  block-size: 60px;
+  overflow: hidden;
+  background: var(--color-canvas);
+}
+.music-jump-art img {
+  inline-size: 100%;
+  block-size: 100%;
+  object-fit: cover;
+}
+.music-jump-art[data-pinned] > .music-collection-pinned {
+  --music-cover-blur: 5px;
+  height: 100%;
+  border-radius: 0;
+}
+.music-jump-art[data-mosaic] {
+  display: grid;
+  grid-template-columns: 1fr 1fr;
+  grid-template-rows: 1fr 1fr;
+}
+.music-jump-art[data-mosaic] > * {
+  min-width: 0;
+  min-height: 0;
+  overflow: hidden;
+}
+.music-jump-copy {
+  display: flex;
+  min-width: 0;
+  flex: 1;
+  flex-direction: column;
+  gap: 3px;
+}
+.music-jump-note {
+  display: flex;
+  align-items: center;
+  gap: 5px;
+  font-size: 11.5px;
+  color: var(--color-ink-muted);
+}
+.music-jump-note-text {
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+}
+.music-jump-name {
+  min-width: 0;
+  font-size: 13.5px;
+  font-weight: 600;
+  line-height: 1.25;
+  color: var(--color-ink);
+  overflow: hidden;
+  display: -webkit-box;
+  -webkit-line-clamp: 2;
+  -webkit-box-orient: vertical;
+}
+@media (prefers-reduced-motion: reduce) {
+  .music-jump-tile {
+    transition: none;
+  }
+  .music-jump-tile:active {
+    transform: none;
+  }
+}
+.music-jump-skeleton {
+  pointer-events: none;
+}
+.music-jump-skeleton .music-jump-art {
+  background: color-mix(in srgb, var(--color-elevated) 60%, transparent);
+}
+.music-jump-bar {
+  block-size: 10px;
+  inline-size: 40%;
+  border-radius: 3px;
+  background: color-mix(in srgb, var(--color-elevated) 70%, transparent);
+}
+.music-jump-bar-wide {
+  inline-size: 68%;
+}

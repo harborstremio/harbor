@@ -1,13 +1,27 @@
-import { Check, ExternalLink, Eye, Key, Lock } from "lucide-react";
-import { createContext, useContext, useEffect, useRef, useState } from "react";
+import { AlertTriangle, Check, ChevronDown, ExternalLink, Eye, Key, Lock } from "./icons";
+import {
+  createContext,
+  useContext,
+  useEffect,
+  useId,
+  useLayoutEffect,
+  useMemo,
+  useRef,
+  useState,
+} from "react";
+import { useKnobAnim } from "@/lib/knob-anim";
+import { advanceFocus } from "@/lib/keyboard-navigation";
+import { getDirection, isRtl } from "@/lib/keyboard-navigation/geometry";
 import { openUrl } from "@/lib/window";
-import { sourceTranslationKey, useT } from "@/lib/i18n";
+import { sourceTranslationKey, useT, useUiLanguage } from "@/lib/i18n";
 import { HoverPreviewCard } from "./setting-preview";
+import { NewBadge } from "./new-badge";
 
 export type SectionId =
   | "basics"
   | "account"
   | "library"
+  | "sports"
   | "trakt"
   | "anilist"
   | "mal"
@@ -17,20 +31,36 @@ export type SectionId =
   | "streaming"
   | "streamFilters"
   | "p2p"
+  | "plugins"
   | "language"
+  | "subtitles"
   | "player"
   | "mpv"
   | "anime"
+  | "shaders"
   | "playerLayout"
   | "hotkeys"
+  | "controllers"
   | "theme"
+  | "badges"
+  | "awardIcons"
   | "webhooks"
   | "bug"
+  | "support"
+  | "licenses"
+  | "icons"
+  | "remotes"
+  | "tv"
+  | "bigPicture"
+  | "storage"
+  | "trackers"
+  | "updates"
   | "advanced";
 
-export const SettingsActiveContext = createContext<{ setActive: (s: SectionId) => void } | null>(
-  null,
-);
+export const SettingsActiveContext = createContext<{
+  setActive: (s: SectionId, anchor?: string) => void;
+  openPage: (s: SectionId, tab?: string) => void;
+} | null>(null);
 
 export function useSettingsActiveContext() {
   const v = useContext(SettingsActiveContext);
@@ -38,13 +68,18 @@ export function useSettingsActiveContext() {
   return v;
 }
 
+const ROW_DESC_BASE = "text-[15.5px] font-normal leading-[22px] tracking-[-0.02px]";
+
+export const ROW_TITLE = "text-[16.5px] font-medium leading-[24px] tracking-[-0.1px] text-ink";
+export const ROW_DESC = `${ROW_DESC_BASE} text-ink-muted`;
+
 export function ExtLink({ href, children }: { href: string; children: React.ReactNode }) {
   return (
     <button
       onClick={() => openUrl(href)}
-      className="inline-flex items-center gap-1 text-ink underline-offset-4 hover:underline"
+      className="inline-flex items-center gap-1 text-[15.5px] text-ink underline-offset-4 hover:underline"
     >
-      {children} <ExternalLink size={12} />
+      {children} <ExternalLink size={14} />
     </button>
   );
 }
@@ -59,26 +94,216 @@ export function settingsAnchor(title: string): string {
   );
 }
 
+type SectionRegistry = {
+  addGroup: (id: string) => void;
+  removeGroup: (id: string) => void;
+  addRow: (id: string, title: string) => void;
+  removeRow: (id: string) => void;
+};
+
+const SectionRegistryContext = createContext<SectionRegistry | null>(null);
+const SectionFlagsContext = createContext<{ multiGroup: boolean }>({ multiGroup: true });
+
+export function useRegisterRowTitle(label: React.ReactNode) {
+  const reg = useContext(SectionRegistryContext);
+  const id = useId();
+  const title = typeof label === "string" ? label : "";
+  useLayoutEffect(() => {
+    if (!reg || !title) return;
+    reg.addRow(id, title);
+    return () => reg.removeRow(id);
+  }, [reg, id, title]);
+}
+
+export function useGroupHeadingVisible(label?: string) {
+  const reg = useContext(SectionRegistryContext);
+  const flags = useContext(SectionFlagsContext);
+  const id = useId();
+  useLayoutEffect(() => {
+    if (!reg || !label) return;
+    reg.addGroup(id);
+    return () => reg.removeGroup(id);
+  }, [reg, id, label]);
+  return !!label && (!reg || flags.multiGroup);
+}
+
+export function stripArrowKeys(
+  refs: { current: (HTMLButtonElement | null)[] },
+  commit: (index: number) => void,
+) {
+  return (e: React.KeyboardEvent<HTMLElement>) => {
+    const dir = getDirection(e.nativeEvent);
+    if (dir !== "left" && dir !== "right") return;
+    const from = refs.current.indexOf(e.target as HTMLButtonElement);
+    if (from < 0) return;
+    const next = from + ((dir === "right") !== isRtl(e.currentTarget) ? 1 : -1);
+    const el = refs.current[next];
+    if (!el) return;
+    e.preventDefault();
+    advanceFocus(el, dir);
+    commit(next);
+  };
+}
+
+export function RowText({
+  lead,
+  leadSize,
+  children,
+  onClick,
+  expanded,
+}: {
+  lead?: React.ReactNode;
+  leadSize?: "lg";
+  children: React.ReactNode;
+  onClick?: () => void;
+  expanded?: boolean;
+}) {
+  const body = (
+    <>
+      {lead && (
+        <span className="hset-row-lead shrink-0 text-ink-muted" data-size={leadSize}>
+          {lead}
+        </span>
+      )}
+      <span className="flex min-w-0 flex-1 flex-col gap-1">{children}</span>
+    </>
+  );
+  if (!onClick) return <span className="hset-row-text flex min-w-0 items-start gap-3">{body}</span>;
+  return (
+    <button
+      type="button"
+      onClick={onClick}
+      aria-expanded={expanded}
+      className="hset-row-text flex min-w-0 items-start gap-3 text-start"
+    >
+      {body}
+      {expanded !== undefined && (
+        <span
+          className={`hset-row-chevron shrink-0 self-center text-ink-subtle transition-transform ${expanded ? "rotate-180" : ""}`}
+        >
+          <ChevronDown size={16} />
+        </span>
+      )}
+    </button>
+  );
+}
+
+export function RowTitle({ children }: { children: React.ReactNode }) {
+  return (
+    <span className={`hset-row-title flex min-w-0 flex-wrap items-center gap-2 ${ROW_TITLE}`}>
+      {children}
+    </span>
+  );
+}
+
+export function RowDesc({ accent, children }: { accent?: boolean; children: React.ReactNode }) {
+  return (
+    <span
+      className={`hset-row-desc block max-w-[66ch] ${ROW_DESC_BASE} ${
+        accent ? "text-accent" : "text-ink-muted"
+      }`}
+    >
+      {children}
+    </span>
+  );
+}
+
+export function RowNote({ children }: { children: React.ReactNode }) {
+  return (
+    <span className="hset-row-note flex max-w-[66ch] items-start gap-2 text-[14px] leading-[20px] text-danger">
+      <AlertTriangle size={15} strokeWidth={2.4} className="mt-[2px] shrink-0" />
+      {children}
+    </span>
+  );
+}
+
+export function RowControl({ span, children }: { span?: boolean; children: React.ReactNode }) {
+  return (
+    <span
+      className={`hset-row-control flex min-h-11 min-w-0 flex-wrap items-center gap-2.5 ${
+        span ? "w-full justify-start" : "justify-end"
+      }`}
+    >
+      {children}
+    </span>
+  );
+}
+
 export function Section({
   title,
   subtitle,
+  newId,
+  bare,
   children,
 }: {
   title: string;
   subtitle?: string;
+  newId?: string;
+  bare?: boolean;
   children: React.ReactNode;
 }) {
+  const groups = useRef<Set<string>>(new Set());
+  const rows = useRef<Map<string, string>>(new Map());
+  const [multiGroup, setMultiGroup] = useState(false);
+  const [echo, setEcho] = useState(false);
+  const titleRef = useRef(title);
+  titleRef.current = title;
+
+  const registry = useMemo<SectionRegistry>(() => {
+    const sync = () => {
+      setMultiGroup(groups.current.size > 1);
+      const only = rows.current.size === 1 ? [...rows.current.values()][0] : undefined;
+      setEcho(
+        groups.current.size <= 1 &&
+          !!only &&
+          settingsAnchor(only) === settingsAnchor(titleRef.current),
+      );
+    };
+    return {
+      addGroup: (id) => {
+        groups.current.add(id);
+        sync();
+      },
+      removeGroup: (id) => {
+        groups.current.delete(id);
+        sync();
+      },
+      addRow: (id, rowTitle) => {
+        rows.current.set(id, rowTitle);
+        sync();
+      },
+      removeRow: (id) => {
+        rows.current.delete(id);
+        sync();
+      },
+    };
+  }, []);
+
+  const flags = useMemo(() => ({ multiGroup }), [multiGroup]);
+  const showHeading = !bare && !echo;
+
   return (
-    <section
-      id={settingsAnchor(title)}
-      className="scroll-mt-28 flex flex-col gap-4 rounded-2xl border border-edge-soft bg-elevated/40 p-7"
-    >
-      <div className="flex flex-col gap-1">
-        <h2 className="text-[19px] font-medium tracking-tight text-ink">{title}</h2>
-        {subtitle && <p className="text-[13.5px] leading-relaxed text-ink-muted">{subtitle}</p>}
-      </div>
-      {children}
-    </section>
+    <SectionRegistryContext.Provider value={registry}>
+      <SectionFlagsContext.Provider value={flags}>
+        <section
+          id={settingsAnchor(title)}
+          className={
+            bare
+              ? "scroll-mt-[72px]"
+              : "harbor-settings-section scroll-mt-[72px] flex flex-col gap-[11px]"
+          }
+        >
+          {showHeading && (
+            <div className="flex items-center gap-2">
+              <h2 className="hset-section-title">{title}</h2>
+              {newId && <NewBadge id={newId} />}
+            </div>
+          )}
+          {!bare && subtitle && <p className={`-mt-0.5 max-w-[70ch] ${ROW_DESC}`}>{subtitle}</p>}
+          <div className={bare ? undefined : "harbor-settings-group"}>{children}</div>
+        </section>
+      </SectionFlagsContext.Provider>
+    </SectionRegistryContext.Provider>
   );
 }
 
@@ -92,6 +317,7 @@ export function KeyField({
   help,
   iconSrc,
   iconBg,
+  iconNode,
   headerExtra,
   badge,
 }: {
@@ -104,21 +330,24 @@ export function KeyField({
   help: React.ReactNode;
   iconSrc?: string;
   iconBg?: string;
+  iconNode?: React.ReactNode;
   headerExtra?: React.ReactNode;
   badge?: string;
 }) {
   const t = useT();
   const [reveal, setReveal] = useState(false);
   const [focused, setFocused] = useState(false);
+  const fieldId = useId();
   const [initialValue, setInitialValue] = useState(value);
-  useEffect(() => {
-    if (saved) setInitialValue(value);
-  }, [saved, value]);
   const dirty = value.trim() !== initialValue.trim();
   const showSave = dirty;
+  const showSaved = saved && !dirty;
 
   const onSaveRef = useRef(onSave);
-  onSaveRef.current = onSave;
+  onSaveRef.current = () => {
+    onSave();
+    setInitialValue(value);
+  };
   const stateRef = useRef({ dirty, value });
   stateRef.current = { dirty, value };
 
@@ -138,38 +367,39 @@ export function KeyField({
 
   return (
     <div className="flex flex-col gap-2.5">
-      <div className="flex items-center justify-between gap-3">
+      <div className="flex flex-wrap items-center justify-between gap-3">
         <div className="flex items-center gap-2">
-          <label className="text-[12px] font-semibold uppercase tracking-[0.14em] text-ink-subtle">
+          <label htmlFor={fieldId} className="harbor-settings-label">
             {label}
           </label>
           {badge && (
-            <span className="rounded-full bg-accent/15 px-2 py-[3px] text-[9.5px] font-semibold uppercase tracking-wider text-accent">
+            <span className="inline-flex h-[22px] shrink-0 items-center rounded-[6px] bg-accent-soft px-2 text-[13px] font-bold uppercase leading-[17px] tracking-[0.72px] text-accent">
               {badge}
             </span>
           )}
         </div>
         <div className="flex items-center gap-3">
           {headerExtra}
-          {!headerExtra && value.length > 0 && !showSave && (
-            <span className="flex items-center gap-1.5 text-[11px] font-medium text-accent transition-colors">
-              <span className="h-1.5 w-1.5 rounded-full bg-accent shadow-[0_0_6px_rgba(0,200,140,0.5)]" />
-              {saved ? t("Saved") : t("Active")}
+          {value.length > 0 && !showSave && (
+            <span className="flex items-center gap-2 text-[15.5px] font-medium text-ink-subtle transition-colors">
+              <span className="h-2 w-2 rounded-full bg-success" />
+              {t("Saved")}
             </span>
           )}
         </div>
       </div>
       <div
-        className={`flex h-14 items-center gap-3 rounded-2xl border bg-elevated px-4 transition-all ${
-          focused
-            ? "border-ink shadow-[0_0_0_3px_rgba(255,255,255,0.04)]"
-            : "border-edge hover:border-edge"
+        data-settings-row
+        className={`flex min-h-[56px] w-full items-center gap-2.5 rounded-[10px] border px-3 transition-colors ${
+          focused ? "border-edge bg-raised" : "border-edge-soft bg-elevated"
         }`}
       >
-        {iconSrc ? (
+        {iconNode ? (
+          iconNode
+        ) : iconSrc ? (
           iconBg ? (
             <span
-              className="flex h-7 w-7 shrink-0 items-center justify-center overflow-hidden rounded-md p-1"
+              className="flex h-9 w-9 shrink-0 items-center justify-center overflow-hidden rounded-md p-1.5"
               style={{ backgroundColor: iconBg }}
             >
               <img
@@ -184,15 +414,16 @@ export function KeyField({
               src={iconSrc}
               alt=""
               draggable={false}
-              className="h-7 w-7 shrink-0 rounded-md object-contain"
+              className="h-9 w-9 shrink-0 rounded-md object-contain"
             />
           )
         ) : (
-          <span className="flex h-7 w-7 shrink-0 items-center justify-center rounded-md bg-canvas text-ink-subtle ring-1 ring-edge-soft">
-            <Key size={14} />
+          <span className="flex h-9 w-9 shrink-0 items-center justify-center rounded-md bg-canvas text-ink-subtle">
+            <Key size={17} />
           </span>
         )}
         <input
+          id={fieldId}
           type={reveal ? "text" : "password"}
           value={value}
           onChange={(e) => onChange(e.target.value)}
@@ -204,23 +435,23 @@ export function KeyField({
           onKeyDown={(e) => {
             if (e.key === "Enter" && dirty) {
               e.preventDefault();
-              onSave();
+              onSaveRef.current();
             }
           }}
           placeholder={placeholder}
           spellCheck={false}
           autoComplete="off"
-          className="h-full flex-1 bg-transparent text-[15px] tracking-wide text-ink placeholder:text-ink-subtle/55 outline-none"
+          className="h-11 min-w-0 flex-1 bg-transparent text-[16.5px] tracking-wide text-ink placeholder:text-ink-subtle/55 outline-none"
         />
         {value.length > 0 && (
           <button
             type="button"
             onClick={() => setReveal((v) => !v)}
             aria-label={reveal ? t("Hide") : t("Show")}
-            className="flex h-8 w-8 shrink-0 items-center justify-center rounded-lg text-ink-subtle transition-colors hover:bg-canvas/40 hover:text-ink"
+            className="flex h-11 w-11 shrink-0 items-center justify-center rounded-md text-ink-subtle transition-colors hover:bg-canvas hover:text-ink"
           >
             {reveal ? (
-              <svg width="16" height="16" viewBox="0 0 24 24" fill="none" aria-hidden>
+              <svg width="19" height="19" viewBox="0 0 24 24" fill="none" aria-hidden>
                 <path
                   d="M3 12s3.5-7 9-7 9 7 9 7-3.5 7-9 7-9-7-9-7z"
                   stroke="currentColor"
@@ -237,7 +468,7 @@ export function KeyField({
                 />
               </svg>
             ) : (
-              <svg width="16" height="16" viewBox="0 0 24 24" fill="none" aria-hidden>
+              <svg width="19" height="19" viewBox="0 0 24 24" fill="none" aria-hidden>
                 <path
                   d="M3 12s3.5-7 9-7 9 7 9 7-3.5 7-9 7-9-7-9-7z"
                   stroke="currentColor"
@@ -251,31 +482,35 @@ export function KeyField({
           </button>
         )}
         <div
+          style={{ display: showSave || showSaved ? undefined : "none" }}
           className={`flex shrink-0 items-center transition-all ${
-            showSave || saved ? "ms-1 w-auto opacity-100" : "w-0 overflow-hidden opacity-0"
+            showSave || showSaved ? "ms-1 w-auto opacity-100" : "w-0 overflow-hidden opacity-0"
           }`}
         >
           <button
             type="button"
-            onClick={onSave}
+            onClick={() => onSaveRef.current()}
             disabled={!showSave && !saved}
-            className={`relative flex h-10 items-center justify-center overflow-hidden rounded-xl px-4 text-[13.5px] font-semibold transition-all ${
-              saved
-                ? "bg-accent/15 text-accent"
+            aria-label={showSaved ? t("Saved") : t("Save")}
+            className={`relative flex h-11 items-center justify-center overflow-hidden rounded-md px-4 text-[15px] font-semibold transition ${
+              showSaved
+                ? "bg-accent-soft text-accent"
                 : "bg-ink text-canvas hover:scale-[1.02] active:scale-[0.97]"
             }`}
           >
             <span
-              className={`flex items-center gap-1.5 transition-all ${
-                saved ? "translate-y-0 opacity-100" : "absolute translate-y-3 opacity-0"
+              aria-hidden
+              className={`flex items-center gap-1.5 transition ${
+                showSaved ? "translate-y-0 opacity-100" : "absolute translate-y-3 opacity-0"
               }`}
             >
-              <Check size={14} strokeWidth={2.6} />
+              <Check size={15} strokeWidth={2.6} />
               {t("Saved")}
             </span>
             <span
-              className={`flex items-center transition-all ${
-                saved ? "absolute -translate-y-3 opacity-0" : "translate-y-0 opacity-100"
+              aria-hidden
+              className={`flex items-center transition ${
+                showSaved ? "absolute -translate-y-3 opacity-0" : "translate-y-0 opacity-100"
               }`}
             >
               {t("Save")}
@@ -283,7 +518,7 @@ export function KeyField({
           </button>
         </div>
       </div>
-      <p className="text-[12.5px] leading-relaxed text-ink-subtle">{help}</p>
+      <p className={`max-w-[70ch] ${ROW_DESC_BASE} text-ink-subtle`}>{help}</p>
     </div>
   );
 }
@@ -297,6 +532,8 @@ export function ToggleRow({
   lockReason,
   note,
   preview,
+  newId,
+  warn,
 }: {
   label: string;
   sub?: React.ReactNode;
@@ -306,6 +543,8 @@ export function ToggleRow({
   lockReason?: string;
   note?: string;
   preview?: React.ReactNode;
+  newId?: string;
+  warn?: string;
 }) {
   const locked = !!lockReason;
   const effective = value && !locked;
@@ -313,6 +552,7 @@ export function ToggleRow({
   const btnRef = useRef<HTMLButtonElement | null>(null);
   const [hover, setHover] = useState(false);
   const hoverTimer = useRef<number | null>(null);
+  useRegisterRowTitle(label);
   const openPreview = () => {
     if (!preview) return;
     if (hoverTimer.current) window.clearTimeout(hoverTimer.current);
@@ -328,6 +568,7 @@ export function ToggleRow({
     },
     [],
   );
+  const knobAnim = useKnobAnim(effective);
   return (
     <button
       ref={btnRef}
@@ -337,59 +578,64 @@ export function ToggleRow({
       onFocus={openPreview}
       onBlur={closePreview}
       disabled={locked}
-      className={`relative flex items-center justify-between gap-4 rounded-xl border bg-canvas/40 px-4 py-3 text-start transition-colors ${
-        locked
-          ? "cursor-not-allowed border-edge-soft/40 opacity-60"
-          : "border-edge-soft hover:border-edge"
-      }`}
+      data-settings-row
+      data-interactive=""
+      data-ctl="switch"
+      role="switch"
+      aria-checked={effective}
+      className={`hset-row group relative ${locked ? "cursor-not-allowed opacity-60" : ""}`}
     >
       {preview && (
         <HoverPreviewCard open={hover} anchorRef={btnRef}>
-          {preview}
+          <span data-tv-skip className="contents">
+            {preview}
+          </span>
         </HoverPreviewCard>
       )}
-      <div className="flex min-w-0 flex-1 items-center gap-3.5">
-        <span className={`relative ${locked ? "saturate-50 opacity-70" : ""}`}>
-          {leading}
-          {locked && (
-            <span className="absolute -bottom-1 -end-1 flex h-4 w-4 items-center justify-center rounded-full bg-canvas ring-1 ring-edge text-ink-subtle">
-              <Lock size={9} strokeWidth={2.4} />
+      <RowText
+        lead={
+          leading ? (
+            <span className={`relative block ${locked ? "saturate-50 opacity-70" : ""}`}>
+              {leading}
+              {locked && (
+                <span className="absolute -bottom-1 -end-1 flex h-4 w-4 items-center justify-center rounded-full bg-canvas ring-1 ring-edge text-ink-subtle">
+                  <Lock size={9} strokeWidth={2.4} />
+                </span>
+              )}
             </span>
+          ) : undefined
+        }
+      >
+        <RowTitle>
+          <span className="min-w-0">{label}</span>
+          {newId && <NewBadge id={newId} />}
+          {locked && !leading && (
+            <Lock size={14} strokeWidth={2.4} className="shrink-0 text-ink-subtle" />
           )}
-        </span>
-        <div className="flex min-w-0 flex-col gap-0.5">
-          <span className="text-[14px] font-medium text-ink">{label}</span>
-          {subText && (
-            <span
-              className={`text-[12.5px] ${
-                lockReason ? "text-accent/85" : note ? "text-ink-muted" : "text-ink-subtle"
-              }`}
-            >
-              {subText}
-            </span>
-          )}
-        </div>
-      </div>
-      <span className="flex shrink-0 items-center gap-2.5">
+        </RowTitle>
+        {subText && <RowDesc accent={!!lockReason}>{subText}</RowDesc>}
+        {warn && <RowNote>{warn}</RowNote>}
+      </RowText>
+      <RowControl>
         {preview && (
           <Eye
-            size={13}
-            className={`transition-colors ${hover ? "text-accent" : "text-ink-subtle/55"}`}
+            size={17}
+            className={`shrink-0 transition-colors ${hover ? "text-accent" : "text-ink-subtle/55"}`}
           />
         )}
         <span
           aria-hidden
-          className={`relative h-6 w-10 rounded-full transition-colors ${
+          className={`relative block h-8 w-12 shrink-0 rounded-full transition-colors ${
             effective ? "bg-ink" : "bg-edge"
           }`}
         >
           <span
-            className={`absolute start-[2px] top-0.5 h-5 w-5 rounded-full bg-canvas transition-transform ${
+            className={`absolute start-[3px] top-[3px] h-[26px] w-[26px] rounded-full bg-canvas ${
               effective ? "translate-x-4 rtl:-translate-x-4" : "translate-x-0"
-            }`}
+            } ${knobAnim}`}
           />
         </span>
-      </span>
+      </RowControl>
     </button>
   );
 }
@@ -398,28 +644,116 @@ export function Segmented<T extends string>({
   value,
   options,
   onChange,
+  label,
+  sub,
 }: {
   value: T;
   options: ReadonlyArray<{ value: T; label: string }>;
   onChange: (v: T) => void;
+  label?: string;
+  sub?: string;
 }) {
   const t = useT();
-  return (
-    <div className="flex w-fit flex-wrap gap-1 rounded-2xl bg-elevated/40 p-1 ring-1 ring-edge-soft/60">
-      {options.map((o) => (
+  const language = useUiLanguage();
+  const wrapRef = useRef<HTMLDivElement | null>(null);
+  const btnRefs = useRef<(HTMLButtonElement | null)[]>([]);
+  const thumbRef = useRef<HTMLSpanElement | null>(null);
+  const prevIndex = useRef(-1);
+  const activeIndex = options.findIndex((o) => o.value === value);
+
+  useLayoutEffect(() => {
+    const thumb = thumbRef.current;
+    const to = btnRefs.current[activeIndex];
+    if (!thumb || !to) return;
+    const place = (el: HTMLButtonElement) => {
+      thumb.style.left = `${el.offsetLeft}px`;
+      thumb.style.top = `${el.offsetTop}px`;
+      thumb.style.width = `${el.offsetWidth}px`;
+      thumb.style.height = `${el.offsetHeight}px`;
+      thumb.style.opacity = "1";
+    };
+    const from = prevIndex.current >= 0 ? btnRefs.current[prevIndex.current] : null;
+    prevIndex.current = activeIndex;
+    place(to);
+    if (!from || from === to) return;
+    if (window.matchMedia?.("(prefers-reduced-motion: reduce)").matches) return;
+    if (from.offsetTop === to.offsetTop) {
+      const edge = Math.min(from.offsetLeft, to.offsetLeft);
+      const far = Math.max(from.offsetLeft + from.offsetWidth, to.offsetLeft + to.offsetWidth);
+      thumb.animate(
+        [
+          { left: `${from.offsetLeft}px`, width: `${from.offsetWidth}px` },
+          { left: `${edge}px`, width: `${far - edge}px`, offset: 0.5 },
+          { left: `${to.offsetLeft}px`, width: `${to.offsetWidth}px` },
+        ],
+        { duration: 420, easing: "ease-in-out" },
+      );
+    } else {
+      thumb.animate(
+        [
+          {
+            left: `${from.offsetLeft}px`,
+            top: `${from.offsetTop}px`,
+            width: `${from.offsetWidth}px`,
+          },
+          { left: `${to.offsetLeft}px`, top: `${to.offsetTop}px`, width: `${to.offsetWidth}px` },
+        ],
+        { duration: 320, easing: "ease-in-out" },
+      );
+    }
+  }, [activeIndex, options.length, language]);
+
+  useEffect(() => {
+    const wrap = wrapRef.current;
+    if (!wrap || typeof ResizeObserver === "undefined") return;
+    const ro = new ResizeObserver(() => {
+      const thumb = thumbRef.current;
+      const el = btnRefs.current[activeIndex];
+      if (!thumb || !el) return;
+      thumb.style.left = `${el.offsetLeft}px`;
+      thumb.style.top = `${el.offsetTop}px`;
+      thumb.style.width = `${el.offsetWidth}px`;
+      thumb.style.height = `${el.offsetHeight}px`;
+    });
+    ro.observe(wrap);
+    return () => ro.disconnect();
+  }, [activeIndex]);
+
+  const control = (
+    <div
+      ref={wrapRef}
+      onKeyDown={stripArrowKeys(btnRefs, (i) => onChange(options[i].value))}
+      className="relative flex w-fit flex-wrap gap-0.5 rounded-[10px] bg-canvas p-1"
+    >
+      <span
+        ref={thumbRef}
+        aria-hidden
+        className="pointer-events-none absolute rounded-[6px] bg-ink opacity-0"
+      />
+      {options.map((o, i) => (
         <button
           key={o.value}
+          ref={(el) => {
+            btnRefs.current[i] = el;
+          }}
           type="button"
+          aria-pressed={value === o.value}
           onClick={() => onChange(o.value)}
-          className={`rounded-full px-4 py-1.5 text-[12.5px] font-semibold transition-colors ${
-            value === o.value
-              ? "bg-ink text-canvas"
-              : "text-ink-muted hover:bg-raised hover:text-ink"
+          className={`relative z-10 flex h-11 items-center rounded-[6px] px-4 text-[15px] font-semibold tracking-[0.01em] transition-colors duration-200 ${
+            value === o.value ? "text-canvas" : "text-ink-subtle hover:text-ink"
           }`}
         >
           {t(o.label)}
         </button>
       ))}
+    </div>
+  );
+  if (!label && !sub) return control;
+  return (
+    <div className="flex flex-col gap-2">
+      {label && <span className={ROW_TITLE}>{label}</span>}
+      {sub && <span className={`max-w-[66ch] ${ROW_DESC_BASE} text-ink-subtle`}>{sub}</span>}
+      {control}
     </div>
   );
 }

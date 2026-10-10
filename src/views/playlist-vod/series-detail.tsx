@@ -1,17 +1,20 @@
-import { ArrowLeft, Play } from "lucide-react";
+import { ArrowLeft } from "lucide-react";
 import { useState } from "react";
 import { Poster } from "@/components/poster";
 import { useT } from "@/lib/i18n";
 import type { VodEpisode, VodSeries } from "@/lib/iptv/vod";
+import { EpisodeRow } from "./episode-row";
 
 type Props = {
   series: VodSeries;
   loading?: boolean;
+  error?: string | null;
+  onRetry?: () => void;
   onBack: () => void;
   onPlay: (ep: VodEpisode) => void;
 };
 
-export function SeriesDetail({ series, loading = false, onBack, onPlay }: Props) {
+export function SeriesDetail({ series, loading = false, error, onRetry, onBack, onPlay }: Props) {
   const t = useT();
   const [season, setSeason] = useState<number>(series.seasons[0] ?? 1);
   const episodes = series.episodes.filter((e) => e.season === season);
@@ -66,23 +69,34 @@ export function SeriesDetail({ series, loading = false, onBack, onPlay }: Props)
       )}
 
       <div className="flex flex-col gap-1">
-        {loading ? (
+        {error ? (
+          <div role="alert" className="px-3 py-4 text-[14px] text-ink-muted">
+            <p>{error}</p>
+            {onRetry && (
+              <button
+                type="button"
+                onClick={onRetry}
+                className="mt-3 rounded-lg bg-elevated px-4 py-2 text-ink"
+              >
+                {t("Retry")}
+              </button>
+            )}
+          </div>
+        ) : loading ? (
           <p className="px-3 py-4 text-[14px] text-ink-muted">{t("Loading episodes...")}</p>
+        ) : episodes.length === 0 ? (
+          <p className="px-3 py-4 text-[14px] text-ink-muted">
+            {t("No episodes were returned for this season.")}
+          </p>
         ) : (
           episodes.map((ep) => (
-            <button
-              key={`${ep.season}-${ep.episode}`}
-              onClick={() => onPlay(ep)}
-              className="group flex items-center gap-3.5 rounded-xl px-3 py-2.5 text-start transition-colors hover:bg-elevated"
-            >
-              <span className="flex h-9 w-9 shrink-0 items-center justify-center rounded-lg bg-elevated text-[13px] font-semibold tabular-nums text-ink-muted group-hover:bg-raised group-hover:text-ink">
-                {ep.episode}
-              </span>
-              <span className="min-w-0 flex-1 truncate text-[14px] text-ink">{ep.title}</span>
-              <span className="flex h-8 w-8 shrink-0 items-center justify-center rounded-full text-ink-subtle opacity-0 transition-opacity group-hover:opacity-100">
-                <Play size={15} fill="currentColor" />
-              </span>
-            </button>
+            <EpisodeRow
+              key={ep.id || `${ep.season}-${ep.episode}-${ep.url}`}
+              seriesId={series.id}
+              ep={ep}
+              fallbackLogo={series.logo}
+              onPlay={() => onPlay(ep)}
+            />
           ))
         )}
       </div>

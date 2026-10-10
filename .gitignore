@@ -1,8 +1,10 @@
 node_modules
+__pycache__/
 dist
 dist-ssr
 *.local
 *.bak
+*.bak-orig
 *.tmp.*
 _backups/
 
@@ -11,7 +13,7 @@ _backups/
 !.env.example
 
 target
-.flatpak-work/
+/.verify-target
 
 *.tsbuildinfo
 /vite.config.js
@@ -37,7 +39,91 @@ pnpm-debug.log*
 /src-tauri/binaries/ffprobe*
 /src-tauri/binaries/mpv-*
 /src-tauri/libmpv/libmpv-2.dll
+/src-tauri/resources/capstan/
 /src-tauri/fonts/*.otf
 /src-tauri/fonts/*.ttf
 local_docs/
+.diag/
+# Agent and dev scratch: lab harnesses, generated signal fixtures, working notes.
+# 174MB and none of it is product code.
+scratchpad/
+# Working notes, triage ledgers and local dev logs. Only *.md and *.log were
+# keeping this out of the tree by accident; make it explicit.
+_private/
+/src-tauri/tauri.dev.local.json
 
+# This repo is pnpm (see packageManager + CI). npm lockfiles must not be committed.
+package-lock.json
+
+# public/avatars and public/kids/avatars are TRACKED. The ~627 licensed-IP
+# avatars were deleted; what remains is Harbor's own artwork and ships with the
+# app, so a fresh clone or worktree gets a working avatar picker.
+# Do not re-add third-party character art here.
+
+# Hollywood statuette photos. Unused: award-logo.tsx renders these as trophy.png
+# and users supply their own via award packs. Stripped 2026-07-22, keep them out.
+public/awards/oscar.png
+public/awards/emmy.png
+public/awards/bafta.png
+public/awards/golden-globe.png
+public/awards/cannestrophy.png
+public/awards/sag.png
+public/awards/critics-choice.png
+
+# Android (Tauri) build output. Gradle regenerates all of this on every build,
+# so it is never committed. Was polluting the tree with ~2,300 files / 2.5GB.
+src-tauri/gen/android/**/build/
+src-tauri/gen/android/.gradle/
+src-tauri/gen/android/**/.gradle/
+src-tauri/gen/android/local.properties
+src-tauri/gen/android/.idea/
+
+# Android native shell (Kotlin/Compose, local dev). Not committed yet per
+# direction. Excluded wholesale: ~13k source + Gradle cache files (checksums,
+# executionHistory, build/) were flooding the tree. Remove this line when ready
+# to start tracking the source; the Gradle caches below stay ignored regardless.
+android-native/
+**/.gradle/
+**/gradle/*.lock
+**/*-checksums.bin
+**/checksums.lock
+**/executionHistory.bin
+**/executionHistory.lock
+/.audit
+audit-defects.txt
+audit-routing.txt
+docs/TV-OPEN-BACKLOG.md
+audit-rest.txt
+*.md
+
+installer/src-tauri/payload/
+installer/payload-stage/
+!installer/**/*.md
+# local design references and perf captures, not for distribution
+tools/tv-refs/
+docs/tv-perf/
+# tauri-generated scaffolding, recreate with: pnpm android:init
+src-tauri/gen/
+installer/src-tauri/gen/
+
+# Localization / Crowdin credentials (token lives outside the repo, env-var only)
+crowdin.credentials
+.crowdin.env
+crowdin_credentials.*
+*.token
+gemini.key
+/.firecrawl
+/work
+!docs/games/*.md
+/docs/games
+
+# Games artwork: 8.6MB of static files referenced by URL, not imported, so ignoring
+# them cannot break a build. Source under src/assets/games stays tracked because it is imported.
+/public/games/
+
+# Built separately from pinned GPL sources; see tools/pokemon-engine/README.md.
+!tools/pokemon-engine/README.md
+/src-tauri/resources/pokemon-engine/
+
+# Rotated dev-server logs: *.log covers dev.log but not its .prev rotation.
+dev.log*

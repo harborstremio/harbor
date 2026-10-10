@@ -27,7 +27,11 @@ export async function enrichAnimeCountry(metas: Meta[]): Promise<Meta[]> {
   });
 }
 
-export type AnimeFilterOpts = { excludeOrigins: string[]; hideWatched: boolean };
+export type AnimeFilterOpts = {
+  excludeOrigins: string[];
+  hideWatched: boolean;
+  isWatched?: (id: string) => boolean;
+};
 
 export function animeOriginExcluded(meta: Meta, excludeOrigins: string[]): boolean {
   return excludeOrigins.length > 0 && !!meta.country && excludeOrigins.includes(meta.country);
@@ -35,7 +39,9 @@ export function animeOriginExcluded(meta: Meta, excludeOrigins: string[]): boole
 
 export function animeFiltered(meta: Meta, opts: AnimeFilterOpts): boolean {
   if (animeOriginExcluded(meta, opts.excludeOrigins)) return true;
-  if (opts.hideWatched && isWatchedFlagged(meta.id)) return true;
+  if (opts.hideWatched && (isWatchedFlagged(meta.id) || opts.isWatched?.(meta.id) === true)) {
+    return true;
+  }
   return false;
 }
 

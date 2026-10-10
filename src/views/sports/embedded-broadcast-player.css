@@ -1,0 +1,209 @@
+.sports-embed-player {
+  position: fixed;
+  z-index: 260;
+  display: flex;
+  flex-direction: column;
+  overflow: hidden;
+  color: var(--color-ink);
+  background: var(--color-canvas);
+}
+.sports-embed-player[data-docked="true"] {
+  right: 20px;
+  bottom: 20px;
+  width: min(440px, calc(100vw - 32px));
+  max-height: calc(100dvh - 40px);
+  border-radius: 14px;
+  box-shadow: 0 14px 46px #0009;
+  outline: 1px solid var(--color-edge);
+}
+.sports-embed-player[data-docked="false"],
+.sports-embed-player:fullscreen {
+  inset: 0;
+  width: 100%;
+  height: 100%;
+  border-radius: 0;
+}
+.sports-embed-player header,
+.sports-embed-player footer {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  padding: 8px 12px;
+  flex-shrink: 0;
+  background: var(--color-surface);
+}
+.sports-embed-player header {
+  min-height: 54px;
+}
+/* Tauri starts a drag from the event target, so the title must not swallow the press. */
+.sports-embed-player > header[data-tauri-drag-region] > span,
+.sports-embed-player > header[data-tauri-drag-region] > span *,
+.sports-embed-player > header[data-tauri-drag-region] > .broadcast-channel-avatar {
+  pointer-events: none;
+}
+.sports-embed-player > header[data-tauri-drag-region] button {
+  pointer-events: auto;
+}
+
+.sports-embed-player[data-docked="true"] > header {
+  cursor: grab;
+  touch-action: none;
+}
+.sports-embed-player[data-docked="true"] > header:active {
+  cursor: grabbing;
+}
+.sports-embed-player[data-docked="true"] > header button {
+  cursor: pointer;
+}
+.sports-embed-player header > span {
+  flex: 1;
+  min-width: 0;
+}
+.sports-embed-player strong,
+.sports-embed-player small {
+  display: block;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+}
+.sports-embed-player strong {
+  font-size: 13px;
+}
+.sports-embed-player small {
+  font-size: 11px;
+  color: var(--color-ink-muted);
+}
+.sports-embed-player button {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  gap: 7px;
+  min-width: 34px;
+  min-height: 34px;
+  border-radius: 7px;
+  font-size: 12px;
+}
+.sports-embed-player button:hover {
+  background: var(--color-elevated);
+}
+.sports-embed-player button:focus-visible {
+  outline: 2px solid var(--color-ink);
+  outline-offset: -2px;
+}
+.sports-embed-stage {
+  position: relative;
+  aspect-ratio: 16 / 9;
+  min-height: 0;
+  flex-shrink: 1;
+  overflow: hidden;
+  background: #080a0b;
+}
+.sports-embed-body {
+  display: flex;
+  min-height: 0;
+  flex: 1;
+}
+.sports-embed-body > .sports-embed-stage {
+  width: 100%;
+  min-width: 0;
+}
+.sports-embed-chat {
+  flex: 0 0 340px;
+  min-height: 0;
+  border-left: 1px solid var(--color-edge);
+}
+.sports-embed-chat iframe {
+  display: block;
+  width: 100%;
+  height: 100%;
+  border: 0;
+}
+.sports-embed-player button[aria-pressed="true"] {
+  background: var(--color-elevated);
+}
+@media (max-width: 740px) {
+  .sports-embed-body[data-chat="true"] {
+    flex-direction: column;
+  }
+  .sports-embed-chat {
+    flex: 0 0 40%;
+    border-left: 0;
+    border-top: 1px solid var(--color-edge);
+  }
+}
+/* Twitch's official embed requires a minimum 400 x 300 viewport. */
+.sports-embed-stage iframe {
+  position: absolute;
+  inset: 0 auto auto 0;
+  display: block;
+  border: 0;
+  transform-origin: top left;
+}
+.sports-embed-player[data-docked="false"] .sports-embed-stage,
+.sports-embed-player:fullscreen .sports-embed-stage {
+  flex: 1;
+  min-height: 0;
+  aspect-ratio: auto;
+}
+.sports-embed-player[data-minimized="true"] .sports-embed-stage {
+  height: 0;
+  aspect-ratio: auto;
+  overflow: hidden;
+  flex: none;
+}
+.sports-embed-player[data-minimized="true"] .sports-embed-stage iframe {
+  pointer-events: none;
+}
+.sports-embed-spacer {
+  flex: 1;
+}
+.sports-embed-loading {
+  position: absolute;
+  inset: 0;
+  display: grid;
+  place-items: center;
+  pointer-events: none;
+  color: white;
+}
+.sports-embed-loading svg {
+  animation: sports-embed-spin 1s linear infinite;
+}
+.sports-embed-unavailable {
+  min-height: 300px;
+  display: flex;
+  flex-direction: column;
+  justify-content: center;
+  padding: 24px;
+  gap: 12px;
+  text-align: center;
+  font-size: 13px;
+  color: #ddd;
+}
+@keyframes sports-embed-spin {
+  to {
+    transform: rotate(360deg);
+  }
+}
+@media (prefers-reduced-motion: reduce) {
+  .sports-embed-loading svg {
+    animation: none;
+  }
+}
+
+.sports-embed-player header > .broadcast-channel-avatar {
+  flex: 0 0 30px;
+  width: 30px;
+  height: 30px;
+  border-radius: 50%;
+  overflow: hidden;
+  display: grid;
+  place-items: center;
+  background: var(--color-elevated);
+  font-size: 13px;
+  font-weight: 650;
+}
+.broadcast-channel-avatar img {
+  width: 100%;
+  height: 100%;
+  object-fit: cover;
+}

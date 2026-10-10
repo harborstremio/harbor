@@ -1,0 +1,24 @@
+.mc-creation-loader {margin-block:24px}
+.mc-creation-loader>span {display:block;color:var(--color-ink-muted);font-size:12px;margin-bottom:10px}
+.mc-creation-loader>[role=group] {display:flex;flex-wrap:wrap;gap:8px}
+.mc-creation-loader>[role=group]>button {position:relative;display:flex;flex:1 1 90px;flex-direction:column;align-items:center;gap:12px;padding:18px 12px 15px;text-align:center;background:var(--color-canvas);border:1px solid transparent;border-radius:9px;min-width:0;color:var(--color-ink);transition:background 150ms ease}
+.mc-creation-loader>[role=group]>button:hover {background:var(--color-elevated)}
+.mc-creation-loader>[role=group]>button[aria-pressed=true] {background:var(--color-elevated);border-color:var(--color-edge)}
+.mc-creation-loader>[role=group]>button>img {width:46px;height:46px;border-radius:6px;object-fit:cover;flex-shrink:0}
+.mc-creation-loader>[role=group]>button>img.mc-creation-fabric-art {object-fit:contain;border-radius:0}
+.mc-creation-loader .mc-creation-selected {position:absolute;inset-block-start:7px;inset-inline-end:7px;color:var(--color-ink-muted);height:14px;width:14px}
+.mc-creation-loader strong {font-size:13px;font-weight:650}
+.mc-creation-loader-note {font-size:13px;line-height:1.6;color:var(--color-ink-muted);margin-top:12px}
+.mc-creation-loader small {font-size:12px;line-height:1.5;color:var(--color-ink-muted)}
+.mc-creation-loader>[role=group]>button>svg {flex-shrink:0}
+.mc-creation-loader>[role=group]>button>svg:last-child {color:var(--color-accent)}
+.mc-creation-version {margin-top:17px}
+.mc-creation-version>p {font-size:13px;line-height:1.65;color:var(--color-ink-muted)}
+.mc-creation-next {display:flex;justify-content:center;flex-wrap:wrap;gap:9px;margin-top:24px}
+.mc-creation-summary {display:flex;align-items:center;gap:14px;text-align:start;max-width:440px;margin:22px auto;padding:14px;background:var(--color-canvas);border-radius:8px}
+.mc-creation-summary>img,.mc-creation-summary>.games-art-empty {width:56px;height:56px;object-fit:cover;border-radius:6px;flex-shrink:0}
+.mc-creation-summary>div {display:flex;flex-direction:column;gap:7px;min-width:0}
+.mc-creation-summary strong {font-size:15px;overflow-wrap:anywhere}
+.mc-creation-summary span {font-size:12px;color:var(--color-ink-muted)}
+@media(max-width:600px) {.mc-creation-loader>[role=group]>button {flex-basis:28%;gap:9px;padding:15px 8px 12px}.mc-creation-loader>[role=group]>button>img {width:38px;height:38px}}
+@media(prefers-reduced-motion:reduce) {.mc-creation-loader>[role=group]>button {transition:none}}

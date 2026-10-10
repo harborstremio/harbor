@@ -42,7 +42,9 @@ export function TrailerOverlay({
 
   useEffect(() => {
     let cancelled = false;
-    fetchTrailer(id, resolveTrailerQuality(settings.trailerQuality)).then((info) => {
+    const pref = settings.trailerQuality;
+    const quality = resolveTrailerQuality(pref);
+    fetchTrailer(id, quality).then((info) => {
       if (cancelled) return;
       if (info) setStreamUrl(trailerSrc(info));
       else setExtractFailed(true);
@@ -68,7 +70,10 @@ export function TrailerOverlay({
 
   useEffect(() => {
     const onKey = (e: KeyboardEvent) => {
-      if (e.key === "Escape") dismiss();
+      if (e.key !== "Escape") return;
+      e.preventDefault();
+      e.stopPropagation();
+      dismiss();
     };
     document.addEventListener("keydown", onKey);
     return () => document.removeEventListener("keydown", onKey);
@@ -77,11 +82,22 @@ export function TrailerOverlay({
   return createPortal(
     <div
       onClick={dismiss}
-      className="fixed inset-0 z-[120] flex cursor-zoom-out items-center justify-center"
+      role="dialog"
+      aria-modal="true"
+      aria-label={t("Trailer")}
+      className="fixed inset-0 z-[170] flex cursor-zoom-out items-center justify-center"
       style={{
-        backgroundColor: open ? (isMacDesktop() ? "rgba(0,0,0,1)" : "rgba(0,0,0,0.82)") : "rgba(0,0,0,0)",
-        backdropFilter: open ? "blur(32px) saturate(1.2)" : "blur(0px)",
-        WebkitBackdropFilter: open ? "blur(32px) saturate(1.2)" : "blur(0px)",
+        backgroundColor: open
+          ? isMacDesktop()
+            ? "rgba(0,0,0,1)"
+            : "rgba(0,0,0,0.82)"
+          : "rgba(0,0,0,0)",
+        backdropFilter: isMacDesktop() ? "none" : open ? "blur(32px) saturate(1.2)" : "blur(0px)",
+        WebkitBackdropFilter: isMacDesktop()
+          ? "none"
+          : open
+            ? "blur(32px) saturate(1.2)"
+            : "blur(0px)",
         transition:
           "background-color 360ms cubic-bezier(0.32,0.72,0.24,1), backdrop-filter 360ms cubic-bezier(0.32,0.72,0.24,1)",
       }}
@@ -116,8 +132,7 @@ export function TrailerOverlay({
         style={{
           opacity: open ? 1 : 0,
           transform: open ? "scale(1)" : "scale(0.93)",
-          transition:
-            "opacity 320ms ease, transform 420ms cubic-bezier(0.32,0.72,0.24,1)",
+          transition: "opacity 320ms ease, transform 420ms cubic-bezier(0.32,0.72,0.24,1)",
         }}
       >
         {streamUrl ? (
@@ -184,7 +199,15 @@ function YouTubeEmbed({ id, title }: { id: string; title: string }) {
   );
 }
 
-function ExternalTrailerFallback({ id, title, logo }: { id: string; title: string; logo?: string }) {
+function ExternalTrailerFallback({
+  id,
+  title,
+  logo,
+}: {
+  id: string;
+  title: string;
+  logo?: string;
+}) {
   const t = useT();
   return (
     <div className="absolute inset-0 flex flex-col items-center justify-center gap-6 px-8 text-center">

@@ -1,0 +1,69 @@
+.games-recent-backdrop { padding:24px;background:rgb(0 0 0 / .62); }
+.games-recent-backdrop>[role="dialog"] { max-height:min(86dvh,860px);border-radius:12px;background:var(--color-surface);transform-origin:center 44%; }
+.games-recent-backdrop>.animate-dialog-in { animation:games-source-panel-in 220ms ease-in-out both; }
+.games-recent-backdrop>.animate-dialog-out { animation:games-source-panel-out 190ms ease-in-out both; }
+.games-recent-backdrop.animate-scrim-out { animation-duration:190ms; }
+.games-sources-modal.games-recent-dialog { block-size:auto;min-height:0;max-height:inherit; }
+.games-recent-dialog>header { padding:22px 24px 18px;gap:16px;border:0; }
+.games-recent-dialog-heading { display:flex;align-items:center;gap:12px; }
+.games-recent-dialog-heading>span { color:var(--color-ink-muted); }
+.games-recent-dialog-heading h2 { margin:0;font-size:20px;letter-spacing:-.025em; }
+.games-recent-dialog>header>.games-icon-button { width:40px;height:40px;flex:none; }
+.games-recent-dialog .games-sources-scroll { padding:0 24px 24px;overscroll-behavior:contain;scrollbar-gutter:stable; }
+.games-recent-release-identity { display:flex;align-items:center;gap:20px;padding:2px 0 24px; }
+.games-recent-release-art { position:relative;display:grid;place-items:center;flex:0 0 90px;align-self:flex-start;width:90px;aspect-ratio:2/3;overflow:hidden;border-radius:6px;background:var(--color-elevated);color:var(--color-ink-subtle); }
+.games-recent-release-art>img { position:absolute;inset:0;width:100%;height:100%;object-fit:cover;opacity:0;transition:opacity 180ms ease-in-out; }
+.games-recent-release-art>img[data-loaded=true] { opacity:1; }
+.games-recent-release-art:has(img[data-loaded=false])::after,.games-recent-placeholder { position:absolute;inset:0;background:var(--color-raised);animation:games-source-placeholder 1.5s ease-in-out infinite;content:""; }
+.games-recent-release-adult { position:absolute;inset:auto 0 12px;text-align:center;font-size:13px;color:var(--color-ink-muted); }
+.games-recent-release-copy { min-width:0;flex:1; }
+.games-recent-release-source { display:flex;align-items:center;gap:8px;min-height:24px;font-size:12px;color:var(--color-ink-muted); }
+.games-recent-release-source>.games-source-art { width:24px;height:24px;flex:0 0 24px; }
+.games-recent-release-copy h3 { font-size:23px;line-height:1.3;letter-spacing:-.025em;margin:7px 0 5px;overflow-wrap:anywhere; }
+.games-recent-release-build { font-size:11px;line-height:1.5;color:var(--color-ink-subtle);overflow-wrap:anywhere;margin:0; }
+.games-recent-release-facts { display:flex;flex-wrap:wrap;gap:8px 16px;margin-top:8px;font-size:12px;color:var(--color-ink-muted); }
+.games-recent-view-game { display:inline-flex;align-items:center;gap:6px;padding:8px 0 0;min-height:30px;font-size:12px;color:var(--color-ink-muted);text-decoration:none;background:none; }
+.games-recent-view-game:hover { color:var(--color-ink); }
+.games-recent-dialog .games-source-release.is-dialog { background:none;border:0;overflow:visible;margin:0; }
+.games-recent-dialog .games-source-release-body { padding:0; }
+.games-recent-dialog .games-source-files { gap:8px; }
+.games-recent-dialog .games-source-file { border:0;border-radius:8px;background:var(--color-elevated);padding:15px 16px;gap:14px;min-height:84px; }
+.games-recent-dialog .games-source-file-identity { gap:14px; }
+.games-recent-dialog .games-source-file-art { width:30px;height:30px;flex:0 0 30px; }
+.games-recent-dialog .games-source-file strong { font-size:13px;line-height:1.5; }
+.games-recent-dialog .games-source-file .games-button { min-height:38px;font-size:12px;border:0;position:relative; }
+.games-recent-dialog .games-source-page-actions { display:flex;align-items:center;gap:4px;flex-shrink:0; }
+.games-recent-dialog .games-source-file[data-resolving=true] .games-button[aria-disabled=true] { color:transparent;cursor:wait; }
+.games-recent-dialog .games-source-file[data-resolving=true] .games-button[aria-disabled=true]>* { opacity:0; }
+.games-recent-dialog .games-source-file[data-resolving=true] .games-button[aria-disabled=true]::after { content:"";position:absolute;inset:calc(50% - 5px) 14px;height:10px;border-radius:3px;background:var(--color-raised);animation:games-source-placeholder 1.5s ease-in-out infinite; }
+.games-recent-dialog .games-source-art[data-loading=true]::after { content:"";position:absolute;inset:0;border-radius:5px;background:var(--color-raised);animation:games-source-placeholder 1.5s ease-in-out infinite; }
+.games-recent-dialog .games-source-art[data-loading=true]>span,.games-recent-dialog .games-source-art[data-loading=true]>svg { visibility:hidden; }
+.games-recent-dialog .games-source-art img { transition:opacity 180ms ease-in-out; }
+@keyframes games-source-panel-in { from { opacity:0;transform:translateY(12px) scale(.985,.97); } to { opacity:1;transform:translateY(0) scale(1,1); } }
+@keyframes games-source-panel-out { from { opacity:1;transform:translateY(0) scale(1,1); } to { opacity:0;transform:translateY(8px) scale(.985,.97); } }
+@keyframes games-source-placeholder { 0%,100% { opacity:.45; } 50% { opacity:.85; } }
+@media(max-width:600px) {
+ .games-recent-backdrop { padding:12px; }
+ .games-recent-backdrop>[role="dialog"] { max-height:calc(100dvh - 24px); }
+ .games-recent-dialog>header { padding:15px 16px 12px; }
+ .games-recent-dialog .games-sources-scroll { padding:0 16px 16px; }
+ .games-recent-release-identity { gap:14px;padding-bottom:20px; }
+ .games-recent-release-art { width:70px;flex-basis:70px; }
+ .games-recent-release-copy h3 { font-size:19px; }
+ .games-recent-dialog .games-source-file { padding:14px;gap:10px; }
+ .games-recent-dialog .games-source-page-actions { width:100%;justify-content:flex-end; }
+}
+@media(prefers-reduced-motion:reduce) {
+ .games-recent-backdrop,.games-recent-backdrop>.animate-dialog-in,.games-recent-backdrop>.animate-dialog-out { animation:none; }
+ .games-recent-dialog *,.games-recent-dialog *::after { animation:none!important;transition:none!important; }
+}
+
+.games-recent-view-slot { min-height:30px; }
+.games-recent-view-placeholder { display:inline-block;width:86px;height:10px;margin-top:14px;border-radius:3px;background:var(--color-raised);animation:games-source-placeholder 1.5s ease-in-out infinite; }
+.games-recent-dialog .games-source-file small:empty { display:none; }
+.games-recent-dialog .games-source-page-actions>button:first-child,.games-recent-dialog .games-source-file>.games-button { background:var(--color-raised); }
+.games-recent-dialog .games-source-page-actions>button:last-child { background:none; }
+.games-recent-dialog .games-source-file .games-button:hover { background:color-mix(in srgb,var(--color-ink) 9%,var(--color-elevated)); }
+
+.games-recent-release-source>.games-source-art[data-loaded=true] { background:#f2f2ee;border-radius:5px; }
+.games-recent-release-source>.games-source-art img { padding:3px; }

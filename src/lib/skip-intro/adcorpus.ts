@@ -1,7 +1,8 @@
 import { safeFetch } from "@/lib/safe-fetch";
 import type { SkipSegment } from "./types";
+import { HARBOR_API_BASE } from "@/lib/config/endpoints";
 
-const CORPUS_URL = "https://harbor.site/updates/ad-segments.json";
+const CORPUS_URL = `${HARBOR_API_BASE}/updates/ad-segments.json`;
 const CORPUS_PUBKEY = "yszDA2+G0Rtep39h67iuhl8+5pCQkM+O4D4pMnpg4Ks=";
 
 type CorpusEntry = {
@@ -75,7 +76,7 @@ async function verify(payload: string, sigB64: string): Promise<boolean> {
   }
 }
 
-function b64(value: string): Uint8Array<ArrayBuffer> {
+function b64(value: string): Uint8Array {
   const bin = atob(value);
   const out = new Uint8Array(bin.length);
   for (let i = 0; i < bin.length; i++) out[i] = bin.charCodeAt(i);

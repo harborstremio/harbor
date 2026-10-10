@@ -1,0 +1,66 @@
+.game-calendar { container-type:inline-size; color:var(--color-ink); padding-bottom:24px; }
+.game-calendar-heading,.game-calendar-tools,.game-calendar-coverage,.game-calendar-error { display:flex;align-items:center;justify-content:space-between;gap:20px; }
+.game-calendar-heading h2 { font-size:24px;font-weight:600;letter-spacing:-.035em; }
+.game-calendar-heading p,.game-calendar-source-note,.game-calendar-band>p,.game-calendar-empty p { font-size:13px;line-height:1.7;color:var(--color-ink-muted); }
+.game-calendar-heading p { margin-top:7px;max-width:60ch; }
+.game-calendar-refresh { display:flex;align-items:center;gap:9px;border-radius:6px;background:var(--color-elevated);padding:11px 14px;font-size:13px;flex:none; }
+.game-calendar button { transition:background 160ms,color 160ms; }
+.game-calendar button:focus-visible,.game-calendar summary:focus-visible { outline:2px solid var(--color-ink);outline-offset:3px; }
+.game-calendar button[aria-disabled=true] { opacity:.55;cursor:default; }
+.game-calendar-refresh:hover { background:var(--color-raised); }
+.game-calendar-tools { margin-top:24px;justify-content:flex-start;flex-wrap:wrap;gap:12px; }
+.game-calendar-tools>label { display:flex;align-items:center;gap:10px;background:var(--color-elevated);padding:11px 14px;border-radius:6px;min-width:0;width:min(100%,350px);color:var(--color-ink-muted); }
+.game-calendar-tools input { min-width:0;width:100%;background:transparent;color:var(--color-ink);font-size:13px;outline:none; }
+.game-calendar-tools>label:focus-within { outline:2px solid var(--color-ink);outline-offset:2px; }
+.game-calendar-coverage { margin-top:15px;font-size:12px;color:var(--color-ink-muted);min-height:25px; }
+.game-calendar-coverage button,.game-calendar-error button { color:var(--color-ink);text-decoration:underline;text-underline-offset:4px;flex:none; }
+.game-calendar-error { padding:12px 0;font-size:12px;color:var(--color-ink-muted); }
+.game-calendar-source-note { margin:10px 0 22px;font-size:12px; }
+.game-calendar-weekdays,.game-calendar-grid { display:grid;grid-template-columns:repeat(7,minmax(0,1fr));gap:6px; }
+.game-calendar-weekdays { margin-bottom:10px; }
+.game-calendar-weekdays span { padding-inline:8px;color:var(--color-ink-muted);font-size:12px;font-weight:550; }
+.game-calendar-day { min-height:135px;min-width:0;background:var(--color-surface);border-radius:4px;padding:7px; }
+.game-calendar-day.is-outside { background:color-mix(in oklch,var(--color-surface) 45%,var(--color-canvas));color:var(--color-ink-subtle); }
+.game-calendar-day h3 { margin-bottom:8px;font-size:12px;font-weight:550; }
+.game-calendar-day time { display:inline-flex;align-items:center;justify-content:center;min-width:24px;height:24px; }
+.game-calendar-day.is-today time { background:var(--color-ink);color:var(--color-canvas);border-radius:50%; }
+.game-calendar-card { display:flex;width:100%;gap:12px;text-align:start;align-items:center;min-width:0;border-radius:4px;padding:8px;background:var(--color-surface); }
+.game-calendar-card:hover { background:var(--color-elevated); }
+.game-calendar-card>img,.game-calendar-card>.games-art-empty { width:100px;aspect-ratio:616/353;object-fit:cover;flex:none;border-radius:3px;background:var(--color-elevated); }
+.game-calendar-card-copy { min-width:0;display:flex;flex-direction:column;gap:4px; }
+.game-calendar-card strong { font-size:14px;font-weight:600;line-height:1.45;overflow-wrap:anywhere; }
+.game-calendar-card b { font-size:13px;font-weight:500; }
+.game-calendar-card small,.game-calendar-card em { font-size:11px;line-height:1.5;color:var(--color-ink-muted);font-style:normal;overflow-wrap:anywhere; }
+.game-calendar-day .game-calendar-card { align-items:flex-start;padding:5px 0;margin-bottom:6px;gap:7px; }
+.game-calendar-day .game-calendar-card>img,.game-calendar-day .game-calendar-card>.games-art-empty { width:48px;margin-top:2px; }
+.game-calendar-day .game-calendar-card-copy { padding:0; }
+.game-calendar-day .game-calendar-card strong { font-size:12px; }
+.game-calendar-day .game-calendar-card small,.game-calendar-day .game-calendar-card em { font-size:10px; }
+.game-calendar-more { font-size:11px;color:var(--color-ink-muted);cursor:pointer;margin:7px 0;padding:3px; }
+.game-calendar-more[aria-expanded=true] { color:var(--color-ink); }
+.game-calendar-expanded { grid-column:1 / -1;padding:16px 8px 22px;animation:game-calendar-reveal 160ms ease-out; }
+.game-calendar-expanded>header { display:flex;justify-content:space-between;align-items:center;gap:16px;margin-bottom:14px; }
+.game-calendar-expanded h3 { font-size:15px;font-weight:550; }
+.game-calendar-expanded>header button { padding:7px;border-radius:4px;background:var(--color-elevated); }
+.game-calendar-expanded>div { display:grid;grid-template-columns:repeat(3,minmax(0,1fr));gap:8px; }
+@keyframes game-calendar-reveal { from { opacity:0 } to { opacity:1 } }
+.game-calendar-agenda { display:none; }
+.game-calendar-band { margin-top:30px; }
+.game-calendar-band>h3,.game-calendar-band>summary { font-size:18px;font-weight:550; }
+.game-calendar-band>p { margin:7px 0 14px; }
+.game-calendar-band>div { display:grid;grid-template-columns:repeat(3,minmax(0,1fr));gap:10px; }
+.game-calendar-undated>summary { cursor:pointer;padding-block:10px; }
+.game-calendar-undated>summary span { margin-inline-start:12px;font-size:13px;color:var(--color-ink-muted); }
+.game-calendar-empty { padding-block:45px; }
+.game-calendar-empty h3 { font-size:20px;margin-bottom:8px; }
+.game-calendar-empty-month { color:var(--color-ink-muted);font-size:13px;margin-top:18px; }
+@container(max-width:1050px){.game-calendar-band>div{grid-template-columns:repeat(2,minmax(0,1fr))}.game-calendar-card>img,.game-calendar-card>.games-art-empty{width:85px}}
+@container(max-width:850px){.game-calendar-month{display:none}.game-calendar-agenda{display:block}.game-calendar-agenda>section{margin:20px 0}.game-calendar-agenda h3{font-size:14px;font-weight:550;margin-bottom:10px}.game-calendar-agenda>section>div{display:grid;gap:7px}.game-calendar-agenda .game-calendar-card>img,.game-calendar-agenda .game-calendar-card>.games-art-empty{width:120px}.game-calendar-band>div{grid-template-columns:1fr}.game-calendar-card{padding:10px}.game-calendar-card>img,.game-calendar-card>.games-art-empty{width:120px}}
+@container(max-width:650px){.game-calendar-heading{align-items:flex-start;gap:12px}.game-calendar-heading h2{font-size:21px}.game-calendar-refresh{padding:10px}.game-calendar-refresh span{display:none}.game-calendar-card>img,.game-calendar-card>.games-art-empty,.game-calendar-agenda .game-calendar-card>img,.game-calendar-agenda .game-calendar-card>.games-art-empty{width:85px}.game-calendar-coverage,.game-calendar-error{gap:12px;align-items:flex-start}.game-calendar-card strong{font-size:13px}}
+@media(prefers-reduced-motion:reduce){.game-calendar *{transition:none!important;animation:none!important}}
+.calendar-games-view>header { padding-inline:clamp(20px,4vw,48px); }
+.calendar-games-view>header>div { flex-wrap:wrap;align-items:center; }
+.calendar-games-view .calendar-body-scroll { padding-inline:clamp(20px,4vw,48px); }
+.calendar-games-view>header>nav>div:first-child { flex-wrap:wrap;border:0;border-radius:0;padding:0;background:transparent; }
+.calendar-games-view>header>nav>div:first-child button { border-radius:5px; }
+@media(max-width:650px){.calendar-games-view>header{padding-top:72px;padding-bottom:18px}.calendar-games-view>header>div{gap:20px}.calendar-games-view>header>div>div:last-child{flex-wrap:wrap;gap:6px}.calendar-games-view>header>div>div:last-child>div{min-width:130px;padding-inline:10px}.calendar-games-view>header h1{font-size:34px}.calendar-games-view>header>nav{margin-top:18px;gap:12px}.calendar-games-view .calendar-body-scroll{padding-top:20px}}

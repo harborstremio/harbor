@@ -1,0 +1,68 @@
+.music-soundtrack-link {
+  display: flex;
+  width: 100%;
+  align-items: center;
+  gap: 12px;
+  padding: 10px;
+  border-radius: 10px;
+  background: var(--color-elevated);
+  text-align: start;
+  transition: background-color 180ms ease-out;
+}
+.music-soundtrack-link:hover {
+  background: var(--color-raised);
+}
+.music-soundtrack-link:focus-visible {
+  outline: 2px solid var(--color-accent);
+  outline-offset: 2px;
+}
+.music-soundtrack-link img,
+.music-soundtrack-glyph {
+  width: 42px;
+  height: 63px;
+  flex-shrink: 0;
+  border-radius: 6px;
+  object-fit: cover;
+}
+.music-soundtrack-glyph {
+  display: grid;
+  place-items: center;
+  background: var(--color-raised);
+  color: var(--color-ink-muted);
+}
+.music-soundtrack-link > span {
+  display: flex;
+  min-width: 0;
+  flex: 1;
+  flex-direction: column;
+  gap: 2px;
+}
+.music-soundtrack-link small {
+  color: var(--color-ink-subtle);
+  font-size: 11px;
+  font-weight: 600;
+  letter-spacing: 0.04em;
+  text-transform: uppercase;
+}
+.music-soundtrack-link strong {
+  overflow: hidden;
+  color: var(--color-ink);
+  font-size: 14px;
+  font-weight: 650;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+}
+.music-soundtrack-link small:last-child {
+  text-transform: none;
+  letter-spacing: 0;
+  font-weight: 500;
+}
+.music-soundtrack-link > svg {
+  flex-shrink: 0;
+  color: var(--color-ink-muted);
+}
+@media (prefers-reduced-motion: reduce) {
+  .music-soundtrack-link {
+    transition: none;
+  }
+}

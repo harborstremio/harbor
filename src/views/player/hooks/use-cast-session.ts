@@ -1,4 +1,13 @@
-import { useCallback, useEffect, useRef, useState, type RefObject } from "react";
+import {
+  useCallback,
+  useEffect,
+  useRef,
+  useState,
+  useSyncExternalStore,
+  type RefObject,
+} from "react";
+import { t } from "@/lib/i18n";
+import { ffmpegInstallStep } from "@/lib/ffmpeg-install";
 import {
   castLoad,
   castPause,
@@ -11,8 +20,15 @@ import {
   type CastSubStyle,
   type TranscodeProfile,
 } from "@/lib/cast";
-import { ffmpegInstallStep } from "@/lib/ffmpeg-install";
-import type { PlayerBridge } from "@/lib/player/bridge";
+import type { PlayerBridge, PlayerSnapshot } from "@/lib/player/bridge";
+import { VideoAudioCast } from "@/lib/player/video-audio-cast";
+import {
+  claimCastSession,
+  ownsCastSession,
+  releaseCastSession,
+  withCastSession,
+  type CastLease,
+} from "@/lib/cast-ownership";
 import type { CastErrorInfo } from "../cast-error-modal";
 
 type LoadParams = {
@@ -28,63 +44,88 @@ type LoadParams = {
   profile?: TranscodeProfile;
   subtitle?: CastSubInfo | null;
   subStyle?: CastSubStyle | null;
+  audioOnly?: boolean;
+  audioTrackOrdinal?: number;
 };
+
+export function localizedFfmpegInstallStep(): string {
+  const step = ffmpegInstallStep();
+  if (step === "Open a terminal and run: brew install ffmpeg") {
+    return t("Open a terminal and run: brew install ffmpeg");
+  }
+  if (
+    step === "Install ffmpeg using your system package manager (apt, dnf, pacman, zypper, etc.)."
+  ) {
+    return t("Install ffmpeg using your system package manager (apt, dnf, pacman, zypper, etc.).");
+  }
+  if (step === "Open a terminal and run: winget install Gyan.FFmpeg") {
+    return t("Open a terminal and run: winget install Gyan.FFmpeg");
+  }
+  return step;
+}
 
 function buildActionableCastError(
   err: string,
   deviceName: string,
   deviceKind: CastDeviceInfo["kind"],
 ): CastErrorInfo | null {
-  if (deviceKind === "roku" && /ROKU_ECP_BLOCKED|control by mobile apps|network access/i.test(err)) {
+  if (
+    deviceKind === "roku" &&
+    /ROKU_ECP_BLOCKED|control by mobile apps|network access/i.test(err)
+  ) {
     return {
-      title: "Enable Roku Network Access",
-      message:
-        "Your Roku is set to block control requests from apps on your network, so Harbor can't reach it. This is a one-time setting on the Roku.",
+      title: t("Enable Roku Network Access"),
+      message: t(
+        "Your Roku is set to block control requests from apps on your network, so JL Media Vision can't reach it. This is a one-time setting on the Roku.",
+      ),
       steps: [
-        "On your Roku remote, press Home.",
-        "Open Settings, then System, then Advanced system settings.",
-        'Select "Control by mobile apps" and set Network access to "Default".',
-        "Come back to Harbor and try casting again.",
+        t("On your Roku remote, press Home."),
+        t("Open Settings, then System, then Advanced system settings."),
+        t('Select "Control by mobile apps" and set Network access to "Default".'),
+        t("Come back to JL Media Vision and try casting again."),
       ],
       deviceName,
     };
   }
   if (deviceKind === "roku" && /ROKU_ECP_NOT_FOUND/i.test(err)) {
     return {
-      title: "Couldn't reach this Roku",
-      message:
-        "Harbor found something at this address that looked like a Roku, but it didn't respond like one. The device may be offline or another product picked up the same broadcast.",
+      title: t("Couldn't reach this Roku"),
+      message: t(
+        "JL Media Vision found something at this address that looked like a Roku, but it didn't respond like one. The device may be offline or another product picked up the same broadcast.",
+      ),
       steps: [
-        "Make sure the Roku is powered on and on the same Wi-Fi as your computer.",
-        "Close the cast menu and reopen it to rescan the network.",
-        "If multiple Rokus appear, pick the one matching your TV's name.",
+        t("Make sure the Roku is powered on and on the same Wi-Fi as your computer."),
+        t("Close the cast menu and reopen it to rescan the network."),
+        t("If multiple Rokus appear, pick the one matching your TV's name."),
       ],
       deviceName,
     };
   }
   if (deviceKind === "roku" && /ROKU_MEDIA_ASSISTANT_MISSING|media assistant/i.test(err)) {
     return {
-      title: "Install Media Assistant",
-      message:
+      title: t("Install Media Assistant"),
+      message: t(
         "Roku changed its OS to block the built-in Media Player from accepting video from other apps. Media Assistant is a free channel built to take over that job. One-time install on your Roku and casting works.",
+      ),
       steps: [
-        "On your Roku, open Streaming Channels from the home screen.",
-        'Search for "Media Assistant" (channel ID 782875, free).',
-        "Install it.",
-        "Come back to Harbor and try casting again.",
+        t("On your Roku, open Streaming Channels from the home screen."),
+        t('Search for "Media Assistant" (channel ID 782875, free).'),
+        t("Install it."),
+        t("Come back to JL Media Vision and try casting again."),
       ],
       deviceName,
     };
   }
   if (/ffmpeg/i.test(err)) {
     return {
-      title: "Install ffmpeg",
-      message:
-        "Harbor uses ffmpeg to convert streams into formats TVs can play. It's a one-time install and Harbor will pick it up automatically.",
+      title: t("Install ffmpeg"),
+      message: t(
+        "JL Media Vision uses ffmpeg to convert streams into formats TVs can play. It's a one-time install and JL Media Vision will pick it up automatically.",
+      ),
       steps: [
-        ffmpegInstallStep(),
-        "Restart Harbor after the install completes.",
-        "Open the cast menu and try this device again.",
+        localizedFfmpegInstallStep(),
+        t("Restart JL Media Vision after the install completes."),
+        t("Open the cast menu and try this device again."),
       ],
       deviceName,
     };
@@ -92,9 +133,14 @@ function buildActionableCastError(
   return null;
 }
 
-export function useCastSession(bridgeRef?: RefObject<PlayerBridge | null>) {
+export function useCastSession(
+  bridgeRef: RefObject<PlayerBridge | null>,
+  snapRef: RefObject<PlayerSnapshot>,
+) {
   const [castMenuOpen, setCastMenuOpen] = useState(false);
-  const [castMenuAnchor, setCastMenuAnchor] = useState<{ right: number; bottom: number } | null>(null);
+  const [castMenuAnchor, setCastMenuAnchor] = useState<{ right: number; bottom: number } | null>(
+    null,
+  );
   const [castDevice, setCastDevice] = useState<CastDeviceInfo | null>(null);
   const [pendingCastDevice, setPendingCastDevice] = useState<CastDeviceInfo | null>(null);
   const [castError, setCastError] = useState<string | null>(null);
@@ -110,10 +156,41 @@ export function useCastSession(bridgeRef?: RefObject<PlayerBridge | null>) {
   const castActiveRef = useRef<boolean>(false);
   castActiveRef.current = castDevice != null;
   const castPlayingRef = useRef<boolean>(true);
+  const leaseRef = useRef<CastLease | null>(null);
+  const stopRef = useRef<() => Promise<void>>(async () => {});
+  const generationRef = useRef(0);
+  const owned = useCallback(<T>(work: () => Promise<T>) => {
+    const lease = leaseRef.current;
+    if (!lease) return Promise.reject(new Error("Cast session was replaced."));
+    return withCastSession(lease, work);
+  }, []);
+  const [audio] = useState(
+    () =>
+      new VideoAudioCast(
+        {
+          load: (options) => owned(() => castLoad(options)),
+          play: () => owned(castPlay),
+          pause: () => owned(castPause),
+          seek: (sec) => owned(() => castSeek(sec)),
+          stop: async () => {
+            const lease = leaseRef.current;
+            await owned(castStop);
+            releaseCastSession(lease);
+          },
+          status: () => owned(castStatus),
+        },
+        bridgeRef,
+        () => snapRef.current,
+      ),
+  );
+  const audioState = useSyncExternalStore(audio.subscribe, audio.getSnapshot);
+  const audioRouting = audioState.device != null;
+  castActiveRef.current = castDevice != null || audioRouting;
 
   useEffect(() => {
     return () => {
-      if (castDeviceRef.current) void castStop();
+      ++generationRef.current;
+      if (ownsCastSession(leaseRef.current)) void stopRef.current().catch(() => {});
     };
   }, []);
 
@@ -125,28 +202,66 @@ export function useCastSession(bridgeRef?: RefObject<PlayerBridge | null>) {
   const closeCastMenu = useCallback(() => setCastMenuOpen(false), []);
 
   const pickCastDevice = useCallback(
-    async (device: CastDeviceInfo, params: Omit<LoadParams, "host" | "port">, beforeLoad?: () => void) => {
+    async (
+      device: CastDeviceInfo,
+      params: Omit<LoadParams, "host" | "port">,
+      beforeLoad?: () => void,
+    ) => {
       setCastMenuOpen(false);
       setCastError(null);
+      const generation = ++generationRef.current;
+      try {
+        const lease = await claimCastSession("video", () => stopRef.current());
+        leaseRef.current = lease;
+        if (generation !== generationRef.current) {
+          releaseCastSession(lease);
+          return;
+        }
+      } catch (error) {
+        setCastError(error instanceof Error ? error.message : String(error));
+        return;
+      }
+      if (device.audio_only) {
+        try {
+          await audio.start(device, params);
+        } catch {
+          /* route retains stop/return controls on failure */
+        }
+        if (!audio.getSnapshot().device) releaseCastSession(leaseRef.current);
+        return;
+      }
       setPendingCastDevice(device);
       beforeLoad?.();
       const startTarget = params.startTimeSec ?? 0;
       lastCastPositionRef.current = startTarget;
       castStartTargetRef.current = startTarget;
       castSeekConfirmedRef.current = startTarget <= 1;
-      const res = await castLoad({
-        host: device.host,
-        port: device.port,
-        kind: device.kind,
-        controlUrl: device.control_url,
-        ...params,
-      });
+      const sessionLease = leaseRef.current;
+      const res = await owned(() =>
+        castLoad({
+          host: device.host,
+          port: device.port,
+          kind: device.kind,
+          controlUrl: device.control_url,
+          ...params,
+        }),
+      );
+      if (generation !== generationRef.current || !ownsCastSession(sessionLease)) return;
       if (res.ok) {
         setCastDevice(device);
         setPendingCastDevice(null);
       } else {
         setPendingCastDevice(null);
-        const err = res.error ?? `Could not cast to ${device.name}.`;
+        try {
+          await owned(castStop);
+          releaseCastSession(sessionLease);
+        } catch (error) {
+          if (generation !== generationRef.current || !ownsCastSession(sessionLease)) return;
+          setCastDevice(device);
+          setCastError(String(error));
+          return;
+        }
+        const err = res.error ?? t("Could not cast to {deviceName}.", { deviceName: device.name });
         const actionable = buildActionableCastError(err, device.name, device.kind);
         if (actionable) {
           setCastErrorInfo(actionable);
@@ -157,7 +272,7 @@ export function useCastSession(bridgeRef?: RefObject<PlayerBridge | null>) {
         }
       }
     },
-    [bridgeRef],
+    [audio, bridgeRef, owned],
   );
 
   useEffect(() => {
@@ -168,8 +283,12 @@ export function useCastSession(bridgeRef?: RefObject<PlayerBridge | null>) {
     }
     let cancelled = false;
     const tick = async () => {
-      const s = await castStatus().catch(() => null);
-      if (cancelled || !s) return;
+      const lease = leaseRef.current;
+      const s = await owned(castStatus).catch((error) => {
+        if (!cancelled && ownsCastSession(lease)) setCastError(String(error));
+        return null;
+      });
+      if (cancelled || !s || !ownsCastSession(lease)) return;
       if (s.player_state === "PLAYING") {
         castPlayingRef.current = true;
         setCastPlaying(true);
@@ -193,12 +312,32 @@ export function useCastSession(bridgeRef?: RefObject<PlayerBridge | null>) {
       }
     };
     void tick();
-    const id = window.setInterval(() => void tick(), 1000);
+    let id: ReturnType<typeof setTimeout>;
+    const poll = async () => {
+      await tick();
+      if (!cancelled) id = setTimeout(() => void poll(), 1000);
+    };
+    id = setTimeout(() => void poll(), 1000);
     return () => {
       cancelled = true;
-      window.clearInterval(id);
+      window.clearTimeout(id);
     };
-  }, [castDevice]);
+  }, [castDevice, owned]);
+
+  useEffect(() => {
+    if (!audioRouting) return;
+    let cancelled = false;
+    let timer: ReturnType<typeof setTimeout>;
+    const poll = async () => {
+      await audio.poll();
+      if (!cancelled) timer = setTimeout(() => void poll(), 1000);
+    };
+    timer = setTimeout(() => void poll(), 1000);
+    return () => {
+      cancelled = true;
+      clearTimeout(timer);
+    };
+  }, [audio, audioRouting]);
 
   useEffect(() => {
     if (!castDevice) return;
@@ -206,63 +345,127 @@ export function useCastSession(bridgeRef?: RefObject<PlayerBridge | null>) {
   }, [castDevice, bridgeRef]);
 
   const togglePlayCast = useCallback(async () => {
-    if (castPlayingRef.current) {
-      castPlayingRef.current = false;
-      setCastPlaying(false);
-      await castPause();
-    } else {
-      castPlayingRef.current = true;
-      setCastPlaying(true);
-      await castPlay();
+    if (audio.getSnapshot().device) {
+      await (audio.getSnapshot().phase === "playing" ? audio.pause() : audio.play()).catch(
+        () => {},
+      );
+      return;
     }
-  }, []);
+    try {
+      if (castPlayingRef.current) {
+        await owned(castPause);
+        castPlayingRef.current = false;
+        setCastPlaying(false);
+      } else {
+        await owned(castPlay);
+        castPlayingRef.current = true;
+        setCastPlaying(true);
+      }
+    } catch (error) {
+      setCastError(String(error));
+    }
+  }, [audio, owned]);
 
   const playCast = useCallback(async () => {
+    if (audio.getSnapshot().device) return audio.play();
+    await owned(castPlay);
     castPlayingRef.current = true;
-    await castPlay();
-  }, []);
+    setCastPlaying(true);
+  }, [audio, owned]);
 
   const pauseCast = useCallback(async () => {
+    if (audio.getSnapshot().device) return audio.pause();
+    await owned(castPause);
     castPlayingRef.current = false;
-    await castPause();
-  }, []);
+    setCastPlaying(false);
+  }, [audio, owned]);
 
-  const getCastPosition = useCallback(() => lastCastPositionRef.current, []);
-  const isCastPlaying = useCallback(() => castPlayingRef.current, []);
+  const getCastPosition = useCallback(
+    () => (audio.getSnapshot().device ? audio.getSnapshot().position : lastCastPositionRef.current),
+    [audio],
+  );
+  const isCastPlaying = useCallback(
+    () =>
+      audio.getSnapshot().device ? audio.getSnapshot().phase === "playing" : castPlayingRef.current,
+    [audio],
+  );
 
   const stopCast = useCallback(async () => {
+    const lease = leaseRef.current;
+    if (!ownsCastSession(lease)) return;
+    if (audio.getSnapshot().device) {
+      await audio.stop();
+      releaseCastSession(lease);
+      return;
+    }
     const finalPos = lastCastPositionRef.current;
-    await castStop();
+    try {
+      await owned(castStop);
+    } catch (error) {
+      setCastError(String(error));
+      throw error;
+    }
+    if (!ownsCastSession(lease)) return;
+    releaseCastSession(lease);
     setCastDevice(null);
+    setPendingCastDevice(null);
     const bridge = bridgeRef?.current;
     if (bridge && finalPos > 1) {
       bridge.seek(finalPos);
     }
-  }, [bridgeRef]);
+  }, [audio, bridgeRef, owned]);
+  stopRef.current = stopCast;
 
-  const seekCast = useCallback(async (sec: number) => {
-    lastCastPositionRef.current = sec;
-    castStartTargetRef.current = sec;
-    castSeekConfirmedRef.current = true;
-    await castSeek(sec);
-  }, []);
+  const returnAudioToComputer = useCallback(async () => {
+    const lease = leaseRef.current;
+    if (!ownsCastSession(lease)) return;
+    try {
+      await audio.returnToComputer();
+      releaseCastSession(lease);
+    } catch {
+      /* route remains visible for an explicit retry */
+    }
+  }, [audio]);
+
+  const seekCast = useCallback(
+    async (sec: number) => {
+      if (audio.getSnapshot().device) {
+        await audio.seek(sec).catch(() => {});
+        return;
+      }
+      try {
+        await owned(() => castSeek(sec));
+      } catch (error) {
+        setCastError(String(error));
+        return;
+      }
+      lastCastPositionRef.current = sec;
+      castStartTargetRef.current = sec;
+      castSeekConfirmedRef.current = true;
+    },
+    [audio, owned],
+  );
 
   const dismissCastErrorInfo = useCallback(() => {
     setCastErrorInfo(null);
-    if (!castDeviceRef.current) bridgeRef?.current?.play().catch(() => {});
-  }, [bridgeRef]);
+    if (!castDeviceRef.current && !audio.getSnapshot().device)
+      bridgeRef.current?.play().catch(() => {});
+  }, [audio, bridgeRef]);
 
   return {
     castMenuOpen,
     castMenuAnchor,
-    castDevice,
-    pendingCastDevice,
-    castError,
+    castDevice: audioRouting && audioState.phase !== "connecting" ? audioState.device : castDevice,
+    pendingCastDevice: audioState.phase === "connecting" ? audioState.device : pendingCastDevice,
+    castError: audioState.error ?? castError,
+    audioRouting,
+    audioPhase: audioState.phase,
+    returnAudioToComputer,
     castErrorInfo,
     setCastErrorInfo,
     dismissCastErrorInfo,
-    castPlaying,
-    castPositionSec,
+    castPlaying: audioRouting ? audioState.phase === "playing" : castPlaying,
+    castPositionSec: audioRouting ? audioState.position : castPositionSec,
     burnSubsOnTv,
     setBurnSubsOnTv,
     openCastMenu,

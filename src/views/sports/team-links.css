@@ -1,0 +1,249 @@
+/* Independent team targets sit above the existing event action without nested buttons. */
+.sh-event-card,
+.sh-fixture,
+.hot-poster-link,
+.hot-week-item {
+  position: relative;
+}
+.sh-event-open {
+  position: absolute;
+  inset: 0;
+  z-index: 1;
+  width: 100%;
+  height: 100%;
+  border: 0;
+  border-radius: inherit;
+  background: transparent;
+  cursor: pointer;
+}
+.sh-event-open:focus-visible {
+  outline: 2px solid var(--color-accent);
+  outline-offset: -3px;
+}
+.sh-card-team-link,
+.sh-fixture-team-link {
+  display: flex;
+  align-items: center;
+  gap: 12px;
+  min-width: 0;
+}
+.sh-card-team-link {
+  flex: 1;
+}
+.sh-fixture-team-link {
+  text-align: inherit;
+  justify-content: inherit;
+}
+.sh-fixture-match > span:first-child .sh-fixture-team-link {
+  justify-content: flex-end;
+}
+.sh-hero-team-link,
+.hot-art-team-link {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  flex: none;
+}
+.hot-week-team-link {
+  display: inline-flex;
+  flex: 0 0 32px;
+}
+.hot-week-team-link:first-child {
+  align-self: flex-start;
+}
+.hot-week-team-link:last-child {
+  align-self: flex-end;
+  margin-inline-start: -10px;
+}
+.hot-week-team-link .sh-team-logo:last-child {
+  margin-inline-start: 0;
+}
+.hot-week-item .hot-week-copy > strong > button {
+  display: inline;
+}
+@media (max-width: 560px) {
+  .sh-fixture-team-link {
+    flex-direction: column;
+    gap: 5px;
+  }
+}
+
+.hot-week > .hot-week-item {
+  flex-shrink: 0;
+  display: flex;
+  align-items: center;
+  width: 100%;
+  gap: 13px;
+  padding: 18px 0;
+  text-align: start;
+  border-top: 1px solid var(--color-edge-soft);
+}
+
+.hot-week > .hot-week-item:hover > span > strong {
+  text-decoration: underline;
+  text-underline-offset: 4px;
+}
+
+.hot-week > .hot-week-item > span {
+  flex: 1;
+  min-width: 0;
+}
+
+.hot-week > .hot-week-item > .hot-week-logos {
+  position: relative;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  width: 54px;
+  min-width: 54px;
+  height: 48px;
+  flex: 0 0 54px;
+}
+
+.hot-week > .hot-week-item > .hot-week-copy {
+  flex: 1;
+}
+
+.hot-week > .hot-week-item > span small {
+  display: block;
+  font-size: 10px;
+  color: var(--color-ink-muted);
+  margin-bottom: 5px;
+}
+
+.hot-week > .hot-week-item strong {
+  display: block;
+  font-size: 13px;
+  line-height: 1.4;
+  font-weight: 650;
+}
+
+.hot-week > .hot-week-item > svg {
+  flex: none;
+  width: 14px;
+  color: var(--color-ink-muted);
+}
+
+.sh-carousel-picks > .sh-carousel-pick {
+  position: relative;
+  display: flex;
+  gap: 12px;
+  align-items: center;
+  min-width: 190px;
+  max-width: 228px;
+  padding: 10px 14px;
+  text-align: start;
+  flex: 1;
+  border-radius: 10px;
+  color: var(--color-ink-muted);
+  transition:
+    background-color 200ms ease-out,
+    color 200ms ease-out;
+}
+.sh-carousel-picks > .sh-carousel-pick:hover {
+  background: color-mix(in srgb, var(--color-ink) 5%, transparent);
+  color: var(--color-ink);
+}
+/* The current pick reads by weight and a hairline, never a bar competing with the hero. */
+.sh-carousel-picks > .sh-carousel-pick[data-selected="true"] {
+  color: var(--color-ink);
+  background: color-mix(in srgb, var(--color-ink) 8%, transparent);
+  box-shadow: inset 0 0 0 1px color-mix(in srgb, var(--color-accent) 26%, transparent);
+}
+@media (prefers-reduced-motion: reduce) {
+  .sh-carousel-picks > .sh-carousel-pick {
+    transition: none;
+  }
+}
+@media (max-width: 700px) {
+  .sh-carousel-picks > .sh-carousel-pick {
+    min-width: 168px;
+    padding: 9px 11px;
+  }
+}
+
+/* Artwork remains behind copy; actual team crests are reachable above the event target. */
+.hot-poster-link .hot-art {
+  z-index: auto;
+  background: none;
+  pointer-events: none;
+}
+.hot-poster-link .hot-art::before {
+  content: "";
+  position: absolute;
+  inset: 0;
+  z-index: -2;
+  background: radial-gradient(ellipse at 80% 10%, #343b42, transparent 75%), #14191d;
+}
+.hot-poster-link .hot-art-photo {
+  position: absolute;
+  z-index: 0;
+}
+.hot-poster-link .hot-art:has(> .hot-art-photo) {
+  z-index: -2;
+}
+.hot-poster-link .hot-art-lettering {
+  position: absolute;
+  z-index: -2;
+}
+.hot-art-team-link {
+  pointer-events: auto;
+}
+
+.sh-event-card .sh-team-profile-link,
+.sh-fixture .sh-team-profile-link,
+.hot-poster-link .sh-team-profile-link,
+.hot-week-item .sh-team-profile-link,
+.sh-carousel-pick .sh-team-profile-link {
+  z-index: 2;
+}
+.sh-card-teams .sh-card-team-link {
+  display: flex;
+  gap: 12px;
+}
+.sh-fixture-match .sh-fixture-team-link {
+  gap: 12px;
+}
+@media (max-width: 560px) {
+  .sh-fixture-match .sh-fixture-team-link {
+    gap: 5px;
+  }
+}
+
+.hot-week .hot-week-logos > .hot-week-team-link .sh-team-logo {
+  margin-inline-start: 0;
+  align-self: center;
+}
+.hot-week .hot-week-logos > .hot-week-team-link {
+  width: 32px;
+  height: 32px;
+}
+
+/* Individual athletes have no team action; preserve percentage-based hero artwork geometry. */
+.sh-hero-art > span.sh-hero-team-link {
+  display: contents;
+}
+
+/* Actual venue backgrounds retain independent, clickable team crests. */
+.hot-poster-link .hot-art.is-venue-team {
+  z-index: auto;
+}
+.hot-art.is-venue-team > .sh-hero-scenery {
+  z-index: -3;
+}
+.hot-poster-link .hot-art.is-venue-team > .hot-art-photo {
+  z-index: -2;
+}
+.hot-art.is-venue-team .hot-art-logos {
+  position: relative;
+}
+
+/* Keep the existing readability fade above venue photos and below team targets. */
+.hot-art.is-venue-team::after {
+  content: "";
+  position: absolute;
+  inset: 0;
+  z-index: -1;
+  background: linear-gradient(0deg, #080b0eef 0%, #080b0e9c 26%, transparent 66%);
+  pointer-events: none;
+}

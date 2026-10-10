@@ -1,11 +1,13 @@
 import { ListChecks } from "lucide-react";
 import { useSettings } from "@/lib/settings";
+import { useKnobAnim } from "@/lib/knob-anim";
 import { useT } from "@/lib/i18n";
 
 export function GuestPickToggle() {
   const { settings, update } = useSettings();
   const t = useT();
   const on = settings.togetherGuestsPick;
+  const knob = useKnobAnim(on);
   return (
     <button
       onClick={() => update({ togetherGuestsPick: !on })}
@@ -28,9 +30,9 @@ export function GuestPickToggle() {
         }`}
       >
         <span
-          className={`block h-4 w-4 rounded-full bg-white shadow-sm transition-transform ${
+          className={`block h-4 w-4 rounded-full bg-white shadow-sm ${
             on ? "translate-x-4 rtl:-translate-x-4" : "translate-x-0"
-          }`}
+          } ${knob}`}
         />
       </span>
     </button>

@@ -1,0 +1,30 @@
+.games-live-broadcast-viewers { display: inline-flex; align-items: center; gap: 7px; white-space: nowrap; }
+.games-broadcast-live-dot { width: 5px; height: 5px; flex: 0 0 5px; border-radius: 50%; background: #f04b55; animation: games-broadcast-pulse 2.4s ease-in-out infinite; }
+@keyframes games-broadcast-pulse { 0%,100% { opacity: .55; } 50% { opacity: 1; } }
+.games-broadcast-watch { width: 100%; border: 0; cursor: pointer; }
+.games-broadcast-watch:focus-visible { outline: 2px solid var(--color-ink); outline-offset: -4px; }
+.games-broadcast-player, .games-broadcast-player-state { width: 100%; height: 100%; position: relative; }
+.games-broadcast-player .games-media-player > video { width: 100%; height: 100%; object-fit: contain; }
+.games-broadcast-player-state { display: flex; flex-direction: column; align-items: center; justify-content: center; gap: 14px; background: #080b0a; color: #fff; }
+.games-broadcast-player-state > img { position: absolute; inset: 0; width: 100%; height: 100%; object-fit: cover; opacity: .25; }
+.games-broadcast-player-state > span, .games-broadcast-player-state > button { position: relative; }
+.games-broadcast-links { display: flex; align-items: center; gap: 12px; margin-inline-start: auto; }
+.games-broadcast-links a { display: inline-flex; gap: 4px; align-items: center; color: var(--color-ink-muted); }
+.games-broadcast-links a:hover { color: var(--color-ink); }
+.games-live-broadcast-content footer { flex-wrap: wrap; align-items: center; }
+@media (max-width: 650px) { .games-live-broadcast .games-live-broadcast-viewers { display: inline-flex; } .games-live-broadcast-title > span { display: none; } }
+@media (prefers-reduced-motion: reduce) { .games-broadcast-live-dot { animation: none; opacity: 1; } }
+
+/* Keep the clip mounted so opening, closing and rapid reversals share one height transition. */
+.games-broadcast-reveal { display:grid;grid-template-rows:0fr;opacity:0;visibility:hidden;transition:grid-template-rows 360ms ease-in-out,opacity 180ms ease-in-out,visibility 0s linear 360ms; }
+.games-broadcast-reveal[data-expanded=true] { grid-template-rows:1fr;opacity:1;visibility:visible;transition:grid-template-rows 360ms ease-in-out,opacity 240ms ease-in-out 70ms,visibility 0s; }
+.games-broadcast-clip { min-height:0;overflow:hidden; }
+.games-broadcast-chevron { flex:none;transition:transform 320ms ease-in-out; }
+.games-live-broadcast-heading[aria-expanded=true] .games-broadcast-chevron { transform:rotate(-180deg); }
+.games-live-broadcast-heading:focus-visible { outline:2px solid var(--color-ink);outline-offset:3px; }
+.games-broadcast-watch-icon { transition:background 180ms ease-in-out; }
+.games-live-broadcast[data-attention=true] .games-broadcast-watch-icon { animation:games-broadcast-invite 4.8s ease-in-out infinite; }
+.games-broadcast-watch:is(:hover,:focus-visible) .games-broadcast-watch-icon { animation-play-state:paused;background:rgb(15 20 18 / .94); }
+.games-live-broadcast:not([data-attention=true]) .games-broadcast-live-dot { animation-play-state:paused; }
+@keyframes games-broadcast-invite { 0%,30%,100% { transform:scale(1); } 50% { transform:scale(1.04,1.06); } 65% { transform:scale(.995,.99); } 78% { transform:scale(1); } }
+@media(prefers-reduced-motion:reduce) { .games-broadcast-reveal,.games-broadcast-chevron,.games-broadcast-watch-icon { transition:none;animation:none!important; }.games-live-broadcast-preview>div>img { transition:none; }.games-live-broadcast-preview:hover>div>img { transform:none; } }

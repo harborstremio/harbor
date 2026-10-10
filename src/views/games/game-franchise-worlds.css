@@ -1,0 +1,62 @@
+.games-world-picker { display:grid;gap:14px;margin-bottom:18px; }
+.games-world-pagination[aria-hidden=true] { visibility:hidden; }
+.games-world-choice,.games-world-picker-placeholder { min-width:0;position:relative;text-align:start;padding:6px;border-radius:6px;transition:background 200ms; }
+.games-world-choice[aria-pressed=true] { background:var(--color-elevated); }
+.games-world-choice:hover { background:var(--color-surface); }
+.games-world-choice>img,.games-world-choice>.games-art-empty,.games-world-picker-placeholder>i { display:block;width:100%;height:79px;object-fit:cover;border-radius:4px;opacity:.75;transition:opacity 200ms; }
+.games-world-choice:is(:hover,[aria-pressed=true])>img { opacity:1; }
+.games-world-choice>span:not(.games-art-empty),.games-world-picker-placeholder>span { display:-webkit-box;-webkit-box-orient:vertical;-webkit-line-clamp:2;overflow:hidden;padding:9px 4px 4px;font-size:13px;line-height:1.4;font-weight:550;height:49.4px; }
+.games-world-picker-placeholder>i { background:var(--color-surface); }
+.games-world-picker-placeholder>span::before { content:"";display:block;width:65%;height:12px;margin-top:3px;border-radius:3px;background:var(--color-surface); }
+.games-world-stage { min-height:310px;display:flex;align-items:flex-end;justify-content:space-between;position:relative;isolation:isolate;overflow:hidden;border-radius:7px;background:var(--color-surface);color:#fff; }
+.games-world-art,.games-world-shade { position:absolute;inset:0;width:100%;height:100%;z-index:-2;object-fit:cover;object-position:center 35%; }
+.games-world-art { animation:games-world-fade 550ms ease backwards; }
+.games-world-shade { z-index:-1;bottom:-24px;height:auto;background:linear-gradient(90deg,#090d12e0,transparent 80%),linear-gradient(0deg,#080c12b0,transparent 80%); }
+.games-world-copy { padding:34px; }
+.games-world-stage-placeholder .games-world-copy { width:min(520px,100%); }
+.games-world-stage-placeholder .games-world-copy>i,.games-world-stage-placeholder .games-world-copy>b { display:block;background:var(--color-elevated);border-radius:4px; }
+.games-world-stage-placeholder .games-world-copy>i { width:130px;height:13px; }
+.games-world-stage-placeholder .games-world-copy>b { width:80%;height:58px;margin:18px 0 24px; }
+.games-world-stage-placeholder .games-world-copy>i:last-child { width:160px;height:43px; }
+.games-world-stage-placeholder>.games-inline-status { padding:34px; }
+.games-world-copy>span { font-size:12px;color:#fffc; }
+.games-world-copy>h3 { font-size:clamp(38px,4.8cqw,64px);line-height:1.06;letter-spacing:-.04em;font-weight:600;margin:12px 0 24px; }
+.games-world-copy>.games-button { min-height:43px;padding:10px 17px;font-size:13px;gap:22px;background:#f5f5f2;color:#15181a; }
+.games-world-copy>.games-button>svg { opacity:0;transition:opacity 180ms; }
+.games-world-copy>.games-button:is(:hover,:focus-visible)>svg { opacity:1; }
+.games-world-feature { display:flex;align-items:center;gap:13px;max-width:38%;margin:0 29px 30px;font-size:12px;color:#fffc;text-align:end; }
+.games-world-feature>svg { flex-shrink:0;opacity:0;transition:opacity 180ms; }
+.games-world-feature:is(:hover,:focus-visible)>svg { opacity:1; }
+.games-world-members { display:grid;grid-template-columns:repeat(6,minmax(0,1fr));gap:21px;margin-top:25px; }
+.games-world-member { min-width:0;display:flex;flex-direction:column;align-items:flex-start;text-align:start; }
+.games-world-member>.games-availability-cover,.games-world-member>.games-art-empty,.games-world-placeholder>i { display:block;width:100%;aspect-ratio:2/3;object-fit:cover;border-radius:6px;transition:filter 250ms,transform 400ms var(--games-ease); }
+.games-world-member:is(:hover,:focus-visible)>.games-availability-cover { transform:translateY(-4px);filter:brightness(1.07); }
+.games-world-member>strong,.games-world-placeholder>b { display:-webkit-box;-webkit-box-orient:vertical;-webkit-line-clamp:2;overflow:hidden;width:100%;height:2.8em;font-size:14px;font-weight:550;line-height:1.4;margin:13px 0 7px; }
+.games-world-member>span:not(.games-art-empty):not(.games-availability-cover),.games-world-placeholder>span { display:flex;align-items:center;gap:8px;font-size:12px;line-height:20px;height:20px;color:var(--color-ink-muted); }
+.games-world-member>span:not(.games-availability-cover)>span { font-size:10px;line-height:1.4;padding:2px 5px;background:var(--color-surface);border-radius:3px; }
+.games-world-member>small,.games-world-placeholder>small { display:-webkit-box;-webkit-box-orient:vertical;-webkit-line-clamp:2;overflow:hidden;width:100%;height:3em;font-size:11px;line-height:1.5;color:var(--color-ink-muted);margin-top:5px; }
+.games-world-placeholder { min-width:0; }
+.games-world-placeholder>i { background:var(--color-surface); }
+.games-world-placeholder>b::before,.games-world-placeholder>span::before,.games-world-placeholder>small::before { content:"";display:block;width:75%;height:12px;background:var(--color-surface);border-radius:3px; }
+.games-world-placeholder>b::before { margin-top:4px; }
+.games-world-placeholder>span::before { width:30%;height:10px; }
+.games-world-placeholder>small::before { width:60%;height:10px;margin-top:3px; }
+.games-world-footer { min-height:42px; }
+@keyframes games-world-fade { from{opacity:.3}to{opacity:1} }
+@container(max-width:900px){.games-world-members{grid-template-columns:repeat(3,minmax(0,1fr));gap:25px 18px}.games-world-member>.games-availability-cover,.games-world-member>.games-art-empty,.games-world-placeholder>i{max-height:285px}.games-world-stage{min-height:285px}.games-world-copy{padding:29px}.games-world-picker{gap:9px}}
+@container(max-width:500px){.games-world-members{grid-template-columns:repeat(2,minmax(0,1fr));gap:24px 15px}.games-world-stage{display:block;min-height:280px}.games-world-copy{padding:26px}.games-world-copy>h3{font-size:42px}.games-world-feature{max-width:100%;margin:0 26px 24px;text-align:start}.games-world-choice>img,.games-world-choice>.games-art-empty,.games-world-picker-placeholder>i{height:72px}.games-world-choice>span:not(.games-art-empty),.games-world-picker-placeholder>span{font-size:12px;height:46.6px}.games-world-member>strong{font-size:14px}}
+@media(prefers-reduced-motion:reduce){.games-world-art{animation:none}.games-world-member>.games-availability-cover{transition:none}}
+.games-world-picker-placeholder { height:116px;background:var(--color-surface); }
+.games-world-choice { height:116px;display:grid;place-items:center;isolation:isolate;overflow:hidden;padding:18px; }
+.games-world-choice::after { content:"";position:absolute;inset:0;background:#0007;z-index:-1; }
+.games-world-choice>.games-world-picker-art { position:absolute;inset:0;width:100%;height:100%;object-fit:cover;z-index:-2;opacity:.55; }
+.games-world-choice>span.games-world-wordmark { height:auto;padding:0;color:white;font-size:19px;line-height:1.15;text-align:center;font-weight:650;letter-spacing:-.035em; }
+.games-world-choice[aria-pressed=true] { background:var(--color-elevated); }
+.games-world-choice[aria-pressed=true]::after { background:#0004; }
+.games-world-copy>h3 { display:flex;align-items:center;width:min(430px,55cqw);height:126px;margin:0 0 24px; }
+.games-world-copy .games-world-wordmark { display:-webkit-box;-webkit-box-orient:vertical;-webkit-line-clamp:2;overflow:hidden;overflow-wrap:anywhere;font-size:clamp(28px,3.8cqw,56px); }
+.games-world-games-heading { display:flex;align-items:center;justify-content:space-between;min-height:58px;padding-top:14px;font-size:12px;color:var(--color-ink-muted); }
+.games-world-games-heading + .games-world-members { margin-top:12px; }
+.games-world-member>.games-availability-cover,.games-world-placeholder>i { max-height:none; }
+@container(max-width:500px){.games-world-copy>h3{width:100%;height:110px}.games-world-stage{min-height:285px}.games-world-choice,.games-world-picker-placeholder{height:105px;padding:14px}.games-world-choice>span.games-world-wordmark{font-size:17px}}
+

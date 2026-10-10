@@ -2,6 +2,7 @@ import { Check, ChevronDown, Plus, Trash2 } from "lucide-react";
 import { useEffect, useRef, useState } from "react";
 import simklLogo from "@/assets/simkl.png";
 import { AnchoredMenu } from "@/components/anchored-menu";
+import { HoverTooltip } from "@/components/hover-tooltip";
 import { SimklApiError } from "@/lib/simkl/client";
 import { resolveSimklTarget } from "@/lib/simkl/ids";
 import { useSimkl } from "@/lib/simkl/provider";
@@ -131,17 +132,18 @@ export function AddToSimklButton({
   return (
     <div className="relative shrink-0">
       {status == null ? (
-        <button
-          type="button"
-          disabled={busy}
-          onClick={() => void setTo("plantowatch")}
-          title={t("Add {title} to Simkl", { title })}
-          className="flex h-12 items-center gap-2.5 rounded-full border border-edge bg-canvas/80 px-6 text-[15px] font-medium text-ink shadow-[inset_0_1px_0_rgba(255,255,255,0.06)] transition-[transform,background-color,border-color] duration-200 hover:border-ink-subtle hover:bg-canvas/95 active:scale-[0.98] disabled:opacity-60"
-        >
-          <img src={simklLogo} alt="" className="h-[18px] w-[18px] rounded-[4px] object-contain" />
-          <Plus size={16} strokeWidth={2.2} className="-ms-1" />
-          {t("Add to Simkl")}
-        </button>
+        <HoverTooltip label={t("Add {title} to Simkl", { title })} align="center">
+          <button
+            type="button"
+            disabled={busy}
+            onClick={() => void setTo("plantowatch")}
+            className="flex h-12 items-center gap-2.5 rounded-full bg-canvas/80 px-6 text-[15px] font-medium text-ink transition-[transform,background-color] duration-200 hover:bg-canvas/95 active:scale-[0.98] disabled:opacity-60"
+          >
+            <img src={simklLogo} alt="" className="h-[18px] w-[18px] rounded-[4px] object-contain" />
+            <Plus size={16} strokeWidth={2.2} className="-ms-1" />
+            {t("Add to Simkl")}
+          </button>
+        </HoverTooltip>
       ) : (
         <>
           <button

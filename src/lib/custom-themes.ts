@@ -1,6 +1,9 @@
 import { FONT_PAIRS, type ChromeConfig, type ChromeNavId, type FontPairId, type ThemePreset, type ThemeButtonStyle, type ThemeCardStyle, type ThemeLayout } from "./theme";
+import { setItemWithRecovery } from "./storage-recovery";
+import { themeKvGet, themeKvPut } from "./theme-storage";
 
 const STORAGE_KEY = "harbor.custom-themes.v1";
+const IDB_KEY = "custom-themes";
 const PREFIX = "user:";
 const HEX_RE = /^#[0-9a-f]{6,8}$/i;
 const COLOR_FN_RE = /^(rgba?|hsla?|oklch|oklab|color)\(/i;
@@ -31,10 +34,9 @@ export type CustomTheme = Omit<ThemePreset, "id"> & {
 const subscribers = new Set<() => void>();
 let cache: CustomTheme[] | null = null;
 
-function readRaw(): CustomTheme[] {
+function parseThemesArray(raw: string | null): CustomTheme[] {
+  if (!raw) return [];
   try {
-    const raw = localStorage.getItem(STORAGE_KEY);
-    if (!raw) return [];
     const parsed = JSON.parse(raw);
     if (!Array.isArray(parsed)) return [];
     return parsed.filter((p) => isCustomTheme(p));
@@ -43,12 +45,76 @@ function readRaw(): CustomTheme[] {
   }
 }
 
-function writeRaw(themes: CustomTheme[]): void {
+function readRaw(): CustomTheme[] {
   try {
-    localStorage.setItem(STORAGE_KEY, JSON.stringify(themes));
+    return parseThemesArray(localStorage.getItem(STORAGE_KEY));
   } catch {
-    return;
+    return [];
   }
+}
+
+let idbReady = false;
+let hydrating: Promise<void> | null = null;
+
+function hydrateFromIDB(): Promise<void> {
+  if (hydrating) return hydrating;
+  hydrating = (async () => {
+    const stored = await themeKvGet(IDB_KEY);
+    if (stored !== null) {
+      idbReady = true;
+      const live = cache ?? [];
+      const merged = [...live];
+      for (const t of [...parseThemesArray(stored), ...readRaw()]) {
+        if (!merged.some((m) => m.id === t.id)) merged.push(t);
+      }
+      cache = merged;
+      const ok = await themeKvPut(IDB_KEY, JSON.stringify(merged));
+      if (ok) {
+        try {
+          localStorage.removeItem(STORAGE_KEY);
+        } catch {
+          void 0;
+        }
+      }
+      emit();
+      return;
+    }
+    const migrated = await themeKvPut(IDB_KEY, JSON.stringify(cache ?? readRaw()));
+    if (migrated) {
+      idbReady = true;
+      try {
+        localStorage.removeItem(STORAGE_KEY);
+      } catch {
+        void 0;
+      }
+    }
+  })();
+  return hydrating;
+}
+
+function writeRaw(themes: CustomTheme[]): boolean {
+  if (idbReady) {
+    void themeKvPut(IDB_KEY, JSON.stringify(themes)).then((ok) => {
+      if (!ok) setItemWithRecovery(STORAGE_KEY, JSON.stringify(themes));
+    });
+    return true;
+  }
+  const ok = setItemWithRecovery(STORAGE_KEY, JSON.stringify(themes));
+  if (!ok && typeof indexedDB !== "undefined") {
+    void themeKvPut(IDB_KEY, JSON.stringify(themes)).then((saved) => {
+      if (saved) {
+        idbReady = true;
+        try {
+          localStorage.removeItem(STORAGE_KEY);
+        } catch {
+          void 0;
+        }
+        emit();
+      }
+    });
+    return true;
+  }
+  return ok;
 }
 
 function isCustomTheme(t: unknown): t is CustomTheme {
@@ -65,7 +131,7 @@ function isCustomTheme(t: unknown): t is CustomTheme {
   return true;
 }
 
-const LAYOUTS = new Set<ThemeLayout>(["sidebar", "topdock", "rail", "stremio", "minui", "dracula", "nord", "forest", "royal", "custom"]);
+const LAYOUTS = new Set<ThemeLayout>(["sidebar", "topdock", "rail", "stremio", "minui", "dracula", "nord", "forest", "royal", "cinematic", "custom"]);
 const CARDS = new Set<ThemeCardStyle>(["flat", "glass", "stremio", "minui", "crunch", "noir", "custom"]);
 const BUTTONS = new Set<ThemeButtonStyle>(["flat", "glossy", "minui", "crunch", "noir", "custom"]);
 const asLayout = (v: unknown): ThemeLayout | undefined =>
@@ -136,8 +202,17 @@ function parseChrome(raw: unknown): ChromeConfig | undefined {
 }
 
 export function getCustomThemes(): CustomTheme[] {
-  if (cache == null) cache = readRaw();
+  if (cache == null) {
+    cache = readRaw();
+    if (typeof indexedDB !== "undefined") void hydrateFromIDB();
+  }
   return cache;
+}
+
+export async function hydrateCustomThemes(): Promise<void> {
+  if (cache == null) cache = readRaw();
+  if (typeof indexedDB === "undefined") return;
+  await hydrateFromIDB();
 }
 
 export function subscribeCustomThemes(fn: () => void): () => void {
@@ -159,7 +234,7 @@ export function parseThemeJson(text: string): { ok: true; theme: CustomTheme } |
     return { ok: false, error: "This file isn't a readable theme." };
   }
   if (!raw || typeof raw !== "object") {
-    return { ok: false, error: "This file isn't a Harbor theme." };
+    return { ok: false, error: "This file isn't a JL Media Vision theme." };
   }
   const o = raw as Partial<CustomTheme>;
   const name = typeof o.name === "string" ? o.name.trim() : "";
@@ -244,11 +319,12 @@ function makeId(name: string): string {
   return `${PREFIX}${slug}-${Date.now().toString(36)}`;
 }
 
-export function saveCustomTheme(theme: CustomTheme): void {
+export function saveCustomTheme(theme: CustomTheme): boolean {
   const list = getCustomThemes().filter((t) => t.id !== theme.id);
   cache = [...list, theme];
-  writeRaw(cache);
+  const ok = writeRaw(cache);
   emit();
+  return ok;
 }
 
 export function removeCustomTheme(id: string): void {

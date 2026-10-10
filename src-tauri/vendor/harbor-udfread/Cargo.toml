@@ -1,0 +1,10 @@
+[package]
+name = "harbor-udfread"
+version = "0.1.0"
+edition = "2021"
+license = "LGPL-2.1-or-later"
+description = "Bounded streaming bindings for Harbor's isolated disc-image decoder"
+build = "build.rs"
+
+[build-dependencies]
+cc = "1"

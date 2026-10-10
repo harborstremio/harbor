@@ -1,0 +1,497 @@
+import {
+  Check,
+  ChevronDown,
+  ChevronLeft,
+  ChevronRight,
+  Loader2,
+  Info,
+  Plus,
+  RefreshCw,
+  Save,
+  X,
+} from "lucide-react";
+import { useEffect, useRef, useState, type ReactNode } from "react";
+import { Flag } from "@/components/flag";
+import { useContextMenu } from "@/lib/context-menu";
+import { saveSubtitleToDisk } from "@/lib/subtitles/save-to-disk";
+import { markAddedSub, useAddedSubs } from "@/lib/subtitles/added-subs";
+import { wasLimitReached } from "@/lib/subtitles/limit-signal";
+import { wasPendingSub } from "@/lib/subtitles/pending-subs";
+import { useTranslationJob } from "@/lib/subtitles/translation-jobs";
+import type { SubResult } from "@/lib/subtitles/types";
+import { parseRelease } from "@/lib/subtitles/release-match";
+import { providerLabel } from "@/lib/subtitles/provider-label";
+import { useT } from "@/lib/i18n";
+import { subtitleSearchMatchDetails } from "@/lib/subtitles/match-explanation";
+import type { StreamHints } from "@/lib/subtitles/stream-hints";
+import { subtitleClassificationLabels } from "@/lib/subtitles/classification-labels";
+
+const PAGE_SIZE = 30;
+
+function isMeaningful(s: string | undefined | null): s is string {
+  if (!s) return false;
+  const trimmed = s.trim();
+  if (trimmed.length <= 3) return false;
+  if (!/[a-zA-Z]{2,}/.test(trimmed)) return false;
+  return true;
+}
+
+function filenameFromUrl(url: string): string | null {
+  try {
+    const last = decodeURIComponent(url.split(/[?#]/)[0].split("/").pop() ?? "");
+    const withoutExt = last
+      .replace(/\.(srt|vtt|ass|ssa|sub|zip)$/i, "")
+      .replace(/[._]+/g, " ")
+      .trim();
+    return isMeaningful(withoutExt) ? withoutExt : null;
+  } catch {
+    return null;
+  }
+}
+
+export function LangGroup({
+  lang,
+  items,
+  defaultOpen,
+  onAdd,
+  streamHints,
+}: {
+  lang: string;
+  items: SubResult[];
+  defaultOpen: boolean;
+  onAdd: (r: SubResult) => void | Promise<boolean | void>;
+  streamHints?: StreamHints;
+}) {
+  const t = useT();
+  const [open, setOpen] = useState(defaultOpen);
+  const [page, setPage] = useState(0);
+  useEffect(() => setPage(0), [items]);
+  const pageCount = Math.max(1, Math.ceil(items.length / PAGE_SIZE));
+  const clampedPage = Math.min(page, pageCount - 1);
+  const pageItems = items.slice(clampedPage * PAGE_SIZE, clampedPage * PAGE_SIZE + PAGE_SIZE);
+
+  const toggleOpen = () => setOpen((v) => !v);
+
+  return (
+    <div className="border-t border-edge-soft/60">
+      <div
+        role="button"
+        tabIndex={0}
+        aria-expanded={open}
+        onClick={toggleOpen}
+        onKeyDown={(e) => {
+          if (e.key === "Enter" || e.key === " ") {
+            e.preventDefault();
+            toggleOpen();
+          }
+        }}
+        className="flex w-full select-none items-center gap-2 bg-canvas/40 px-4 py-2 text-start transition-colors hover:bg-canvas/60"
+      >
+        <Flag language={lang} size="sm" showLabel={false} />
+        <span className="text-[11.5px] font-bold uppercase tracking-[0.16em] text-ink-muted">
+          {lang}
+        </span>
+        <span className="text-[11px] tabular-nums text-ink-subtle">{items.length}</span>
+        {open && pageCount > 1 && (
+          <span className="ms-1 flex items-center gap-0.5">
+            <button
+              type="button"
+              onClick={(e) => {
+                e.stopPropagation();
+                setPage((p) => Math.max(0, p - 1));
+              }}
+              disabled={clampedPage === 0}
+              aria-label={t("Previous page")}
+              className="flex h-5 w-5 items-center justify-center rounded text-ink-subtle transition-colors hover:bg-raised hover:text-ink disabled:opacity-30"
+            >
+              <ChevronLeft size={12} strokeWidth={2.6} />
+            </button>
+            <span className="text-[10px] tabular-nums text-ink-subtle">
+              {clampedPage + 1}/{pageCount}
+            </span>
+            <button
+              type="button"
+              onClick={(e) => {
+                e.stopPropagation();
+                setPage((p) => Math.min(pageCount - 1, p + 1));
+              }}
+              disabled={clampedPage === pageCount - 1}
+              aria-label={t("Next page")}
+              className="flex h-5 w-5 items-center justify-center rounded text-ink-subtle transition-colors hover:bg-raised hover:text-ink disabled:opacity-30"
+            >
+              <ChevronRight size={12} strokeWidth={2.6} />
+            </button>
+          </span>
+        )}
+        <ChevronDown
+          size={14}
+          strokeWidth={2.4}
+          className={`ms-auto shrink-0 text-ink-subtle transition-transform duration-200 ${open ? "" : "-rotate-90"}`}
+        />
+      </div>
+      {open &&
+        pageItems.map((r) => (
+          <ResultRow
+            key={`${r.source}:${r.id}:${r.url}`}
+            result={r}
+            lang={lang}
+            onAdd={() => onAdd(r)}
+            streamHints={streamHints}
+          />
+        ))}
+    </div>
+  );
+}
+
+function ResultRow({
+  result,
+  lang,
+  onAdd,
+  streamHints,
+}: {
+  result: SubResult;
+  lang: string;
+  onAdd: () => void | Promise<boolean | void>;
+  streamHints?: StreamHints;
+}) {
+  const t = useT();
+  const { openAt } = useContextMenu();
+  const addedSubs = useAddedSubs();
+  const added = addedSubs.has(result.url);
+  // Some addon subtitles are generated on demand from the same URL (AI translation),
+  // so an already-added entry must stay selectable to pull the finished file later.
+  const refreshable = result.source === "addon";
+  // Pending translations are tracked by the player loop and added automatically once
+  // ready, so their "Translating…" state stays visible instead of flashing briefly.
+  const translating = useTranslationJob(result.url);
+  const [busy, setBusy] = useState(false);
+  const [saved, setSaved] = useState(false);
+  const [adding, setAdding] = useState(false);
+  const [addStatus, setAddStatus] = useState<"failed" | "limited" | "pending" | null>(null);
+  const [downloadStatus, setDownloadStatus] = useState<"failed" | "limited" | null>(null);
+  const effectiveStatus = translating ? "pending" : addStatus;
+  const timer = useRef<number | null>(null);
+  const failTimer = useRef<number | null>(null);
+  const downloadFailTimer = useRef<number | null>(null);
+
+  useEffect(
+    () => () => {
+      if (timer.current !== null) window.clearTimeout(timer.current);
+      if (failTimer.current !== null) window.clearTimeout(failTimer.current);
+      if (downloadFailTimer.current !== null) window.clearTimeout(downloadFailTimer.current);
+    },
+    [],
+  );
+
+  const handleAdd = async () => {
+    if (adding) return;
+    if (added && !refreshable) return;
+    setAdding(true);
+    setAddStatus(null);
+    try {
+      const ok = await Promise.resolve(onAdd());
+      if (ok !== false) {
+        markAddedSub(result.url);
+        return;
+      }
+      setAddStatus(
+        wasPendingSub(result.url) ? "pending" : wasLimitReached(result.url) ? "limited" : "failed",
+      );
+      if (failTimer.current !== null) window.clearTimeout(failTimer.current);
+      failTimer.current = window.setTimeout(() => setAddStatus(null), 2600);
+    } finally {
+      setAdding(false);
+    }
+  };
+
+  const download = async () => {
+    if (busy) return;
+    setBusy(true);
+    setDownloadStatus(null);
+    try {
+      const outcome = await saveSubtitleToDisk(result.url, {
+        title: result.title,
+        lang: result.lang,
+        format: result.format,
+        downloadAuth: result.downloadAuth,
+        label: t("Subtitle"),
+      });
+      if (outcome === "ok") {
+        setSaved(true);
+        if (timer.current !== null) window.clearTimeout(timer.current);
+        timer.current = window.setTimeout(() => setSaved(false), 1400);
+      } else {
+        setDownloadStatus(outcome);
+        if (downloadFailTimer.current !== null) window.clearTimeout(downloadFailTimer.current);
+        downloadFailTimer.current = window.setTimeout(() => setDownloadStatus(null), 2200);
+      }
+    } catch {
+      setDownloadStatus("failed");
+      if (downloadFailTimer.current !== null) window.clearTimeout(downloadFailTimer.current);
+      downloadFailTimer.current = window.setTimeout(() => setDownloadStatus(null), 2200);
+    } finally {
+      setBusy(false);
+    }
+  };
+
+  const sourceColor =
+    {
+      addon: "text-blue-400",
+      opensubtitles: "text-emerald-400",
+      wyzie: "text-purple-400",
+      jimaku: "text-amber-400",
+      podnapisi: "text-rose-400",
+      subdl: "text-teal-400",
+      gestdown: "text-orange-400",
+      subsource: "text-sky-400",
+    }[result.source] || "text-ink-subtle";
+
+  const primaryName =
+    (isMeaningful(result.release) ? result.release : null) ||
+    filenameFromUrl(result.url) ||
+    result.label ||
+    result.displayTitle ||
+    result.title ||
+    lang;
+  const providerName = providerLabel(result);
+  const releaseTags = parseRelease(result.release || primaryName);
+  const quality = [
+    releaseTags.resolution,
+    releaseTags.source?.toUpperCase(),
+    ...releaseTags.hdr.map((tag) => tag.toUpperCase()),
+  ]
+    .filter(Boolean)
+    .join(" · ");
+  const matchDetails = subtitleSearchMatchDetails(result, streamHints);
+  const classificationLabels = subtitleClassificationLabels(result, t);
+  const contextTarget = {
+    kind: "subtitle" as const,
+    label: primaryName,
+    details: {
+      language: result.langName || lang,
+      source: result.source,
+      provider: providerName,
+      format: result.format?.toUpperCase(),
+      fps: result.fps,
+      quality: quality || undefined,
+      release: result.release,
+      author: result.author,
+      downloads: result.downloads,
+      compatibilityPercent: matchDetails.compatibilityPercent,
+      matchReasons: matchDetails.reasons,
+      flags: classificationLabels.map(({ label }) => label),
+    },
+    download,
+  };
+
+  return (
+    <div
+      className={`group flex w-full items-start gap-3 px-4 py-2.5 transition-colors duration-300 ${
+        added
+          ? "bg-emerald-400/12"
+          : effectiveStatus === "pending"
+            ? "bg-amber-400/10"
+            : effectiveStatus
+              ? "bg-red-400/10"
+              : "hover:bg-canvas/60"
+      }`}
+    >
+      <button
+        onClick={handleAdd}
+        disabled={added && !refreshable}
+        className="flex min-w-0 flex-1 items-start gap-3 text-start disabled:cursor-default"
+      >
+        <span
+          className={`mt-0.5 flex h-5 w-5 shrink-0 items-center justify-center rounded-full ${
+            added
+              ? "bg-emerald-400/20 text-emerald-300"
+              : effectiveStatus === "pending"
+                ? "bg-amber-400/20 text-amber-200"
+                : effectiveStatus
+                  ? "bg-red-400/20 text-red-300"
+                  : ""
+          }`}
+        >
+          {adding ? (
+            <Loader2 size={14} className="animate-spin text-ink-subtle" />
+          ) : added ? (
+            <Check size={12} strokeWidth={3} className="animate-in zoom-in-50 duration-200" />
+          ) : effectiveStatus === "pending" ? (
+            <RefreshCw size={12} strokeWidth={2.4} className="animate-spin" />
+          ) : effectiveStatus ? (
+            <X size={12} strokeWidth={3} className="animate-in zoom-in-50 duration-200" />
+          ) : (
+            <Plus
+              size={14}
+              strokeWidth={2.4}
+              className="text-ink-subtle transition-colors group-hover:text-ink"
+            />
+          )}
+        </span>
+        <div className="flex min-w-0 flex-1 flex-col gap-0.5">
+          <span className="flex items-center gap-2">
+            <span title={primaryName} className="truncate text-[13.5px] text-ink">
+              {primaryName}
+            </span>
+            {added && (
+              <span className="shrink-0 rounded bg-emerald-400/20 px-1.5 py-0.5 text-[10px] font-bold uppercase tracking-[0.12em] text-emerald-300 animate-in fade-in slide-in-from-left-1 duration-200">
+                {refreshable ? t("Added · refresh for updates") : t("Added")}
+              </span>
+            )}
+            {effectiveStatus && (
+              <span
+                className={`shrink-0 rounded px-1.5 py-0.5 text-[10px] font-bold uppercase tracking-[0.12em] animate-in fade-in slide-in-from-left-1 duration-200 ${
+                  effectiveStatus === "pending"
+                    ? "bg-amber-400/20 text-amber-200"
+                    : "bg-red-400/20 text-red-300"
+                }`}
+              >
+                {effectiveStatus === "pending"
+                  ? t("Translating… we'll add it when it's ready")
+                  : effectiveStatus === "limited"
+                    ? t("Limit reached")
+                    : t("Couldn't add, try again")}
+              </span>
+            )}
+          </span>
+          <span className="flex flex-wrap items-center gap-2 text-[11.5px] text-ink-subtle">
+            <span className={`truncate font-semibold ${sourceColor}`}>{providerName}</span>
+            {result.format && (
+              <>
+                <span aria-hidden>·</span>
+                <span className="uppercase">{result.format}</span>
+              </>
+            )}
+            {typeof result.downloads === "number" && result.downloads > 0 && (
+              <>
+                <span aria-hidden>·</span>
+                <span>{t("{count} dl", { count: compactNumber(result.downloads) })}</span>
+              </>
+            )}
+            {matchDetails.compatibilityPercent > 0 && (
+              <>
+                <span aria-hidden>·</span>
+                <span>{matchDetails.compatibilityPercent}%</span>
+              </>
+            )}
+            {classificationLabels.map(({ kind, label }) => (
+              <span
+                key={kind}
+                className={`rounded px-1.5 py-0.5 text-[10px] font-bold uppercase tracking-[0.12em] ${
+                  kind === "hearingImpaired" || kind === "machineTranslated"
+                    ? "bg-amber-400/15 text-amber-200"
+                    : "bg-sky-400/15 text-sky-200"
+                }`}
+              >
+                {label}
+              </span>
+            ))}
+          </span>
+        </div>
+      </button>
+      {added && refreshable && (
+        <button
+          type="button"
+          aria-label={t("Refresh subtitle")}
+          title={t("Refresh subtitle")}
+          onClick={(event) => {
+            event.stopPropagation();
+            void handleAdd();
+          }}
+          disabled={adding}
+          className="mt-0.5 inline-flex h-7 w-7 shrink-0 items-center justify-center rounded-md text-ink-subtle transition-colors hover:bg-elevated hover:text-ink disabled:opacity-40"
+        >
+          {adding ? (
+            <Loader2 size={13} className="animate-spin" />
+          ) : (
+            <RefreshCw size={13} strokeWidth={2} />
+          )}
+        </button>
+      )}
+      <button
+        type="button"
+        aria-label={t("Open subtitle details")}
+        title={t("Subtitle details")}
+        onClick={(event) => {
+          event.stopPropagation();
+          const rect = event.currentTarget.getBoundingClientRect();
+          openAt({ x: rect.right, y: rect.bottom }, contextTarget);
+        }}
+        className="mt-0.5 inline-flex h-7 w-7 shrink-0 items-center justify-center rounded-md text-ink-subtle transition-colors hover:bg-elevated hover:text-ink focus-visible:ring-2 focus-visible:ring-accent"
+      >
+        <Info size={13} strokeWidth={2} />
+      </button>
+      <span
+        role="button"
+        tabIndex={0}
+        title={
+          saved
+            ? t("Saved to disk")
+            : downloadStatus === "limited"
+              ? t("Limit reached")
+              : downloadStatus === "failed"
+                ? t("Couldn't download, try again")
+                : t("Download to disk")
+        }
+        aria-label={t("Download subtitle to disk")}
+        onClick={(e) => {
+          e.stopPropagation();
+          void download();
+        }}
+        onKeyDown={(e) => {
+          if (e.key === "Enter" || e.key === " ") {
+            e.preventDefault();
+            e.stopPropagation();
+            void download();
+          }
+        }}
+        className={`mt-0.5 inline-flex h-7 w-7 shrink-0 cursor-pointer items-center justify-center rounded-md transition-colors ${
+          saved
+            ? "text-accent"
+            : downloadStatus
+              ? "text-red-400"
+              : "text-ink-subtle hover:bg-elevated hover:text-ink"
+        }`}
+      >
+        {busy ? (
+          <Loader2 size={13} className="animate-spin" />
+        ) : saved ? (
+          <Check size={13} strokeWidth={2.4} />
+        ) : downloadStatus ? (
+          <X size={13} strokeWidth={2.4} />
+        ) : (
+          <Save size={13} strokeWidth={2} />
+        )}
+      </span>
+    </div>
+  );
+}
+
+export function FilterChip({
+  active,
+  onClick,
+  children,
+}: {
+  active: boolean;
+  onClick: () => void;
+  children: ReactNode;
+}) {
+  return (
+    <button
+      onClick={onClick}
+      className={`flex h-7 items-center rounded-full px-2.5 text-[11.5px] font-semibold transition-colors ${
+        active
+          ? "bg-elevated text-ink ring-1 ring-edge"
+          : "bg-raised text-ink-muted hover:bg-elevated/80"
+      }`}
+    >
+      {children}
+    </button>
+  );
+}
+
+function compactNumber(n: number): string {
+  if (n >= 1_000_000) return `${(n / 1_000_000).toFixed(1)}M`;
+  if (n >= 1_000) return `${(n / 1_000).toFixed(1)}k`;
+  return String(n);
+}

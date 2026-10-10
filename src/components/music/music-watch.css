@@ -1,0 +1,254 @@
+.music-watch-next {
+  display: flex;
+  flex-direction: column;
+  gap: 20px;
+  flex-shrink: 0;
+  width: 300px;
+  padding-top: 32px;
+}
+.music-watch-next-list {
+  display: flex;
+  flex-direction: column;
+  gap: 12px;
+}
+.music-watch-next-heading {
+  font-size: 13px;
+  font-weight: 500;
+  text-transform: uppercase;
+  letter-spacing: 0.08em;
+  color: var(--color-ink-subtle);
+}
+.music-watch-up-next {
+  display: flex;
+  flex-direction: column;
+  gap: 12px;
+  padding-bottom: 20px;
+  border-bottom: 1px solid var(--color-edge-soft);
+}
+.music-watch-video-next {
+  display: flex;
+  width: 100%;
+  align-items: center;
+  gap: 12px;
+  text-align: start;
+  border-radius: 8px;
+  min-width: 0;
+}
+.music-watch-next-art {
+  position: relative;
+  aspect-ratio: 16/9;
+  width: 120px;
+  flex-shrink: 0;
+  overflow: hidden;
+  border-radius: 8px;
+  background: var(--color-elevated);
+  cursor: pointer;
+}
+.music-watch-next-art:focus-visible,
+.music-watch-next-label button:focus-visible {
+  outline: 2px solid var(--color-accent);
+  outline-offset: 3px;
+}
+.music-watch-next-art > svg {
+  position: absolute;
+  left: 50%;
+  top: 50%;
+  transform: translate(-50%, -50%);
+  color: white;
+  filter: drop-shadow(0 1px 4px #000);
+}
+.music-watch-next-art > small {
+  position: absolute;
+  bottom: 5px;
+  inset-inline-end: 5px;
+  background: #000b;
+  color: white;
+  border-radius: 3px;
+  padding: 2px 4px;
+  font-size: 10px;
+}
+.music-watch-next-label {
+  display: flex;
+  flex-direction: column;
+  gap: 5px;
+  min-width: 0;
+}
+.music-watch-next-label button {
+  cursor: pointer;
+  border-radius: 4px;
+}
+.music-watch-next-label strong {
+  display: -webkit-box;
+  -webkit-line-clamp: 2;
+  -webkit-box-orient: vertical;
+  overflow: hidden;
+  font-size: 13px;
+  font-weight: 600;
+  line-height: 1.4;
+}
+.music-watch-next-label > span {
+  color: var(--color-ink-muted);
+  font-size: 12px;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+}
+.music-watch-video-next:hover strong {
+  color: var(--color-accent);
+}
+.music-watch-more {
+  margin-top: 32px;
+}
+.music-watch-more h3 {
+  font-size: 20px;
+  font-weight: 700;
+  margin-bottom: 18px;
+}
+.music-watch-more > div {
+  display: grid;
+  grid-template-columns: repeat(3, minmax(0, 1fr));
+  gap: 24px 18px;
+}
+.music-watch-more .music-watch-video-next {
+  flex-direction: column;
+  align-items: stretch;
+}
+.music-watch-more .music-watch-next-art {
+  width: 100%;
+}
+
+.music-watch-next-skeleton {
+  pointer-events: none;
+}
+.music-watch-next-skeleton .music-watch-next-art {
+  cursor: default;
+}
+.music-watch-next-skeleton .music-watch-next-label {
+  flex: 1;
+  gap: 7px;
+}
+.music-watch-next-skeleton .music-watch-next-label > span {
+  height: 10px;
+  border-radius: 4px;
+  width: 100%;
+}
+.music-watch-next-skeleton .music-watch-next-label > span:last-child {
+  width: 52%;
+}
+.music-watch-next-skeleton-stacked {
+  flex-direction: column;
+  align-items: stretch;
+}
+.music-watch-next-skeleton-stacked .music-watch-next-art {
+  width: 100%;
+}
+.music-watch-next-skeleton .music-watch-next-art,
+.music-watch-next-skeleton .music-watch-next-label > span {
+  background: linear-gradient(
+    90deg,
+    var(--color-elevated) 24%,
+    var(--color-raised) 38%,
+    var(--color-elevated) 62%
+  );
+  background-size: 220% 100%;
+  animation: music-watch-sheen 1.5s linear infinite;
+}
+@keyframes music-watch-sheen {
+  from {
+    background-position: 220% 0;
+  }
+  to {
+    background-position: -220% 0;
+  }
+}
+
+.music-watch-stage {
+  position: relative;
+  z-index: 2;
+  aspect-ratio: 16/9;
+  width: 100%;
+  overflow: hidden;
+  border-radius: 16px;
+  background: var(--color-elevated);
+  box-shadow: inset 0 0 0 1px var(--color-edge-soft);
+}
+.music-watch-stage-poster {
+  position: absolute;
+  inset: 0;
+  opacity: 0.55;
+}
+.music-watch-stage-error {
+  position: absolute;
+  inset: 0;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  gap: 14px;
+  padding: 24px;
+  text-align: center;
+}
+.music-watch-stage-error p {
+  font-size: 14px;
+  color: var(--color-ink-muted);
+  max-width: 42ch;
+}
+.music-watch-retry {
+  display: inline-flex;
+  align-items: center;
+  gap: 8px;
+  min-height: 44px;
+  padding: 0 20px;
+  border-radius: 999px;
+  background: var(--color-raised);
+  color: var(--color-ink);
+  font-size: 13px;
+  font-weight: 600;
+  cursor: pointer;
+  transition: background-color 180ms ease-out;
+}
+.music-watch-retry:hover {
+  background: var(--color-surface);
+}
+.music-watch-retry:focus-visible {
+  outline: 2px solid var(--color-accent);
+  outline-offset: 3px;
+}
+
+@media (max-width: 1023px) {
+  .music-watch-next {
+    width: 100%;
+    padding-top: 0;
+  }
+  .music-watch-next-list {
+    display: grid;
+    grid-template-columns: repeat(2, minmax(0, 1fr));
+    gap: 16px;
+  }
+  .music-watch-more > div {
+    grid-template-columns: repeat(2, minmax(0, 1fr));
+  }
+}
+@media (max-width: 580px) {
+  .music-watch-next-list {
+    grid-template-columns: 1fr;
+  }
+  .music-watch-next-art {
+    width: 130px;
+  }
+  .music-watch-more > div {
+    grid-template-columns: 1fr;
+  }
+  .music-watch-stage {
+    border-radius: 12px;
+  }
+}
+@media (prefers-reduced-motion: reduce) {
+  .music-watch-next-skeleton .music-watch-next-art,
+  .music-watch-next-skeleton .music-watch-next-label > span {
+    animation: none;
+  }
+  .music-watch-retry {
+    transition: none;
+  }
+}

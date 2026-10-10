@@ -15,6 +15,7 @@ import { useRef, useState } from "react";
 import type { PlayerCapabilities, PlayerSnapshot } from "@/lib/player/bridge";
 import { useT } from "@/lib/i18n";
 import { fmtTime } from "./transport/transport-utils";
+import { FullscreenClock } from "./fullscreen-clock";
 
 const clamp01 = (n: number) => Math.min(1, Math.max(0, n));
 
@@ -83,7 +84,16 @@ export function TransportKids({
             </span>
           )}
         </div>
-        <div className="w-14 shrink-0" />
+        <div className="flex min-w-[7rem] shrink-0 justify-end">
+          {fullscreen && (
+            <FullscreenClock
+              variant="kids"
+              durationSec={snap.durationSec}
+              playbackRate={snap.rate}
+              active={visible}
+            />
+          )}
+        </div>
       </div>
 
       <div
@@ -120,9 +130,8 @@ export function TransportKids({
             <SeekBtn dir={-1} onClick={() => onSeekStep(-10)} label={t("Back 10s")} />
             <button
               onClick={onPlayPause}
-              data-player-play-pause
               aria-label={playing ? t("Pause") : t("Play")}
-              className="relative flex h-24 w-24 shrink-0 items-center justify-center rounded-full bg-white text-[#1f8f88] shadow-[0_14px_36px_-10px_rgba(0,0,0,0.7)] transition-transform hover:scale-105 active:scale-95"
+              className="flex h-24 w-24 shrink-0 items-center justify-center rounded-full bg-white text-[#1f8f88] shadow-[0_14px_36px_-10px_rgba(0,0,0,0.7)] transition-transform hover:scale-105 active:scale-95"
             >
               {playing ? (
                 <Pause size={46} strokeWidth={0} fill="currentColor" />
@@ -186,6 +195,10 @@ function KidsSeekBar({
   return (
     <div
       ref={ref}
+      data-player-seekbar
+      onClick={(e) => {
+        if (!e.isTrusted && duration > 0) onSeek(fromX(e.clientX) * duration);
+      }}
       onPointerDown={(e) => {
         e.currentTarget.setPointerCapture(e.pointerId);
         setDrag(fromX(e.clientX));
@@ -228,6 +241,7 @@ function KidsVolume({
   onMute: () => void;
   onVolume: (v: number) => void;
 }) {
+  const t = useT();
   const ref = useRef<HTMLDivElement>(null);
   const v = muted ? 0 : clamp01(volume);
   const fromX = (clientX: number) => {
@@ -240,7 +254,7 @@ function KidsVolume({
     <div className="flex items-center gap-3">
       <button
         onClick={onMute}
-        aria-label={v === 0 ? "Unmute" : "Mute"}
+        aria-label={v === 0 ? t("Unmute") : t("Mute")}
         className="flex h-16 w-16 shrink-0 items-center justify-center rounded-full bg-white/15 text-white transition hover:bg-white/25 active:scale-95"
       >
         {v === 0 ? (

@@ -1,0 +1,20 @@
+const musicArtistExtras: Record<string, string> = {
+  "music.extras.merch": "Sanatçı ürünleri",
+  "music.extras.tour": "Canlı gösteriler",
+  "music.extras.store": "Mağazaya git",
+  "music.extras.tourLink": "Turne bilgileri",
+  "music.extras.official": "Sanatçının sitesi",
+  "music.extras.loading": "Sanatçı güncellemeleri yükleniyor…",
+  "music.extras.source": "Kaynak: {source}",
+  "music.extras.event": "Etkinlik ayrıntıları",
+  "music.credits.title": "Emeği geçenler",
+  "music.credits.main": "Ana sanatçı",
+  "music.credits.featured": "Konuk sanatçı",
+  "music.credits.composer": "Besteci",
+  "music.credits.lyricist": "Söz yazarı",
+  "music.credits.producer": "Yapımcı",
+  "music.credits.performer": "İcracı",
+  "music.artist.readMore": "Devamını oku",
+  "music.artist.readLess": "Daha az göster",
+};
+export default musicArtistExtras;

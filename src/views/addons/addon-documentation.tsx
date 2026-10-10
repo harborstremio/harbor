@@ -88,7 +88,7 @@ export function AddonDocumentation({ slug }: { slug: string }) {
                   type="button"
                   onClick={(e) => {
                     e.preventDefault();
-                    if (typeof p.href === "string") openUrl(p.href);
+                    if (typeof p.href === "string" && /^https?:\/\//i.test(p.href)) openUrl(p.href);
                   }}
                   className="inline font-semibold text-accent underline-offset-2 transition-colors hover:text-ink hover:underline"
                 >

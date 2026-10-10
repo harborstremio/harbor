@@ -1,4 +1,5 @@
 import { ArrowDownToLine, Check, RotateCw, X } from "lucide-react";
+import { HoverTooltip } from "@/components/hover-tooltip";
 import type { Meta } from "@/lib/cinemeta";
 import { activeDownloadFor, cancelDownload, useDownloads } from "@/lib/download/downloads-store";
 import { findLocalEpisodeByIds, findLocalMovie } from "@/lib/local-library";
@@ -29,7 +30,7 @@ export function EpisodeDownloadButton({
   const dl = activeDownloadFor(meta.id, episode?.season ?? null, episode?.episode ?? null);
   if (isLocal) return null;
   const status = dl?.status;
-  const downloading = status === "downloading";
+  const downloading = status === "downloading" || status === "queued";
   const done = status === "done";
   const failed = status === "error";
   const persistent = downloading || done || failed;
@@ -52,7 +53,7 @@ export function EpisodeDownloadButton({
   const stroke = dim >= 38 ? 2.5 : 2.2;
 
   const stateTone = done
-    ? "text-emerald-300"
+    ? "text-success"
     : failed
       ? isBar
         ? "text-danger"
@@ -61,12 +62,20 @@ export function EpisodeDownloadButton({
         ? "text-ink"
         : "text-ink-subtle hover:bg-elevated hover:text-ink active:scale-90";
   const wrapperClass = isBar
-    ? `group/dl relative flex shrink-0 items-center justify-center rounded-full border border-edge bg-canvas/80 transition-[transform,background-color,border-color] duration-200 hover:border-ink-subtle hover:bg-canvas/95 active:scale-[0.96] ${stateTone}`
+    ? `group/dl relative flex shrink-0 items-center justify-center rounded-full bg-canvas/80 transition-[transform,background-color] duration-200 hover:bg-canvas/95 active:scale-[0.96] ${stateTone}`
     : `group/dl relative flex shrink-0 items-center justify-center self-start rounded-full transition-[opacity,background-color,transform] duration-200 ease-out ${
         persistent ? "opacity-100" : "opacity-0 group-hover:opacity-100 focus-visible:opacity-100"
       } ${stateTone}`;
 
-  return (
+  const tipLabel = downloading
+    ? t("Downloading {pct}%  ·  click to cancel", { pct })
+    : done
+      ? t("Saved offline")
+      : failed
+        ? t("Download failed  ·  click to retry")
+        : t("Download for offline");
+
+  const btn = (
     <button
       type="button"
       onClick={onClick}
@@ -79,15 +88,7 @@ export function EpisodeDownloadButton({
               ? t("Download failed, click to retry")
               : t("Download for offline")
       }
-      title={
-        downloading
-          ? t("Downloading {pct}%  ·  click to cancel", { pct })
-          : done
-            ? t("Saved offline")
-            : failed
-              ? t("Download failed  ·  click to retry")
-              : t("Download for offline")
-      }
+      title={isBar ? undefined : tipLabel}
       className={wrapperClass}
       style={{ width: dim, height: dim }}
     >
@@ -139,5 +140,13 @@ export function EpisodeDownloadButton({
         <ArrowDownToLine size={dim * 0.46} strokeWidth={2} />
       )}
     </button>
+  );
+
+  return isBar ? (
+    <HoverTooltip label={tipLabel} align="center" className="shrink-0">
+      {btn}
+    </HoverTooltip>
+  ) : (
+    btn
   );
 }

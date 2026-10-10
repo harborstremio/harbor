@@ -1,4 +1,5 @@
 import { useEffect, useRef, useState } from "react";
+import { usePageVisible } from "@/lib/visibility";
 import { RotateCcw, Tv } from "lucide-react";
 import type { Meta } from "@/lib/cinemeta";
 import { useT } from "@/lib/i18n";
@@ -38,11 +39,12 @@ export function LiveHero({
     ? hydrated?.background || active.current?.iconUrl || active.channel.logo || null
     : null;
 
+  const pageVisible = usePageVisible();
   useEffect(() => {
-    if (paused || playing || items.length < 2) return;
+    if (paused || playing || items.length < 2 || !pageVisible) return;
     const t = window.setInterval(() => setIdx((i) => (i + 1) % items.length), 9000);
     return () => window.clearInterval(t);
-  }, [paused, playing, items.length]);
+  }, [paused, playing, items.length, pageVisible]);
 
   useEffect(() => {
     setPlaying(false);

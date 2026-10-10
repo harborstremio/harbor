@@ -1,4 +1,5 @@
 import { useRef } from "react";
+import { horizontalScrollState } from "./horizontal-scroll";
 
 export function useDragScroll<T extends HTMLElement>(opts: { stride?: number } = {}) {
   const ref = useRef<T | null>(null);
@@ -83,12 +84,14 @@ export function useDragScroll<T extends HTMLElement>(opts: { stride?: number } =
     const friction = 0.004;
     const v = d.vel;
     const projection = -((v * Math.abs(v)) / (2 * friction));
-    const max = el.scrollWidth - el.clientWidth;
+    const { max, rtl } = horizontalScrollState(el);
     const projected = el.scrollLeft + projection;
+    const logical = rtl ? -projected : projected;
+    const snapped = opts.stride && opts.stride > 0
+      ? Math.round(logical / opts.stride) * opts.stride
+      : logical;
     const target =
-      opts.stride && opts.stride > 0
-        ? Math.max(0, Math.min(Math.round(projected / opts.stride) * opts.stride, max))
-        : Math.max(0, Math.min(projected, max));
+      (rtl ? -1 : 1) * Math.max(0, Math.min(snapped, max));
     const start = el.scrollLeft;
     const distance = target - start;
     const startTime = performance.now();

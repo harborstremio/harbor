@@ -1,0 +1,17 @@
+.games-custom-playtime{padding-block:20px;border-top:1px solid var(--color-edge-soft)}
+.games-custom-playtime-heading{display:flex;align-items:center;justify-content:space-between;gap:16px;margin-bottom:18px}
+.games-custom-playtime-heading h3{margin:0;font-size:16px;font-weight:600}
+.games-custom-playtime dl{display:flex;flex-wrap:wrap;gap:18px 40px;margin:0}
+.games-custom-playtime dt{color:var(--color-ink-muted);font-size:12px;margin-bottom:5px}
+.games-custom-playtime dd{font-size:20px;font-variant-numeric:tabular-nums;font-weight:600;margin:0}
+.games-custom-playtime p{font-size:12px;line-height:1.65;color:var(--color-ink-muted);margin:12px 0 0;max-width:65ch}
+.games-custom-playtime-fields{display:grid;grid-template-columns:repeat(4,minmax(0,1fr));gap:14px;margin-top:16px}
+.games-custom-playtime-fields label{display:flex;flex-direction:column;gap:8px;flex:1;max-width:180px;font-size:13px;color:var(--color-ink-muted)}
+.games-custom-playtime-fields input{width:100%;min-width:0;background:var(--color-elevated);color:var(--color-ink);border:0;border-radius:8px;padding:12px;font-size:16px;font-variant-numeric:tabular-nums}
+.games-custom-playtime-fields input:focus-visible{outline:2px solid var(--color-accent);outline-offset:2px}
+.games-custom-playtime [role=alert]{color:var(--color-danger)}
+.games-custom-playtime-actions{display:flex;justify-content:flex-end;gap:8px;flex-wrap:wrap;margin-top:18px}
+.games-custom-time-label{display:flex;align-items:center;gap:6px;color:var(--color-ink-muted);font-size:12px;line-height:1.6;margin-top:5px}
+@media(max-width:600px){.games-custom-playtime-heading{align-items:flex-start;flex-wrap:wrap}.games-custom-playtime-actions>.games-button:first-child:not(:last-child){margin-inline-end:auto}.games-custom-playtime-actions .games-button{white-space:normal;text-align:start}}
+.games-custom-editor>footer .games-button:disabled{opacity:.4;cursor:default}
+@media(max-width:600px){.games-custom-playtime-fields{grid-template-columns:repeat(2,minmax(0,1fr))}.games-custom-playtime-fields label{max-width:none}}

@@ -1,0 +1,165 @@
+.music-karaoke {
+  position: fixed;
+  inset-block-start: 0;
+  inset-inline: 0;
+  height: 100%;
+  max-height: calc(100dvh - var(--harbor-dock-gap, 76px));
+  z-index: 120;
+  display: flex;
+  flex-direction: column;
+  overflow: hidden;
+  color: #fff;
+  --music-karaoke-field: var(--music-art-accent, #2f6f6b);
+  background:
+    radial-gradient(
+      124% 92% at 16% -8%,
+      color-mix(in srgb, var(--music-karaoke-field) 52%, #05070a) 0%,
+      transparent 70%
+    ),
+    linear-gradient(
+      166deg,
+      color-mix(in srgb, var(--music-karaoke-field) 38%, #05070a) 0%,
+      color-mix(in srgb, var(--music-karaoke-field) 14%, #05070a) 100%
+    );
+  animation: music-karaoke-in 240ms cubic-bezier(0.2, 0.7, 0.2, 1) both;
+}
+.music-karaoke-head {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 16px;
+  flex-shrink: 0;
+  padding: 18px clamp(20px, 4vw, 64px);
+}
+.music-karaoke-track {
+  display: flex;
+  align-items: center;
+  gap: 12px;
+  min-width: 0;
+}
+.music-karaoke-track > div {
+  display: flex;
+  flex-direction: column;
+  gap: 2px;
+  min-width: 0;
+}
+.music-karaoke-track svg {
+  flex-shrink: 0;
+  opacity: 0.75;
+}
+.music-karaoke-track strong {
+  font-size: 14px;
+  font-weight: 650;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+}
+.music-karaoke-track span {
+  font-size: 12px;
+  opacity: 0.7;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+}
+.music-karaoke-close {
+  display: grid;
+  place-items: center;
+  flex-shrink: 0;
+  width: 44px;
+  height: 44px;
+  border-radius: 50%;
+  color: #fff;
+  background: rgb(255 255 255 / 0.1);
+  transition: background-color 160ms ease;
+}
+.music-karaoke-close:hover {
+  background: rgb(255 255 255 / 0.2);
+}
+.music-karaoke-scroll {
+  position: relative;
+  flex: 1;
+  min-height: 0;
+  overflow: hidden auto;
+  overscroll-behavior: contain;
+  padding: 8px clamp(20px, 5vw, 96px) 46vh;
+  scrollbar-width: none;
+}
+.music-karaoke-scroll::-webkit-scrollbar {
+  width: 0;
+}
+.music-karaoke-lines {
+  list-style: none;
+  margin: 0;
+  padding: 0;
+  max-width: min(100%, 18em);
+  font-size: clamp(30px, 4.2vw, 62px);
+}
+.music-karaoke-line {
+  display: block;
+  width: 100%;
+  text-align: start;
+  padding: 10px 0;
+  min-height: 44px;
+  color: inherit;
+  font-size: inherit;
+  font-weight: 760;
+  line-height: 1.1;
+  letter-spacing: -0.028em;
+  overflow-wrap: break-word;
+  text-wrap: balance;
+  opacity: 0.45;
+  transition:
+    opacity 260ms ease,
+    color 260ms ease;
+}
+.music-karaoke-line[data-line="current"] {
+  opacity: 1;
+}
+.music-karaoke-line:hover {
+  opacity: 0.85;
+}
+.music-karaoke-line[data-line="current"]:hover {
+  opacity: 1;
+}
+.music-karaoke-note {
+  display: flex;
+  align-items: center;
+  gap: 12px;
+  padding-block: 18vh;
+  font-size: 17px;
+  font-weight: 500;
+  opacity: 0.8;
+}
+.music-karaoke button:focus-visible {
+  outline: 2px solid #fff;
+  outline-offset: 4px;
+  border-radius: 8px;
+}
+@keyframes music-karaoke-in {
+  from {
+    opacity: 0;
+  }
+  to {
+    opacity: 1;
+  }
+}
+@media (max-width: 720px) {
+  .music-karaoke-lines {
+    font-size: clamp(26px, 7vw, 38px);
+  }
+  .music-karaoke-lines {
+    max-width: none;
+  }
+}
+@media (prefers-reduced-motion: reduce) {
+  .music-karaoke {
+    animation: none;
+  }
+  .music-karaoke-line,
+  .music-karaoke-close {
+    transition: none;
+  }
+  .music-karaoke-scroll {
+    scroll-behavior: auto;
+  }
+}

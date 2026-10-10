@@ -5,6 +5,24 @@ use once_cell::sync::Lazy;
 use regex::Regex;
 use std::collections::{BTreeMap, HashSet};
 
+static EPISODE_SPAN_RX: Lazy<Vec<Regex>> = Lazy::new(|| vec![
+    Regex::new(r"(?i)(?:^|[^a-z0-9])s(\d{1,3})[ ._-]*e(\d{1,4})[ ._-]*e(\d{1,4})(?:\D|$)").unwrap(),
+    Regex::new(r"(?i)(?:^|[^a-z0-9])s(\d{1,3})[ ._-]*e(\d{1,4})\s*-\s*e?(\d{1,4})(?:\D|$)").unwrap(),
+    Regex::new(r"(?i)(?:^|[^a-z0-9])(\d{1,3})x(\d{1,4})\s*-\s*(\d{1,4})(?:\D|$)").unwrap(),
+]);
+
+fn parse_episode_span(text: &str) -> Option<(i32, i32, i32)> {
+    for regex in EPISODE_SPAN_RX.iter() {
+        let Some(captures) = regex.captures(text) else { continue };
+        let season = captures.get(1)?.as_str().parse().ok()?;
+        let episode = captures.get(2)?.as_str().parse().ok()?;
+        let episode_end = captures.get(3)?.as_str().parse().ok()?;
+        return (season > 0 && episode > 0 && episode_end == episode + 1)
+            .then_some((season, episode, episode_end));
+    }
+    None
+}
+
 static TRUSTED_GROUPS: Lazy<HashSet<&'static str>> = Lazy::new(|| {
     let mut s = HashSet::new();
     for g in [
@@ -165,8 +183,12 @@ static TORRENTIO_NOISE_SUFFIX_RX: Lazy<Regex> = Lazy::new(|| {
 static CONTAINER_RX: Lazy<Regex> =
     Lazy::new(|| Regex::new(r"(?i)\.(mkv|mp4|m4v|avi|webm|mov|ts|wmv)\b").unwrap());
 
-static SIZE_RX: Lazy<Regex> =
-    Lazy::new(|| Regex::new(r"(?i)(\d+(?:\.\d+)?)\s*(GB|MB|TB|GiB|MiB|TiB)\b").unwrap());
+static SIZE_RX: Lazy<Regex> = Lazy::new(|| {
+    Regex::new(
+        r"(?i)(\d{1,3}(?:[ ,]\d{3})+(?:[.,]\d{1,2})?|\d[\d.,]*\d|\d)\s*(GB|MB|TB|GiB|MiB|TiB)\b",
+    )
+    .unwrap()
+});
 
 static SEEDERS_RX: Lazy<Regex> = Lazy::new(|| {
     Regex::new(r"(?i)(?:\x{1F465}|\x{1F464}|S:|seeds?:?|\bS\s*=\s*)\s*(\d+)").unwrap()
@@ -837,8 +859,10 @@ pub fn parse_stream(stream: Stream) -> ParsedStream {
     let edition = parse_edition(&text, &ptt);
     let year = ptt.year;
     let year_range = parse_year_range(&text);
-    let season = ptt.season;
-    let episode = ptt.episode;
+    let span = parse_episode_span(&filename_line);
+    let season = span.map(|value| value.0).or(ptt.season);
+    let episode = span.map(|value| value.1).or(ptt.episode);
+    let episode_end = span.map(|value| value.2).or(episode);
     let season_pack = parse_season_pack(&text, &ptt);
     let disc_index = parse_disc(&text);
     let repack_iteration = parse_repack_iteration(&text, &ptt);
@@ -879,6 +903,7 @@ pub fn parse_stream(stream: Stream) -> ParsedStream {
         year_range,
         season,
         episode,
+        episode_end,
         season_pack,
         disc_index,
         repack_iteration,
@@ -1252,6 +1277,28 @@ fn filename_score(line: &str) -> i64 {
     s
 }
 
+fn size_number(token: &str) -> Option<f64> {
+    let Some(last_sep) = token.rfind([' ', '.', ',']) else {
+        return token.parse().ok();
+    };
+    let groups: Vec<&str> = token.split([' ', '.', ',']).collect();
+    if groups.iter().any(|g| g.is_empty()) {
+        return None;
+    }
+    let tail = groups[groups.len() - 1];
+    let looks_like_thousands = if groups.len() > 2 {
+        groups[1..].iter().all(|g| g.len() == 3)
+    } else {
+        tail.len() == 3 && !token[last_sep..].starts_with('.')
+    };
+    let digits: String = token.chars().filter(|c| c.is_ascii_digit()).collect();
+    if looks_like_thousands {
+        return digits.parse().ok();
+    }
+    let int_len = digits.len().checked_sub(tail.len())?;
+    format!("{}.{}", &digits[..int_len], tail).parse().ok()
+}
+
 fn parse_size(text: &str, hint: Option<u64>) -> Option<u64> {
     if let Some(h) = hint {
         if h > 0 {
@@ -1259,7 +1306,7 @@ fn parse_size(text: &str, hint: Option<u64>) -> Option<u64> {
         }
     }
     let c = SIZE_RX.captures(text)?;
-    let n: f64 = c.get(1)?.as_str().parse().ok()?;
+    let n = size_number(c.get(1)?.as_str())?;
     let unit = c.get(2)?.as_str().to_lowercase();
     let bytes = if unit.starts_with('t') {
         n * (1024f64.powi(4))
@@ -1775,5 +1822,47 @@ mod tests {
         s.behavior_hints = Some(json!({ "videoSize": 5_000_000_000_u64 }));
         let p = parse_stream(s);
         assert_eq!(p.size, Some(5_000_000_000));
+    }
+
+    #[test]
+    fn size_number_reads_decimal_and_thousands_separators() {
+        assert_eq!(size_number("500"), Some(500.0));
+        assert_eq!(size_number("2.75"), Some(2.75));
+        assert_eq!(size_number("2,75"), Some(2.75));
+        assert_eq!(size_number("2.750"), Some(2.75));
+        assert_eq!(size_number("1,500"), Some(1500.0));
+        assert_eq!(size_number("1 500"), Some(1500.0));
+        assert_eq!(size_number("1.080,5"), Some(1080.5));
+        assert_eq!(size_number("1,234,567"), Some(1234567.0));
+    }
+
+    #[test]
+    fn comma_decimal_size_is_not_read_as_its_tail() {
+        let p = parse_stream(mk_stream("Movie.2020.1080p.WEB-DL\n💾 2,75 GB", "Torrentio"));
+        let bytes = p.size.expect("size parsed");
+        assert!(
+            bytes > 2_900_000_000 && bytes < 3_000_000_000,
+            "expected about 2.75 GiB, got {bytes}"
+        );
+    }
+
+    #[test]
+    fn space_grouped_size_keeps_its_thousands() {
+        let p = parse_stream(mk_stream("Movie.2020.1080p.WEB-DL\n💾 1 500 MB", "Torrentio"));
+        let bytes = p.size.expect("size parsed");
+        assert!(
+            bytes > 1_500_000_000 && bytes < 1_600_000_000,
+            "expected about 1500 MiB, got {bytes}"
+        );
+    }
+
+    #[test]
+    fn digits_before_the_size_are_not_absorbed() {
+        let p = parse_stream(mk_stream("Movie.2020 1080 2.75 GB", "Torrentio"));
+        let bytes = p.size.expect("size parsed");
+        assert!(
+            bytes > 2_900_000_000 && bytes < 3_000_000_000,
+            "expected about 2.75 GiB, got {bytes}"
+        );
     }
 }

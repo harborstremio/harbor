@@ -1,8 +1,9 @@
 import { Cast, Loader2, Subtitles, X } from "lucide-react";
 import { useEffect, useRef, useState } from "react";
 import { discoverCastDevices, type CastDeviceInfo } from "@/lib/cast";
-import { useT } from "@/lib/i18n";
+import { isRtl, useT, useUiLanguage } from "@/lib/i18n";
 import { CastIcon } from "./cast-icon";
+import { noteOverlayDismiss } from "@/lib/player/overlay-dismiss";
 
 export function CastMenu({
   open,
@@ -22,6 +23,7 @@ export function CastMenu({
   setBurnSubsOnTv: (next: boolean) => void;
 }) {
   const t = useT();
+  const dir = isRtl(useUiLanguage()) ? "rtl" : "ltr";
   const [devices, setDevices] = useState<CastDeviceInfo[]>([]);
   const [loading, setLoading] = useState(false);
   const [scanCount, setScanCount] = useState(0);
@@ -48,33 +50,65 @@ export function CastMenu({
   useEffect(() => {
     if (!open) return;
     const onDown = (e: MouseEvent) => {
+      noteOverlayDismiss();
       if (!wrapRef.current?.contains(e.target as Node)) onClose();
     };
     const onKey = (e: KeyboardEvent) => {
-      if (e.key !== "Escape") return;
-      e.preventDefault();
-      e.stopPropagation();
-      onClose();
+      if (e.key === "Escape") {
+        e.preventDefault();
+        e.stopImmediatePropagation();
+        noteOverlayDismiss();
+        onClose();
+      }
+      if (e.key === "Tab") {
+        const buttons = [
+          ...(wrapRef.current?.querySelectorAll<HTMLButtonElement>("button:not(:disabled)") ?? []),
+        ];
+        const target = e.shiftKey ? buttons.at(-1) : buttons[0];
+        if (
+          (e.shiftKey && document.activeElement === buttons[0]) ||
+          (!e.shiftKey && document.activeElement === buttons.at(-1))
+        ) {
+          e.preventDefault();
+          target?.focus();
+        }
+      }
     };
+    const origin = document.activeElement as HTMLElement | null;
+    const frame = requestAnimationFrame(() =>
+      (
+        wrapRef.current?.querySelector<HTMLButtonElement>("[data-cast-device]") ??
+        wrapRef.current?.querySelector<HTMLButtonElement>("button")
+      )?.focus(),
+    );
     window.addEventListener("mousedown", onDown);
     window.addEventListener("keydown", onKey, true);
     return () => {
+      cancelAnimationFrame(frame);
       window.removeEventListener("mousedown", onDown);
       window.removeEventListener("keydown", onKey, true);
+      if (origin?.isConnected) origin.focus({ preventScroll: true });
     };
   }, [open, onClose]);
+
+  useEffect(() => {
+    if (!open || loading || !devices.length) return;
+    wrapRef.current?.querySelector<HTMLButtonElement>("[data-cast-device]")?.focus();
+  }, [open, loading, devices]);
 
   if (!open) return null;
 
   return (
     <div
       ref={wrapRef}
-      data-tv-focus-scope
+      dir={dir}
+      role="dialog"
+      aria-label={t("Cast to TV or speaker")}
       onMouseDown={(e) => e.stopPropagation()}
-      className="animate-popover-in fixed z-[140] w-[320px] rounded-2xl border border-edge bg-elevated p-4 shadow-[0_24px_60px_-18px_rgba(0,0,0,0.7)] backdrop-blur-md"
+      className="animate-menu-pop fixed z-[140] w-[320px] max-w-[calc(100vw-32px)] rounded-md bg-elevated p-4 shadow-[0_10px_30px_-12px_rgba(0,0,0,0.6)]"
       style={{
         right: anchor ? window.innerWidth - anchor.right : 24,
-        bottom: anchor ? window.innerHeight - anchor.bottom + 12 : 80,
+        bottom: anchor ? window.innerHeight - anchor.bottom + 82 : 150,
       }}
     >
       <div className="mb-2 flex items-center justify-between">
@@ -84,7 +118,6 @@ export function CastMenu({
         </span>
         <button
           onClick={onClose}
-          data-tv-modal-close
           aria-label={t("Close")}
           className="flex h-6 w-6 items-center justify-center rounded-full text-ink-subtle transition-colors hover:bg-raised hover:text-ink"
         >
@@ -122,7 +155,9 @@ export function CastMenu({
               </span>
               <span className="text-[11px] leading-snug text-ink-subtle">
                 {burnSubsOnTv
-                  ? t("Subtitles are baked into the picture so they always show. Re-encodes the video.")
+                  ? t(
+                      "Subtitles are baked into the picture so they always show. Re-encodes the video.",
+                    )
                   : t("Subtitles may not appear on the TV.")}
               </span>
             </span>
@@ -138,7 +173,9 @@ export function CastMenu({
       ) : devices.length === 0 ? (
         <div className="flex flex-col gap-2 px-1 py-3">
           <p className="text-[12.5px] text-ink-muted">
-            {t("No Chromecast, DLNA, or Roku devices found. Make sure your TV is on, woken up, and on the same Wi-Fi.")}
+            {t(
+              "No Chromecast, DLNA, or Roku devices found. Make sure your TV is on, woken up, and on the same Wi-Fi.",
+            )}
           </p>
           <button
             onClick={() => setScanCount((c) => c + 1)}
@@ -152,6 +189,7 @@ export function CastMenu({
           {devices.map((d) => (
             <button
               key={d.id}
+              data-cast-device
               onClick={() => onPick(d)}
               className="flex items-center gap-3 rounded-lg px-2.5 py-2 text-start transition-colors hover:bg-canvas/65"
             >
@@ -168,7 +206,11 @@ export function CastMenu({
                   )}
                 </span>
                 <span className="truncate text-[11px] text-ink-subtle">
-                  {d.kind === "dlna" ? d.model ?? t("DLNA TV") : d.model || `${d.host}:${d.port}`}
+                  {d.audio_only
+                    ? t("video.cast.localPicture")
+                    : d.kind === "dlna"
+                      ? (d.model ?? t("DLNA TV"))
+                      : d.model || `${d.host}:${d.port}`}
                 </span>
               </div>
             </button>

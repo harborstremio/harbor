@@ -1,0 +1,95 @@
+.sh-match-sections {
+  display: flex;
+  flex-direction: column;
+  gap: 12px;
+  min-width: 0;
+  container-type: inline-size;
+}
+.sh-match-disclosure {
+  min-width: 0;
+  border-radius: 10px;
+  background: var(--color-surface);
+  color: var(--color-ink);
+  overflow: hidden;
+}
+.sh-match-disclosure > summary {
+  display: flex;
+  align-items: center;
+  gap: 12px;
+  min-height: 56px;
+  padding: 14px 18px;
+  background: var(--color-elevated);
+  cursor: pointer;
+  list-style: none;
+}
+.sh-match-disclosure > summary::-webkit-details-marker {
+  display: none;
+}
+.sh-match-disclosure > summary:hover {
+  background: var(--color-raised);
+}
+.sh-match-disclosure > summary strong {
+  flex: 1;
+  min-width: 0;
+  font-size: 15px;
+  font-weight: 600;
+  overflow-wrap: anywhere;
+}
+.sh-match-disclosure > summary svg {
+  flex-shrink: 0;
+  color: var(--color-ink-muted);
+}
+.sh-match-disclosure-count {
+  color: var(--color-ink-muted);
+  font-size: 12px;
+  font-variant-numeric: tabular-nums;
+}
+.sh-match-disclosure-chevron {
+  transition: transform 150ms ease-out;
+}
+.sh-match-disclosure[open] > summary .sh-match-disclosure-chevron {
+  transform: rotate(180deg);
+}
+.sh-match-disclosure-body {
+  display: flex;
+  flex-direction: column;
+  gap: 12px;
+  min-width: 0;
+  padding: 18px;
+}
+.sh-match-disclosure-body.is-scrollable {
+  max-height: min(520px, 65vh);
+  overflow: auto;
+  scrollbar-width: thin;
+  scrollbar-gutter: stable;
+}
+.sh-match-disclosure > summary:focus-visible,
+.sh-match-disclosure-body:focus-visible {
+  outline: 2px solid var(--color-accent);
+  outline-offset: -3px;
+}
+.sh-match-stat-grid {
+  display: grid;
+  gap: 18px 32px;
+}
+.sh-match-stat-grid > div {
+  min-width: 0;
+}
+@container (min-width: 760px) {
+  .sh-match-stat-grid {
+    grid-template-columns: repeat(2, minmax(0, 1fr));
+  }
+}
+@media (max-width: 600px) {
+  .sh-match-disclosure > summary {
+    padding-inline: 14px;
+  }
+  .sh-match-disclosure-body {
+    padding: 14px 10px;
+  }
+}
+@media (prefers-reduced-motion: reduce) {
+  .sh-match-disclosure-chevron {
+    transition: none;
+  }
+}

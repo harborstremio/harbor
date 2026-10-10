@@ -1,0 +1,60 @@
+<?xml version="1.0" encoding="utf-8"?>
+<!--
+  Harbor Android TV. Permits cleartext HTTP to the on-device torrent engine,
+  and to nothing else.
+
+  WHY THIS FILE HAS TO EXIST
+
+  Tauri 2.10.1 generates app/build.gradle.kts containing:
+
+      defaultConfig {
+          manifestPlaceholders["usesCleartextTraffic"] = "false"
+      }
+      buildTypes {
+          getByName("debug") {
+              manifestPlaceholders["usesCleartextTraffic"] = "true"
+          }
+          getByName("release") {
+              // no override, so the "false" above stands
+          }
+      }
+
+  (Verified by extracting the template from the CLI binary this repo has
+  installed, not from documentation.)
+
+  Harbor's torrent engine serves http://127.0.0.1:11470. So P2P playback is
+  permitted under `tauri android dev` and forbidden in the shipped release APK.
+  It fails in the WebView's network stack, so Rust logs nothing, the engine
+  reports healthy, and video simply never starts. That is a
+  works-in-dev-dead-in-release trap, which is the expensive kind.
+
+  On API 24 and above a network security config overrides
+  android:usesCleartextTraffic completely, so this file alone is the fix. There
+  is no need to also flip the gradle placeholder, and flipping it instead of
+  using this file would open cleartext app-wide.
+
+  INSTALL
+
+    1. copy to
+         src-tauri/gen/android/app/src/main/res/xml/network_security_config.xml
+    2. add this attribute to the <application> tag in
+         src-tauri/gen/android/app/src/main/AndroidManifest.xml
+         android:networkSecurityConfig="@xml/network_security_config"
+
+  Both files live under gen/android, which Tauri generates once and which has
+  no override hook, so they must be committed and hand maintained. That is a
+  git decision for js.
+
+  tauri.localhost is listed because that is the origin Tauri serves the app
+  from on Android. Tauri intercepts those requests before the network stack, so
+  it should not need the entry, but listing loopback costs nothing and removes
+  a variable from the first on-device debugging session.
+-->
+<network-security-config>
+    <base-config cleartextTrafficPermitted="false" />
+    <domain-config cleartextTrafficPermitted="true">
+        <domain includeSubdomains="false">127.0.0.1</domain>
+        <domain includeSubdomains="false">localhost</domain>
+        <domain includeSubdomains="false">tauri.localhost</domain>
+    </domain-config>
+</network-security-config>

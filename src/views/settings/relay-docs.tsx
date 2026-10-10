@@ -13,12 +13,12 @@ export function RelayDocs({ onBack }: { onBack: () => void }) {
   }, [savedPath]);
   return (
     <div className="flex flex-col gap-8">
-      <div className="flex items-center justify-between gap-4 rounded-2xl border border-edge-soft bg-canvas/40 p-3">
+      <div className="flex flex-wrap items-center justify-between gap-3 rounded-md bg-elevated px-4 py-3">
         <button
           onClick={onBack}
-          className="flex h-12 items-center gap-2.5 rounded-xl bg-elevated px-5 text-[14px] font-semibold text-ink shadow-[inset_0_0_0_1px_var(--color-edge-soft)] transition-all hover:bg-raised hover:shadow-[inset_0_0_0_1px_var(--color-edge)]"
+          className="flex h-11 items-center gap-2 rounded-[8px] bg-canvas px-4 text-[15px] font-semibold text-ink transition-colors hover:bg-raised"
         >
-          <svg width="16" height="16" viewBox="0 0 24 24" fill="none" aria-hidden>
+          <svg width="18" height="18" viewBox="0 0 24 24" fill="none" aria-hidden className="dir-icon">
             <path
               d="M15 6l-6 6 6 6"
               stroke="currentColor"
@@ -30,22 +30,22 @@ export function RelayDocs({ onBack }: { onBack: () => void }) {
           {t("Back to relay")}
         </button>
         <div className="flex items-center gap-3">
-          <DownloadMenu docsRef={docsRef} onSaved={setSavedPath} />
-          <span className="text-[11.5px] font-semibold uppercase tracking-[0.16em] text-ink-subtle">
+          <span className="harbor-settings-label">
             {t("Documentation")}
           </span>
+          <DownloadMenu docsRef={docsRef} onSaved={setSavedPath} />
         </div>
       </div>
 
       <div ref={docsRef} className="flex flex-col gap-8">
-      <header className="flex flex-col gap-2 border-b border-edge-soft pb-6">
-        <p className="text-[10.5px] font-semibold uppercase tracking-[0.18em] text-accent">
+      <header className="flex flex-col gap-2 pb-2">
+        <p className="text-[13px] font-bold uppercase leading-[17px] tracking-[0.72px] text-accent">
           {t("Self-host")}
         </p>
         <h2 className="font-display text-[32px] font-medium leading-tight tracking-tight text-ink">
           {t("Run your own Harbor Relay")}
         </h2>
-        <p className="text-[14px] leading-relaxed text-ink-muted">
+        <p className="max-w-[66ch] text-[15.5px] leading-[22px] text-ink-muted">
           {t("Two paths: Harbor handles the deploy for you, or you do it yourself with wrangler.")}
         </p>
       </header>
@@ -211,12 +211,12 @@ function DocsH2({ children }: { children: React.ReactNode }) {
 }
 
 function DocsP({ children }: { children: React.ReactNode }) {
-  return <p className="text-[13.5px] leading-relaxed text-ink-muted">{children}</p>;
+  return <p className="max-w-[70ch] text-[15.5px] leading-[22px] text-ink-muted">{children}</p>;
 }
 
 function DocsList({ children }: { children: React.ReactNode }) {
   return (
-    <ul className="ms-5 flex list-disc flex-col gap-1.5 text-[13.5px] leading-relaxed text-ink-muted marker:text-ink-subtle">
+    <ul className="ms-5 flex max-w-[70ch] list-disc flex-col gap-1.5 text-[15.5px] leading-[22px] text-ink-muted marker:text-ink-subtle">
       {children}
     </ul>
   );
@@ -224,7 +224,7 @@ function DocsList({ children }: { children: React.ReactNode }) {
 
 function DocsOl({ children }: { children: React.ReactNode }) {
   return (
-    <ol className="ms-5 flex list-decimal flex-col gap-2.5 text-[13.5px] leading-relaxed text-ink-muted marker:font-semibold marker:text-ink-subtle">
+    <ol className="ms-5 flex max-w-[70ch] list-decimal flex-col gap-2.5 text-[15.5px] leading-[22px] text-ink-muted marker:font-semibold marker:text-ink-subtle">
       {children}
     </ol>
   );
@@ -232,7 +232,7 @@ function DocsOl({ children }: { children: React.ReactNode }) {
 
 export function DocsCode({ children }: { children: React.ReactNode }) {
   return (
-    <code className="rounded bg-canvas/70 px-1.5 py-0.5 font-mono text-[12px] text-ink ring-1 ring-edge-soft">
+    <code className="rounded-md bg-elevated px-1.5 py-0.5 font-mono text-[15.5px] text-ink">
       {children}
     </code>
   );
@@ -240,7 +240,7 @@ export function DocsCode({ children }: { children: React.ReactNode }) {
 
 function DocsKbd({ children }: { children: React.ReactNode }) {
   return (
-    <kbd className="rounded-md border border-edge-soft bg-elevated px-1.5 py-0.5 font-mono text-[11.5px] font-medium text-ink shadow-[0_1px_0_var(--color-edge)]">
+    <kbd className="rounded-md bg-raised px-2 py-0.5 font-mono text-[15.5px] font-medium text-ink">
       {children}
     </kbd>
   );
@@ -248,7 +248,7 @@ function DocsKbd({ children }: { children: React.ReactNode }) {
 
 function DocsPre({ children }: { children: React.ReactNode }) {
   return (
-    <pre className="mt-2 overflow-x-auto rounded-xl border border-edge-soft bg-canvas/70 p-3 font-mono text-[12px] leading-relaxed text-ink">
+    <pre className="mt-2 overflow-x-auto rounded-md bg-elevated p-4 font-mono text-[15.5px] leading-[22px] text-ink">
       {children}
     </pre>
   );
@@ -261,21 +261,21 @@ function DocsTable({
 }) {
   const t = useT();
   return (
-    <div className="overflow-hidden rounded-xl border border-edge-soft">
-      <table className="w-full text-start text-[12.5px] text-ink-muted">
-        <thead className="bg-canvas/60 text-[10.5px] font-semibold uppercase tracking-[0.14em] text-ink-subtle">
+    <div className="overflow-x-auto">
+      <table className="w-full min-w-[560px] border-separate border-spacing-y-1.5 text-start text-[15.5px] leading-[22px] text-ink-muted">
+        <thead className="text-[13px] font-bold uppercase leading-[17px] tracking-[0.72px] text-ink-subtle">
           <tr>
-            <th className="px-3 py-2.5">{t("Symptom")}</th>
-            <th className="px-3 py-2.5">{t("Cause")}</th>
-            <th className="px-3 py-2.5">{t("Fix")}</th>
+            <th className="px-4 pb-1 text-start font-semibold">{t("Symptom")}</th>
+            <th className="px-4 pb-1 text-start font-semibold">{t("Cause")}</th>
+            <th className="px-4 pb-1 text-start font-semibold">{t("Fix")}</th>
           </tr>
         </thead>
         <tbody>
           {rows.map((r, i) => (
-            <tr key={i} className="border-t border-edge-soft align-top">
-              <td className="px-3 py-2.5 text-ink">{r.symptom}</td>
-              <td className="px-3 py-2.5">{r.cause}</td>
-              <td className="px-3 py-2.5">{r.fix}</td>
+            <tr key={i} className="align-top">
+              <td className="rounded-s-md bg-elevated px-4 py-3 font-medium text-ink">{r.symptom}</td>
+              <td className="bg-elevated px-4 py-3">{r.cause}</td>
+              <td className="rounded-e-md bg-elevated px-4 py-3">{r.fix}</td>
             </tr>
           ))}
         </tbody>

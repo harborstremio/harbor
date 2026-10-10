@@ -1,17 +1,16 @@
-import { useEffect, useLayoutEffect, useRef, useState, type ReactNode } from "react";
-import { LogIn, LogOut, Pencil, Search, Settings as SettingsLucide, Users } from "lucide-react";
-import { createPortal } from "react-dom";
+import { useEffect, useState, type ReactNode } from "react";
+import { usePreviewNavCustomization } from "@/lib/theme-preview";
+import { Monitor } from "lucide-react";
+import { useContextMenu } from "@/lib/context-menu";
+import { NavHiddenTray, NavEditableItem, NavEditClose, useNavDrag } from "@/chrome/nav-edit";
+import { useNavEditMode } from "@/chrome/nav-edit-mode";
+import { Search } from "@/components/icons/search-icon";
 import { HarborMark } from "@/components/icons/harbor-mark";
-import { CatAvatar } from "@/components/icons/cat-avatar";
-import { ThreeLiquidGlassSurface } from "@/components/ThreeLiquidGlassSurface";
-import { AuthModal } from "@/components/auth-modal";
+import { NotificationCenter } from "@/components/notification-center/notification-center";
 import { ParentalPinModal } from "@/components/parental-pin-modal";
-import { TvModalClose } from "@/components/tv-modal-close";
 import { TogetherButton } from "@/chrome/topbar";
-import { useAuth } from "@/lib/auth";
+import { AccountMenu } from "@/chrome/account-menu/account-menu";
 import { useT } from "@/lib/i18n";
-import { useTvFocusScope } from "@/lib/keyboard-navigation";
-import { useProfiles } from "@/lib/profiles";
 import { useSearch } from "@/lib/search-context";
 import {
   effectiveBinding,
@@ -25,8 +24,8 @@ import { useParental } from "@/lib/parental";
 import { useView, type View } from "@/lib/view";
 import { close, minimize, toggleMaximize, useMaximized } from "@/lib/window";
 import { OverflowNav, type NavEntry } from "@/chrome/nav-overflow";
-import { HoverNavIcon } from "@/chrome/hover-nav-icon";
-import { NAV_ITEMS, applyNavCustomization, type NavItem } from "@/chrome/nav-items";
+import { useAvailableNavItems, applyNavCustomization, type NavItem } from "@/chrome/nav-items";
+import { useBigPictureEntry } from "@/chrome/use-big-picture-entry";
 
 const IS_TAURI = typeof window !== "undefined" && "__TAURI_INTERNALS__" in window;
 
@@ -38,12 +37,22 @@ export function RoyalTopbar() {
   const t = useT();
   const [pinFor, setPinFor] = useState<View | null>(null);
   const maxed = useMaximized();
+  const bigPicture = useBigPictureEntry();
+  const editing = useNavEditMode();
+  const { open: openContextMenu } = useContextMenu();
+  const openEmptyMenu = (e: React.MouseEvent) => {
+    if ((e.target as HTMLElement).closest("button")) return;
+    openContextMenu(e, { kind: "nav" });
+  };
 
   const themePreset =
     settings.theme.preset !== "custom" ? getThemeById(settings.theme.preset) : null;
   const customMark = themePreset?.logo?.mark ?? null;
 
-  const items = applyNavCustomization(NAV_ITEMS, settings.navCustomization);
+  const items = applyNavCustomization(
+    useAvailableNavItems(),
+    usePreviewNavCustomization(settings.navCustomization),
+  );
 
   const isVisible = (item: NavItem) => {
     if (item.view === "vod" && !settings.showPlaylistsTab) return false;
@@ -68,64 +77,32 @@ export function RoyalTopbar() {
       label,
       active,
       onSelect: () => navigate(item),
-      node: (
-        <button
-          type="button"
-          data-harbor-nav={item.view}
-          onClick={() => navigate(item)}
-          aria-label={label}
-          title={label}
-          className={`relative flex h-9 items-center gap-2 whitespace-nowrap rounded-md px-2.5 text-[13.5px] font-medium leading-none transition-colors duration-150 ${
-            active ? "text-accent" : "text-ink-muted hover:text-ink"
-          }`}
-        >
-          {active && (
-            <span
-              aria-hidden
-              className="absolute inset-0 -z-10 rounded-md bg-accent-soft ring-1 ring-[color-mix(in_srgb,var(--color-accent)_22%,transparent)]"
-            />
-          )}
-          <span className="grid h-[18px] w-[18px] place-items-center [&_svg]:h-[18px] [&_svg]:w-[18px]">
-            <HoverNavIcon render={item.render} />
-          </span>
-          <span className="hidden xl:inline">{label}</span>
-        </button>
-      ),
+      node: <RoyalNavButton item={item} active={active} label={label} navigate={navigate} />,
     };
   });
 
   return (
     <>
       <header
+        data-tv-focus-scope={editing || undefined}
+        data-tv-top-chrome
         aria-hidden={chromeHidden}
-        className={`fixed inset-x-0 top-0 z-[60] flex h-20 items-center px-4 transition-[opacity,transform] duration-300 ease-[cubic-bezier(0.16,1,0.3,1)] ${
+        className={`fixed inset-x-0 top-(--harbor-top-inset) z-[60] flex h-20 items-center px-4 transition-[opacity,transform] duration-300 ease-[cubic-bezier(0.16,1,0.3,1)] ${
           chromeHidden
             ? "pointer-events-none -translate-y-1.5 opacity-0"
             : "translate-y-0 opacity-100"
         }`}
       >
-        <ThreeLiquidGlassSurface
+        <div
           data-tauri-drag-region
-          data-tv-top-chrome
-          radius="10px"
-          intensity={0.1}
-          shaderRadius={0.58}
-          refractionStrength={1.42}
-          lensStrength={1.05}
-          interactive={false}
-          alwaysActive
-          className="harbor-royal-bar pointer-events-auto h-14 w-full rounded-[10px] border border-white/[0.14]"
-          contentClassName="grid h-full w-full min-w-0 grid-cols-[1fr_auto] items-center gap-3 overflow-visible ps-3.5 pe-2"
-          style={{
-            background: "rgba(255,255,255,0.001)",
-            overflow: "visible",
-            boxShadow:
-              "inset 0 1px 0 rgba(255,255,255,0.15), inset 0 -1px 0 rgba(110,185,255,0.05)",
-          }}
+          onContextMenu={openEmptyMenu}
+          className="harbor-royal-bar pointer-events-auto grid h-14 w-full grid-cols-[1fr_auto] items-center gap-3 rounded-md border border-[color-mix(in_srgb,var(--color-accent)_22%,var(--color-edge))] bg-canvas/85 ps-3.5 pe-2 shadow-[inset_0_1px_0_color-mix(in_srgb,var(--color-accent)_14%,transparent),0_22px_60px_-26px_rgba(0,0,0,0.85)] backdrop-blur-xl"
         >
           <div className="flex min-w-0 items-center gap-2.5">
             <button
               type="button"
+              tabIndex={-1}
+              data-tv-skip="true"
               onClick={() => setView("home")}
               className="flex shrink-0 items-center gap-2.5 text-ink"
               aria-label={t("chrome.harborHome")}
@@ -139,7 +116,7 @@ export function RoyalTopbar() {
                 className="hidden text-[18px] font-medium uppercase leading-none tracking-[0.14em] text-ink lg:inline"
                 style={{ fontFamily: "var(--font-display)" }}
               >
-                Harbor
+                Media Vision
               </span>
             </button>
 
@@ -155,12 +132,28 @@ export function RoyalTopbar() {
 
           <div className="flex shrink-0 items-center gap-1.5">
             <SearchPill onOpen={() => setSearchOpen(true)} />
+            <NotificationCenter />
             {view !== "live" && <TogetherButton variant="ghost" />}
-            <RoyalProfileMenu
+            {bigPicture.offer && (
+              <button
+                type="button"
+                onClick={bigPicture.open}
+                aria-label={bigPicture.label}
+                title={bigPicture.label}
+                className="flex h-9 w-9 items-center justify-center rounded-full text-ink-muted transition-colors duration-150 hover:bg-elevated/60 hover:text-ink"
+              >
+                <Monitor size={17} strokeWidth={2} />
+              </button>
+            )}
+            <AccountMenu
+              trigger="pill"
+              placement="down"
+              align="end"
+              showSettings
               onOpenSettings={() => setView("settings")}
               settingsActive={view === "settings"}
             />
-            {IS_TAURI && !settings.useNativeTitleBar && (
+            {IS_TAURI && !settings.useNativeTitleBar && !settings.hybridTitleBar && (
               <div className="ms-0.5 flex items-center gap-1">
                 <WinBtn onClick={minimize} label={t("chrome.minimize")}>
                   <path
@@ -215,8 +208,16 @@ export function RoyalTopbar() {
               </div>
             )}
           </div>
-        </ThreeLiquidGlassSurface>
+        </div>
+        {editing && <NavEditClose />}
       </header>
+      {editing && (
+        <div className="fixed inset-x-0 top-[calc(var(--harbor-top-inset)+5rem)] z-[59] flex justify-center px-4">
+          <div className="w-full max-w-2xl rounded-2xl border border-edge-soft bg-canvas/90 p-2 shadow-2xl backdrop-blur-xl">
+            <NavHiddenTray orientation="horizontal" />
+          </div>
+        </div>
+      )}
       {pinFor !== null && (
         <ParentalPinModal
           mode={{
@@ -232,6 +233,60 @@ export function RoyalTopbar() {
         />
       )}
     </>
+  );
+}
+
+function RoyalNavButton({
+  item,
+  active,
+  label,
+  navigate,
+}: {
+  item: NavItem;
+  active: boolean;
+  label: string;
+  navigate: (item: NavItem) => void;
+}) {
+  const { open: openContextMenu } = useContextMenu();
+  const editing = useNavEditMode();
+  const drag = useNavDrag(item.id, "horizontal");
+  return (
+    <NavEditableItem itemId={item.id}>
+      <button
+        type="button"
+        onClick={() => navigate(item)}
+        onContextMenu={(e) =>
+          openContextMenu(e, {
+            kind: "nav",
+            itemId: item.id,
+            view: item.view,
+            label,
+            onOpen: () => navigate(item),
+          })
+        }
+        data-tauri-drag-region={editing ? "false" : undefined}
+        onPointerDown={drag.onPointerDown}
+        onKeyDown={drag.onKeyDown}
+        data-nav-drop-id={item.id}
+        aria-label={label}
+        title={label}
+        data-harbor-nav={item.id}
+        className={`relative flex h-9 items-center gap-2 whitespace-nowrap rounded-md px-2.5 text-[13.5px] font-medium leading-none transition-colors duration-150 ${
+          drag.over ? "ring-2 ring-accent" : ""
+        } ${active ? "text-accent" : "text-ink-muted hover:text-ink"}`}
+      >
+        {active && (
+          <span
+            aria-hidden
+            className="absolute inset-0 -z-10 rounded-md bg-accent-soft ring-1 ring-[color-mix(in_srgb,var(--color-accent)_22%,transparent)]"
+          />
+        )}
+        <span className="grid h-[18px] w-[18px] place-items-center [&>*]:!h-[18px] [&>*]:!w-[18px] [&>*]:!p-0 [&_svg]:h-[18px] [&_svg]:w-[18px]">
+          {item.render(active)}
+        </span>
+        <span className="hidden xl:inline">{label}</span>
+      </button>
+    </NavEditableItem>
   );
 }
 
@@ -305,377 +360,6 @@ function WinBtn({
       <svg width="13" height="13" viewBox="0 0 13 13" fill="none">
         {children}
       </svg>
-    </button>
-  );
-}
-
-function RoyalProfileMenu({
-  onOpenSettings,
-  settingsActive,
-}: {
-  onOpenSettings: () => void;
-  settingsActive: boolean;
-}) {
-  const { user, signOut } = useAuth();
-  const { settings } = useSettings();
-  const { profiles, activeProfile, openPicker, selectProfile } = useProfiles();
-  const t = useT();
-  const [open, setOpen] = useState(false);
-  const [authOpen, setAuthOpen] = useState(false);
-  const wrapRef = useRef<HTMLDivElement>(null);
-  const popoverPortalRef = useRef<HTMLDivElement>(null);
-
-  const [popoverPosition, setPopoverPosition] = useState({
-    top: 0,
-    left: 0,
-    visibility: "hidden" as "hidden" | "visible",
-  });
-
-  useTvFocusScope(open, popoverPortalRef);
-
-  useEffect(() => {
-    if (!open) return;
-
-    const onDown = (event: MouseEvent) => {
-      const target = event.target as Node;
-      const insideButton = wrapRef.current?.contains(target) ?? false;
-      const insidePopover = popoverPortalRef.current?.contains(target) ?? false;
-
-      if (!insideButton && !insidePopover) {
-        setOpen(false);
-      }
-    };
-
-    const onKey = (event: KeyboardEvent) => {
-      if (event.key === "Escape") {
-        setOpen(false);
-      }
-    };
-
-    document.addEventListener("mousedown", onDown);
-    document.addEventListener("keydown", onKey);
-
-    return () => {
-      document.removeEventListener("mousedown", onDown);
-      document.removeEventListener("keydown", onKey);
-    };
-  }, [open]);
-
-  useLayoutEffect(() => {
-    if (!open) return;
-
-    const anchor = wrapRef.current;
-    const popover = popoverPortalRef.current;
-
-    if (!anchor || !popover) return;
-
-    let frameId: number | null = null;
-
-    const updatePosition = () => {
-      if (frameId != null) {
-        cancelAnimationFrame(frameId);
-      }
-
-      frameId = requestAnimationFrame(() => {
-        const anchorRect = anchor.getBoundingClientRect();
-        const popoverRect = popover.getBoundingClientRect();
-        const viewportPadding = 12;
-        const gap = -1;
-
-        let top = anchorRect.bottom + gap;
-        let left = anchorRect.right - popoverRect.width;
-
-        top = Math.max(
-          viewportPadding,
-          Math.min(top, window.innerHeight - popoverRect.height - viewportPadding),
-        );
-
-        left = Math.max(
-          viewportPadding,
-          Math.min(left, window.innerWidth - popoverRect.width - viewportPadding),
-        );
-
-        setPopoverPosition({
-          top,
-          left,
-          visibility: "visible",
-        });
-      });
-    };
-
-    updatePosition();
-
-    const resizeObserver = new ResizeObserver(updatePosition);
-    resizeObserver.observe(anchor);
-    resizeObserver.observe(popover);
-
-    window.addEventListener("resize", updatePosition);
-    window.addEventListener("scroll", updatePosition, true);
-
-    return () => {
-      if (frameId != null) {
-        cancelAnimationFrame(frameId);
-      }
-
-      resizeObserver.disconnect();
-      window.removeEventListener("resize", updatePosition);
-      window.removeEventListener("scroll", updatePosition, true);
-    };
-  }, [open]);
-
-  const name =
-    activeProfile?.name ?? user?.fullname ?? user?.email?.split("@")[0] ?? t("profile.fallback");
-  const color = activeProfile?.color ?? "#f08032";
-  const avatarSrc = activeProfile?.avatar ?? settings.harborAvatar ?? user?.avatar ?? null;
-  const otherProfiles = profiles.filter((p) => p.id !== activeProfile?.id);
-
-  const sizing = open ? "h-14 gap-2 ps-1 pe-3" : "h-9 gap-2 ps-1 pe-3";
-  const glassRadius = open ? "8px 8px 0 0" : "9999px";
-
-  const glassChrome = open
-    ? `
-        z-[51]
-        harbor-together-surface
-        border border-white/[0.18] border-b-0
-        text-white
-        [text-shadow:0_1px_2px_rgba(0,0,0,0.72)]
-      `
-    : `
-        border border-white/[0.12]
-        text-white/[0.88]
-        [text-shadow:0_1px_2px_rgba(0,0,0,0.68)]
-        hover:border-white/[0.22]
-        hover:text-white
-      `;
-
-  const dismiss = (run: () => void) => {
-    setOpen(false);
-    run();
-  };
-
-  return (
-    <div
-      ref={wrapRef}
-      className={`relative ${open ? "harbor-wt-wrap flex flex-col self-stretch justify-end" : ""}`}
-    >
-      <ThreeLiquidGlassSurface
-        radius={glassRadius}
-        shaderRadius={1}
-        intensity={0.1}
-        style={{
-          background: open ? "rgba(8,12,18,0.15)" : "rgba(255,255,255,0.028)",
-          boxShadow: open
-            ? "inset 0 1px 0 rgba(255,255,255,0.17)"
-            : "inset 0 1px 0 rgba(255,255,255,0.10)",
-        }}
-        className={`
-          relative inline-flex
-          transition-colors duration-150
-          ${glassChrome}
-          ${open ? "harbor-wt-tab" : ""}
-        `}
-        contentClassName="h-full w-full"
-      >
-        <button
-          type="button"
-          data-tauri-drag-region="false"
-          aria-label={name}
-          onClick={() => setOpen((current) => !current)}
-          data-open={String(open)}
-          aria-haspopup="menu"
-          aria-expanded={open}
-          className={`
-            harbor-together-btn
-            harbor-profile-btn
-            relative flex items-center
-            rounded-[inherit]
-            border-0 bg-transparent
-            outline-none
-            transition-colors duration-150
-            ${sizing}
-          `}
-        >
-          <span
-            className="
-              flex h-7 w-7 shrink-0
-              items-center justify-center
-              overflow-hidden rounded-full
-              ring-1 ring-white/25
-            "
-            style={{ background: color }}
-          >
-            {avatarSrc ? (
-              <img
-                src={avatarSrc}
-                alt=""
-                className="h-full w-full object-cover"
-                draggable={false}
-              />
-            ) : (
-              <CatAvatar className="h-full w-full" />
-            )}
-          </span>
-
-          <span className="hidden max-w-[8rem] truncate text-white/[0.96] [text-shadow:0_1px_2px_rgba(0,0,0,0.72)] md:inline">
-            {name}
-          </span>
-        </button>
-      </ThreeLiquidGlassSurface>
-
-      {open &&
-        typeof document !== "undefined" &&
-        createPortal(
-          <div
-            ref={popoverPortalRef}
-            data-tv-focus-scope
-            data-tauri-drag-region="false"
-            data-profile-dropdown-portal
-            className="
-              harbor-wt-modal
-              fixed z-[300]
-              isolate
-              w-60
-              pointer-events-auto
-            "
-            style={{
-              top: popoverPosition.top,
-              left: popoverPosition.left,
-              visibility: popoverPosition.visibility,
-            }}
-          >
-            <ThreeLiquidGlassSurface
-              role="menu"
-              aria-label={name}
-              radius="16px"
-              shaderRadius={0.3}
-              intensity={0.1}
-              refractionStrength={1.42}
-              lensStrength={1.05}
-              interactive={false}
-              alwaysActive
-              style={{
-                background: "rgba(7,11,17,0.18)",
-                overflow: "hidden",
-                borderStartEndRadius: 0,
-                boxShadow:
-                  "inset 0 1px 0 rgba(255,255,255,0.18), inset 0 -1px 0 rgba(110,185,255,0.07), 0 24px 60px -20px rgba(0,0,0,0.76)",
-              }}
-              className="
-                harbor-together-surface
-                harbor-profile-dropdown
-                w-full overflow-hidden
-                border border-white/15
-                border-t-0
-                shadow-[0_20px_50px_-15px_rgba(0,0,0,0.8)]
-                animate-popover-in
-              "
-              contentClassName="
-                flex w-full flex-col
-                overflow-hidden
-                text-white/[0.94]
-                [text-shadow:0_1px_2px_rgba(0,0,0,0.66)]
-              "
-            >
-              <TvModalClose onClose={() => setOpen(false)} label={t("common.close")} />
-              <div className="border-b border-white/[0.14] px-4 py-3">
-                <div
-                  className="text-[14px] leading-tight text-ink"
-                  style={{ fontFamily: "var(--font-display)" }}
-                >
-                  {name}
-                </div>
-                {user?.email && (
-                  <div className="truncate pt-0.5 text-[11.5px] text-ink-subtle">{user.email}</div>
-                )}
-              </div>
-
-              {otherProfiles.length > 0 && (
-                <div className="flex flex-col gap-0.5 border-b border-white/[0.14] p-1.5">
-                  <span className="px-2.5 pb-1 pt-1 text-[10px] font-bold uppercase tracking-[0.16em] text-ink-subtle">
-                    {t("profile.switch")}
-                  </span>
-                  {otherProfiles.map((p) => (
-                    <button
-                      key={p.id}
-                      type="button"
-                      data-tauri-drag-region="false"
-                      onClick={() =>
-                        dismiss(() =>
-                          p.passwordHash
-                            ? openPicker({ kind: "unlock", profileId: p.id })
-                            : selectProfile(p.id),
-                        )
-                      }
-                      className="mx-1 flex items-center gap-2 rounded-xl border border-transparent px-2 py-1.5 text-start transition-colors hover:border-white/[0.14] hover:bg-white/[0.10]"
-                    >
-                      <span
-                        className="flex h-6 w-6 shrink-0 items-center justify-center rounded-full text-[10px] font-bold text-canvas"
-                        style={{ background: p.color }}
-                      >
-                        {p.name.slice(0, 1).toUpperCase()}
-                      </span>
-                      <span className="truncate text-[12.5px] text-ink">{p.name}</span>
-                    </button>
-                  ))}
-                </div>
-              )}
-
-              <div className="flex flex-col py-1">
-                <MenuItem onClick={() => dismiss(() => openPicker({ kind: "list" }))}>
-                  <Users size={13} strokeWidth={2.2} /> {t("profile.whoWatching")}
-                </MenuItem>
-                {activeProfile && (
-                  <MenuItem
-                    onClick={() =>
-                      dismiss(() => openPicker({ kind: "edit", profileId: activeProfile.id }))
-                    }
-                  >
-                    <Pencil size={13} strokeWidth={2.2} /> {t("Edit profile")}
-                  </MenuItem>
-                )}
-                <MenuItem active={settingsActive} onClick={() => dismiss(onOpenSettings)}>
-                  <SettingsLucide size={13} strokeWidth={2.2} /> {t("nav.settings")}
-                </MenuItem>
-                {user ? (
-                  <MenuItem bordered onClick={() => dismiss(signOut)}>
-                    <LogOut size={13} strokeWidth={2.2} /> {t("Sign out")}
-                  </MenuItem>
-                ) : (
-                  <MenuItem bordered onClick={() => dismiss(() => setAuthOpen(true))}>
-                    <LogIn size={13} strokeWidth={2.2} /> {t("profile.signIn")}
-                  </MenuItem>
-                )}
-              </div>
-            </ThreeLiquidGlassSurface>
-          </div>,
-          document.body,
-        )}
-
-      {authOpen && <AuthModal onClose={() => setAuthOpen(false)} />}
-    </div>
-  );
-}
-
-function MenuItem({
-  onClick,
-  active,
-  bordered,
-  children,
-}: {
-  onClick: () => void;
-  active?: boolean;
-  bordered?: boolean;
-  children: ReactNode;
-}) {
-  return (
-    <button
-      type="button"
-      onClick={onClick}
-      className={`flex items-center gap-2.5 px-4 py-2.5 text-start text-[13px] transition-colors hover:bg-elevated hover:text-ink ${
-        bordered ? "mt-1 border-t border-edge-soft pt-3" : ""
-      } ${active ? "text-accent" : "text-ink-muted"}`}
-    >
-      {children}
     </button>
   );
 }

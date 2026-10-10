@@ -6,6 +6,7 @@ export function DockButton({
   scale,
   baseSize,
   onClick,
+  hideIndicator,
   children,
 }: {
   label: string;
@@ -13,6 +14,7 @@ export function DockButton({
   scale: number;
   baseSize: number;
   onClick: () => void;
+  hideIndicator?: boolean;
   children: ReactNode;
 }) {
   const [punch, setPunch] = useState(false);
@@ -41,7 +43,7 @@ export function DockButton({
         style={{
           width: baseSize,
           height: baseSize,
-          background: active ? "var(--color-accent)" : "var(--color-surface)",
+          background: active ? "var(--color-accent)" : "var(--color-elevated)",
           color: active ? "#fff" : "var(--color-ink-muted)",
           borderColor: active ? "transparent" : "var(--color-edge-soft)",
           boxShadow: active
@@ -56,16 +58,18 @@ export function DockButton({
       >
         {children}
       </button>
-      <span
-        aria-hidden
-        className="absolute bottom-[-10px] h-1.5 w-1.5 rounded-full"
-        style={{
-          background: "var(--color-accent)",
-          opacity: active ? 1 : 0,
-          transform: `scale(${active ? 1 : 0.4})`,
-          transition: "opacity 160ms ease, transform 220ms cubic-bezier(0.34, 1.56, 0.64, 1)",
-        }}
-      />
+      {hideIndicator ? null : (
+        <span
+          aria-hidden
+          className="absolute bottom-[-10px] h-1.5 w-1.5 rounded-full"
+          style={{
+            background: "var(--color-accent)",
+            opacity: active ? 1 : 0,
+            transform: `scale(${active ? 1 : 0.4})`,
+            transition: "opacity 160ms ease, transform 220ms cubic-bezier(0.34, 1.56, 0.64, 1)",
+          }}
+        />
+      )}
     </div>
   );
 }

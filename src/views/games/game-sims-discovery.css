@@ -1,0 +1,69 @@
+/* One reading surface: game identity, navigation and substantial project rows. */
+.mods-workspace[data-mod-game^="sims"] .mods-game-identity>.mods-game-logo{width:180px;height:160px;padding:0;background:none;border-radius:0}
+.mods-workspace[data-mod-game="sims4"] .mods-game-identity>.mods-game-logo{width:220px;height:112px;padding:0;background:none}
+.mods-workspace[data-mod-game^="sims"] .mods-game-identity h2{font-size:38px}
+.mods-workspace[data-mod-game^="sims"] .mods-game-identity p{font-size:17px}
+.mods-workspace .games-sims>.mods-tabs{border:0;padding:0;margin:0 0 30px;gap:6px 14px;align-items:center;container-type:inline-size}
+.mods-workspace .games-sims>.mods-tabs>button{min-height:52px;font-size:16px;padding:12px 14px;gap:10px}
+.sims-browse-controls{display:contents}
+.sims-catalog-controls{display:flex;align-items:center;flex-wrap:wrap;gap:12px;min-width:0;margin-inline-start:auto}
+.sims-catalog-controls>fieldset{border:0;padding:0;margin:0;min-width:0}
+.sims-catalog-controls [aria-haspopup=listbox],.sims-source-picker [aria-haspopup=listbox]{min-height:52px;font-size:15px;gap:10px;background:none}
+.sims-catalog-controls [aria-haspopup=listbox]:hover,.sims-source-picker [aria-haspopup=listbox]:hover{background:var(--color-elevated)}
+.mods-workspace .games-sims>.mods-tabs>.mods-source-label{font-size:14px;margin-inline-start:0}
+.games-sims-mts-browser.is-discovery{container-type:inline-size}
+.games-sims-mts-browser.is-discovery .games-sims-mts-results-head{align-items:center;margin:0 0 26px;min-height:88px}
+.games-sims-mts-browser.is-discovery .games-sims-mts-results-head h3{font-size:36px;line-height:1.2;letter-spacing:-.035em;font-weight:650;margin:0 0 10px}
+.games-sims-mts-browser.is-discovery .games-sims-mts-results-head p{font-size:16px;margin:0;color:var(--color-ink-muted)}
+.games-sims-mts-browser.is-discovery .games-sims-mts-results-head .games-icon-button{width:48px;height:48px}
+.games-sims-mts-browser.is-discovery .games-sims-duplicates-progress.is-initial-load{min-height:88px;margin:0 0 26px;font-size:16px}
+.games-sims-mts-browser.is-discovery .games-sims-duplicates-progress.is-initial-load p{margin:0}
+.games-sims-mts-browser.is-discovery .games-sims-duplicates-progress .games-button{min-height:52px;font-size:16px}
+.games-sims-mts-browser.is-discovery .games-sims-mts-grid{display:grid;grid-template-columns:minmax(0,1fr);gap:24px;margin:0 0 30px}
+.games-sims-mts-browser.is-discovery .games-sims-mts-card.sims-discovery-project{display:grid;grid-template-columns:minmax(240px,.9fr) minmax(0,1.8fr);gap:28px;align-items:stretch;padding:22px;border-radius:var(--radius-md);background:var(--color-surface);transition:background-color 180ms ease-out;text-align:start;cursor:pointer}
+.games-sims-mts-browser.is-discovery .sims-discovery-project:not(:disabled):hover{background:var(--color-elevated)}
+.sims-discovery-project-art{position:relative;display:block;min-width:0;align-self:center}
+.games-sims-mts-browser.is-discovery .sims-discovery-project-art>.games-sims-mts-art{width:100%;height:auto;aspect-ratio:16/11;background:none;border-radius:var(--radius-sm);margin:0}
+.games-sims-mts-browser.is-discovery .sims-discovery-project>.sims-discovery-project-copy{display:flex;flex-direction:column;align-items:stretch;min-width:0;gap:9px;padding-block:4px;-webkit-line-clamp:unset;overflow:visible}
+.sims-discovery-card-heading{display:flex;align-items:center;justify-content:space-between;gap:12px;margin-bottom:6px;min-height:24px}
+.sims-discovery-card-heading>.mod-provider-logo{flex:none;margin-inline-start:auto}
+.sims-curseforge .games-sims-mts-results-head a{display:inline-flex;align-items:center;gap:7px;font-size:14px;color:var(--color-ink-muted)}
+.games-sims-mts-browser.is-discovery .sims-discovery-project-title{font-size:26px;line-height:1.2;letter-spacing:-.025em;display:-webkit-box;-webkit-line-clamp:2;-webkit-box-orient:vertical;overflow:hidden;font-weight:650;color:var(--color-ink)}
+.sims-discovery-category{display:flex;align-items:center;gap:9px;min-width:0;color:var(--color-ink-muted);font-size:14px;line-height:1.4}
+.sims-discovery-category>span{overflow:hidden;text-overflow:ellipsis;white-space:nowrap}
+.sims-discovery-icon{flex:none;transition:transform 180ms ease-out}
+.sims-discovery-creator{font-size:16px;line-height:1.5;color:var(--color-ink-muted);overflow-wrap:anywhere}
+.sims-discovery-description{font-size:16px;line-height:1.5;color:var(--color-ink-muted);display:-webkit-box;-webkit-line-clamp:2;-webkit-box-orient:vertical;overflow:hidden;overflow-wrap:anywhere;margin-top:2px}
+.sims-discovery-updated{display:flex;align-items:center;gap:8px;flex-wrap:wrap;font-size:14px;color:var(--color-ink-muted)}
+.sims-discovery-project-bottom{display:flex;align-items:center;gap:16px;flex-wrap:wrap;margin-top:auto;padding-top:18px}
+.sims-discovery-downloads{display:flex;align-items:center;gap:9px;flex:none;color:var(--color-ink)}
+.sims-discovery-downloads>span{display:flex;flex-direction:column;gap:2px}
+.games-sims-mts-browser.is-discovery .sims-discovery-downloads strong{font-size:24px;line-height:1.15;font-weight:650;font-variant-numeric:tabular-nums}
+.sims-discovery-downloads>span>span{font-size:13px;line-height:1.4;color:var(--color-ink-muted)}
+.sims-discovery-project-bottom>.mod-project-stats{margin:0;font-size:16px;gap:16px}
+.games-sims-mts-browser.is-discovery .sims-discovery-project-bottom .mod-project-stats strong{font-size:16px}
+.sims-discovery-project-bottom>.mod-project-stats svg{width:20px;height:20px}
+.sims-discovery-cta{display:inline-flex;align-items:center;justify-content:center;gap:16px;min-height:54px;margin-inline-start:auto;padding:12px 18px;border-radius:var(--radius-sm);background:var(--color-ink);color:var(--color-canvas);font-size:16px;line-height:1.4;font-weight:600;transition:transform 180ms ease-out}
+.sims-discovery-project:hover .sims-discovery-cta>.sims-discovery-icon{transform:translate(2px,-2px)}
+.sims-discovery-project:active:not(:disabled) .sims-discovery-cta{transform:scale(.98)}
+.games-sims-mts-browser.is-discovery .games-sims-mts-pagination{gap:20px;margin-top:32px}
+.games-sims-mts-browser.is-discovery .games-sims-mts-pagination .games-button{min-height:52px;gap:12px;padding-inline:22px;font-size:16px}
+.games-sims-mts-browser.is-discovery .games-sims-mts-pagination>span{font-size:16px}
+.games-sims-mts-browser.is-discovery .games-sims-mts-art>img{transition:opacity 220ms ease-out}
+.games-sims-mts-browser.is-discovery .games-sims-mts-art>img.is-loaded{animation:sims-art-reveal 220ms ease-out}
+.games-sims-mts-browser.is-discovery .games-sims-mts-art .sims-art-skeleton{position:absolute;inset:0;width:100%;height:100%;border-radius:inherit}
+.sims-discovery-skeleton{display:block;background:var(--color-elevated);border-radius:var(--radius-sm);animation:sims-discovery-pulse 1.4s ease-in-out infinite}
+.sims-discovery-category-line{width:35%;height:24px}
+.sims-discovery-title-line{width:85%;height:32px}
+.sims-discovery-author-line{width:30%;height:24px}
+.sims-discovery-description-lines{width:100%;height:48px;mask-image:linear-gradient(#000 0 38%,transparent 38% 60%,#000 60%)}
+.sims-discovery-count-line{width:114px;height:52px}
+.sims-discovery-button-line{width:170px;height:54px;margin-inline-start:auto}
+.games-sims-mts-browser.is-discovery .sims-discovery-loading .sims-discovery-project{cursor:default}
+@container(max-width:740px){.games-sims-mts-browser.is-discovery .games-sims-mts-card.sims-discovery-project{grid-template-columns:minmax(180px,.85fr) minmax(0,1.3fr);gap:22px;padding:20px}.games-sims-mts-browser.is-discovery .sims-discovery-project-title{font-size:24px}.sims-discovery-project-bottom>.mod-project-stats{display:none}}
+@container(max-width:560px){.games-sims-mts-browser.is-discovery .games-sims-mts-card.sims-discovery-project{grid-template-columns:minmax(0,1fr);gap:18px;padding:18px}.games-sims-mts-browser.is-discovery .sims-discovery-project-art>.games-sims-mts-art{aspect-ratio:16/10}.games-sims-mts-browser.is-discovery .games-sims-mts-results-head h3{font-size:30px}.sims-discovery-project-bottom{gap:12px}.sims-discovery-cta{font-size:15px;padding-inline:14px}.sims-discovery-project-copy{gap:10px}}
+@media(max-width:700px){.mods-workspace[data-mod-game^="sims"] .mods-game-identity>.mods-game-logo{width:132px;height:126px}.mods-workspace[data-mod-game="sims4"] .mods-game-identity>.mods-game-logo{width:146px;height:86px}.mods-workspace[data-mod-game^="sims"] .mods-game-identity h2{font-size:30px}.mods-workspace .games-sims>.mods-tabs{gap:6px;margin-bottom:24px}.sims-catalog-controls{margin-inline-start:0;width:100%;gap:0}.sims-catalog-controls>fieldset{flex:1;min-width:0}.sims-catalog-controls [aria-haspopup=listbox]{max-width:100%;font-size:14px}.sims-source-picker{margin-inline-start:auto}}
+@keyframes sims-discovery-pulse{0%,100%{opacity:.45}50%{opacity:.85}}
+@keyframes sims-art-reveal{from{opacity:0}to{opacity:1}}
+@container(max-width:560px){.games-sims-mts-browser.is-discovery .sims-discovery-project-bottom>.mod-project-stats{display:none}.sims-catalog-controls>fieldset{flex-basis:100%}.sims-catalog-controls [aria-haspopup=listbox]{width:100%}.sims-source-picker{margin-inline-start:auto}}
+@media(prefers-reduced-motion:reduce){.games-sims-mts-browser.is-discovery .sims-discovery-skeleton,.games-sims-mts-browser.is-discovery .games-sims-mts-art>img.is-loaded{animation:none}.sims-discovery-icon,.sims-discovery-cta,.sims-discovery-project,.games-sims-mts-browser.is-discovery .games-sims-mts-art>img{transition:none}.sims-discovery-project:hover .sims-discovery-cta>.sims-discovery-icon,.sims-discovery-project:active:not(:disabled) .sims-discovery-cta{transform:none}}

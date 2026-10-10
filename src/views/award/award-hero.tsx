@@ -1,4 +1,4 @@
-import { useMemo } from "react";
+import { useMemo, type CSSProperties } from "react";
 import { AwardLogo } from "@/components/icons/award-logo";
 import { Laurel } from "@/components/icons/laurel";
 import { AWARD_CATALOG } from "@/lib/awards-catalog";
@@ -6,9 +6,27 @@ import type { Meta } from "@/lib/cinemeta";
 import type { AwardType } from "@/lib/providers/wikidata";
 import { useT } from "@/lib/i18n";
 
-const SLOTS = 10;
+const SLOTS = 18;
 
-export function AwardHero({ type, tint, films }: { type: AwardType; tint: string; films: Meta[] }) {
+const MOSAIC_MASK = [
+  "linear-gradient(to right, transparent 6%, rgba(0,0,0,0.18) 30%, rgba(0,0,0,0.62) 56%, black 82%)",
+  "linear-gradient(to bottom, transparent 0%, black 20%, black 66%, transparent 100%)",
+  "radial-gradient(125% 135% at 86% 48%, black 26%, rgba(0,0,0,0.32) 76%, transparent 100%)",
+].join(", ");
+
+const TILE_OPACITY = 0.72;
+
+export function AwardHero({
+  type,
+  tint,
+  films,
+  loading,
+}: {
+  type: AwardType;
+  tint: string;
+  films: Meta[];
+  loading?: boolean;
+}) {
   const t = useT();
   const meta = AWARD_CATALOG[type];
 
@@ -31,20 +49,42 @@ export function AwardHero({ type, tint, films }: { type: AwardType; tint: string
       className="harbor-bleed-stremio relative flex h-[52vh] min-h-[460px] items-end overflow-hidden border-b border-edge-soft pb-14 pt-32"
       style={{ backgroundImage: baseGradient }}
     >
-      {tiles.length > 0 && (
+      {(tiles.length > 0 || loading) && (
         <div
           aria-hidden
-          className="pointer-events-none absolute inset-0 grid grid-cols-5 grid-rows-2 gap-2 p-2"
+          className="pointer-events-none absolute inset-0 grid grid-cols-6 grid-rows-3"
           style={{
-            WebkitMaskImage: "linear-gradient(to right, transparent 8%, black 60%)",
-            maskImage: "linear-gradient(to right, transparent 8%, black 60%)",
+            WebkitMaskImage: MOSAIC_MASK,
+            maskImage: MOSAIC_MASK,
+            WebkitMaskComposite: "source-in",
+            maskComposite: "intersect",
           }}
         >
-          {tiles.map((src, i) => (
-            <div key={i} className="overflow-hidden rounded-xl ring-1 ring-inset ring-white/[0.06]">
-              <img src={src} alt="" draggable={false} className="h-full w-full object-cover opacity-[0.82]" />
-            </div>
-          ))}
+          {tiles.length > 0
+            ? tiles.map((src, i) => (
+                <div key={i} className="overflow-hidden">
+                  <img
+                    src={src}
+                    alt=""
+                    draggable={false}
+                    className="h-full w-full scale-[1.04] object-cover"
+                    style={{ opacity: TILE_OPACITY }}
+                  />
+                </div>
+              ))
+            : Array.from({ length: SLOTS }, (_, i) => (
+                <div
+                  key={i}
+                  className="harbor-shimmer relative"
+                  style={
+                    {
+                      "--ai-delay": `${(i % 6) * 110 + Math.floor(i / 6) * 60}ms`,
+                      opacity: TILE_OPACITY,
+                      borderRadius: 0,
+                    } as CSSProperties
+                  }
+                />
+              ))}
         </div>
       )}
 

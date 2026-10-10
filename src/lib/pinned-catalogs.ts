@@ -13,6 +13,39 @@ export type PinnedCatalog = {
   params: Record<string, string>;
 };
 
+export type PinnedBuiltinTitle = {
+  key: string;
+  valueKey?: string;
+};
+
+const LIST_RAIL_TITLE_KEYS: Readonly<Record<string, string>> = {
+  watching: "Watching",
+  planning: "Plan to Watch",
+  completed: "Completed",
+  onhold: "On Hold",
+  paused: "On Hold",
+  dropped: "Dropped",
+};
+
+export function pinnedBuiltinTitle(
+  source: PinnedSource,
+  railKey: string | undefined,
+): PinnedBuiltinTitle | null {
+  if (!railKey) return null;
+  if (source === "anilist") {
+    if (railKey === "trending") return { key: "Trending on AniList" };
+    if (railKey === "top100") return { key: "Top 100 on AniList" };
+    if (railKey === "recommended") return { key: "Recommended for you" };
+    const valueKey = LIST_RAIL_TITLE_KEYS[railKey];
+    return valueKey ? { key: "Your AniList: {name}", valueKey } : null;
+  }
+  if (source === "mal") {
+    const valueKey = LIST_RAIL_TITLE_KEYS[railKey];
+    return valueKey ? { key: "Your MAL: {name}", valueKey } : null;
+  }
+  return null;
+}
+
 let cache: PinnedCatalog[] = load();
 
 function load(): PinnedCatalog[] {
@@ -26,12 +59,19 @@ function load(): PinnedCatalog[] {
       if (!el || typeof el !== "object") continue;
       const e = el as Partial<PinnedCatalog>;
       if (typeof e.id !== "string" || typeof e.name !== "string") continue;
-      if (e.source !== "catalog" && e.source !== "anilist" && e.source !== "simkl" && e.source !== "mal") continue;
+      if (
+        e.source !== "catalog" &&
+        e.source !== "anilist" &&
+        e.source !== "simkl" &&
+        e.source !== "mal"
+      )
+        continue;
       out.push({
         id: e.id,
         source: e.source,
         name: e.name,
-        params: e.params && typeof e.params === "object" ? (e.params as Record<string, string>) : {},
+        params:
+          e.params && typeof e.params === "object" ? (e.params as Record<string, string>) : {},
       });
     }
     return out.slice(0, CAP);

@@ -1,0 +1,48 @@
+.music-dock-overflow-menu {
+  display: flex;
+  flex-direction: column;
+  padding: 6px;
+  gap: 2px;
+  border-radius: 6px;
+  background: var(--color-elevated);
+  box-shadow:
+    0 24px 64px -24px rgb(0 0 0 / 0.65),
+    0 0 0 1px var(--color-edge-soft);
+  overflow: hidden;
+}
+.music-dock-overflow-menu > button {
+  display: flex;
+  align-items: center;
+  gap: 12px;
+  min-height: 40px;
+  padding: 0 12px;
+  border-radius: 8px;
+  color: var(--color-ink);
+  font-size: 13.5px;
+  text-align: start;
+}
+.music-dock-overflow-menu > button > span:first-child {
+  display: grid;
+  place-items: center;
+  width: 20px;
+  flex-shrink: 0;
+  color: var(--color-ink-muted);
+}
+.music-dock-overflow-menu > button:hover,
+.music-dock-overflow-menu > button:focus-visible {
+  background: var(--color-raised);
+  outline: none;
+}
+.music-dock-overflow-menu > button[aria-pressed="true"] > span:first-child {
+  color: var(--color-accent);
+}
+.music-dock-overflow-menu > button:disabled {
+  opacity: 0.45;
+}
+
+/* Above the overflow breakpoint the real buttons carry these, below it the menu does. */
+@container (max-width:1149px) {
+  [data-music-dock] [data-dock-wide="1"] {
+    display: none;
+  }
+}

@@ -1,0 +1,18 @@
+<svg xmlns="http://www.w3.org/2000/svg" width="64" height="64" viewBox="0 0 64 64" role="img" aria-labelledby="title-sci-fi">
+<title id="title-sci-fi">Sci-Fi anime genre icon</title>
+<style>
+.icon-stroke { fill: none; stroke: #F8F5F2; stroke-width: 4; stroke-linecap: round; stroke-linejoin: round; }
+.soft-stroke { fill: none; stroke: #FFC56E; stroke-width: 3.4; stroke-linecap: round; stroke-linejoin: round; }
+.coral { fill: #FF7A6E; }
+.gold { fill: #FFC56E; }
+.violet { fill: #9B8AFB; }
+.ink { fill: #F8F5F2; }
+.dark { fill: #28272C; }
+</style>
+
+  <path class="gold" d="M20 25c2-8 7-12 12-12s10 4 12 12H20z"/>
+  <path class="coral" d="M9 27c3-5 12-8 23-8s20 3 23 8c-3 8-12 13-23 13S12 35 9 27z"/>
+  <path class="icon-stroke" d="M15 28c5 4 29 4 34 0M23 45l-4 9M32 45v11M41 45l4 9"/>
+  <circle class="ink" cx="22" cy="30" r="2"/><circle class="ink" cx="32" cy="31" r="2"/><circle class="ink" cx="42" cy="30" r="2"/>
+
+</svg>

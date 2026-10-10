@@ -91,7 +91,13 @@ export function applyRoomEvent(e: RoomEvent, sinks: RoomEventSinks): void {
     setIncomingHostLeaving({ from: e.from, name: e.name, at: e.at });
   } else if (e.kind === "participant-left") {
     if (e.clientId !== clientId) {
-      setIncomingParticipantLeft({ clientId: e.clientId, name: e.name, at: Date.now() });
+      setIncomingParticipantLeft({
+        clientId: e.clientId,
+        name: e.name,
+        at: Date.now(),
+        avatar: e.avatar ?? null,
+        color: e.color ?? null,
+      });
     }
   } else if (e.kind === "summon") {
     setIncomingInvite(null);

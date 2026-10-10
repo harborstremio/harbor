@@ -1,51 +1,63 @@
-import { useQuery, useQueryClient } from "@tanstack/react-query";
 import { useEffect, useMemo, useState } from "react";
-import { Check, Pin, Puzzle, Search, SlidersHorizontal, X } from "lucide-react";
+import { Check, Pin, Puzzle, SlidersHorizontal, X } from "lucide-react";
+import { PencilOutlineIcon } from "@/components/icons/pencil-outline";
+import { Search } from "@/components/icons/search-icon";
 import { useAuth } from "@/lib/auth";
-import { listBrowseCatalogs, type BrowseCatalog } from "@/lib/catalog-browse";
-import { queryKeys } from "@/lib/query";
+import {
+  catalogTypeLabelKey,
+  listBrowseCatalogs,
+  subscribeBrowseCatalogs,
+  type BrowseCatalog,
+} from "@/lib/catalog-browse";
 import { useView } from "@/lib/view";
 import { useT } from "@/lib/i18n";
 import { useSettings } from "@/lib/settings";
-import { CatalogShelf, prefetchCatalogShelf } from "./catalogs/catalog-shelf";
+import { CatalogShelf } from "./catalogs/catalog-shelf";
 import { CatalogManageList } from "./catalogs/catalog-manage-list";
 import { AddonFilterSelect } from "./catalogs/addon-filter-select";
 import { useCatalogList } from "./catalogs/use-catalog-list";
-
-const TYPE_LABELS: Record<string, string> = {
-  movie: "Movies",
-  series: "Series",
-  anime: "Anime",
-  tv: "TV",
-  channel: "Channels",
-};
-
-/** First N shelves load eagerly + prefetched so posters appear without waiting for IO. */
-const EAGER_SHELF_COUNT = 8;
+import { useContentDrag } from "@/lib/window-drag";
 
 export function Catalogs({ active = true }: { active?: boolean }) {
   const t = useT();
   const { authKey } = useAuth();
   const { setView } = useView();
   const { settings, update } = useSettings();
-  const queryClient = useQueryClient();
+  const contentDrag = useContentDrag();
+  const [catalogs, setCatalogs] = useState<BrowseCatalog[]>([]);
+  const [loading, setLoading] = useState(true);
   const [query, setQuery] = useState("");
   const [typeFilter, setTypeFilter] = useState("all");
   const [addonFilter, setAddonFilter] = useState("all");
   const [customize, setCustomize] = useState(false);
+  void active;
 
-  const {
-    data: catalogs = [],
-    isPending: loading,
-    isFetching,
-  } = useQuery({
-    queryKey: queryKeys.catalog.list(authKey),
-    queryFn: () => listBrowseCatalogs(authKey),
-    enabled: active,
-    staleTime: 5 * 60_000,
-    gcTime: 30 * 60_000,
-    retry: 1,
-  });
+  useEffect(() => {
+    let cancelled = false;
+    setLoading(true);
+    void listBrowseCatalogs(authKey, { pluginRows: settings.pluginsOutsideTab }).then((list) => {
+      if (cancelled) return;
+      setCatalogs(list);
+      setLoading(false);
+    });
+    return () => {
+      cancelled = true;
+    };
+  }, [authKey, settings.pluginsOutsideTab]);
+
+  // A plugin's own catalogs arrive after its runtime is up, which is later than the addons.
+  useEffect(() => {
+    let cancelled = false;
+    const stop = subscribeBrowseCatalogs(() => {
+      void listBrowseCatalogs(authKey, { pluginRows: settings.pluginsOutsideTab }).then((list) => {
+        if (!cancelled) setCatalogs(list);
+      });
+    });
+    return () => {
+      cancelled = true;
+      stop();
+    };
+  }, [authKey, settings.pluginsOutsideTab]);
 
   const pinned = settings.catalogsPinned ?? [];
   const hidden = settings.catalogsHidden ?? [];
@@ -55,21 +67,6 @@ export function Catalogs({ active = true }: { active?: boolean }) {
     pinned,
     hidden,
   );
-
-  // Prefetch poster pages for the shelves the user will see first.
-  useEffect(() => {
-    if (!active || catalogs.length === 0) return;
-    const visible: BrowseCatalog[] = [...pinnedCats, ...groups.flatMap((g) => g.cats)];
-    const seen = new Set<string>();
-    let n = 0;
-    for (const c of visible) {
-      if (seen.has(c.key)) continue;
-      seen.add(c.key);
-      prefetchCatalogShelf(queryClient, c);
-      n += 1;
-      if (n >= EAGER_SHELF_COUNT) break;
-    }
-  }, [active, catalogs, pinnedCats, groups, queryClient]);
 
   const togglePin = (key: string) =>
     update({
@@ -93,19 +90,9 @@ export function Catalogs({ active = true }: { active?: boolean }) {
     [customize, catalogs, hiddenSet],
   );
 
-  const eagerKeys = useMemo(() => {
-    const keys = new Set<string>();
-    const order = [...pinnedCats, ...groups.flatMap((g) => g.cats)];
-    for (const c of order) {
-      if (keys.size >= EAGER_SHELF_COUNT) break;
-      keys.add(c.key);
-    }
-    return keys;
-  }, [pinnedCats, groups]);
-
   return (
     <main className="flex-1 overflow-y-auto px-12 pb-24 pt-28">
-      <div data-tauri-drag-region className="flex flex-col gap-8">
+      <div {...contentDrag} className="flex flex-col gap-8">
         <header className="flex flex-col gap-5">
           <div className="flex items-end justify-between gap-4">
             <div className="flex flex-col gap-1.5">
@@ -129,7 +116,7 @@ export function Catalogs({ active = true }: { active?: boolean }) {
                     : "border border-edge-soft bg-elevated/40 text-ink-muted hover:bg-elevated hover:text-ink"
                 }`}
               >
-                {customize ? <Check size={16} /> : <SlidersHorizontal size={15} />}
+                {customize ? <Check size={16} /> : <PencilOutlineIcon size={14} />}
                 {customize ? t("Done") : t("Customize")}
               </button>
             )}
@@ -166,14 +153,17 @@ export function Catalogs({ active = true }: { active?: boolean }) {
                     active={typeFilter === "all"}
                     onClick={() => setTypeFilter("all")}
                   />
-                  {types.map((ty) => (
-                    <Chip
-                      key={ty}
-                      label={t(TYPE_LABELS[ty] ?? ty)}
-                      active={typeFilter === ty}
-                      onClick={() => setTypeFilter(ty)}
-                    />
-                  ))}
+                  {types.map((ty) => {
+                    const labelKey = catalogTypeLabelKey(ty);
+                    return (
+                      <Chip
+                        key={ty}
+                        label={labelKey ? t(labelKey) : ty}
+                        active={typeFilter === ty}
+                        onClick={() => setTypeFilter(ty)}
+                      />
+                    );
+                  })}
                 </div>
                 {addons.length > 1 && (
                   <AddonFilterSelect
@@ -187,9 +177,9 @@ export function Catalogs({ active = true }: { active?: boolean }) {
           )}
         </header>
 
-        {loading && catalogs.length === 0 ? (
+        {loading ? (
           <ShelfSkeletons />
-        ) : catalogs.length === 0 && !isFetching ? (
+        ) : catalogs.length === 0 ? (
           <EmptyState onOpenAddons={() => setView("addons")} />
         ) : customize ? (
           filtered.length === 0 ? (
@@ -224,7 +214,7 @@ export function Catalogs({ active = true }: { active?: boolean }) {
                 </div>
                 <div className="flex flex-col gap-7">
                   {pinnedCats.map((c) => (
-                    <CatalogShelf key={c.key} catalog={c} eager={eagerKeys.has(c.key)} />
+                    <CatalogShelf key={c.key} catalog={c} />
                   ))}
                 </div>
               </section>
@@ -237,10 +227,10 @@ export function Catalogs({ active = true }: { active?: boolean }) {
                       src={g.logo}
                       alt=""
                       draggable={false}
-                      className="h-6 w-6 rounded-[6px] object-contain"
+                      className="h-6 w-6 rounded-sm object-contain"
                     />
                   ) : (
-                    <span className="flex h-6 w-6 items-center justify-center rounded-[6px] bg-elevated text-[11px] font-bold text-ink-subtle ring-1 ring-edge-soft">
+                    <span className="flex h-6 w-6 items-center justify-center rounded-sm bg-elevated text-[11px] font-bold text-ink-subtle ring-1 ring-edge-soft">
                       {g.name.charAt(0).toUpperCase()}
                     </span>
                   )}
@@ -249,7 +239,7 @@ export function Catalogs({ active = true }: { active?: boolean }) {
                 </div>
                 <div className="flex flex-col gap-7">
                   {g.cats.map((c) => (
-                    <CatalogShelf key={c.key} catalog={c} eager={eagerKeys.has(c.key)} />
+                    <CatalogShelf key={c.key} catalog={c} />
                   ))}
                 </div>
               </section>

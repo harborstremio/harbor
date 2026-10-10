@@ -1,0 +1,23 @@
+# yaml-language-server: $schema=https://aka.ms/winget-manifest.installer.1.10.0.schema.json
+
+PackageIdentifier: HarborStremio.Harbor
+PackageVersion: 0.9.21
+MinimumOSVersion: 10.0.17763.0
+InstallerType: nullsoft
+# The NSIS bundle is built with "installMode": "currentUser" in
+# src-tauri/tauri.conf.json, so Harbor installs per-user, not machine-wide.
+Scope: user
+InstallModes:
+  - interactive
+  - silent
+  - silentWithProgress
+UpgradeBehavior: install
+ReleaseDate: 2026-07-11
+Installers:
+  # x64 only: the release workflow declares an aarch64-pc-windows-msvc matrix row,
+  # but no ARM64 asset has ever been attached to a release.
+  - Architecture: x64
+    InstallerUrl: https://github.com/harborstremio/harbor/releases/download/V0.9.21/Harbor_0.9.21_x64-setup.exe
+    InstallerSha256: C45F26729AB8EFAAA8E466EC616EC0D769E730D167E7ED47C0BC837FA1414C7F
+ManifestType: installer
+ManifestVersion: 1.10.0

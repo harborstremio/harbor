@@ -1,0 +1,22 @@
+export default {
+  "games.playtime.title": "플레이 시간",
+  "games.playtime.total": "내 총 플레이 시간",
+  "games.playtime.tracked": "Harbor가 기록한 시간",
+  "games.playtime.adjusted": "직접 조정한 시간",
+  "games.playtime.changed": "{date} 조정됨",
+  "games.playtime.edit": "플레이 시간 조정",
+  "games.playtime.hours": "시간",
+  "games.playtime.minutes": "분",
+  "games.playtime.duration": "{hours}시간 {minutes}분",
+  "games.playtime.card": "{time} 플레이",
+  "games.playtime.note": "다른 곳에서 플레이한 시간을 추가하거나 총 시간을 수정하세요. Harbor는 기록된 플레이 세션을 유지하며 이후 세션의 시간을 이 총 시간에 더합니다.",
+  "games.playtime.localNote": "Harbor 프로필에 있는 이 로컬 복사본에 적용됩니다. Steam 및 다른 계정은 변경되지 않습니다.",
+  "games.playtime.running": "플레이 시간을 조정하기 전에 이 게임을 종료하세요.",
+  "games.playtime.save": "플레이 시간 저장",
+  "games.playtime.finishEdit": "다른 설정을 저장하기 전에 플레이 시간 수정을 저장하거나 취소하세요.",
+  "games.playtime.reset": "기록된 시간 사용",
+  "games.playtime.invalid": "시간은 0~999,999 사이의 정수로, 분은 0~59 사이로 입력하세요.",
+  "games.playtime.saved": "플레이 시간을 저장했습니다.",
+  "games.playtime.resetDone": "Harbor가 기록한 시간을 사용합니다.",
+  "games.custom.launch_playtime": "이 플레이 시간을 저장하지 못했습니다. 시간과 분을 확인하고 다시 시도하세요."
+} satisfies Record<string, string>;

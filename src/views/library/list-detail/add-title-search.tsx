@@ -1,13 +1,14 @@
 import { Check, Plus, Search as SearchIcon, X } from "lucide-react";
 import { useEffect, useRef, useState } from "react";
 import type { Meta } from "@/lib/cinemeta";
-import { addToList, MAX_ITEMS, type CustomList } from "@/lib/custom-lists";
+import { MAX_ITEMS, sharedLists, type CustomList, type ListStore } from "@/lib/custom-lists";
 import { useT } from "@/lib/i18n";
 import { searchAll, type AnimeHit, type SearchResults } from "@/lib/search";
 import { useSettings } from "@/lib/settings";
 import { emitListToast } from "@/components/lists/list-toast";
 import { Poster } from "@/components/poster";
 
+import { releaseText } from "@/lib/release-info";
 function animeToMeta(a: AnimeHit): Meta {
   return {
     id: a.kitsuId ? `kitsu:${a.kitsuId}` : `mal:${a.malId}`,
@@ -18,7 +19,7 @@ function animeToMeta(a: AnimeHit): Meta {
   };
 }
 
-export function AddTitleSearch({ list }: { list: CustomList }) {
+export function AddTitleSearch({ list, store = sharedLists }: { list: CustomList; store?: ListStore }) {
   const t = useT();
   const { settings } = useSettings();
   const [query, setQuery] = useState("");
@@ -67,7 +68,14 @@ export function AddTitleSearch({ list }: { list: CustomList }) {
       emitListToast(t("This list is full ({max} items)", { max: MAX_ITEMS }));
       return;
     }
-    addToList(list.id, { id: m.id, type: m.type, name: m.name, poster: m.poster });
+    store.addToList(list.id, {
+      id: m.id,
+      type: m.type,
+      name: m.name,
+      poster: m.poster,
+      addonOrigin: m.addonOrigin,
+      videos: m.videos,
+    });
     emitListToast(t('Added to "{name}"', { name: list.name }));
   };
 
@@ -106,7 +114,9 @@ export function AddTitleSearch({ list }: { list: CustomList }) {
           {loading && hits.length === 0 ? (
             <p className="px-4 py-4 text-[13px] text-ink-muted">{t("Searching...")}</p>
           ) : hits.length === 0 ? (
-            <p className="px-4 py-4 text-[13px] text-ink-muted">{t("No matches. Try another title.")}</p>
+            <p className="px-4 py-4 text-[13px] text-ink-muted">
+              {t("No matches. Try another title.")}
+            </p>
           ) : (
             <div className="max-h-[360px] overflow-y-auto py-1.5">
               {hits.map((m) => {
@@ -125,7 +135,9 @@ export function AddTitleSearch({ list }: { list: CustomList }) {
                       <span className="truncate text-[13.5px] font-medium text-ink">{m.name}</span>
                       <span className="text-[11.5px] text-ink-subtle">
                         {m.type === "movie" ? t("Movie") : t("Series")}
-                        {m.releaseInfo ? ` · ${m.releaseInfo.slice(0, 4)}` : ""}
+                        {releaseText(m.releaseInfo)
+                          ? ` · ${releaseText(m.releaseInfo).slice(0, 4)}`
+                          : ""}
                       </span>
                     </span>
                     <span
@@ -133,7 +145,11 @@ export function AddTitleSearch({ list }: { list: CustomList }) {
                         inList ? "text-accent" : "border border-edge text-ink-muted"
                       }`}
                     >
-                      {inList ? <Check size={16} strokeWidth={2.6} /> : <Plus size={16} strokeWidth={2.2} />}
+                      {inList ? (
+                        <Check size={16} strokeWidth={2.6} />
+                      ) : (
+                        <Plus size={16} strokeWidth={2.2} />
+                      )}
                     </span>
                   </button>
                 );

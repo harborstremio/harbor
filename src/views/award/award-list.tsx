@@ -1,8 +1,9 @@
-import { ArrowUpRight, Search, X } from "lucide-react";
+import { ArrowUpRight, X } from "lucide-react";
+import { Search } from "@/components/icons/search-icon";
 import { useEffect, useMemo, useState } from "react";
 import { AWARD_CATALOG } from "@/lib/awards-catalog";
 import { readAwardHistory, type CategoryHistory } from "@/lib/awards-history";
-import { tmdbPersonIdByName } from "@/lib/providers/tmdb";
+import { tmdbCompanyIdByName, tmdbPersonIdByName } from "@/lib/providers/tmdb";
 import type { AwardType } from "@/lib/providers/wikidata";
 import { useSettings } from "@/lib/settings";
 import { useView } from "@/lib/view";
@@ -201,10 +202,18 @@ function WinnerRow({
   preferTv: boolean;
 }) {
   const { settings } = useSettings();
-  const { openMeta, openPerson } = useView();
+  const { openMeta, openPerson, openFilter } = useView();
   const [resolving, setResolving] = useState(false);
 
   const onWorkClick = async () => {
+    if (entry.imdb) {
+      openMeta({
+        id: entry.imdb,
+        type: preferTv ? "series" : "movie",
+        name: entry.workTitle,
+      });
+      return;
+    }
     if (resolving || !settings.tmdbKey) return;
     setResolving(true);
     try {
@@ -221,15 +230,34 @@ function WinnerRow({
     }
   };
 
+  const onNomineeClick = (nominee: { title: string; imdb?: string }) => {
+    if (!nominee.imdb) return;
+    openMeta({
+      id: nominee.imdb,
+      type: preferTv ? "series" : "movie",
+      name: nominee.title,
+    });
+  };
+
   const onRecipientClick = async (name: string) => {
     if (resolving) return;
     setResolving(true);
-    const id = await tmdbPersonIdByName(settings.tmdbKey, name);
-    setResolving(false);
-    if (id) openPerson(id);
+    try {
+      if (isStudioName(name)) {
+        const id = await tmdbCompanyIdByName(settings.tmdbKey, name);
+        if (id) {
+          openFilter({ kind: "studio", mediaType: preferTv ? "tv" : "movie", name, id });
+          return;
+        }
+      }
+      const id = await tmdbPersonIdByName(settings.tmdbKey, name);
+      if (id) openPerson(id);
+    } finally {
+      setResolving(false);
+    }
   };
 
-  const workClickable = !!settings.tmdbKey;
+  const workClickable = !!settings.tmdbKey || !!entry.imdb;
 
   return (
     <li className="grid grid-cols-[80px_1fr_auto] items-baseline gap-x-6 border-b border-edge-soft/55 py-4">
@@ -269,6 +297,26 @@ function WinnerRow({
             ))}
           </span>
         )}
+        {entry.nominees && entry.nominees.length > 0 && (
+          <span className="self-start text-[12px] leading-relaxed text-ink-subtle">
+            {entry.nominees.map((n, i) => (
+              <span key={`${n.title}-${i}`}>
+                {i > 0 && <span> · </span>}
+                {n.imdb ? (
+                  <button
+                    type="button"
+                    onClick={() => onNomineeClick(n)}
+                    className="text-start transition-colors hover:text-ink-muted"
+                  >
+                    {n.title}
+                  </button>
+                ) : (
+                  <span>{n.title}</span>
+                )}
+              </span>
+            ))}
+          </span>
+        )}
       </div>
       {workClickable && (
         <ArrowUpRight size={14} className="dir-icon text-ink-subtle" strokeWidth={2.2} />
@@ -279,6 +327,15 @@ function WinnerRow({
 
 const TV_CATEGORY_RX =
   /series|television|\btv\b|daytime|talk|host|reality|variety|game show|soap|drama series|comedy series|limited series|miniseries|anthology/i;
+
+const STUDIO_WORDS =
+  /\b(animations?|pictures?|studios?|entertainment|films?|productions?|company|media|networks?|television|cine|cinema|imageworks|toons?|features?|interactive|distribution|releasing|group)\b/i;
+const STUDIO_BRANDS =
+  /\b(netflix|disney|pixar|dreamworks|nickelodeon|universal|paramount|warner|columbia|sony|marvel|lucasfilm|aardman|laika|gkids|illumination|ghibli|a24|mgm|lionsgate|shadowmachine|skydance|cinesite|atresmedia|titmouse|hbo|hulu)\b/i;
+
+function isStudioName(name: string): boolean {
+  return STUDIO_WORDS.test(name) || STUDIO_BRANDS.test(name);
+}
 
 type AwardHit = { id: number; type: "movie" | "tv" };
 

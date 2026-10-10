@@ -1,3 +1,4 @@
+import { blackAndWhitePage } from "@/lib/black-and-white";
 import { type Meta } from "@/lib/cinemeta";
 import { recentlyPlayed, watchTitleKey } from "@/lib/playback-history";
 import { fetchUnderNinety } from "@/lib/feed/sections";
@@ -182,6 +183,11 @@ export function movieSpecs(key: string, region: string): RowSpec[] {
           sort_by: "vote_average.desc",
           page: String(p),
         }),
+    },
+    {
+      key: "black-and-white",
+      title: "In Black and White",
+      fetcher: (p) => blackAndWhitePage(p),
     },
     {
       key: "lang-jp",

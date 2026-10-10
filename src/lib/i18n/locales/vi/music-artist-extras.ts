@@ -1,0 +1,20 @@
+const musicArtistExtras: Record<string, string> = {
+  "music.extras.merch": "Sản phẩm của nghệ sĩ",
+  "music.extras.tour": "Biểu diễn trực tiếp",
+  "music.extras.store": "Ghé cửa hàng",
+  "music.extras.tourLink": "Thông tin lưu diễn",
+  "music.extras.official": "Trang web nghệ sĩ",
+  "music.extras.loading": "Đang tải tin mới của nghệ sĩ…",
+  "music.extras.source": "Từ {source}",
+  "music.extras.event": "Chi tiết sự kiện",
+  "music.credits.title": "Đội ngũ thực hiện",
+  "music.credits.main": "Nghệ sĩ chính",
+  "music.credits.featured": "Nghệ sĩ khách mời",
+  "music.credits.composer": "Nhạc sĩ sáng tác",
+  "music.credits.lyricist": "Người viết lời",
+  "music.credits.producer": "Nhà sản xuất",
+  "music.credits.performer": "Người biểu diễn",
+  "music.artist.readMore": "Đọc thêm",
+  "music.artist.readLess": "Thu gọn",
+};
+export default musicArtistExtras;

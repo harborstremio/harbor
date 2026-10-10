@@ -1,0 +1,599 @@
+.sh-esmap {
+  margin: 24px 0;
+  background: var(--color-surface, #191b1b);
+  border-radius: 14px;
+  overflow: hidden;
+  color: var(--color-ink, #fff);
+}
+.sh-esmap > summary {
+  display: flex;
+  gap: 14px;
+  align-items: center;
+  list-style: none;
+  padding: 22px;
+  cursor: pointer;
+}
+.sh-esmap > summary::-webkit-details-marker {
+  display: none;
+}
+.sh-esmap > summary > span {
+  flex: 1;
+}
+.sh-esmap > summary strong,
+.sh-esmap > summary small {
+  display: block;
+}
+.sh-esmap > summary strong {
+  font-size: 15px;
+}
+.sh-esmap > summary small {
+  font-size: 12px;
+  color: var(--color-ink-muted, #a8acad);
+  margin-top: 5px;
+}
+.sh-esmap[open] > summary > svg:last-child {
+  transform: rotate(180deg);
+}
+.sh-esmap button {
+  cursor: pointer;
+}
+.sh-esmap button:disabled {
+  opacity: 0.4;
+  cursor: default;
+}
+.sh-esmap :is(button, summary):focus-visible {
+  outline: 2px solid var(--color-ink, #fff);
+  outline-offset: -3px;
+}
+.sh-esmap-content {
+  padding: 0 22px 22px;
+}
+.sh-esmap-picks {
+  display: flex;
+  overflow-x: auto;
+  gap: 7px;
+  padding: 1px 0 12px;
+  cursor: grab;
+  scrollbar-width: thin;
+}
+.sh-esmap-picks button {
+  flex: none;
+  padding: 9px 13px;
+  background: var(--color-elevated, #242727);
+  border-radius: 8px;
+  font-size: 12px;
+}
+.sh-esmap-picks button[aria-pressed="true"] {
+  background: var(--color-ink, #fff);
+  color: var(--color-canvas, #111);
+}
+.sh-esmap-heading {
+  display: flex;
+  align-items: center;
+  gap: 16px;
+  margin: 6px 0 17px;
+}
+.sh-esmap-heading > div:first-child {
+  flex: 1;
+}
+.sh-esmap-heading h3 {
+  font-size: 18px;
+  margin: 0;
+}
+.sh-esmap-heading p {
+  font-size: 12px;
+  line-height: 1.6;
+  margin: 5px 0 0;
+  color: var(--color-ink-muted, #b3b8b9);
+}
+.sh-esmap-zoom {
+  display: flex;
+  align-items: center;
+  gap: 3px;
+  background: var(--color-elevated, #262929);
+  border-radius: 8px;
+  padding: 3px;
+}
+.sh-esmap-zoom button {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  min-width: 30px;
+  height: 30px;
+  padding: 0 5px;
+  font-size: 11px;
+  border-radius: 5px;
+}
+.sh-esmap-layout {
+  display: grid;
+  grid-template-columns: minmax(0, 1.65fr) minmax(220px, 1fr);
+  gap: 22px;
+  align-items: start;
+}
+.sh-esmap-viewport {
+  position: relative;
+  aspect-ratio: 1;
+  overflow: auto;
+  border-radius: 11px;
+  background: #0e171a;
+}
+.sh-esmap-scene {
+  width: 100%;
+  height: 100%;
+  position: relative;
+  transform-origin: top left;
+  transition: transform 180ms ease-out;
+}
+.sh-esmap-art {
+  position: absolute;
+  inset: 0;
+  width: 100%;
+  height: 100%;
+  object-fit: contain;
+  opacity: 0;
+  transition: opacity 220ms;
+}
+.sh-esmap-art[data-loaded="true"] {
+  opacity: 1;
+}
+.sh-esmap-loading {
+  position: absolute;
+  inset: 0;
+  display: flex;
+  flex-direction: column;
+  gap: 12px;
+  align-items: center;
+  justify-content: center;
+  color: var(--color-ink-muted, #bac0c1);
+  font-size: 12px;
+}
+.sh-esmap-loading svg,
+.sh-esmap-spinner {
+  animation: sh-esmap-spin 900ms linear infinite;
+}
+.sh-esmap-art-error {
+  position: absolute;
+  inset: auto 12px 12px;
+  font-size: 11px;
+  background: #111c;
+  padding: 8px;
+  color: #fff;
+  border-radius: 5px;
+}
+.sh-esmap-caption {
+  display: flex;
+  align-items: flex-start;
+  justify-content: space-between;
+  gap: 14px;
+  font-size: 11px;
+  line-height: 1.6;
+  color: var(--color-ink-muted, #abb2b2);
+  padding: 10px 0;
+}
+.sh-esmap-caption button {
+  display: flex;
+  gap: 5px;
+  align-items: center;
+  flex: none;
+  font-size: 11px;
+}
+.sh-esmap-roster-heading {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+  margin-bottom: 12px;
+}
+.sh-esmap-roster-heading h4 {
+  font-size: 13px;
+  margin: 0;
+  flex: 1;
+}
+.sh-esmap-rosters section + section {
+  margin-top: 18px;
+}
+.sh-esmap-team {
+  display: flex;
+  gap: 12px;
+  align-items: center;
+  padding-bottom: 8px;
+  font-size: 12px;
+}
+.sh-esmap-team:before {
+  content: "";
+  width: 6px;
+  height: 6px;
+  border-radius: 50%;
+  background: #69c6a9;
+  flex: none;
+}
+.sh-esmap-team.away:before {
+  background: #f27076;
+}
+.sh-esmap-team strong {
+  flex: 1;
+}
+.sh-esmap-team b {
+  font-size: 16px;
+}
+.sh-esmap-player {
+  display: flex;
+  align-items: center;
+  gap: 9px;
+  width: 100%;
+  text-align: start;
+  padding: 8px;
+  border-radius: 8px;
+  min-height: 51px;
+  margin-top: 3px;
+}
+.sh-esmap-player:hover,
+.sh-esmap-player[aria-pressed="true"] {
+  background: var(--color-elevated, #292c2c);
+}
+.sh-esmap-player > img {
+  width: 48px;
+  height: 56px;
+  flex: 0 0 48px;
+  object-fit: contain;
+  object-position: center bottom;
+  border-radius: 4px;
+}
+.sh-esmap-player > svg {
+  width: 41px;
+  flex: none;
+}
+.sh-esmap-player > span {
+  flex: 1;
+  min-width: 0;
+}
+.sh-esmap-player strong {
+  display: block;
+  font-size: 12px;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+}
+.sh-esmap-player small {
+  display: block;
+  font-size: 10px;
+  margin-top: 4px;
+  color: var(--color-ink-muted, #a5acac);
+}
+.sh-esmap-player em {
+  font-size: 10px;
+  font-style: normal;
+  flex: none;
+  color: var(--color-ink-muted, #a5acac);
+}
+.sh-esmap-statline {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 5px 12px;
+  margin-top: 7px;
+  font-size: 10px;
+  color: var(--color-ink-muted, #a5acac);
+  font-variant-numeric: tabular-nums;
+}
+.sh-esmap-statline b {
+  color: var(--color-ink, #f5f5f5);
+  margin-inline-end: 4px;
+}
+.sh-esmap-statline span:first-child b {
+  color: #8cdac0;
+}
+.sh-esmap-check-time {
+  display: block;
+  margin-top: 5px;
+}
+.sh-esmap-empty {
+  font-size: 12px;
+  line-height: 1.7;
+  color: var(--color-ink-muted, #a5acac);
+  margin: 18px 0;
+}
+.sh-esmap-retry,
+.sh-esmap-inspect button {
+  display: flex;
+  align-items: center;
+  gap: 6px;
+  font-size: 12px;
+  padding: 8px 0;
+}
+.sh-esmap-inspect {
+  margin-top: 18px;
+  border-top: 1px solid var(--color-edge-soft, #ffffff10);
+  padding-top: 13px;
+}
+.sh-esmap-inspect > strong,
+.sh-esmap-inspect > span {
+  display: block;
+  font-size: 13px;
+}
+.sh-esmap-inspect > span {
+  font-size: 11px;
+  color: var(--color-ink-muted, #a5acac);
+  margin-top: 5px;
+}
+.sh-esmap-provider {
+  display: block;
+  font-size: 10px;
+  margin-top: 16px;
+  color: var(--color-ink-muted, #a5acac);
+}
+.sh-esmap-schematic {
+  position: absolute;
+  inset: 0;
+  background:
+    radial-gradient(ellipse at 24% 74%, #254e40, transparent 58%),
+    radial-gradient(ellipse at 77% 24%, #473a38, transparent 58%), #162d2a;
+}
+.sh-esmap-schematic:after {
+  content: "";
+  position: absolute;
+  inset: 0;
+  pointer-events: none;
+  background-image:
+    linear-gradient(#ffffff04 1px, transparent 1px),
+    linear-gradient(90deg, #ffffff04 1px, transparent 1px);
+  background-size: 5% 5%;
+}
+.sh-esmap-schematic svg {
+  position: absolute;
+  width: 100%;
+  height: 100%;
+  inset: 0;
+}
+.sh-esmap-river {
+  fill: none;
+  stroke: #3d777f;
+  stroke-width: 10;
+  opacity: 0.5;
+}
+.sh-esmap-lane {
+  fill: none;
+  stroke: #baa77a;
+  stroke-width: 4;
+  stroke-linecap: round;
+  stroke-linejoin: round;
+  opacity: 0.75;
+}
+.sh-esmap-jungle {
+  fill: #071d17;
+  stroke: #62855c;
+  stroke-width: 0.5;
+}
+.sh-esmap-base {
+  position: absolute;
+  font-size: 11px;
+  font-weight: 700;
+  letter-spacing: 0.03em;
+  background: #11221cdb;
+  border: 1px solid #8fe3be44;
+  padding: 8px 11px;
+  border-radius: 6px;
+  color: #b9eed8;
+}
+.sh-esmap-base.home {
+  bottom: 6%;
+  left: 6%;
+}
+.sh-esmap-base.away {
+  top: 6%;
+  right: 6%;
+  color: #ffd1d1;
+  background: #321a1cdc;
+  border-color: #e99b9b44;
+}
+.sh-esmap-marker {
+  position: absolute;
+  transform: translate(-50%, -50%);
+  width: 38px;
+  height: 32px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  border: 2px solid #69c6a9;
+  border-radius: 6px;
+  overflow: hidden;
+  z-index: 2;
+  background: #152820;
+  box-shadow: 0 3px 7px #0005;
+}
+.sh-esmap-marker.away {
+  border-color: #f27076;
+}
+.sh-esmap-marker img {
+  width: 100%;
+  height: 100%;
+  object-fit: cover;
+}
+.sh-esmap-marker[aria-pressed="true"] {
+  outline: 2px solid white;
+  outline-offset: 3px;
+}
+.sh-esmap-schematic.is-tactical {
+  background: radial-gradient(ellipse at 50% 35%, #434649, #252d31);
+}
+.sh-esmap-corridor {
+  stroke: #b1aba0;
+  stroke-width: 8;
+  fill: none;
+  stroke-linecap: square;
+  stroke-linejoin: miter;
+}
+.sh-esmap-wall {
+  fill: #333b3e;
+  stroke: #616568;
+  stroke-width: 0.6;
+}
+.sh-esmap-objective {
+  position: absolute;
+  transform: translate(-50%, -50%);
+  width: 37px;
+  height: 37px;
+  display: grid;
+  place-items: center;
+  border-radius: 8px;
+  background: #d7a262;
+  color: #251d16;
+  font-size: 18px;
+}
+.sh-esmap-spawn {
+  position: absolute;
+  bottom: 5%;
+  left: 50%;
+  transform: translateX(-50%);
+  font-size: 11px;
+  padding: 6px 9px;
+  border-radius: 6px;
+  background: #141d23;
+  color: #cddbe2;
+}
+@keyframes sh-esmap-spin {
+  to {
+    transform: rotate(360deg);
+  }
+}
+@media (max-width: 800px) {
+  .sh-esmap-layout {
+    grid-template-columns: 1fr;
+  }
+  .sh-esmap-rosters {
+    display: grid;
+    grid-template-columns: 1fr 1fr;
+    gap: 14px;
+  }
+  .sh-esmap-roster-heading,
+  .sh-esmap-empty,
+  .sh-esmap-inspect,
+  .sh-esmap-provider {
+    grid-column: 1/-1;
+  }
+  .sh-esmap-rosters section + section {
+    margin-top: 0;
+  }
+  .sh-esmap-content {
+    padding: 0 15px 15px;
+  }
+  .sh-esmap-heading {
+    align-items: flex-start;
+  }
+  .sh-esmap-caption {
+    flex-wrap: wrap;
+  }
+}
+@media (prefers-reduced-motion: reduce) {
+  .sh-esmap-scene,
+  .sh-esmap-art {
+    transition: none;
+  }
+  .sh-esmap-loading svg,
+  .sh-esmap-spinner {
+    animation: none;
+  }
+}
+
+.sh-esmap-unavailable {
+  position: absolute;
+  inset: 0;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  gap: 16px;
+  text-align: center;
+  padding: 30px;
+  color: var(--color-ink-muted);
+}
+.sh-esmap-unavailable strong {
+  font-size: 22px;
+  color: var(--color-ink);
+}
+.sh-esmap-unavailable p {
+  font-size: 13px;
+  max-width: 30ch;
+}
+.sh-esmap-unavailable .sh-button {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  font-size: 12px;
+  background: var(--color-elevated);
+  padding: 10px 14px;
+  border-radius: 8px;
+}
+.sh-esmap-rocket {
+  position: absolute;
+  inset: 10% 2%;
+  border: 3px solid #9cbbc3;
+  border-radius: 9%;
+  background: repeating-linear-gradient(90deg, #174f41 0 10%, #205a49 10% 20%);
+  overflow: hidden;
+}
+.sh-esmap-rocket:before {
+  content: "";
+  position: absolute;
+  top: 0;
+  bottom: 0;
+  left: 50%;
+  border-left: 2px solid #bddbd5;
+}
+.sh-esmap-rocket i {
+  position: absolute;
+}
+.sh-esmap-rocket .center {
+  width: 27%;
+  aspect-ratio: 1;
+  border: 2px solid #bddbd5;
+  border-radius: 50%;
+  left: 50%;
+  top: 50%;
+  transform: translate(-50%, -50%);
+}
+.sh-esmap-rocket .goal {
+  width: 5%;
+  height: 28%;
+  top: 36%;
+  border: 3px solid;
+}
+.sh-esmap-rocket .goal.home {
+  left: 0;
+  border-color: #50a3f4;
+  background: #1e3b7299;
+}
+.sh-esmap-rocket .goal.away {
+  right: 0;
+  border-color: #ed9850;
+  background: #743a1b99;
+}
+.sh-esmap-rocket .boost {
+  height: 3.5%;
+  aspect-ratio: 1;
+  transform: translate(-50%, -50%);
+  background: #f2c879;
+  border: 3px solid #7a683d;
+  border-radius: 50%;
+}
+
+.sh-esmap-blueprint-picks {
+  position: absolute;
+  bottom: 12px;
+  left: 12px;
+  right: 12px;
+  display: flex;
+  flex-wrap: wrap;
+  justify-content: center;
+  gap: 6px;
+  z-index: 3;
+}
+.sh-esmap-blueprint-picks button {
+  padding: 8px 10px;
+  border-radius: 7px;
+  background: #182127eb;
+  color: white;
+  font-size: 12px;
+}
+.sh-esmap-blueprint-picks button[aria-pressed="true"] {
+  background: white;
+  color: #101819;
+}

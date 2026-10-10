@@ -1,5 +1,6 @@
 import type { SubResult, SubSearchQuery } from "../types";
-import { normalizeLang } from "../language";
+import { isKnownLanguage, normalizeLang } from "../language";
+import { safeFetch } from "@/lib/safe-fetch";
 
 const ENDPOINT = "https://sub.wyzie.io/search";
 
@@ -17,9 +18,14 @@ type RawWyzie = {
   flagUrl?: string;
   fps?: number;
   downloads?: number;
+  author?: string;
+  uploader?: string;
 };
 
-export async function searchWyzie(q: SubSearchQuery): Promise<SubResult[]> {
+export async function searchWyzie(
+  q: SubSearchQuery,
+  fetchImpl: typeof safeFetch = safeFetch,
+): Promise<SubResult[]> {
   const params = new URLSearchParams();
   if (q.imdbId) params.set("id", q.imdbId.startsWith("tt") ? q.imdbId : `tt${q.imdbId}`);
   else if (q.tmdbId) params.set("id", q.tmdbId);
@@ -33,7 +39,7 @@ export async function searchWyzie(q: SubSearchQuery): Promise<SubResult[]> {
   }
   let resp: Response;
   try {
-    resp = await fetch(`${ENDPOINT}?${params.toString()}`, {
+    resp = await fetchImpl(`${ENDPOINT}?${params.toString()}`, {
       headers: { Accept: "application/json" },
     });
   } catch {
@@ -50,10 +56,14 @@ export async function searchWyzie(q: SubSearchQuery): Promise<SubResult[]> {
   const out: SubResult[] = [];
   for (const r of arr) {
     if (!r.url) continue;
-    const lang = normalizeLang(r.language) || "en";
+    const lang = isKnownLanguage(r.language)
+      ? normalizeLang(r.language)
+      : isKnownLanguage(r.display)
+        ? normalizeLang(r.display)
+        : normalizeLang(r.language);
     const fmt = (r.format || "").toLowerCase();
     out.push({
-      id: String(r.id ?? r.url),
+      id: `wyzie:${r.id ?? r.url}`,
       url: r.url,
       lang,
       langName: r.display,
@@ -65,6 +75,7 @@ export async function searchWyzie(q: SubSearchQuery): Promise<SubResult[]> {
       hearingImpaired: r.isHearingImpaired || r.hi || false,
       release: r.release,
       downloads: r.downloads,
+      author: r.author ?? r.uploader,
     });
   }
   return out;

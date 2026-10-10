@@ -1,0 +1,69 @@
+.games-discovery-desk .games-desk-body { grid-template-columns:minmax(0,1.8fr) minmax(230px,1fr);gap:24px;align-items:start; }
+.games-discovery-desk .games-desk-list { gap:6px; }
+.games-discovery-desk .games-desk-row { position:relative;min-height:0;padding:0;gap:16px;border-radius:3px;overflow:hidden;background:var(--color-surface); }
+.games-discovery-desk .games-desk-row:is(:hover,:focus-visible,.is-selected) { background:var(--color-elevated); }
+.games-discovery-desk .games-desk-row>.games-availability-cover { width:38%;height:auto;aspect-ratio:460/215;border-radius:0;align-self:stretch; }
+.games-discovery-desk .games-desk-rank { position:absolute;inset-inline-start:6px;top:6px;z-index:2;padding:3px 5px;background:#101213d9;color:#fff;font-size:10px;line-height:1;min-width:0; }
+.games-discovery-desk .games-desk-row-copy { padding:14px 16px 14px 0;gap:9px; }
+.games-discovery-desk .games-desk-row-copy>strong { font-size:17px;line-height:1.3;font-weight:600; }
+.games-discovery-desk .games-desk-row-copy>.games-desk-meta { display:flex;flex-wrap:wrap;gap:4px 12px;font-size:13px;line-height:1.4;color:var(--color-ink-muted); }
+.games-desk-meta time { white-space:nowrap; }
+.games-discovery-desk .games-desk-row-footer { display:flex;flex-wrap:wrap;align-items:center;gap:8px 18px;min-height:26px; }
+.games-discovery-desk .games-desk-row .games-card-price { flex-direction:row;align-items:center;gap:8px;font-size:16px;font-weight:600;color:var(--color-ink);margin:0; }
+.games-discovery-desk .games-card-price .games-discount { font-size:13px;padding:4px 6px; }
+.games-discovery-desk .games-desk-rating { display:flex;align-items:center;gap:6px;line-height:1.4; }
+.games-desk-rating>img { opacity:.85; }
+.games-discovery-desk .games-desk-rating>strong { font-size:14px;font-weight:600; }
+.games-desk-rating>span { font-size:12px;color:var(--color-ink-muted); }
+.games-desk-continuation { min-height:1px;display:grid;gap:6px; }
+.games-desk-row-skeleton { height:112px;border-radius:3px; }
+.games-discovery-desk .games-desk-tabs { gap:20px; }
+.games-discovery-desk .games-desk-tabs button { border-radius:0;padding:12px 0;background:none;white-space:nowrap; }
+.games-discovery-desk .games-desk-tabs button[aria-selected=true] { background:none; }
+.games-discovery-desk .games-desk-tabs button[aria-selected=true]::after { display:block; }
+.games-chart-preview {
+  --chart-sticky-top:max(16px,calc(var(--games-chrome-inset,0px) - 16px));
+  min-width:0;
+  position:sticky;
+  top:var(--chart-sticky-top);
+  /* Sticky starts inside the Games scrollport's chrome padding; reserve that and the live dock. */
+  max-height:calc(100dvh - var(--games-chrome-inset,0px) - var(--chart-sticky-top) - var(--harbor-music-dock,0px) - var(--harbor-viewport-bottom,0px) - 16px);
+  overflow-y:auto;
+  overscroll-behavior-y:contain;
+  scrollbar-width:thin;
+  scrollbar-color:var(--color-edge) transparent;
+  scroll-padding-block:16px;
+}
+.games-chart-summary { padding:16px;background:var(--color-surface);display:grid;grid-template-rows:48px 19px 63px 26px 22px;gap:8px;height:242px; }
+.games-chart-summary h3 { font-size:18px;font-weight:650;line-height:24px;margin:0;display:-webkit-box;-webkit-line-clamp:2;-webkit-box-orient:vertical;overflow:hidden; }
+.games-chart-summary>span { color:var(--color-ink-muted);font-size:13px;white-space:nowrap;overflow:hidden;text-overflow:ellipsis; }
+.games-chart-summary p { font-size:14px;line-height:21px;color:var(--color-ink-muted);margin:0;display:-webkit-box;-webkit-line-clamp:3;-webkit-box-orient:vertical;overflow:hidden;animation:games-chart-reveal var(--chart-copy-fade) ease-out; }
+.games-chart-summary .games-text-action { font-size:14px;margin:0;justify-self:start; }
+.games-chart-genres { display:flex;gap:5px;margin:0;overflow:hidden;align-items:start; }
+.games-chart-genres span { font-size:12px;padding:4px 6px;background:var(--color-elevated);color:var(--color-ink-muted);border-radius:2px;white-space:nowrap; }
+.games-chart-screens { display:grid;gap:6px;margin-top:6px; }
+.games-chart-preview { --chart-image-fade:220ms;--chart-copy-fade:160ms; }
+.games-chart-frame { position:relative;aspect-ratio:16/9;background:var(--color-surface);overflow:hidden; }
+.games-chart-frame img { position:absolute;inset:0;width:100%;height:100%;object-fit:cover;opacity:0;transition:opacity var(--chart-image-fade) ease-out; }
+.games-chart-frame[data-phase=ready] img { opacity:1; }
+.games-chart-image-skeleton { position:absolute;inset:0;border-radius:0;transition:opacity var(--chart-image-fade) ease-out; }
+.games-chart-frame:not([data-pending=true]) .games-chart-image-skeleton { opacity:0;animation:none; }
+.games-chart-text-skeleton { display:grid;align-content:center;gap:7px; }
+.games-chart-text-skeleton i { height:9px;background:var(--color-elevated); }
+.games-chart-text-skeleton i:last-child { width:65%; }
+.games-chart-genres>i { height:20px;width:68px;background:var(--color-elevated); }
+@keyframes games-chart-reveal { from { opacity:0; } to { opacity:1; } }
+@container(max-width:850px) {
+  .games-discovery-desk .games-desk-body { grid-template-columns:1fr; }
+  .games-chart-preview { display:none; }
+  .games-discovery-desk .games-desk-row>.games-availability-cover { width:32%;max-width:230px; }
+}
+@container(max-width:500px) {
+  .games-discovery-desk .games-desk-row { gap:10px; }
+  .games-discovery-desk .games-desk-row>.games-availability-cover { width:30%; }
+  .games-discovery-desk .games-desk-row-copy>strong { font-size:16px; }
+  .games-discovery-desk .games-desk-row-copy { padding:12px 12px 12px 0; }
+  .games-discovery-desk .games-desk-tabs { gap:18px;overflow-x:auto; }
+}
+[dir=rtl] .games-discovery-desk .games-desk-row-copy { padding-inline:0 16px; }
+@media(prefers-reduced-motion:reduce) { .games-discovery-desk .games-desk-row,.games-chart-frame img,.games-chart-image-skeleton { transition:none; } .games-chart-summary p { animation:none; } }

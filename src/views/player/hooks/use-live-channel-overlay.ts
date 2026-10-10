@@ -1,16 +1,17 @@
 import { useCallback, useEffect, useMemo, useRef, useState } from "react";
-import { useSettings } from "@/lib/settings";
+import { usePlaylists } from "@/lib/iptv/playlists-store";
 import { headersFromChannel } from "@/lib/iptv/channel-headers";
 import type { IptvChannel, IptvPlaylistSource } from "@/lib/iptv/types";
 import type { Meta } from "@/lib/cinemeta";
 import type { PlayerSrc } from "@/lib/view";
+import { preservePreviewMode } from "@/lib/player/docked-navigation";
 
 export function useLiveChannelOverlay(params: {
   src: PlayerSrc;
   replacePlayerSrc: (src: PlayerSrc) => void;
 }) {
   const { src, replacePlayerSrc } = params;
-  const { settings } = useSettings();
+  const playlists = usePlaylists();
   const [open, setOpen] = useState(false);
   const [group, setGroup] = useState<string | null>(null);
   const [query, setQuery] = useState("");
@@ -23,27 +24,27 @@ export function useLiveChannelOverlay(params: {
     const stripped = src.meta.id.replace(/^iptv:/, "");
     const playlistId = stripped.split("::")[0];
     if (!playlistId) return null;
-    const found = settings.iptvPlaylists.find((p) => p.id === playlistId);
+    const found = playlists.find((p) => p.id === playlistId);
     if (!found) return null;
     return { id: found.id, name: found.name, url: found.url, epgUrl: found.epgUrl };
-  }, [isLive, src.meta.id, settings.iptvPlaylists]);
+  }, [isLive, src.meta.id, playlists]);
 
   const activeSource: IptvPlaylistSource | null = useMemo(() => {
     if (!overrideSourceId) return playingSource;
-    const found = settings.iptvPlaylists.find((p) => p.id === overrideSourceId);
+    const found = playlists.find((p) => p.id === overrideSourceId);
     if (!found) return playingSource;
     return { id: found.id, name: found.name, url: found.url, epgUrl: found.epgUrl };
-  }, [overrideSourceId, playingSource, settings.iptvPlaylists]);
+  }, [overrideSourceId, playingSource, playlists]);
 
   const availableSources: IptvPlaylistSource[] = useMemo(
     () =>
-      settings.iptvPlaylists.map((p) => ({
+      playlists.map((p) => ({
         id: p.id,
         name: p.name,
         url: p.url,
         epgUrl: p.epgUrl,
       })),
-    [settings.iptvPlaylists],
+    [playlists],
   );
 
   const selectSource = useCallback((id: string) => {
@@ -66,13 +67,10 @@ export function useLiveChannelOverlay(params: {
   useEffect(() => {
     if (!open) return;
     const onKey = (e: KeyboardEvent) => {
-      if (e.key !== "Escape") return;
-      e.preventDefault();
-      e.stopPropagation();
-      setOpen(false);
+      if (e.key === "Escape") setOpen(false);
     };
-    window.addEventListener("keydown", onKey, true);
-    return () => window.removeEventListener("keydown", onKey, true);
+    window.addEventListener("keydown", onKey);
+    return () => window.removeEventListener("keydown", onKey);
   }, [open]);
 
   const currentChannelId = useMemo(() => {
@@ -100,8 +98,8 @@ export function useLiveChannelOverlay(params: {
     const stack = prevStackRef.current;
     let prev = stack.pop();
     while (prev && prev.meta.id === lastSrcRef.current?.meta.id) prev = stack.pop();
-    if (prev) replacePlayerSrc(prev);
-  }, [replacePlayerSrc]);
+    if (prev) replacePlayerSrc(preservePreviewMode(lastSrcRef.current ?? src, prev));
+  }, [replacePlayerSrc, src]);
 
   const switchChannel = useCallback(
     (channel: IptvChannel, program?: string) => {
@@ -125,10 +123,10 @@ export function useLiveChannelOverlay(params: {
         headers: headersFromChannel(channel),
         liveProgram: program,
       };
-      replacePlayerSrc(newSrc);
+      replacePlayerSrc(preservePreviewMode(src, newSrc));
       setOpen(false);
     },
-    [replacePlayerSrc],
+    [replacePlayerSrc, src],
   );
 
   return {

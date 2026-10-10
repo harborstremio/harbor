@@ -1,0 +1,48 @@
+.music-live-mark {
+  position: absolute;
+  inset-block-end: 8px;
+  inset-inline-start: 8px;
+  z-index: 2;
+  display: grid;
+  place-items: center;
+  padding: 5px 7px;
+  border-radius: 6px;
+  background: color-mix(in oklab, var(--color-canvas) 62%, transparent);
+  backdrop-filter: blur(6px);
+  -webkit-backdrop-filter: blur(6px);
+  opacity: 0.85;
+  animation: music-live-mark-in 240ms cubic-bezier(0.22, 0.61, 0.36, 1) backwards;
+  pointer-events: none;
+}
+.music-live-mark .music-eq-bars {
+  height: 13px;
+}
+.music-live-mark .music-eq-bars i {
+  width: 2.5px;
+}
+.music-live-mark[data-paused] .music-eq-bars i { animation-play-state: paused; }
+@keyframes music-live-mark-in {
+  from {
+    opacity: 0;
+    transform: scale(0.9);
+  }
+  to {
+    opacity: 0.85;
+    transform: none;
+  }
+}
+@media (prefers-reduced-motion: reduce) {
+  .music-live-mark {
+    animation: none;
+  }
+  .music-live-mark .music-eq-bars i {
+    animation: none;
+    height: 60%;
+  }
+}
+.music-live-mark[data-loading] {
+  color: var(--color-accent);
+}
+.music-live-mark[data-loading] svg {
+  display: block;
+}

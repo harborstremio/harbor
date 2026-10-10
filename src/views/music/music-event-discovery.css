@@ -1,0 +1,52 @@
+.music-events { min-width: 0; display: flex; flex-direction: column; gap: 18px; }
+.music-events-heading { display: flex; align-items: center; justify-content: space-between; gap: 20px; flex-wrap: wrap; }
+.music-events-heading h2 { font-size: 21px; font-weight: 650; letter-spacing: -.025em; }
+.music-events-heading p { margin-top: 5px; font-size: 13px; color: var(--color-ink-muted); }
+.music-events-filters { display: flex; align-items: center; gap: 8px; flex-wrap: wrap; }
+.music-events-stage { display: grid; grid-template-columns: minmax(0,1.7fr) minmax(260px,1fr); gap: 20px; }
+.music-events-hero { position: relative; isolation: isolate; overflow: hidden; min-width: 0; width: 100%; aspect-ratio: 16/10; border-radius: 10px; text-align: start; color: white; background: var(--color-surface); }
+.music-events-hero::after { content: ""; position: absolute; inset: 0; z-index: -1; background: linear-gradient(180deg, transparent 25%, #0007 55%, #000e); }
+.music-events-hero > .music-events-image { position: absolute; inset: 0; z-index: -2; width: 100%; height: 100%; object-fit: cover; transition: transform 300ms ease-out; }
+.music-events-hero:hover > .music-events-image { transform: scale(1.025); }
+.music-events-caption { display: flex; flex-direction: column; justify-content: end; gap: 12px; height: 100%; padding: clamp(20px, 3vw, 36px); }
+.music-events-caption > small { font-size: 12px; font-weight: 600; }
+.music-events-caption > strong { display: -webkit-box; -webkit-line-clamp: 2; -webkit-box-orient: vertical; overflow: hidden; font-size: clamp(22px, 2.6vw, 36px); font-weight: 700; line-height: 1.13; letter-spacing: -.03em; }
+.music-events-caption > span { display: flex; align-items: center; gap: 12px; font-size: 13px; }
+.music-events-caption time { margin-inline-start: auto; font-variant-numeric: tabular-nums; opacity: .75; }
+.music-events-play { display: grid; place-items: center; flex-shrink: 0; width: 44px; height: 44px; background: white; color: #151515; border-radius: 50%; }
+.music-events-side { display: flex; flex-direction: column; justify-content: space-between; gap: 14px; min-width: 0; }
+.music-events-side > button { display: flex; align-items: center; gap: 14px; text-align: start; min-width: 0; flex: 1; border-radius: 8px; }
+.music-events-thumb { position: relative; width: 45%; flex-shrink: 0; aspect-ratio: 16/10; border-radius: 6px; overflow: hidden; }
+.music-events-thumb > :first-child { width: 100%; height: 100%; object-fit: cover; }
+.music-events-thumb > span { position: absolute; inset: 0; display: grid; place-items: center; background: #0005; color: white; opacity: 0; transition: opacity 160ms ease-out; }
+.music-events-side > button:hover .music-events-thumb > span, .music-events-side > button:focus-visible .music-events-thumb > span { opacity: 1; }
+.music-events-side-copy { display: flex; flex-direction: column; gap: 7px; min-width: 0; padding-inline-end: 8px; }
+.music-events-side-copy small, .music-events-side-copy time { font-size: 11px; color: var(--color-ink-muted); }
+.music-events-side-copy strong { font-size: 13px; line-height: 1.4; display: -webkit-box; -webkit-line-clamp: 2; -webkit-box-orient: vertical; overflow: hidden; }
+.music-events footer { display: flex; align-items: center; justify-content: space-between; gap: 12px; color: var(--color-ink-muted); font-size: 12px; }
+.music-events footer > div { display: flex; align-items: center; gap: 12px; }
+.music-events footer button { width: 36px; height: 36px; display: grid; place-items: center; background: var(--color-surface); border-radius: 6px; }
+.music-events button:disabled { opacity: .35; cursor: default; }
+.music-events button:focus-visible { outline: 2px solid var(--color-accent); outline-offset: 3px; }
+.music-events-loading { display: grid; grid-template-columns: 1.7fr 1fr; gap: 20px; }
+.music-events-loading > span { aspect-ratio: 16/10; }
+.music-events-loading > div { display: grid; gap: 14px; }
+.music-events-loading span { display: block; border-radius: 8px; background: var(--color-elevated); animation: music-event-loading 1.6s ease-in-out infinite alternate; }
+.music-events-message { min-height: 240px; display: flex; align-items: center; justify-content: center; flex-direction: column; gap: 16px; color: var(--color-ink-muted); }
+.music-events-message button { display: flex; align-items: center; gap: 8px; padding: 10px 16px; border-radius: 6px; background: var(--color-elevated); }
+@keyframes music-event-loading { to { opacity: .45; } }
+@media (max-width: 800px) { .music-events-stage { grid-template-columns: 1fr; } .music-events-hero { aspect-ratio: 16/9; } .music-events-side { flex-direction: row; gap: 12px; } .music-events-side > button { flex-direction: column; align-items: stretch; justify-content: start; } .music-events-thumb { width: 100%; } .music-events-side-copy { gap: 4px; } }
+@media (max-width: 460px) { .music-events-side > button:last-child { display: none; } .music-events-caption { gap: 8px; } .music-events-caption strong { font-size: 22px; } .music-events-hero { aspect-ratio: 4/3; } }
+@media (prefers-reduced-motion: reduce) { .music-events *, .music-events *::after { transition: none !important; animation: none !important; } }
+.music-events-feature { min-width: 0; }
+.music-events-feature > .music-performance-artist { margin-top: 12px; }
+.music-events-side-item { display: flex; flex: 1; flex-direction: column; justify-content: center; min-width: 0; gap: 8px; }
+.music-events-side-item > button { display: flex; align-items: center; gap: 14px; text-align: start; min-width: 0; border-radius: 8px; }
+.music-events-side-item > button:hover .music-events-thumb > span, .music-events-side-item > button:focus-visible .music-events-thumb > span { opacity: 1; }
+.music-performance-artist { display: inline-flex; width: fit-content; max-width: 100%; align-items: center; gap: 9px; min-height: 36px; color: var(--color-ink-muted); text-align: start; border-radius: 20px; }
+.music-performance-artist > span { position: relative; display: grid; place-items: center; flex-shrink: 0; width: 32px; height: 32px; border-radius: 50%; overflow: hidden; background: var(--color-elevated); }
+.music-performance-artist img { position: absolute; inset: 0; width: 100%; height: 100%; object-fit: cover; }
+.music-performance-artist strong { font-size: 12px; font-weight: 500; overflow: hidden; white-space: nowrap; text-overflow: ellipsis; }
+.music-performance-artist:hover { color: var(--color-ink); }
+@media (max-width:800px) { .music-events-side-item > button { flex-direction: column; align-items: stretch; justify-content: start; gap: 8px; } .music-events-side-item { justify-content: start; } }
+@media (max-width:460px) { .music-events-side-item:last-child { display: none; } }

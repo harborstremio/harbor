@@ -1,33 +1,81 @@
 import { Layers, Plus } from "lucide-react";
-import { useState } from "react";
-import { MAX_LISTS, reorderLists, useCustomLists } from "@/lib/custom-lists";
+import { useRef, useState } from "react";
+import { MAX_LISTS, sharedLists, type ListStore } from "@/lib/custom-lists";
 import { useT } from "@/lib/i18n";
 import { CreateListModal } from "@/components/lists/create-list-modal";
 import { ListCard } from "@/components/lists/list-card";
 import { ListDetail } from "./list-detail";
 
-export function MyListsTab() {
+export function MyListsTab({
+  store = sharedLists,
+  emptyCopy,
+  showSearch = true,
+}: {
+  store?: ListStore;
+  emptyCopy?: { title: string; body: string; action: string };
+  showSearch?: boolean;
+} = {}) {
   const t = useT();
-  const lists = useCustomLists();
+  const lists = store.useLists();
   const [selectedListId, setSelectedListId] = useState<string | null>(null);
   const [creating, setCreating] = useState(false);
   const [dragId, setDragId] = useState<string | null>(null);
-  const [overId, setOverId] = useState<string | null>(null);
+  const [dropTarget, setDropTarget] = useState<string | null>(null);
+  const dragRef = useRef<{ id: string; x: number; y: number; active: boolean } | null>(null);
+  const rowRefs = useRef<Map<string, HTMLElement>>(new Map());
+  const listsRef = useRef(lists);
+  listsRef.current = lists;
+  const suppressClick = useRef(false);
 
-  const dropOn = (targetId: string) => {
-    if (dragId && dragId !== targetId) {
-      const ids = lists.map((l) => l.id);
-      const to = ids.indexOf(targetId);
-      ids.splice(ids.indexOf(dragId), 1);
-      ids.splice(to, 0, dragId);
-      reorderLists(ids);
+  const onDown = (e: React.PointerEvent, id: string) => {
+    dragRef.current = { id, x: e.clientX, y: e.clientY, active: false };
+  };
+  const onMove = (e: React.PointerEvent) => {
+    const d = dragRef.current;
+    if (!d) return;
+    if (!d.active) {
+      if (Math.abs(e.clientX - d.x) + Math.abs(e.clientY - d.y) < 8) return;
+      d.active = true;
+      e.currentTarget.setPointerCapture(e.pointerId);
+      setDragId(d.id);
     }
+    let target: string | null = null;
+    for (const l of listsRef.current) {
+      if (l.id === d.id) continue;
+      const el = rowRefs.current.get(l.id);
+      if (!el) continue;
+      const r = el.getBoundingClientRect();
+      if (e.clientX >= r.left && e.clientX <= r.right && e.clientY >= r.top && e.clientY <= r.bottom) {
+        target = l.id;
+        break;
+      }
+    }
+    setDropTarget(target);
+  };
+  const onUp = () => {
+    const d = dragRef.current;
+    if (d?.active) {
+      suppressClick.current = true;
+      if (dropTarget && dropTarget !== d.id) {
+        const ids = listsRef.current.map((l) => l.id).filter((x) => x !== d.id);
+        ids.splice(ids.indexOf(dropTarget), 0, d.id);
+        store.reorderLists(ids);
+      }
+    }
+    dragRef.current = null;
     setDragId(null);
-    setOverId(null);
+    setDropTarget(null);
   };
 
   if (selectedListId) {
-    return <ListDetail listId={selectedListId} onBack={() => setSelectedListId(null)} />;
+    return (
+      <ListDetail
+        listId={selectedListId}
+        onBack={() => setSelectedListId(null)}
+        store={store}
+        showSearch={showSearch}
+      />
+    );
   }
 
   const atMax = lists.length >= MAX_LISTS;
@@ -52,7 +100,12 @@ export function MyListsTab() {
       )}
 
       {lists.length === 0 ? (
-        <EmptyLists onCreate={() => setCreating(true)} />
+        <EmptyLists
+          onCreate={() => setCreating(true)}
+          title={emptyCopy?.title}
+          body={emptyCopy?.body}
+          action={emptyCopy?.action}
+        />
       ) : (
         <div
           className="grid gap-5"
@@ -61,27 +114,24 @@ export function MyListsTab() {
           {lists.map((l) => (
             <div
               key={l.id}
-              draggable
-              onMouseDown={(e) => e.stopPropagation()}
-              onDragStart={(e) => {
-                setDragId(l.id);
-                e.dataTransfer.effectAllowed = "move";
+              ref={(el) => {
+                if (el) rowRefs.current.set(l.id, el);
+                else rowRefs.current.delete(l.id);
               }}
-              onDragOver={(e) => {
-                e.preventDefault();
-                e.dataTransfer.dropEffect = "move";
-                if (dragId && overId !== l.id) setOverId(l.id);
+              onPointerDown={(e) => onDown(e, l.id)}
+              data-tauri-drag-region="false"
+              onPointerMove={onMove}
+              onPointerUp={onUp}
+              onPointerCancel={onUp}
+              onClickCapture={(e) => {
+                if (suppressClick.current) {
+                  e.stopPropagation();
+                  e.preventDefault();
+                  suppressClick.current = false;
+                }
               }}
-              onDrop={(e) => {
-                e.preventDefault();
-                dropOn(l.id);
-              }}
-              onDragEnd={() => {
-                setDragId(null);
-                setOverId(null);
-              }}
-              className={`cursor-grab rounded-2xl transition-all active:cursor-grabbing ${dragId === l.id ? "opacity-40" : ""} ${
-                overId === l.id && dragId !== l.id ? "ring-2 ring-accent ring-offset-2 ring-offset-canvas" : ""
+              className={`cursor-grab touch-none rounded-2xl transition-[opacity,box-shadow] active:cursor-grabbing ${dragId === l.id ? "opacity-40" : ""} ${
+                dropTarget === l.id && dragId !== l.id ? "ring-2 ring-accent ring-offset-2 ring-offset-canvas" : ""
               }`}
             >
               <ListCard list={l} onOpen={setSelectedListId} />
@@ -92,6 +142,7 @@ export function MyListsTab() {
 
       {creating && (
         <CreateListModal
+          store={store}
           onClose={() => setCreating(false)}
           onCreated={(id) => setSelectedListId(id)}
         />
@@ -100,7 +151,17 @@ export function MyListsTab() {
   );
 }
 
-function EmptyLists({ onCreate }: { onCreate: () => void }) {
+function EmptyLists({
+  onCreate,
+  title,
+  body,
+  action,
+}: {
+  onCreate: () => void;
+  title?: string;
+  body?: string;
+  action?: string;
+}) {
   const t = useT();
   return (
     <div className="flex flex-col items-center gap-4 rounded-2xl border border-dashed border-edge-soft bg-canvas/30 px-8 py-20 text-center">
@@ -108,9 +169,9 @@ function EmptyLists({ onCreate }: { onCreate: () => void }) {
         <Layers size={24} strokeWidth={1.6} />
       </span>
       <div className="flex flex-col gap-1.5">
-        <h2 className="font-display text-[20px] font-medium text-ink">{t("Create your first list")}</h2>
+        <h2 className="font-display text-[20px] font-medium text-ink">{title ?? t("Create your first list")}</h2>
         <p className="max-w-sm text-[13px] leading-relaxed text-ink-muted">
-          {t("Group the movies and shows you love. Rewatch shelf, weekend picks, whatever keeps them close.")}
+          {body ?? t("Group the movies and shows you love. Rewatch shelf, weekend picks, whatever keeps them close.")}
         </p>
       </div>
       <button
@@ -119,7 +180,7 @@ function EmptyLists({ onCreate }: { onCreate: () => void }) {
         className="mt-1 flex h-11 items-center gap-2 rounded-full bg-ink px-6 text-[14px] font-semibold text-canvas shadow-[inset_0_1px_0_rgba(255,255,255,0.5)] transition-transform duration-200 hover:scale-[1.03] active:scale-[0.98]"
       >
         <Plus size={17} strokeWidth={2.2} />
-        {t("New list")}
+        {action ?? t("New list")}
       </button>
     </div>
   );

@@ -22,6 +22,7 @@ export type WrappedStats = {
   heatmap: HeatCell[];
   topTitles: TopTitle[];
   topGenres: Array<{ genre: string; count: number }>;
+  topActors: Array<{ name: string; count: number; photo?: string }>;
   posters: Record<string, string>;
   split: { movies: number; series: number; anime: number };
   firstPlay: WatchEvent | null;

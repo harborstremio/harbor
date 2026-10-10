@@ -10,7 +10,7 @@ export type DeployResult = {
 };
 
 const NOT_NATIVE_MSG =
-  "Relay deploy is only available in the Harbor desktop app. Open Harbor outside the browser to continue.";
+  "Relay deploy is only available in the JL Media Vision desktop app. Open JL Media Vision outside the browser to continue.";
 
 function ensureNative(): void {
   const hasTauri =

@@ -1,0 +1,56 @@
+.games-dota { padding-block: 36px 48px; color: var(--color-ink); }
+.games-dota-heading { display: flex; justify-content: space-between; align-items: end; gap: 24px; margin-bottom: 26px; }
+.games-dota-logo { width: 230px; height: 58px; object-fit: contain; object-position: left center; margin-bottom: 22px; }
+[dir="rtl"] .games-dota-logo { object-position: right center; }
+[data-theme-mode="light"] .games-dota-logo { background: #151919; padding: 8px 12px; border-radius: 4px; }
+.games-dota h2 { font-size: clamp(27px, 3vw, 36px); line-height: 1.2; font-weight: 650; letter-spacing: -.035em; margin: 0; }
+.games-dota-heading p { margin-top: 10px; font-size: 15px; color: var(--color-ink-muted); }
+.games-dota-workbench { display: grid; grid-template-columns: minmax(0, 1.1fr) minmax(0, 1fr); gap: 32px; align-items: start; }
+.games-dota-browse, .games-dota-matchups { min-width: 0; }
+.games-dota-matchups { scroll-margin-block-start: 90px; }
+.games-dota .games-dota-return { display: none; }
+.games-dota-tools { display: flex; align-items: center; flex-wrap: wrap; gap: 8px; }
+.games-dota-search { display: flex; align-items: center; gap: 8px; flex: 1 1 180px; min-width: 130px; padding-inline: 12px; border-radius: 6px; background: var(--color-surface); color: var(--color-ink-muted); }
+.games-dota-search > svg { flex-shrink: 0; }
+.games-dota-search input { min-width: 0; width: 100%; height: 42px; font-size: 13px; background: transparent; border: 0; color: var(--color-ink); }
+.games-dota-search:focus-within { outline: 2px solid var(--color-accent); outline-offset: 3px; }
+.games-dota .games-dota-search input:focus { outline: none !important; box-shadow: none !important; }
+.games-dota-attributes { display: flex; align-items: center; gap: 5px; flex-wrap: wrap; margin-top: 14px; }
+.games-dota-attributes button { min-height: 36px; padding: 7px 10px; font-size: 12px; color: var(--color-ink-muted); border-radius: 5px; }
+.games-dota-attributes button[aria-pressed="true"] { background: var(--color-elevated); color: var(--color-ink); }
+.games-dota-scope { color: var(--color-ink-muted); font-size: 12px; line-height: 1.7; margin-block: 14px 18px; }
+.games-dota-roster { display: grid; grid-template-columns: repeat(4, minmax(0, 1fr)); gap: 12px 10px; }
+.games-dota-roster button { min-width: 0; background: var(--color-surface); border-radius: 5px; overflow: hidden; padding-bottom: 10px; text-align: start; }
+.games-dota-roster button:hover { background: var(--color-elevated); }
+.games-dota-roster button[aria-pressed="true"] { box-shadow: inset 0 -3px var(--color-accent); background: var(--color-elevated); }
+.games-dota-roster img, .games-dota-roster .games-art-empty { width: 100%; aspect-ratio: 256 / 144; object-fit: cover; display: block; }
+.games-dota-roster strong { display: block; font-size: 12px; line-height: 1.5; padding: 8px 9px 2px; white-space: nowrap; overflow: hidden; text-overflow: ellipsis; }
+.games-dota-roster button > span { display: flex; gap: 4px; align-items: baseline; padding-inline: 9px; font-size: 13px; font-variant-numeric: tabular-nums; }
+.games-dota-roster small { font-size: 10px; color: var(--color-ink-muted); }
+.games-dota-roster button > small { display: block; padding: 3px 9px 0; }
+.games-dota-selected { display: grid; grid-template-columns: 42% minmax(0, 1fr); align-items: center; gap: 18px; padding-bottom: 22px; border-bottom: 1px solid var(--color-edge-soft); }
+.games-dota-selected > img, .games-dota-selected > .games-art-empty { display: block; width: 100%; aspect-ratio: 256 / 144; object-fit: cover; border-radius: 5px; }
+.games-dota-selected h3 { font-size: clamp(22px, 2.5vw, 29px); line-height: 1.2; font-weight: 650; letter-spacing: -.025em; margin: 5px 0 8px; overflow-wrap: anywhere; }
+.games-dota-selected p { font-size: 12px; color: var(--color-ink-muted); margin: 0; }
+.games-dota-selected span { font-size: 14px; font-variant-numeric: tabular-nums; }
+.games-dota-matchup-heading { display: flex; align-items: center; justify-content: space-between; gap: 16px; margin-top: 22px; }
+.games-dota-matchup-heading h3 { margin: 0; font-size: 19px; font-weight: 600; }
+.games-dota-opponents { list-style: none; padding: 0; margin: 18px 0 0; }
+.games-dota-opponents > li { display: flex; align-items: center; gap: 12px; padding-block: 10px; border-bottom: 1px solid var(--color-edge-soft); }
+.games-dota-opponents img, .games-dota-opponents .games-art-empty { width: 66px; aspect-ratio: 256 / 144; object-fit: cover; flex: 0 0 66px; border-radius: 3px; }
+.games-dota-opponents > li > div { min-width: 0; flex: 1; }
+.games-dota-opponents strong { display: block; font-size: 13px; font-weight: 550; overflow-wrap: anywhere; }
+.games-dota-opponents small { display: block; color: var(--color-ink-muted); font-size: 11px; margin-top: 4px; }
+.games-dota-opponents li > span { font-variant-numeric: tabular-nums; font-size: 15px; }
+.games-dota-more { margin-top: 18px; }
+.games-dota footer { display: flex; align-items: center; flex-wrap: wrap; gap: 10px 18px; font-size: 11px; color: var(--color-ink-muted); margin-top: 22px; line-height: 1.6; }
+.games-dota footer a { display: inline-flex; align-items: center; gap: 5px; }
+.games-dota-status { font-size: 13px; line-height: 1.7; color: var(--color-ink-muted); margin-block: 20px; }
+.games-dota-status button { text-decoration: underline; color: var(--color-ink); }
+.games-dota :is(button, a):focus-visible { outline: 2px solid var(--color-accent); outline-offset: 3px; }
+.games-dota-loading { display: grid; grid-template-columns: repeat(4, minmax(0, 1fr)); gap: 14px; }
+.games-dota-loading i { height: 140px; border-radius: 5px; }
+.games-dota-matchup-loading { display: grid; gap: 12px; margin-top: 20px; }
+.games-dota-matchup-loading i { height: 55px; border-radius: 4px; }
+@media (max-width: 1150px) { .games-dota-workbench { grid-template-columns: 1fr; gap: 32px; }.games-dota-roster { grid-template-columns: repeat(6, minmax(0, 1fr)); }.games-dota-selected { grid-template-columns: 180px minmax(0, 1fr); }.games-dota .games-dota-return { display: inline-flex; margin-bottom: 16px; } }
+@media (max-width: 650px) { .games-dota-roster { grid-template-columns: repeat(3, minmax(0, 1fr)); }.games-dota-selected { grid-template-columns: 40% minmax(0, 1fr); gap: 14px; }.games-dota-loading { grid-template-columns: repeat(2, minmax(0, 1fr)); }.games-dota-logo { width: 190px; } }

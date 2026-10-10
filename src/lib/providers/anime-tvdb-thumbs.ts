@@ -15,15 +15,13 @@ export async function fetchTvdbThumbs(
 
   const absEps = await tvdbEpisodesAbsolute(apiKey, seriesId).catch(() => []);
   if (absEps.length > 0) {
-    let pos = 0;
     for (const e of absEps) {
-      pos += 1;
       if (!e.image) continue;
       bySeasonEpisode.set(`${e.seasonNumber}:${e.number}`, e.image);
-      if (!byAbsolute.has(pos)) byAbsolute.set(pos, e.image);
-      if (e.absoluteNumber != null && !byAbsolute.has(e.absoluteNumber)) {
-        byAbsolute.set(e.absoluteNumber, e.image);
-      }
+      // This endpoint uses absolute ordering; its number remains meaningful
+      // even when the response omits earlier episodes or artwork.
+      const absolute = e.absoluteNumber ?? e.number;
+      if (!byAbsolute.has(absolute)) byAbsolute.set(absolute, e.image);
     }
     return { bySeasonEpisode, byAbsolute };
   }
@@ -36,14 +34,10 @@ export async function fetchTvdbThumbs(
     for (const e of list) {
       if (!e.image) continue;
       bySeasonEpisode.set(`${e.seasonNumber}:${e.number}`, e.image);
+      if (e.absoluteNumber != null && !byAbsolute.has(e.absoluteNumber)) {
+        byAbsolute.set(e.absoluteNumber, e.image);
+      }
     }
-  }
-  const flat = lists.flat().filter((e) => e.image);
-  flat.sort((a, b) => a.seasonNumber - b.seasonNumber || a.number - b.number);
-  let abs = 0;
-  for (const e of flat) {
-    abs += 1;
-    if (!byAbsolute.has(abs)) byAbsolute.set(abs, e.image!);
   }
   return { bySeasonEpisode, byAbsolute };
 }

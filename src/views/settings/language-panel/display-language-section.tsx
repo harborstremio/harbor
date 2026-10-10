@@ -1,6 +1,8 @@
+import { Check } from "../icons";
+import { Flag } from "@/components/flag";
 import { useSettings } from "@/lib/settings";
 import { LANGUAGES, setUiLanguage, useT } from "@/lib/i18n";
-import { Section } from "../shared";
+import { ROW_DESC, ROW_TITLE, Section } from "../shared";
 
 export function DisplayLanguageSection() {
   const { settings, update } = useSettings();
@@ -9,37 +11,41 @@ export function DisplayLanguageSection() {
     <Section
       title={t("Display language")}
       subtitle={t(
-        "Sets Harbor's interface language and automatically follows its text direction. This is separate from subtitle and metadata languages below.",
+        "The language of Harbor's menus, buttons, and labels. Audio, subtitles, and title information have their own language settings.",
       )}
     >
-      <div className="flex flex-col gap-2.5">
+      <div className="grid grid-cols-[repeat(auto-fill,minmax(min(100%,320px),1fr))] gap-2.5">
         {LANGUAGES.map((lang) => {
           const selected = settings.uiLanguage === lang.code;
           return (
             <button
               key={lang.code}
               type="button"
+              aria-pressed={selected}
               onClick={() => {
                 setUiLanguage(lang.code);
                 update({ uiLanguage: lang.code });
               }}
-              className={`flex items-center gap-3.5 rounded-2xl border px-5 py-4 text-start transition-colors ${
-                selected
-                  ? "border-ink bg-elevated"
-                  : "border-edge-soft bg-canvas/40 hover:border-edge hover:bg-canvas/60"
+              className={`flex min-h-[var(--hset-row-min-h)] items-center gap-3 rounded-[10px] border bg-elevated px-4 py-3 text-start transition-colors ${
+                selected ? "border-accent" : "border-edge-soft hover:bg-raised"
               }`}
             >
-              <span
-                className={`flex h-5 w-5 shrink-0 items-center justify-center rounded-full border-2 transition-colors ${
-                  selected ? "border-ink" : "border-edge"
-                }`}
-              >
-                {selected && <span className="h-2.5 w-2.5 rounded-full bg-ink" />}
+              <Flag language={lang.label} size="md" showLabel={false} />
+              <span className="flex min-w-0 flex-1 flex-col gap-1">
+                <span className={ROW_TITLE}>{lang.nativeLabel}</span>
+                <span className={ROW_DESC}>
+                  {lang.rtl ? `${t(lang.label)} · ${t("Right to left")}` : t(lang.label)}
+                </span>
               </span>
-              <div className="flex min-w-0 flex-1 flex-col gap-0.5">
-                <span className="text-[15px] font-semibold text-ink">{lang.nativeLabel}</span>
-                <span className="text-[12.5px] leading-snug text-ink-muted">{lang.label}</span>
-              </div>
+              <span
+                dir={lang.rtl ? "rtl" : "ltr"}
+                className="shrink-0 rounded-[6px] bg-canvas px-2.5 py-1 text-[15.5px] font-medium leading-[22px] text-ink-muted"
+              >
+                {lang.greeting}
+              </span>
+              {selected && (
+                <Check size={18} strokeWidth={2.6} className="shrink-0 text-accent" />
+              )}
             </button>
           );
         })}

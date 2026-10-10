@@ -1,6 +1,7 @@
 import { Zap } from "lucide-react";
 import { AddonLogo } from "@/components/addon-logo";
 import { useDebridClients } from "@/lib/debrid/registry";
+import { useT } from "@/lib/i18n";
 import type { ScoredStream } from "@/lib/streams/types";
 import { directStreamAvailable } from "@/lib/torrent/stremio-stream";
 
@@ -15,6 +16,7 @@ export function PlayProvenance({
   isCached: boolean;
   addonLogo: string | null;
 }) {
+  const t = useT();
   const addonChip = (
     <span className="inline-flex items-center gap-1.5">
       <AddonLogo
@@ -30,7 +32,7 @@ export function PlayProvenance({
   if (stream.url) {
     return (
       <p className="flex items-center gap-1.5 text-[11px] font-semibold uppercase tracking-[0.28em] text-ink-subtle">
-        <span>via</span>
+        <span>{t("via")}</span>
         {addonChip}
       </p>
     );
@@ -40,10 +42,10 @@ export function PlayProvenance({
       return (
         <div className="flex flex-col gap-1">
           <p className="text-[11px] font-semibold uppercase tracking-[0.28em] text-ink-muted">
-            Streams from peers
+            {t("Streams from peers")}
           </p>
           <p className="flex items-center gap-1.5 text-[10px] font-medium tracking-[0.18em] text-ink-subtle/70">
-            <span>found by</span>
+            <span>{t("found by")}</span>
             {addonChip}
           </p>
         </div>
@@ -52,10 +54,13 @@ export function PlayProvenance({
     return (
       <div className="flex flex-col gap-1">
         <p className="text-[11px] font-semibold uppercase tracking-[0.28em] text-danger/80">
-          No debrid configured
+          {t("No debrid configured")}
         </p>
         <p className="flex items-center gap-1.5 text-[10px] font-medium tracking-[0.18em] text-ink-subtle/80">
-          add one in settings · found by {addonChip}
+          <span>{t("add one in settings")}</span>
+          <span aria-hidden>·</span>
+          <span>{t("found by")}</span>
+          {addonChip}
         </p>
       </div>
     );
@@ -66,10 +71,17 @@ export function PlayProvenance({
     <div className="flex flex-col gap-1">
       <p className="flex items-center gap-1.5 text-[11px] font-semibold uppercase tracking-[0.28em] text-ink-muted">
         {isCached && <Zap size={10} fill="currentColor" strokeWidth={0} className="text-accent" />}
-        {isCached ? `plays via ${target.name}` : "uncached on debrid"}
+        {isCached ? (
+          <>
+            <span>{t("plays via")}</span>
+            <span>{target.name}</span>
+          </>
+        ) : (
+          t("uncached on debrid")
+        )}
       </p>
       <p className="flex items-center gap-1.5 text-[10px] font-medium tracking-[0.18em] text-ink-subtle/70">
-        <span>found by</span>
+        <span>{t("found by")}</span>
         {addonChip}
       </p>
     </div>

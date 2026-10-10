@@ -8,6 +8,7 @@ import {
   useState,
   type ReactNode,
 } from "react";
+import { subscribeSecretsReady } from "@/lib/secret-store";
 import {
   completeAuthorization,
   pollForToken,
@@ -18,6 +19,9 @@ import {
 import { getSession, setSession, subscribeSession } from "./session";
 import { stremioIdToSimklTarget } from "./ids";
 import { addToHistory } from "./history";
+import { armOnlineFlush, flushPendingWatches } from "./pending-sync";
+import { recordWatchedFallback } from "./record-watched";
+import { simklScrobble } from "./scrobble";
 import type { SimklPin, SimklSession, SimklTarget } from "./types";
 
 export type ConnectState =
@@ -52,19 +56,39 @@ export function SimklProvider({ children }: { children: ReactNode }) {
   const [connectState, setConnectState] = useState<ConnectState>({ kind: "idle" });
   const pollHandleRef = useRef<PollHandle | null>(null);
 
-  useEffect(
-    () =>
-      subscribeSession(() => {
-        setLocalSession(getSession());
-      }),
-    [],
-  );
+  useEffect(() => {
+    const syncSession = () => setLocalSession(getSession());
+    const unsubscribe = subscribeSession(syncSession);
+    // Profile restoration can finish after render but before this subscription.
+    syncSession();
+    // The persisted store also loads after mount; re-read when it lands.
+    const stopSecrets = subscribeSecretsReady(syncSession);
+    return () => {
+      stopSecrets();
+      unsubscribe();
+    };
+  }, []);
 
   useEffect(() => {
     return () => {
       pollHandleRef.current?.cancel();
     };
   }, []);
+
+  useEffect(
+    () =>
+      armOnlineFlush({
+        hasSession: () => getSession() != null,
+        stopScrobble: (metaId, episode) => simklScrobble("stop", metaId, episode, 100),
+        recordWatched: (metaId, episode, imdb) =>
+          recordWatchedFallback(metaId, episode, imdb ? { imdb } : undefined),
+      }),
+    [],
+  );
+
+  useEffect(() => {
+    if (session) void flushPendingWatches().catch(() => {});
+  }, [session]);
 
   const beginConnect = useCallback(async () => {
     pollHandleRef.current?.cancel();
@@ -114,7 +138,7 @@ export function SimklProvider({ children }: { children: ReactNode }) {
       const target = resolveTarget(args.metaId, args.episode);
       if (!target) return;
       if (!getSession()) return;
-      await addToHistory(target);
+      await addToHistory(target, args.metaId);
     },
     [resolveTarget],
   );

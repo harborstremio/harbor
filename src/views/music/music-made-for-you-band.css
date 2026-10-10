@@ -1,0 +1,13 @@
+.music-mix-card {
+  position: relative;
+  display: flex;
+  width: 100%;
+  min-width: 0;
+  flex-direction: column;
+  container: music-mix-tight / inline-size;
+}
+
+.music-mix-card .music-live-mark {
+  inset-block-start: 8px;
+  inset-block-end: auto;
+}

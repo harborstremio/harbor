@@ -124,7 +124,7 @@ export function AwardView({ awardType }: { awardType: AwardType }) {
 
   return (
     <main ref={scrollRef} className="relative h-full overflow-y-auto bg-canvas">
-      <AwardHero type={awardType} tint={tint} films={films} />
+      <AwardHero type={awardType} tint={tint} films={films} loading={loadingFilms} />
 
       <div className="relative mx-auto flex max-w-[1180px] flex-col gap-12 px-12 pb-32 pt-14">
         <section className="flex max-w-3xl flex-col gap-3">

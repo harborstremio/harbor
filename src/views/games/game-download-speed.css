@@ -1,0 +1,12 @@
+.games-speed-active{position:absolute;inset-inline-end:5px;top:5px;width:5px;height:5px;border-radius:50%;background:var(--color-accent)}
+.games-speed-dialog{padding:26px;overflow-y:auto;scrollbar-width:thin;scrollbar-color:var(--color-edge) transparent}
+.games-speed-dialog header{display:flex;align-items:center;justify-content:space-between;gap:16px}
+.games-speed-dialog h2{font-size:22px;line-height:1.25;font-weight:600;letter-spacing:-.025em}
+.games-speed-dialog>p,.games-speed-dialog form>p,.games-speed-failed p{font-size:13px;line-height:1.6;color:var(--color-ink-muted);margin:15px 0 23px}
+.games-speed-modes{display:flex;gap:8px}
+.games-speed-modes button{flex:1;min-width:0;padding:12px;border-radius:6px;background:var(--color-surface);font-size:13px;line-height:1.4;color:var(--color-ink-muted)}
+.games-speed-modes button[aria-pressed=true]{background:var(--color-elevated);color:var(--color-ink)}
+.games-speed-rate{display:flex;flex-direction:column;gap:9px;font-size:13px;margin-top:23px}
+.games-speed-rate input{background:var(--color-surface);border-radius:6px;padding:12px 14px;min-width:0;width:100%;color:var(--color-ink);font-variant-numeric:tabular-nums}
+.games-speed-rate>span{font-size:12px;line-height:1.5;color:var(--color-ink-muted)}
+.games-speed-dialog footer{display:flex;justify-content:flex-end;flex-wrap:wrap;gap:8px;margin-top:26px}

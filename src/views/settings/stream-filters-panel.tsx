@@ -1,119 +1,247 @@
-import { Filter, Pencil, Plus, Trash2 } from "lucide-react";
-import { useState } from "react";
+import { Check, Filter, FilterX, Pencil, Plus, Trash2 } from "./icons";
+import { useRef, useState } from "react";
 import { useSettings } from "@/lib/settings";
 import { useT } from "@/lib/i18n";
-import { summarizeFilter, type CustomStreamFilter } from "@/lib/streams/custom-filters";
+import { isFilterEmpty, type CustomStreamFilter } from "@/lib/streams/custom-filters";
 import { FilterBuilder } from "../play-picker/filter-builder";
 import { Section } from "./shared";
+import {
+  ModalButton,
+  ROW_ACTION,
+  ROW_ACTION_DANGER,
+  ROW_ACTION_PRIMARY,
+  ROW_DESC,
+  SettingRow,
+  SettingsModal,
+} from "./kit";
+
+const ACTIVE_BUTTON = "min-w-[140px] justify-center";
+
+function dimensionText(values: string[] | undefined): string | null {
+  if (!values || values.length === 0) return null;
+  if (values.length <= 3) return values.join(", ");
+  return `${values.slice(0, 3).join(", ")}, +${values.length - 3}`;
+}
+
+function FilterSummary({ filter }: { filter: CustomStreamFilter }) {
+  const t = useT();
+  const parts: string[] = [];
+  const resolution = dimensionText(filter.resolution);
+  if (resolution) parts.push(resolution);
+  const source = dimensionText(filter.source);
+  if (source) parts.push(source);
+  const codec = dimensionText(filter.codec);
+  if (codec) parts.push(codec);
+  const audio = dimensionText(filter.audio);
+  if (audio) parts.push(audio);
+  if (filter.requireHdr === true) parts.push(t("HDR"));
+  if (filter.cachedOnly === true) parts.push(t("Cached"));
+  if (typeof filter.minSeeders === "number" && filter.minSeeders > 0)
+    parts.push(t("{n}+ seeds", { n: filter.minSeeders }));
+  if (typeof filter.maxSizeGb === "number" && filter.maxSizeGb > 0)
+    parts.push(t("Max {n} GB", { n: filter.maxSizeGb }));
+  if (parts.length === 0) return null;
+  return <span className="block">{parts.join(" · ")}</span>;
+}
+
+function ActiveButton({
+  on,
+  label,
+  disabled,
+  onClick,
+}: {
+  on: boolean;
+  label: string;
+  disabled?: boolean;
+  onClick: () => void;
+}) {
+  const t = useT();
+  return (
+    <button
+      type="button"
+      onClick={onClick}
+      aria-label={label}
+      aria-pressed={on}
+      disabled={disabled}
+      className={`${on ? ROW_ACTION_PRIMARY : ROW_ACTION} ${ACTIVE_BUTTON}`}
+    >
+      {on && <Check size={18} strokeWidth={2.4} />}
+      {on ? t("Active") : t("Set active")}
+    </button>
+  );
+}
 
 export function StreamFiltersPanel() {
   const t = useT();
   const { settings, update } = useSettings();
   const filters = settings.customStreamFilters ?? [];
+  const activeFilter = filters.find((filter) => filter.id === settings.activeStreamFilterId && !isFilterEmpty(filter));
+  const activeId = activeFilter?.id ?? null;
   const [editing, setEditing] = useState<CustomStreamFilter | null>(null);
   const [building, setBuilding] = useState(false);
-
-  const persist = (next: CustomStreamFilter[]) => update({ customStreamFilters: next });
+  const [pendingDelete, setPendingDelete] = useState<CustomStreamFilter | null>(null);
+  const createButtonRef = useRef<HTMLButtonElement>(null);
 
   const upsert = (filter: CustomStreamFilter) => {
     const exists = filters.some((f) => f.id === filter.id);
-    persist(exists ? filters.map((f) => (f.id === filter.id ? filter : f)) : [...filters, filter]);
+    update({
+      customStreamFilters: exists
+        ? filters.map((f) => (f.id === filter.id ? filter : f))
+        : [...filters, filter],
+      activeStreamFilterId: isFilterEmpty(filter)
+        ? activeId === filter.id ? null : activeId
+        : filter.id,
+    });
     setEditing(null);
     setBuilding(false);
   };
 
-  const rename = (id: string, name: string) =>
-    persist(filters.map((f) => (f.id === id ? { ...f, name } : f)));
+  const toggleActive = (id: string) =>
+    update({ activeStreamFilterId: activeId === id ? null : id });
 
-  const remove = (id: string) => persist(filters.filter((f) => f.id !== id));
+  const remove = (id: string) => {
+    update({
+      customStreamFilters: filters.filter((f) => f.id !== id),
+      ...(settings.activeStreamFilterId === id ? { activeStreamFilterId: null } : {}),
+    });
+  };
 
   const closeBuilder = () => {
     setEditing(null);
     setBuilding(false);
   };
 
+  const askDelete = (id: string) => {
+    const target = filters.find((f) => f.id === id);
+    if (target) setPendingDelete(target);
+  };
+
+  const confirmDelete = () => {
+    if (!pendingDelete) return;
+    remove(pendingDelete.id);
+    setPendingDelete(null);
+    closeBuilder();
+    requestAnimationFrame(() => createButtonRef.current?.focus({ preventScroll: true }));
+  };
+
   return (
     <Section
       title={t("Saved stream filters")}
-      subtitle={t("Build a named filter once, then apply it in the source picker to hide everything that doesn't match. Each filter ANDs its dimensions and ignores any you leave blank.")}
+      subtitle={t("Save the stream quality you prefer. Streams must match every category you set; leave a category blank to accept any value. If nothing matches, Harbor uses the next best available source.")}
     >
-      <div className="flex flex-col gap-3 rounded-xl border border-edge-soft bg-canvas/40 p-5">
-        <div className="flex items-center justify-between gap-3">
-          <span className="flex items-center gap-1.5 text-[11.5px] font-bold uppercase tracking-[0.16em] text-ink-subtle">
-            <Filter size={11} strokeWidth={2.3} />
-            {t("YOUR FILTERS")}
-          </span>
-          <button
-            type="button"
-            onClick={() => {
-              setEditing(null);
-              setBuilding(true);
-            }}
-            className="flex h-9 items-center gap-1.5 rounded-full bg-ink px-3.5 text-[12.5px] font-semibold text-canvas transition-opacity hover:opacity-90"
-          >
-            <Plus size={13} strokeWidth={2.4} />
-            {t("New filter")}
-          </button>
-        </div>
+      <SettingRow
+        label={t("No filter")}
+        icon={<FilterX size={18} />}
+        desc={t("Remove the saved quality preference. Your other stream settings still apply.")}
+      >
+        <ActiveButton
+          on={activeId == null}
+          label={t("Use no saved stream filter")}
+          onClick={() => update({ activeStreamFilterId: null })}
+        />
+      </SettingRow>
 
-        {filters.length === 0 ? (
-          <div className="rounded-lg border border-dashed border-edge-soft/60 bg-canvas/20 px-3 py-6 text-center text-[12.5px] text-ink-subtle">
-            {t("No saved filters yet. Hit New filter to build one.")}
-          </div>
-        ) : (
-          <ul className="flex flex-col gap-2">
-            {filters.map((f) => (
-              <li
-                key={f.id}
-                className="flex items-center gap-3 rounded-lg border border-edge-soft bg-elevated/40 px-3.5 py-2.5"
-              >
-                <div className="flex min-w-0 flex-1 flex-col gap-1.5">
-                  <input
-                    type="text"
-                    value={f.name}
-                    onChange={(e) => rename(f.id, e.target.value)}
-                    placeholder={t("Untitled filter")}
-                    maxLength={60}
-                    spellCheck={false}
-                    className="w-full max-w-[280px] bg-transparent text-[13px] font-semibold text-ink outline-none placeholder:text-ink-subtle/70"
-                  />
-                  <span className="w-fit max-w-full truncate rounded-full bg-canvas/70 px-2 py-0.5 text-[11px] font-medium text-ink-muted ring-1 ring-edge-soft/60">
-                    {summarizeFilter(f)}
-                  </span>
-                </div>
-                <button
-                  type="button"
-                  onClick={() => {
-                    setBuilding(false);
-                    setEditing(f);
-                  }}
-                  aria-label={t("Edit filter")}
-                  className="flex h-7 items-center gap-1.5 rounded-full px-2.5 text-[11.5px] font-medium text-ink-muted transition-colors hover:bg-canvas/60 hover:text-ink"
-                >
-                  <Pencil size={12} strokeWidth={2} />
-                  {t("Edit")}
-                </button>
-                <button
-                  type="button"
-                  onClick={() => remove(f.id)}
-                  aria-label={t("Delete filter")}
-                  className="flex h-7 w-7 items-center justify-center rounded-full text-ink-subtle transition-colors hover:bg-danger/15 hover:text-danger"
-                >
-                  <Trash2 size={12} strokeWidth={1.9} />
-                </button>
-              </li>
-            ))}
-          </ul>
-        )}
-      </div>
+      {filters.map((f) => (
+        <SettingRow
+          key={f.id}
+          wide
+          icon={
+            <Filter size={18} className={activeId === f.id ? "text-accent" : undefined} />
+          }
+          label={f.name.trim() || t("Untitled filter")}
+          desc={
+            isFilterEmpty(f) ? (
+              t("No preferences selected. Edit this filter to choose the streams you prefer.")
+            ) : (
+              <FilterSummary filter={f} />
+            )
+          }
+        >
+          <span className="flex flex-wrap items-center gap-2.5">
+            <ActiveButton
+              on={activeId === f.id}
+              label={activeId === f.id
+                ? t("Turn off {name}", { name: f.name.trim() || t("Untitled filter") })
+                : t("Use {name}", { name: f.name.trim() || t("Untitled filter") })}
+              disabled={isFilterEmpty(f)}
+              onClick={() => toggleActive(f.id)}
+            />
+            <button
+              type="button"
+              aria-label={t("Edit {name}", { name: f.name.trim() || t("Untitled filter") })}
+              onClick={() => {
+                setBuilding(false);
+                setEditing(f);
+              }}
+              className={ROW_ACTION}
+            >
+              <Pencil size={18} strokeWidth={2} />
+              {t("Edit")}
+            </button>
+            <button type="button" onClick={() => askDelete(f.id)} aria-label={t("Delete {name}", { name: f.name.trim() || t("Untitled filter") })} className={ROW_ACTION_DANGER}>
+              <Trash2 size={18} strokeWidth={2} />
+              {t("Delete")}
+            </button>
+          </span>
+        </SettingRow>
+      ))}
+
+      <SettingRow
+        label={t("New filter")}
+        icon={<Plus size={18} />}
+        desc={
+          filters.length === 0
+            ? t("Create your first filter with the stream quality you prefer.")
+            : t("Choose a name, then select the resolutions, sources, codecs and audio you prefer.")
+        }
+        tip={t("A filter applies everywhere Harbor picks a stream: the source picker, the instant pick, and Big Picture on TV.")}
+      >
+        <button
+          type="button"
+          ref={createButtonRef}
+          aria-label={t("Create a stream filter")}
+          onClick={() => {
+            setEditing(null);
+            setBuilding(true);
+          }}
+          className={ROW_ACTION_PRIMARY}
+        >
+          <Plus size={18} strokeWidth={2.4} />
+          {t("Create")}
+        </button>
+      </SettingRow>
 
       <FilterBuilder
         open={building || editing != null}
+        dismissible={pendingDelete == null}
         initial={editing}
         onSave={upsert}
-        onDelete={remove}
+        onDelete={askDelete}
         onClose={closeBuilder}
       />
+
+      <SettingsModal
+        open={pendingDelete != null}
+        onClose={() => setPendingDelete(null)}
+        title={t("Delete filter")}
+        actions={
+          <>
+            <ModalButton ghost onClick={() => setPendingDelete(null)}>
+              {t("Cancel")}
+            </ModalButton>
+            <button type="button" onClick={confirmDelete} className={ROW_ACTION_DANGER}>
+              <Trash2 size={18} strokeWidth={2.2} />
+              {t("Delete")}
+            </button>
+          </>
+        }
+      >
+        <p className={`max-w-[66ch] ${ROW_DESC}`}>
+          {t("Delete {name}? Saved filters cannot be brought back.", {
+            name: pendingDelete?.name.trim() || t("Untitled filter"),
+          })}
+        </p>
+      </SettingsModal>
     </Section>
   );
 }

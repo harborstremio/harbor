@@ -1,0 +1,23 @@
+.games-wow-realm-field > div { position: relative; border-radius: 6px; }
+.games-wow-realm-field > div:focus-within { outline: 2px solid var(--color-accent); outline-offset: 2px; }
+.games-wow-character-search .games-wow-realm-field input:focus-visible { outline: none; }
+.games-wow-realm-field input { padding-inline-end: 42px; }
+.games-wow-realm-field > div > button { position: absolute; inset-inline-end: 0; top: 0; height: 44px; width: 40px; display: grid; place-items: center; color: var(--color-ink-muted); border-radius: 6px; }
+.games-wow-realm-field > div > button:hover { color: var(--color-ink); background: var(--color-raised); }
+.games-wow-realm-info { order: 1; flex: 1 1 100%; display: flex; align-items: center; flex-wrap: wrap; gap: 8px 14px; font-size: 12px; line-height: 1.6; color: var(--color-ink-muted); min-height: 28px; }
+.games-wow-realm-info strong { color: var(--color-ink); font-weight: 600; }
+.games-wow-realm-info a, .games-wow-realm-info button { display: inline-flex; align-items: center; gap: 4px; }
+.games-wow-realm-info a:hover { color: var(--color-ink); }
+.games-wow-realm-info button { padding: 7px; border-radius: 4px; }
+.games-wow-realm-info button:hover { background: var(--color-elevated); }
+.games-wow-realm-info button:disabled { opacity: .5; }
+.games-wow-realm-menu { position: fixed; z-index: 400; overflow-y: auto; overscroll-behavior: contain; padding: 5px; border-radius: 7px; background: var(--color-elevated); border: 1px solid var(--color-edge); box-shadow: 0 8px 24px #0003; }
+.games-wow-realm-menu > button { width: 100%; min-height: 42px; display: flex; align-items: center; justify-content: space-between; gap: 12px; padding: 9px 10px; text-align: start; border-radius: 4px; font-size: 14px; }
+.games-wow-realm-menu > button > span { overflow-wrap: anywhere; }
+.games-wow-realm-menu > button:hover, .games-wow-realm-menu > button[aria-selected=true] { background: var(--color-raised); }
+.games-wow-realm-menu > p { font-size: 13px; line-height: 1.6; padding: 8px; color: var(--color-ink-muted); }
+.games-wow-realm-state { display: inline-flex; align-items: center; gap: 6px; white-space: nowrap; }
+.games-wow-realm-state i { width: 6px; height: 6px; flex: 0 0 6px; border-radius: 50%; background: var(--color-ink-muted); }
+.games-wow-realm-state.is-online i { background: var(--color-success); }
+.games-wow-realm-state.is-offline i { background: var(--color-danger); }
+.games-wow-realm-state small, small.games-wow-realm-state { font-size: 11px; color: var(--color-ink-muted); }

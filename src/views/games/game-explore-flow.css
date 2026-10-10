@@ -1,0 +1,20 @@
+/* Give the lower page different rhythms: game shelves, compact studio context,
+   then launcher discovery. Keep artwork and Harbor's existing surface tokens. */
+.games-studios .games-studio-intro { display:flex;align-items:center;justify-content:space-between;gap:24px;margin:4px 0 22px;min-height:64px; }
+.games-studio-intro h3 { font-size:20px;line-height:1.3;margin:0 0 6px; }
+.games-studio-intro p { color:var(--color-ink-muted);font-size:12px;line-height:1.6;max-width:75ch;display:-webkit-box;-webkit-line-clamp:2;-webkit-box-orient:vertical;overflow:hidden; }
+.games-studio-intro>.games-text-action { flex-shrink:0; }
+.games-studio-catalog .games-studio-game-shelf { width:100%; }
+.games-connected-shelf .games-media-art { border-radius:5px; }
+.games-connected-shelf :is(button,a):focus-visible { outline:2px solid var(--color-ink);outline-offset:4px; }
+.games-hack-rail .games-rom-card { width:100%; }
+.games-hack-rail .games-rom-skeleton { aspect-ratio:2/3;min-height:0; }
+.games-explore-shortcuts { display:flex;flex-wrap:wrap;gap:12px 28px;padding-block:12px 4px;margin-block:0 20px;color:var(--color-ink-muted);font-size:12px; }
+.games-explore-shortcuts button { padding-block:8px;text-align:start; }
+.games-explore-shortcuts button:hover { color:var(--color-ink); }
+.games-explore-shortcuts button:focus-visible { outline:2px solid var(--color-ink);outline-offset:4px; }
+.games-browser-home .games-section { scroll-margin-block-start:72px; }
+@container(max-width:600px) {
+  .games-studios .games-studio-intro { align-items:flex-start;flex-direction:column;gap:12px; }
+  .games-explore-shortcuts { gap:4px 20px;font-size:11px; }
+}

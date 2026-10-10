@@ -1,3 +1,4 @@
+import { dispatchTvNav } from "@/lib/keyboard-navigation";
 import type { RemoteTextEntry } from "./protocol";
 
 /** Non-textual input types — everything else can be armed for remote typing. */
@@ -102,24 +103,9 @@ export function applyTextToFocused(value: string) {
 export function submitFocusedText() {
   const el = resolveTextEntryEl();
   if (!el) return;
-  el.focus({ preventScroll: true });
-  const opts: KeyboardEventInit = {
-    key: "Enter",
-    code: "Enter",
-    keyCode: 13,
-    which: 13,
-    bubbles: true,
-    cancelable: true,
-  };
-  el.dispatchEvent(new KeyboardEvent("keydown", opts));
-  el.dispatchEvent(new KeyboardEvent("keyup", opts));
-  if (el.form) {
-    try {
-      el.form.requestSubmit();
-    } catch {
-      el.form.submit();
-    }
-  }
+  el.removeAttribute(TEXT_ACTIVE_ATTR);
+  el.blur();
+  dispatchTvNav("down");
 }
 
 function clearTextActiveOnFocusOut(e: FocusEvent) {

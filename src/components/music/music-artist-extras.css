@@ -1,0 +1,233 @@
+.music-artist-extras {
+  display: grid;
+  gap: 28px;
+  min-width: 0;
+  min-height: 1px;
+  container-type: inline-size;
+}
+.music-artist-extras header {
+  display: flex;
+  align-items: center;
+  flex-wrap: wrap;
+  gap: 8px 20px;
+  margin-bottom: 16px;
+}
+.music-artist-extras h2 {
+  flex: 1;
+  font-size: 22px;
+  font-weight: 700;
+}
+.music-artist-extras button:focus-visible {
+  outline: 2px solid var(--color-accent);
+  outline-offset: 4px;
+}
+.music-artist-extras-link {
+  display: inline-flex;
+  width: fit-content;
+  align-items: center;
+  gap: 8px;
+  min-height: 44px;
+  font-size: 13px;
+  color: var(--color-ink-muted);
+  text-align: start;
+}
+.music-artist-extras-link:hover {
+  color: var(--color-ink);
+  text-decoration: underline;
+  text-underline-offset: 4px;
+}
+.music-merch-grid {
+  display: grid;
+  grid-template-columns: repeat(4, minmax(0, 1fr));
+  gap: 18px;
+}
+.music-merch-card {
+  min-width: 0;
+  display: flex;
+  flex-direction: column;
+  text-align: start;
+  gap: 10px;
+  border-radius: 6px;
+}
+.music-merch-art {
+  display: grid;
+  place-items: center;
+  width: 100%;
+  aspect-ratio: 1;
+  overflow: hidden;
+  border-radius: 6px;
+  background: var(--color-elevated);
+  color: var(--color-ink-subtle);
+}
+.music-merch-art img {
+  width: 100%;
+  height: 100%;
+  object-fit: contain;
+  transition: transform 180ms ease;
+}
+.music-merch-card:hover .music-merch-art img {
+  transform: scale(1.025);
+}
+.music-merch-card strong {
+  font-size: 14px;
+  line-height: 1.45;
+  font-weight: 600;
+  overflow-wrap: anywhere;
+}
+.music-merch-meta {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 12px;
+  width: 100%;
+  margin-top: auto;
+  font-size: 13px;
+  color: var(--color-ink-muted);
+}
+.music-tour-list {
+  display: grid;
+  gap: 2px;
+}
+.music-tour-event {
+  display: flex;
+  align-items: center;
+  gap: 16px;
+  min-height: 78px;
+  padding: 10px 12px;
+  border-radius: 10px;
+  transition: background-color 180ms ease-out;
+  text-align: start;
+}
+.music-tour-event:hover {
+  background: var(--color-elevated);
+}
+.music-tour-date {
+  display: grid;
+  flex: 0 0 auto;
+  place-items: center;
+  align-content: center;
+  gap: 1px;
+  inline-size: 58px;
+  block-size: 58px;
+  border-radius: 8px;
+  background: var(--color-elevated);
+}
+.music-tour-month {
+  font-size: 10.5px;
+  font-weight: 700;
+  letter-spacing: 0.06em;
+  text-transform: uppercase;
+  color: var(--color-ink-subtle);
+}
+.music-tour-day {
+  font-size: 21px;
+  font-weight: 700;
+  line-height: 1;
+  font-variant-numeric: tabular-nums;
+  color: var(--color-ink);
+}
+.music-tour-where {
+  flex: 1;
+  min-width: 0;
+}
+.music-tour-year {
+  flex: 0 0 auto;
+  font-size: 12.5px;
+  font-variant-numeric: tabular-nums;
+  color: var(--color-ink-subtle);
+}
+.music-tour-event:hover .music-tour-date {
+  background: var(--color-surface);
+}
+.music-tour-event > span {
+  flex: 1;
+  min-width: 0;
+}
+.music-tour-event strong {
+  display: block;
+  font-size: 15px;
+  font-weight: 600;
+}
+.music-tour-event small {
+  display: block;
+  margin-top: 5px;
+  font-size: 12px;
+  line-height: 1.5;
+  color: var(--color-ink-muted);
+}
+.music-tour-event > svg {
+  flex-shrink: 0;
+}
+.music-artist-extras-source {
+  font-size: 11px;
+  color: var(--color-ink-subtle);
+  overflow-wrap: anywhere;
+}
+.music-artist-extras-loading {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  min-height: 64px;
+  color: var(--color-ink-muted);
+  font-size: 13px;
+}
+.music-artist-extras-loading svg {
+  animation: artist-extras-spin 1s linear infinite;
+}
+@keyframes artist-extras-spin {
+  to {
+    transform: rotate(360deg);
+  }
+}
+@container (max-width:600px) {
+  .music-merch-grid {
+    grid-template-columns: repeat(2, minmax(0, 1fr));
+    gap: 18px 14px;
+  }
+  .music-tour-event {
+    gap: 12px;
+  }
+  .music-tour-event time {
+    flex-basis: 80px;
+  }
+}
+@media (prefers-reduced-motion: reduce) {
+  .music-merch-art img {
+    transition: none;
+  }
+  .music-merch-card:hover .music-merch-art img {
+    transform: none;
+  }
+  .music-artist-extras-loading svg {
+    animation: none;
+  }
+}
+
+.music-merch-links {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 8px;
+  margin-top: 4px;
+}
+.music-merch-store {
+  display: inline-flex;
+  align-items: center;
+  gap: 8px;
+  min-height: 40px;
+  padding: 8px 12px;
+  border-radius: 8px;
+  background: var(--color-elevated);
+  color: var(--color-ink);
+  font-size: 12.5px;
+  transition: background-color 140ms ease;
+}
+.music-merch-store:hover {
+  background: var(--color-raised);
+}
+.music-merch-favicon {
+  width: 16px;
+  height: 16px;
+  border-radius: 3px;
+  flex-shrink: 0;
+  object-fit: contain;
+}

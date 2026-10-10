@@ -1,0 +1,35 @@
+.games-personal-achievement-summary{margin:0 24px 16px;display:flex;align-items:center;gap:12px;min-height:36px;flex-wrap:wrap;font-size:13px;color:var(--color-ink-muted)}
+.games-personal-achievement-summary>strong{display:flex;align-items:center;gap:7px;color:var(--color-ink);font-size:15px;font-weight:600}.games-personal-achievement-summary>strong svg{color:var(--color-success);flex:none}
+.games-personal-achievement-summary>span{flex:1;line-height:1.5}.games-personal-achievement-summary>progress{flex:1;min-width:70px;max-width:150px;height:5px;appearance:none;border:none;border-radius:3px;overflow:hidden;background:var(--color-raised)}.games-personal-achievement-summary progress::-webkit-progress-bar{background:var(--color-raised)}.games-personal-achievement-summary progress::-webkit-progress-value{background:var(--color-success)}.games-personal-achievement-summary progress::-moz-progress-bar{background:var(--color-success)}
+.games-personal-achievement-summary>button{margin-inline-start:auto;display:grid;place-items:center;width:34px;height:34px;flex:none;border-radius:5px}.games-personal-achievement-summary>button:hover{background:var(--color-elevated)}.games-personal-achievement-summary>button:disabled{opacity:.4}
+.games-personal-achievement-filters{display:flex;gap:6px;flex-wrap:wrap;padding:0 24px 14px}.games-personal-achievement-filters>button{padding:9px 12px;border-radius:5px;font-size:13px;min-height:38px;color:var(--color-ink-muted)}.games-personal-achievement-filters>button[aria-pressed=true]{background:var(--color-elevated);color:var(--color-ink)}.games-personal-achievement-filters span{margin-inline-start:5px;font-size:12px;font-variant-numeric:tabular-nums;color:var(--color-ink-subtle)}
+.games-public-achievement-list .games-personal-achievement-row{display:grid;grid-template-columns:48px minmax(0,1fr) auto;gap:14px}.games-personal-achievement-row>div{min-width:0}.games-public-achievement-list .games-personal-achievement-row h3{font-size:14px}.games-public-achievement-list .games-personal-achievement-row p{font-size:12px}.games-personal-achievement-row time{display:block;margin-top:6px;font-size:11px;color:var(--color-ink-subtle)}
+.games-personal-achievement-state{display:flex;flex-direction:column;align-items:flex-end;gap:8px;text-align:end}.games-personal-achievement-state>strong{display:flex;align-items:center;gap:6px;color:var(--color-ink-muted);font-size:13px;font-weight:550;line-height:1.4}.games-personal-achievement-state>strong svg{flex:none}.games-personal-achievement-row[data-progress=earned] .games-personal-achievement-state>strong{color:var(--color-success)}.games-personal-achievement-state .games-achievement-rate{font-size:11px;white-space:normal}.games-personal-achievement-secret{display:grid;place-items:center;width:48px;height:48px;border-radius:3px;background:var(--color-elevated);color:var(--color-ink-muted)}
+.games-public-achievements footer .games-personal-achievement-reveal{flex-basis:100%;text-align:start;font-size:12px;color:var(--color-ink-muted);min-height:30px}.games-personal-achievement-summary>button:focus-visible,.games-personal-achievement-filters>button:focus-visible{outline:2px solid var(--color-ink);outline-offset:2px}
+@media(max-width:540px){.games-personal-achievement-summary{margin-inline:16px}.games-personal-achievement-filters{padding-inline:16px}.games-public-achievement-list .games-personal-achievement-row{grid-template-columns:42px minmax(0,1fr);gap:10px}.games-public-achievement-list .games-personal-achievement-row>img,.games-personal-achievement-secret{width:42px;height:42px}.games-personal-achievement-state{grid-column:2;flex-direction:row;align-items:center;justify-content:space-between;text-align:start;gap:12px}.games-personal-achievement-state .games-achievement-rate{text-align:end}.games-personal-achievement-summary>progress{max-width:95px}}
+.games-personal-achievement-row[data-progress=locked]>img,
+.games-personal-achievement-row[data-progress=locked]>.games-art-empty{opacity:.42;filter:grayscale(1)}
+.games-personal-achievement-row[data-progress=locked] .games-achievement-copy h3{color:var(--color-ink-muted)}
+.games-achievement-list-tools{display:flex;align-items:stretch;gap:10px;margin:0 24px 16px;flex-wrap:wrap}
+.games-achievement-list-tools>.games-achievement-search{flex:1 1 240px;min-width:0;margin:0}
+.games-achievement-reveal{display:inline-flex;align-items:center;justify-content:center;gap:8px;padding:10px 12px;min-height:40px;max-width:100%;border-radius:5px;background:var(--color-elevated);font-size:12px;color:var(--color-ink-muted)}
+.games-achievement-reveal>svg{flex:none}
+.games-achievement-reveal:hover,.games-achievement-reveal[aria-pressed=true]{background:var(--color-raised);color:var(--color-ink)}
+.games-achievement-reveal:focus-visible{outline:2px solid var(--color-accent);outline-offset:2px}
+@media(max-width:540px){.games-achievement-list-tools{margin-inline:16px}}
+.games-achievement-progress-reason{display:block;margin-top:4px;font-size:12px;line-height:1.5;color:var(--color-ink-subtle)}
+.games-achievements-backdrop .games-public-achievements{min-height:min(86vh,calc(100vh - 76px));max-height:86vh}
+.games-achievements-backdrop .games-public-achievement-list{flex:1 1 auto;min-height:0;scrollbar-gutter:stable}
+.games-achievement-state-pending{display:block;width:66px;height:13px;border-radius:4px;background:var(--color-elevated)}
+.games-personal-achievement-row>img,.games-personal-achievement-row .games-personal-achievement-state>strong{transition:opacity 220ms var(--ease-out),filter 220ms var(--ease-out),color 220ms var(--ease-out)}
+.gam-reward-owned{display:inline-flex;align-items:center;gap:7px;min-height:38px;padding:0 12px;border-radius:7px;background:color-mix(in oklch,var(--color-success) 14%,transparent);color:var(--color-success);font-size:12.5px;font-weight:550}
+@media(prefers-reduced-motion:no-preference){.games-achievement-state-pending{animation:games-achievement-pending 1.3s ease-in-out infinite}}
+@keyframes games-achievement-pending{0%,100%{opacity:.5}50%{opacity:.9}}
+
+/* Keep the detail page steady while achievement panels enter, leave or hand off. */
+:is(.games-achievements-backdrop,.games-achievement-manager-backdrop).animate-scrim-in,
+:is(.games-achievements-backdrop,.games-achievement-manager-backdrop).animate-scrim-out{animation:none}
+:is(.games-achievements-backdrop,.games-achievement-manager-backdrop)>.animate-dialog-in{animation:games-achievement-panel 220ms ease-in-out both}
+:is(.games-achievements-backdrop,.games-achievement-manager-backdrop)>.animate-dialog-out{animation:games-achievement-panel 190ms ease-in-out reverse both}
+@keyframes games-achievement-panel{from{opacity:0;transform:translateY(8px) scale(.99,.98)}to{opacity:1;transform:translateY(0) scale(1,1)}}
+@media(prefers-reduced-motion:reduce){:is(.games-achievements-backdrop,.games-achievement-manager-backdrop)>.animate-dialog-in,:is(.games-achievements-backdrop,.games-achievement-manager-backdrop)>.animate-dialog-out{animation:none}}

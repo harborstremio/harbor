@@ -5,12 +5,15 @@ import {
   modalOverlayClose,
   modalOverlayEmitAction,
   modalOverlayGetPending,
+  modalOverlayRequestAction,
   onModalShow,
   onModalState,
   type ModalPayload,
 } from "@/lib/modal-overlay";
 import { AudioModal, type AudioModalState } from "@/components/popups/audio-modal";
 import { SubtitleModal, type SubtitleModalState } from "@/components/popups/subtitle-modal";
+import { markLimitReached } from "@/lib/subtitles/limit-signal";
+import { markPendingSub } from "@/lib/subtitles/pending-subs";
 
 export function ModalOverlayApp() {
   useEffect(() => {
@@ -69,10 +72,25 @@ function ModalRouter() {
       <SubtitleModal
         state={payload.state as SubtitleModalState}
         onSelect={(id) => modalOverlayEmitAction("modal://subtitle/select", { id })}
+        onSelectSecondary={(id) => modalOverlayEmitAction("modal://subtitle/secondary", { id })}
         onDelay={(sec) => modalOverlayEmitAction("modal://subtitle/delay", { sec })}
-        onAddSubtitle={(url, lang, title, metadata) =>
-          modalOverlayEmitAction("modal://subtitle/add", { url, lang, title, ...metadata })
-        }
+        onEnterSync={() => modalOverlayEmitAction("modal://subtitle/live-sync", {})}
+        onAddSubtitle={async (url, lang, title, metadata) => {
+          const result = await modalOverlayRequestAction<"ok" | "failed" | "limited" | "pending">(
+            "modal://subtitle/add",
+            {
+              url,
+              lang,
+              title,
+              ...metadata,
+            },
+          );
+          if (result === "limited") markLimitReached(url);
+          // The overlay is a separate window, so the main window's pending signal must
+          // be re-marked locally for this menu instance to show "translating".
+          if (result === "pending") markPendingSub(url);
+          return result === "ok";
+        }}
         onClose={close}
       />
     );

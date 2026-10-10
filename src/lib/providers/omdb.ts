@@ -1,5 +1,6 @@
 import { useEffect, useState } from "react";
 import { lruSet } from "../cache";
+import { registerEvictable } from "../maintenance";
 
 const CACHE_MAX = 1500;
 const MISS_MAX = 1000;
@@ -19,6 +20,7 @@ export type OmdbAwards = {
 
 export type OmdbScores = {
   imdbRating?: string;
+  rated?: string;
   imdbVotes?: number;
   rtCritics?: number;
   metascore?: number;
@@ -339,6 +341,10 @@ async function performFetch(key: string, imdbId: string, type?: string): Promise
     const rtCritics = parsePercent(rt?.Value);
     const scores: OmdbScores = {
       imdbRating: j.imdbRating && j.imdbRating !== "N/A" ? j.imdbRating : undefined,
+      rated:
+        typeof j.Rated === "string" && !/^(n\/a|not rated|unrated|nr)$/i.test(j.Rated.trim())
+          ? j.Rated.trim()
+          : undefined,
       imdbVotes,
       rtCritics,
       metascore: parsePercent(meta?.Value),
@@ -398,6 +404,10 @@ export async function omdbPrefetch(key: string, imdbId?: string, type?: string):
 const seasonRatingsCache = new Map<string, Map<number, number>>();
 const seasonRatingsInflight = new Map<string, Promise<Map<number, number>>>();
 
+registerEvictable("omdb-season-ratings", (aggressive) => {
+  if (aggressive) seasonRatingsCache.clear();
+});
+
 async function performSeasonFetch(
   key: string,
   imdbId: string,
@@ -438,7 +448,7 @@ async function performSeasonFetch(
         out.set(num, rating);
       }
     }
-    seasonRatingsCache.set(cacheKey, out);
+    lruSet(seasonRatingsCache, cacheKey, out, 200);
     return out;
   } catch {
     return out;

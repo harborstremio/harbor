@@ -47,7 +47,7 @@ export function TierStrip({
             <button
               key={t}
               onClick={() => onSelect(t)}
-              className={`group flex min-h-[56px] items-center gap-3 rounded-[14px] border px-4 py-2.5 text-start transition-[border-color,background-color,opacity] duration-200 ${
+              className={`group flex min-h-[56px] items-center gap-3 rounded-lg border px-4 py-2.5 text-start transition-[border-color,background-color,opacity] duration-200 ${
                 isActive
                   ? "border-ink/35 bg-ink/[0.05]"
                   : "border-edge-soft hover:border-edge hover:bg-canvas/60"
@@ -129,7 +129,7 @@ function QualityDisclaimer() {
               Quality labels come from addons
             </span>
             <p className="text-[12.5px] leading-snug text-ink-muted">
-              Each row's resolution badge is whatever the addon claimed. Some addons mislabel files: a 1080p or 4K tag on a brand-new theatrical release is often a CAM or TS rebadged. Harbor pushes obvious mismatches down the ranking, but if a top result looks suspicious, scroll the source list or pick the Theater Capture tier instead.
+              Each row's resolution badge is whatever the addon claimed. Some addons mislabel files: a 1080p or 4K tag on a brand-new theatrical release is often a CAM or TS rebadged. JL Media Vision pushes obvious mismatches down the ranking, but if a top result looks suspicious, scroll the source list or pick the Theater Capture tier instead.
             </p>
           </div>,
           document.body,

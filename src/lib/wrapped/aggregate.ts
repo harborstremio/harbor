@@ -43,7 +43,7 @@ export function aggregateWrapped(
   let longestBinge = { date: "", count: 0 };
   for (const [date, count] of byDay) if (count > longestBinge.count) longestBinge = { date, count };
 
-  const topTitles = [...byId.values()].sort((a, b) => b.count - a.count).slice(0, 10);
+  const topTitles = [...byId.values()].sort((a, b) => b.count - a.count).slice(0, 20);
 
   return {
     source,
@@ -54,6 +54,7 @@ export function aggregateWrapped(
     heatmap,
     topTitles,
     topGenres: [],
+    topActors: [],
     posters: {},
     split,
     firstPlay: sorted[0] ?? null,

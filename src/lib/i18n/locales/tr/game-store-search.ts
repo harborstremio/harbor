@@ -1,0 +1,20 @@
+export default {
+  "Search shortcuts": "Arama kısayolları",
+  "Steam search shortcut": "Steam arama kısayolu",
+  "Type “st ” or “st:” to search the Steam store. Turn off to use normal Harbor search for these queries.": "Steam mağazasında aramak için “st ” veya “st:” yazın. Bu sorgularda normal Harbor aramasını kullanmak için kapatın.",
+  "games.storeSearch.title": "Steam mağazası",
+  "games.storeSearch.hint": "Steam’de doğrudan aramak için Harbor aramasında “st ” kullanın.",
+  "games.storeSearch.automatic": "Otomatik",
+  "games.storeSearch.region": "Mağaza bölgesi",
+  "games.storeSearch.showLibrary": "Kütüphanemde bulunan oyunları işaretle",
+  "games.storeSearch.settingsError": "Arama tercihleri kaydedilemedi veya okunamadı. Değiştirmeden önce tekrar deneyin.",
+  "games.storeSearch.openError": "Bu bağlantı açılamadı. Steam’in veya tarayıcınızın kullanılabilir olduğunu kontrol edip tekrar deneyin.",
+  "games.storeSearch.empty": "Bir oyun adı girin.",
+  "games.storeSearch.saved": "{date} tarihinde kaydedilen sonuçlar ve fiyatlar.",
+  "games.storeSearch.error": "Steam araması kullanılamıyor. Tekrar deneyin.",
+  "games.storeSearch.comingSoon": "Yakında",
+  "games.storeSearch.inLibrary": "Kütüphanenizde",
+  "games.storeSearch.unavailable": "Fiyat bulunamadı",
+  "games.storeSearch.web": "Web sitesi",
+  "games.storeSearch.client": "Steam’de aç"
+};

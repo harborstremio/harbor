@@ -1,6 +1,6 @@
 import { MAL_API_BASE } from "./config";
 import { getSession } from "./session";
-import { ensureRefreshed } from "./auth";
+import { resolveMalRequestUrl } from "./url";
 
 export class MalApiError extends Error {
   constructor(
@@ -30,17 +30,20 @@ export async function malRequest<T>(
   if (token) headers["Authorization"] = `Bearer ${token}`;
   if (options.body) headers["Content-Type"] = "application/x-www-form-urlencoded";
 
-  let res = await tauriFetch(`${MAL_API_BASE}${path}`, {
+  const requestUrl = resolveMalRequestUrl(MAL_API_BASE, path);
+
+  let res = await tauriFetch(requestUrl, {
     method: options.method ?? "GET",
     headers,
     body: options.body?.toString(),
   });
 
   if (res.status === 401 && !options.accessToken) {
+    const { ensureRefreshed } = await import("./auth");
     const refreshed = await ensureRefreshed();
     if (refreshed) {
       headers["Authorization"] = `Bearer ${refreshed.accessToken}`;
-      res = await tauriFetch(`${MAL_API_BASE}${path}`, {
+      res = await tauriFetch(requestUrl, {
         method: options.method ?? "GET",
         headers,
         body: options.body?.toString(),

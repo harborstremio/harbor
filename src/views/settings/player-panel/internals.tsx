@@ -1,15 +1,19 @@
 import type { ReactNode } from "react";
+import { useT } from "@/lib/i18n";
 
 export const isTauri = typeof window !== "undefined" && "__TAURI_INTERNALS__" in window;
 
 export function DesktopOnlyBlock({ children }: { children: ReactNode }) {
+  const t = useT();
   if (isTauri) return <>{children}</>;
   return (
     <div className="relative">
-      <div className="pointer-events-none select-none opacity-40">{children}</div>
+      <div inert data-tv-skip className="pointer-events-none select-none opacity-40">
+        {children}
+      </div>
       <div className="pointer-events-none absolute inset-0 flex items-start justify-center pt-3">
-        <span className="rounded-full border border-edge-soft bg-elevated/95 px-3 py-1 text-[10.5px] font-semibold uppercase tracking-[0.16em] text-ink-subtle backdrop-blur-sm">
-          Desktop only
+        <span className="inline-flex h-[22px] items-center rounded-[6px] bg-elevated px-2 text-[13px] font-bold uppercase leading-[17px] tracking-[0.72px] text-ink-subtle">
+          {t("Desktop only")}
         </span>
       </div>
     </div>
@@ -18,9 +22,7 @@ export function DesktopOnlyBlock({ children }: { children: ReactNode }) {
 
 export function Label({ children }: { children: React.ReactNode }) {
   return (
-    <span className="text-[11px] font-semibold uppercase tracking-[0.16em] text-ink-subtle">
-      {children}
-    </span>
+    <span className="harbor-settings-label">{children}</span>
   );
 }
 
@@ -37,7 +39,9 @@ export function SubField({
     <div className="flex flex-col gap-2">
       <div className="flex items-center justify-between">
         <Label>{label}</Label>
-        {value && <span className="font-mono text-[12px] tabular-nums text-ink-muted">{value}</span>}
+        {value && (
+          <span className="font-mono text-[15.5px] tabular-nums text-ink-muted">{value}</span>
+        )}
       </div>
       {children}
     </div>
@@ -55,7 +59,9 @@ export function previewFamily(id: string): string {
     case "serif":
       return '"Fraunces", Georgia, serif';
     case "rounded":
-      return '"SF Pro Rounded", "Nunito", system-ui, sans-serif';
+      return '"Fredoka", "SF Pro Rounded", system-ui, sans-serif';
+    case "arabic":
+      return '"Vazirmatn", "Noto Sans Arabic", system-ui, sans-serif';
     default:
       return '"Inter", system-ui, sans-serif';
   }

@@ -1,0 +1,88 @@
+.sh-field-board {
+  margin-top: 18px;
+  border: 1px solid var(--color-edge-soft);
+  border-radius: 12px;
+  background: var(--color-surface);
+  overflow: hidden;
+}
+.sh-field-board > header {
+  display: flex;
+  align-items: baseline;
+  justify-content: space-between;
+  gap: 12px;
+  padding: 13px 16px;
+  border-bottom: 1px solid var(--color-edge-soft);
+}
+.sh-field-board > header h3 {
+  font-size: 13.5px;
+  font-weight: 600;
+  color: var(--color-ink);
+}
+.sh-field-board > header span {
+  font-size: 12px;
+  color: var(--color-ink-subtle);
+  font-variant-numeric: tabular-nums;
+}
+.sh-field-board ol {
+  display: flex;
+  flex-direction: column;
+  margin: 0;
+  padding: 4px 0;
+  list-style: none;
+}
+.sh-field-board li {
+  display: flex;
+  align-items: center;
+  gap: 11px;
+  padding: 7px 16px;
+  font-size: 13px;
+  color: var(--color-ink-muted);
+}
+.sh-field-board li[data-podium] {
+  color: var(--color-ink);
+  font-weight: 600;
+}
+.sh-field-place {
+  min-width: 22px;
+  font-variant-numeric: tabular-nums;
+  font-size: 12px;
+  color: var(--color-ink-subtle);
+  text-align: end;
+}
+.sh-field-board li[data-podium] .sh-field-place {
+  color: var(--color-accent);
+}
+.sh-field-board img,
+.sh-field-blank {
+  width: 22px;
+  height: 22px;
+  flex-shrink: 0;
+  border-radius: 50%;
+  object-fit: cover;
+  background: var(--color-elevated);
+}
+.sh-field-name {
+  flex: 1;
+  min-width: 0;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+}
+.sh-field-score {
+  flex-shrink: 0;
+  font-variant-numeric: tabular-nums;
+  font-size: 12.5px;
+  color: var(--color-ink-subtle);
+}
+.sh-field-board > button {
+  width: 100%;
+  padding: 11px;
+  border-top: 1px solid var(--color-edge-soft);
+  font-size: 12.5px;
+  font-weight: 600;
+  color: var(--color-ink);
+  transition: background-color 160ms ease-out;
+}
+.sh-field-board > button:hover {
+  background: var(--color-elevated);
+}

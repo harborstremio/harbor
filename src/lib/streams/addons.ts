@@ -1,9 +1,19 @@
-import { safeFetch as fetch } from "@/lib/safe-fetch";
+import { safeFetch as fetch, safeFetchLocal } from "@/lib/safe-fetch";
 import type { Addon } from "@/lib/addons";
 import { dlog, dwarn } from "@/lib/debug";
+import { isHarborFetchPolicyError } from "@/lib/fetch-fallback-policy";
+import { isLocalNetworkUrl } from "@/lib/local-network";
 import { isAddonRanked, isStatusOnlyAddon } from "./addon-detect";
+import type { AddonRankFn } from "./addon-priority";
 import { hasUncachedMarker } from "./cached";
 import { infoHashFromSources, infoHashFromUrl } from "@/lib/torrent/magnet";
+import {
+  isPluginAddon,
+  PLUGIN_ADDON_PREFIX,
+  pluginIdFromCatalogueBase,
+  runPluginAddon,
+} from "./plugins/addon";
+import type { StreamRequestContext } from "./plugins/types";
 import type { Stream } from "./types";
 
 const TIMEOUT_MS_FAST = 8000;
@@ -18,54 +28,217 @@ const SLOW_ADDON_PATTERNS = [
   /torbox/i,
 ];
 
-function timeoutFor(addon: Addon): number {
+function timeoutFor(addon: Addon, ceilingMs: number): number {
   const name = addon.manifest.name ?? "";
   const id = addon.manifest.id ?? "";
   const url = addon.transportUrl ?? "";
   const slow = SLOW_ADDON_PATTERNS.some((re) => re.test(name) || re.test(id) || re.test(url));
-  return slow ? TIMEOUT_MS_SLOW : TIMEOUT_MS_FAST;
+  const base = slow ? TIMEOUT_MS_SLOW : TIMEOUT_MS_FAST;
+  return Math.max(base, ceilingMs);
 }
 
 export type StreamRequest = {
   type: string;
   ids: string[];
+  animeIdUnverified?: boolean;
+  context?: StreamRequestContext;
 };
+
+export type AddonFailureCode = "blocked" | "timeout" | "http" | "unreachable";
+
+export type AddonFailure = {
+  id: string;
+  name: string;
+  code: AddonFailureCode;
+};
+
+export type AddonProgress = {
+  settled: number;
+  total: number;
+  queriedAddonIds: string[];
+  settledAddonIds: string[];
+  /** Addons that answered with nothing because the request failed, so the picker
+   *  can say why instead of silently showing 0 streams. */
+  failures?: AddonFailure[];
+};
+
+/** The plugin whose catalogue a request came from, when it names one.
+ *
+ * A row listed by a plugin belongs to that plugin: it is the only one that has the page, and the
+ * others would be searching their own sites for a title that was never theirs. A row from anywhere
+ * else names no plugin, and every plugin stays free to answer. */
+export function pinnedPluginBase(
+  forced: readonly { base: string }[] | undefined,
+): string | undefined {
+  return forced?.find((entry) => entry.base.startsWith(PLUGIN_ADDON_PREFIX))?.base;
+}
+
+/** The stream addon answering a request that names a plugin's catalogue, when it is here to
+ * answer. A row's base names the plugin and the provider, while the addon is per plugin, so the
+ * match is on the plugin the base belongs to rather than on the base itself. Honoured only while
+ * that plugin's addon is in the list; otherwise every plugin is left free rather than all of them
+ * being stood down for a catalogue that is no longer here. */
+export function pinnedPluginUrl(
+  forced: readonly { base: string }[] | undefined,
+  addons: readonly Pick<Addon, "transportUrl">[],
+): string | undefined {
+  const base = pinnedPluginBase(forced);
+  const id = base ? pluginIdFromCatalogueBase(base) : undefined;
+  if (!id) return undefined;
+  const url = `${PLUGIN_ADDON_PREFIX}${id}`;
+  return addons.some((a) => a.transportUrl === url) ? url : undefined;
+}
+
+/** The id a plugin is asked with. A plugin's own catalogue rows address it by an id its manifest
+ * cannot declare for itself, so the id the catalogue handed the request is taken first; only then
+ * is the repository's declared prefixes consulted. */
+export function pluginQueryId(
+  addon: Addon,
+  req: StreamRequest,
+  forcedId: string | undefined,
+): string | undefined {
+  if (forcedId) return forcedId;
+  return (
+    pickIds(addon, req.type, req.ids, req.animeIdUnverified === true)[0] ??
+    pickIdByDeclaredTypes(addon, req.ids)?.id
+  );
+}
 
 export async function fetchAddonStreams(
   addons: Addon[],
   req: StreamRequest,
   signal: AbortSignal,
   onPartial?: (current: Stream[]) => void,
+  onProgress?: (progress: AddonProgress) => void,
+  timeoutMs = TIMEOUT_MS_SLOW,
+  ranks?: AddonRankFn | null,
+  forced?: Array<{ base: string; id: string }>,
 ): Promise<Stream[]> {
-  const namedTasks: Array<{ name: string; p: Promise<Stream[]> }> = [];
+  const forcedBases = new Map((forced ?? []).map((f) => [f.base, f.id]));
+  // A request that names a plugin is that plugin's to answer, the way CloudStream asks only the
+  // provider whose catalogue the item came from.
+  const pinnedPlugin = pinnedPluginUrl(forced, addons);
+  const namedTasks: Array<{
+    addonId: string;
+    name: string;
+    p: Promise<Stream[]>;
+    plugin?: boolean;
+  }> = [];
   const skipped: string[] = [];
   for (let i = 0; i < addons.length; i++) {
     const addon = addons[i];
-    const priority = i;
+    const priority = ranks ? ranks(i, addon) : i;
+    if (isPluginAddon(addon)) {
+      if (pinnedPlugin && addon.transportUrl !== pinnedPlugin) {
+        skipped.push(`${addon.manifest.name}(other-plugin)`);
+        continue;
+      }
+      const pluginId = pluginQueryId(
+        addon,
+        req,
+        forcedBases.get(addon.transportUrl.replace(/\/manifest\.json$/, "")),
+      );
+      if (!pluginId) {
+        skipped.push(`${addon.manifest.name}(no-matching-id)`);
+        continue;
+      }
+      namedTasks.push({
+        addonId: addon.manifest.id,
+        name: addon.manifest.name,
+        plugin: true,
+        p: runPluginAddon(addon, req, pluginId, signal, timeoutMs).then((ss) =>
+          ss.map((s, idx) => ({ ...s, addonPriority: priority, addonReturnIdx: idx })),
+        ),
+      });
+      continue;
+    }
     if (isStatusOnlyAddon(addon)) {
       skipped.push(`${addon.manifest.name}(status-addon)`);
       continue;
     }
-    const ids = pickIds(addon, req.type, req.ids);
-    if (ids.length === 0) {
+    const forcedId = forcedBases.get(addon.transportUrl.replace(/\/manifest\.json$/, ""));
+    const ids =
+      forcedId != null
+        ? [forcedId]
+        : pickIds(addon, req.type, req.ids, req.animeIdUnverified === true);
+    if (ids.length > 0) {
+      for (const id of ids) {
+        // Local lists only persist movie/series, which can drop the type an addon's
+        // catalog declared for non-standard id schemes. Retry the other declared
+        // types when the primary query comes back empty.
+        const altTypes =
+          forcedId != null || !hasStandardIdScheme(id)
+            ? alternateStreamTypes(addon, req.type, id)
+            : [];
+        const name =
+          ids.length > 1 ? `${addon.manifest.name}[${idScheme(id)}]` : addon.manifest.name;
+        namedTasks.push({
+          addonId: addon.manifest.id,
+          name,
+          p: fetchOne(addon, req.type, id, signal, timeoutMs, altTypes).then((r) => {
+            if (r.failure) noteFailure(addon.manifest.id, name, r.failure);
+            return r.streams.map((s, idx) => ({
+              ...s,
+              addonPriority: priority,
+              addonReturnIdx: idx,
+            }));
+          }),
+        });
+      }
+      continue;
+    }
+
+    // No (type, id) pair matched the request, but a non-standard id may still be
+    // served under a type the catalog declared. Query those types directly.
+    const anyType = pickIdByDeclaredTypes(addon, req.ids);
+    if (anyType == null) {
       skipped.push(`${addon.manifest.name}(no-matching-id)`);
       continue;
     }
-    for (const id of ids) {
-      const name = ids.length > 1 ? `${addon.manifest.name}[${idScheme(id)}]` : addon.manifest.name;
-      namedTasks.push({
-        name,
-        p: fetchOne(addon, req.type, id, signal).then((ss) =>
-          ss.map((s, idx) => ({ ...s, addonPriority: priority, addonReturnIdx: idx })),
-        ),
-      });
-    }
+    const { id, types } = anyType;
+    namedTasks.push({
+      addonId: addon.manifest.id,
+      name: `${addon.manifest.name}[${idScheme(id)}]`,
+      p: fetchOne(addon, types[0], id, signal, timeoutMs, types.slice(1)).then((r) => {
+        if (r.failure)
+          noteFailure(addon.manifest.id, `${addon.manifest.name}[${idScheme(id)}]`, r.failure);
+        return r.streams.map((s, idx) => ({
+          ...s,
+          addonPriority: priority,
+          addonReturnIdx: idx,
+        }));
+      }),
+    });
   }
   if (skipped.length > 0) console.info(`[addons] skipped: ${skipped.join(", ")}`);
-  console.info(`[addons] querying ${namedTasks.length}: ${namedTasks.map((t) => t.name).join(", ")}`);
+  console.info(
+    `[addons] querying ${namedTasks.length}: ${namedTasks.map((t) => t.name).join(", ")}`,
+  );
 
+  const total = namedTasks.filter((task) => !task.plugin).length;
+  const pendingByAddon = new Map<string, number>();
+  for (const task of namedTasks) {
+    pendingByAddon.set(task.addonId, (pendingByAddon.get(task.addonId) ?? 0) + 1);
+  }
+  const queriedAddonIds = [...pendingByAddon.keys()];
+  const settledAddonIds = new Set<string>();
+  const failures: AddonFailure[] = [];
+  const noteFailure = (addonId: string, name: string, code: AddonFailureCode): void => {
+    if (failures.some((f) => f.id === addonId)) return;
+    failures.push({ id: addonId, name, code });
+  };
+  let settled = 0;
+  const reportProgress = () =>
+    onProgress?.({
+      settled,
+      total,
+      queriedAddonIds,
+      settledAddonIds: [...settledAddonIds],
+      failures: failures.length > 0 ? [...failures] : undefined,
+    });
+  reportProgress();
   const accumulated: Stream[] = [];
-  const wrapped = namedTasks.map(({ name, p }) =>
+  const wrapped = namedTasks.map(({ addonId, name, p, plugin }) =>
     p
       .then((streams) => {
         console.info(`[addons] ${name}: ${streams.length} streams`);
@@ -74,6 +247,17 @@ export async function fetchAddonStreams(
       })
       .catch((e) => {
         if (!signal.aborted) dwarn(`[addons] ${name} failed`, e);
+      })
+      .finally(() => {
+        if (!plugin) settled += 1;
+        const remaining = (pendingByAddon.get(addonId) ?? 1) - 1;
+        if (remaining <= 0) {
+          pendingByAddon.delete(addonId);
+          settledAddonIds.add(addonId);
+        } else {
+          pendingByAddon.set(addonId, remaining);
+        }
+        reportProgress();
       }),
   );
 
@@ -104,18 +288,74 @@ function pickId(addon: Addon, type: string, ids: string[]): string | null {
 
 const ANIME_SCHEMES = ["kitsu", "mal", "anidb", "anilist"];
 
+const STANDARD_ID_SCHEMES = [
+  "tt",
+  "tmdb:",
+  "kitsu:",
+  "mal:",
+  "anidb:",
+  "anilist:",
+  "tvdb:",
+  "simkl:",
+];
+
 function idScheme(id: string): string {
   return id.startsWith("tt") ? "imdb" : id.split(":")[0];
 }
 
-function pickIds(addon: Addon, type: string, ids: string[]): string[] {
+const SPECIALS_SCOPED_TT_RX = /^tt\d+:0:\d+$/;
+
+function hasStandardIdScheme(id: string): boolean {
+  return STANDARD_ID_SCHEMES.some((p) => id.startsWith(p));
+}
+
+function pickIds(addon: Addon, type: string, ids: string[], animeIdUnverified = false): string[] {
   const sorted = [...ids].sort((a, b) => idPriority(a) - idPriority(b));
   const accepted = sorted.filter((id) => addonAcceptsId(addon, type, id));
   if (accepted.length === 0) return [];
   const animeId = accepted.find((id) => ANIME_SCHEMES.some((s) => id.startsWith(s)));
   const ttId = accepted.find((id) => id.startsWith("tt"));
-  if (animeId && ttId) return [animeId, ttId];
-  return [accepted[0]];
+  if (!animeId || !ttId) return [accepted[0]];
+  // Specials have no reliable kitsu numbering, so both identities stay.
+  if (SPECIALS_SCOPED_TT_RX.test(ttId)) return [animeId, ttId];
+  if (animeIdUnverified) return [ttId];
+  return [animeId];
+}
+
+function pickIdByDeclaredTypes(
+  addon: Addon,
+  ids: string[],
+): { id: string; types: string[] } | null {
+  const sorted = [...ids].sort((a, b) => idPriority(a) - idPriority(b));
+  for (const id of sorted) {
+    const types = streamTypesAcceptingId(addon, id);
+    if (types.length > 0) return { id, types };
+  }
+  return null;
+}
+
+function streamTypesAcceptingId(addon: Addon, id: string): string[] {
+  const m = addon.manifest;
+  const resources = m.resources ?? [];
+  const streamResources = resources.filter(
+    (r): r is { name: string; types?: string[]; idPrefixes?: string[] } =>
+      typeof r === "object" && r.name === "stream",
+  );
+  const out = new Set<string>();
+  if (streamResources.length > 0) {
+    for (const r of streamResources) {
+      const idOk =
+        !r.idPrefixes || r.idPrefixes.length === 0 || r.idPrefixes.some((p) => id.startsWith(p));
+      if (!idOk) continue;
+      for (const t of r.types ?? []) out.add(t);
+    }
+    return Array.from(out);
+  }
+  if (!resources.some((r) => r === "stream")) return [];
+  const idOk =
+    !m.idPrefixes || m.idPrefixes.length === 0 || m.idPrefixes.some((p) => id.startsWith(p));
+  if (!idOk) return [];
+  return Array.from(m.types ?? []);
 }
 
 function addonAcceptsId(addon: Addon, type: string, id: string): boolean {
@@ -129,9 +369,7 @@ function addonAcceptsId(addon: Addon, type: string, id: string): boolean {
     return streamResources.some((r) => {
       const typeOk = Array.isArray(r.types) && r.types.includes(type);
       const idOk =
-        !r.idPrefixes ||
-        r.idPrefixes.length === 0 ||
-        r.idPrefixes.some((p) => id.startsWith(p));
+        !r.idPrefixes || r.idPrefixes.length === 0 || r.idPrefixes.some((p) => id.startsWith(p));
       return typeOk && idOk;
     });
   }
@@ -143,74 +381,113 @@ function addonAcceptsId(addon: Addon, type: string, id: string): boolean {
   return true;
 }
 
+function alternateStreamTypes(addon: Addon, type: string, id: string): string[] {
+  return streamTypesAcceptingId(addon, id).filter((t) => t !== type);
+}
+
 async function fetchOne(
   addon: Addon,
   type: string,
   id: string,
   signal: AbortSignal,
-): Promise<Stream[]> {
+  timeoutMs: number,
+  altTypes: string[] = [],
+): Promise<{ streams: Stream[]; failure?: AddonFailureCode }> {
   const base = addon.transportUrl.replace(/\/manifest\.json$/, "");
-  const url = `${base}/stream/${type}/${id}.json`;
-  const limit = timeoutFor(addon);
-  const ac = new AbortController();
-  let timedOut = false;
-  const timer = setTimeout(() => {
-    timedOut = true;
-    ac.abort();
-  }, limit);
-  const onParentAbort = () => ac.abort();
-  signal.addEventListener("abort", onParentAbort);
-  const startedAt = performance.now();
-  try {
-    const res = await fetch(url, {
-      headers: {
-        Accept: "application/json, text/plain, */*",
-        "User-Agent":
-          "Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/130.0.0.0 Safari/537.36",
-      },
-      signal: ac.signal,
-    });
-    if (!res.ok) {
-      dwarn(`[addons] ${addon.manifest.name} returned ${res.status} for ${type}/${id}`);
-      return [];
-    }
-    const json = (await res.json()) as { streams?: RawStream[] };
-    const list = json.streams ?? [];
-    const ranked = isAddonRanked(addon);
-    return list.map((s) => {
-      const mapped = {
-        ...s,
-        infoHash: s.infoHash?.toLowerCase(),
-        addonId: addon.manifest.id,
-        addonName: addon.manifest.name,
-        addonUrl: addon.transportUrl,
-        addonRanked: ranked,
-      };
-      if (!mapped.infoHash && hasUncachedMarker(s)) {
-        const fromUrl = s.url ? infoHashFromUrl(s.url) : null;
-        const hash = fromUrl?.infoHash ?? infoHashFromSources(s.sources);
-        if (hash) {
-          mapped.infoHash = hash;
-          if (mapped.fileIdx == null && fromUrl?.fileIdx != null) mapped.fileIdx = fromUrl.fileIdx;
-        }
+  const limit = timeoutFor(addon, timeoutMs);
+  // A self-hosted addon lives on loopback/LAN, which the guarded bridge fetch
+  // rejects outright ("blocked internal target"). Only a URL the user installed
+  // themselves opts into local networking, so public addons keep the
+  // DNS-rebinding guard.
+  const doFetch = isLocalNetworkUrl(base) ? safeFetchLocal : fetch;
+
+  const queryOnce = async (
+    t: string,
+  ): Promise<{ streams?: Stream[]; failure?: AddonFailureCode }> => {
+    const url = `${base}/stream/${t}/${id}.json`;
+    const ac = new AbortController();
+    let timedOut = false;
+    const timer = setTimeout(() => {
+      timedOut = true;
+      ac.abort();
+    }, limit);
+    const onParentAbort = () => ac.abort();
+    signal.addEventListener("abort", onParentAbort);
+    const startedAt = performance.now();
+    try {
+      const res = await doFetch(url, {
+        headers: {
+          Accept: "application/json, text/plain, */*",
+          "User-Agent":
+            "Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/130.0.0.0 Safari/537.36",
+        },
+        signal: ac.signal,
+      });
+      if (!res.ok) {
+        dwarn(`[addons] ${addon.manifest.name} returned ${res.status} for ${t}/${id}`);
+        return { failure: "http" };
       }
-      return mapped;
-    });
-  } catch (e) {
-    if (timedOut) {
-      dwarn(`[addons] ${addon.manifest.name} timed out after ${limit}ms — dropped`);
-    } else if (!signal.aborted) {
-      dwarn(`[addons] ${addon.manifest.name} failed`, e);
+      const json = (await res.json()) as { streams?: RawStream[] };
+      const list = json.streams ?? [];
+      const ranked = isAddonRanked(addon);
+      const streams = list.map((s) => {
+        const mapped = {
+          ...s,
+          infoHash: s.infoHash?.toLowerCase(),
+          addonId: addon.manifest.id,
+          addonName: addon.manifest.name,
+          addonUrl: addon.transportUrl,
+          addonRanked: ranked,
+        };
+        if (!mapped.infoHash && hasUncachedMarker(s)) {
+          const fromUrl = s.url ? infoHashFromUrl(s.url) : null;
+          const hash = fromUrl?.infoHash ?? infoHashFromSources(s.sources);
+          if (hash) {
+            mapped.infoHash = hash;
+            if (mapped.fileIdx == null && fromUrl?.fileIdx != null)
+              mapped.fileIdx = fromUrl.fileIdx;
+          }
+        }
+        return mapped;
+      });
+      return { streams };
+    } catch (e) {
+      if (timedOut) {
+        dwarn(`[addons] ${addon.manifest.name} timed out after ${limit}ms — dropped`);
+        return { failure: "timeout" };
+      }
+      if (!signal.aborted) {
+        dwarn(`[addons] ${addon.manifest.name} failed`, e);
+      }
+      return { failure: failureCodeFor(e) };
+    } finally {
+      clearTimeout(timer);
+      signal.removeEventListener("abort", onParentAbort);
+      const elapsed = Math.round(performance.now() - startedAt);
+      if (elapsed > 2500 && !timedOut) {
+        dlog(`[addons] ${addon.manifest.name} took ${elapsed}ms`);
+      }
     }
-    return [];
-  } finally {
-    clearTimeout(timer);
-    signal.removeEventListener("abort", onParentAbort);
-    const elapsed = Math.round(performance.now() - startedAt);
-    if (elapsed > 2500 && !timedOut) {
-      dlog(`[addons] ${addon.manifest.name} took ${elapsed}ms`);
-    }
+  };
+
+  const primary = await queryOnce(type);
+  if (!primary.streams) return { streams: [], failure: primary.failure };
+  if (primary.streams.length > 0 || altTypes.length === 0) return { streams: primary.streams };
+  const settled = await Promise.allSettled(altTypes.map((t) => queryOnce(t)));
+  let failure: AddonFailureCode | undefined;
+  for (const r of settled) {
+    if (r.status !== "fulfilled") continue;
+    if (r.value.streams && r.value.streams.length > 0) return { streams: r.value.streams };
+    failure ??= r.value.failure;
   }
+  return { streams: [], failure };
+}
+
+function failureCodeFor(e: unknown): AddonFailureCode {
+  const message = e instanceof Error ? `${e.name}: ${e.message}` : String(e);
+  if (/blocked internal target/i.test(message)) return "blocked";
+  if (isHarborFetchPolicyError(e)) return "http";
+  return "unreachable";
 }
 
 function dedupeStreams(streams: Stream[]): Stream[] {

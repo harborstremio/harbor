@@ -1,5 +1,7 @@
-import { Check, Pencil, RotateCcw } from "lucide-react";
+import { Check, RotateCcw } from "lucide-react";
+import { PencilOutlineIcon } from "@/components/icons/pencil-outline";
 import { useT } from "@/lib/i18n";
+import { FloatingPageActions } from "@/components/floating-page-actions";
 
 type Props = {
   editMode: boolean;
@@ -13,8 +15,9 @@ function BarButtons({ editMode, hasChanges, onToggleEdit, onReset, kids }: Props
   const t = useT();
   return (
     <>
-      {editMode && hasChanges && (
-        kids ? (
+      {editMode &&
+        hasChanges &&
+        (kids ? (
           <button
             onClick={onReset}
             className="flex h-12 items-center gap-2 rounded-full bg-amber-400 px-5 text-[15px] font-extrabold text-[#0e3a43] shadow-[0_8px_20px_-8px_rgba(180,120,0,0.5)] transition-transform hover:scale-105 active:scale-95"
@@ -30,8 +33,7 @@ function BarButtons({ editMode, hasChanges, onToggleEdit, onReset, kids }: Props
             <RotateCcw size={12} strokeWidth={2.2} />
             {t("Reset")}
           </button>
-        )
-      )}
+        ))}
       {kids ? (
         editMode ? (
           <button
@@ -53,7 +55,7 @@ function BarButtons({ editMode, hasChanges, onToggleEdit, onReset, kids }: Props
               className="block h-10 w-auto select-none"
             />
             <span className="absolute inset-0 flex items-center justify-center gap-1.5 pe-1 text-[13px] font-semibold text-[#36254d]">
-              <Pencil size={14} strokeWidth={2.6} />
+              <PencilOutlineIcon size={13} />
               {t("Customize page")}
             </span>
           </button>
@@ -67,7 +69,7 @@ function BarButtons({ editMode, hasChanges, onToggleEdit, onReset, kids }: Props
               : "border-edge-soft/40 bg-canvas/80 text-ink-muted hover:bg-canvas hover:text-ink"
           }`}
         >
-          <Pencil size={12} strokeWidth={2.4} />
+          <PencilOutlineIcon size={12} />
           {editMode ? t("Done editing") : t("Customize page")}
         </button>
       )}
@@ -82,11 +84,11 @@ export function CatalogCustomizeBar(props: Props) {
         <BarButtons {...props} />
       </div>
       {props.editMode && (
-        <div className="pointer-events-none fixed inset-x-0 bottom-6 z-50 flex justify-center px-4">
-          <div className="pointer-events-auto flex items-center gap-2 rounded-xl border border-edge-soft bg-canvas/95 px-3 py-2 shadow-[0_16px_40px_-12px_rgba(0,0,0,0.75)] backdrop-blur-md">
+        <FloatingPageActions>
+          <div className="pointer-events-auto flex max-w-full flex-wrap items-center justify-center gap-2 rounded-xl border border-edge-soft bg-canvas/95 px-3 py-2 shadow-[0_16px_40px_-12px_rgba(0,0,0,0.75)] backdrop-blur-md">
             <BarButtons {...props} />
           </div>
-        </div>
+        </FloatingPageActions>
       )}
     </>
   );

@@ -1,0 +1,493 @@
+.music-dock-icon {
+  border-radius: 4px;
+}
+.music-dock-icon:is(:hover, :focus-visible),
+.music-dock-icon-on {
+  color: var(--color-accent);
+}
+.music-dock-icon:focus-visible {
+  outline: 2px solid var(--color-accent);
+  outline-offset: 2px;
+}
+.music-dock-device {
+  filter: brightness(1.6);
+}
+/* One contrast-safe reading of the album colour, shared by every surface that tints.
+   Raw cover colours are unusable directly: some albums are near-white, some near-black.
+   Pinning lightness per scheme and clamping chroma keeps the hue while guaranteeing the
+   result reads on both cream and charcoal. --music-art-wash is the same hue as a surface.
+   light-dark() needs color-scheme, which applyTheme sets from the theme mode. */
+[data-art-colors] {
+  --music-art-tone: light-dark(
+    oklch(from var(--music-art-accent) 0.46 clamp(0.05, c, 0.17) h),
+    oklch(from var(--music-art-accent) 0.78 clamp(0.05, c, 0.15) h)
+  );
+  --music-art-wash: color-mix(in srgb, var(--music-art-tone) 12%, var(--color-canvas));
+}
+
+[data-music-dock][data-art-colors]:not([data-music-dock-tab]) {
+  background: var(--music-art-wash);
+}
+[data-art-colors] .music-dock-play {
+  background: var(--music-art-accent);
+  color: var(--music-art-ink);
+}
+/* Seek visibility must not depend on the artwork palette. Theme ink supplies a
+   contrast floor for both dark covers and light themes. */
+[data-art-colors] .music-dock-seek-track > span {
+  background: color-mix(in srgb, var(--music-art-tone) 55%, var(--color-ink));
+}
+[data-art-colors] .music-dock-seek-track > .music-dock-seek-thumb {
+  background: var(--color-ink);
+}
+/* Hovering must stay inside the artwork palette. The amber house accent reads
+   as a clash against a blue or green cover, so hover deepens toward the album
+   colour instead, keeping the ink floor that guarantees contrast. */
+[data-art-colors] .music-dock-seek:is(:hover, :focus-within, [data-dragging]) .music-dock-seek-fill {
+  background: var(--music-art-tone);
+}
+[data-art-colors] .music-dock-volume:is(:hover, :focus-within) {
+  --dock-vol-fill: var(--music-art-tone);
+}
+.music-dock-seek {
+  position: absolute;
+  inset-inline: 0;
+  top: -20px;
+  height: 32px;
+  z-index: 1;
+  touch-action: none;
+}
+.music-dock-seek-track {
+  position: absolute;
+  inset-inline: 0;
+  top: 20px;
+  height: 4px;
+  background: color-mix(in srgb, var(--color-ink) 28%, var(--color-canvas));
+  pointer-events: none;
+  transition: height 150ms ease-out;
+}
+.music-dock-seek-fill {
+  position: relative;
+  z-index: 10;
+  display: block;
+  height: 100%;
+  background: var(--color-ink);
+  transition: background 140ms ease-out;
+}
+.music-dock-seek:is(:hover, :focus-within, [data-dragging]) .music-dock-seek-fill {
+  background: var(--color-accent);
+}
+.music-dock-seek-preview {
+  position: absolute;
+  inset-block: 0;
+  inset-inline-start: 0;
+  background: color-mix(in srgb, var(--color-ink) 20%, transparent);
+  pointer-events: none;
+}
+.music-dock-seek-thumb {
+  position: absolute;
+  z-index: 20;
+  top: 50%;
+  width: 12px;
+  height: 12px;
+  margin-inline-start: -6px;
+  border-radius: 50%;
+  background: var(--color-ink);
+  box-shadow: 0 1px 3px rgb(0 0 0 / 0.45);
+  transform: translateY(-50%) scale(calc(1 + var(--dock-thumb-approach, 0) * 0.3));
+  transition: transform 140ms ease-out;
+}
+.music-dock-seek:is(:hover, :focus-within, [data-dragging]) .music-dock-seek-track {
+  height: 6px;
+}
+.music-dock-seek:focus-within .music-dock-seek-thumb,
+.music-dock-seek[data-dragging] .music-dock-seek-thumb {
+  transform: translateY(-50%) scale(1.5);
+}
+.music-dock-seek:has(input:focus-visible) .music-dock-seek-thumb {
+  outline: 2px solid var(--color-accent);
+  outline-offset: 3px;
+}
+.music-dock-seek-tip,
+.music-dock-control-tip {
+  position: absolute;
+  bottom: 15px;
+  transform: translateX(-50%);
+  padding: 2px 7px;
+  border-radius: 6px;
+  background: var(--color-elevated);
+  color: var(--color-ink);
+  font-size: 11px;
+  line-height: 1.35;
+  font-variant-numeric: tabular-nums;
+  white-space: nowrap;
+  pointer-events: none;
+  border: 1px solid var(--color-edge-soft);
+  box-shadow: 0 6px 16px -6px rgba(0, 0, 0, 0.55);
+  z-index: 6;
+}
+.music-dock-seek-tip::after,
+.music-dock-control-tip::after {
+  content: "";
+  position: absolute;
+  left: 50%;
+  bottom: -4px;
+  width: 7px;
+  height: 7px;
+  transform: translateX(-50%) rotate(45deg);
+  background: var(--color-elevated);
+  border-inline-end: 1px solid var(--color-edge-soft);
+  border-block-end: 1px solid var(--color-edge-soft);
+}
+
+.music-dock-control-tip {
+  position: fixed;
+  bottom: auto;
+  transform: none;
+  max-width: min(280px, calc(100vw - 16px));
+  white-space: normal;
+  overflow-wrap: anywhere;
+  text-align: center;
+  z-index: 2000;
+  animation: music-dock-tip-in 120ms ease-out;
+}
+.music-dock-control-tip::after { left: var(--music-tip-arrow, 50%); }
+@keyframes music-dock-tip-in { from { opacity: 0; } to { opacity: 1; } }
+@media (prefers-reduced-motion: reduce) {
+  .music-dock-control-tip { animation: none; }
+}
+
+/* The shared settings slider has a canvas border around its handle. Playback
+   keeps the fill continuous beneath it, including at the maximum volume. */
+.music-dock-volume .harbor-slider {
+  height: 44px;
+  margin: 0;
+}
+.music-dock-volume {
+  --dock-vol-fill: var(--color-ink);
+}
+.music-dock-volume:is(:hover, :focus-within) {
+  --dock-vol-fill: var(--color-accent);
+}
+.music-dock-volume {
+  position: relative;
+}
+.music-dock-vol-rail {
+  position: absolute;
+  inset-inline: 0;
+  top: 50%;
+  height: 4px;
+  transform: translateY(-50%);
+  border-radius: 999px;
+  background: color-mix(in srgb, var(--color-ink) 26%, var(--color-canvas));
+  pointer-events: none;
+  overflow: hidden;
+  transition: height 140ms ease-out;
+}
+.music-dock-volume:is(:hover, :focus-within) .music-dock-vol-rail {
+  height: 6px;
+}
+.music-dock-vol-fill {
+  display: block;
+  height: 100%;
+  border-radius: 999px;
+  background: var(--dock-vol-fill);
+  transition: background 140ms ease-out;
+}
+.music-dock-volume[data-rescale] .music-dock-vol-fill {
+  transition:
+    width 300ms cubic-bezier(0.22, 0.61, 0.36, 1),
+    background 140ms ease-out;
+}
+@media (prefers-reduced-motion: reduce) {
+  .music-dock-volume[data-rescale] .music-dock-vol-fill {
+    transition: background 140ms ease-out;
+  }
+}
+.music-dock-volume .harbor-slider::-webkit-slider-runnable-track {
+  background: transparent;
+  background-image: none;
+}
+.music-dock-volume .harbor-slider::-moz-range-track {
+  background: transparent;
+  background-image: none;
+}
+.music-dock-volume .harbor-slider::-moz-range-progress {
+  background: transparent;
+}
+.music-dock-volume .harbor-slider {
+  position: relative;
+  z-index: 1;
+}
+.music-dock-volume .harbor-slider::-webkit-slider-thumb {
+  width: 14px;
+  height: 14px;
+  margin-top: 0;
+  border: 2px solid var(--color-canvas);
+  border-radius: 50%;
+  background: var(--dock-vol-fill);
+  box-shadow: none;
+  opacity: 0;
+  transition:
+    opacity 140ms ease-out,
+    transform 140ms ease-out;
+}
+.music-dock-volume .harbor-slider::-moz-range-thumb {
+  width: 14px;
+  height: 14px;
+  border: 2px solid var(--color-canvas);
+  border-radius: 50%;
+  background: var(--dock-vol-fill);
+  box-shadow: none;
+  opacity: 0;
+  transition:
+    opacity 140ms ease-out,
+    transform 140ms ease-out;
+}
+.music-dock-volume:is(:hover, :focus-within) .harbor-slider::-webkit-slider-thumb,
+.music-dock-volume .harbor-slider:active::-webkit-slider-thumb {
+  opacity: 1;
+}
+.music-dock-volume:is(:hover, :focus-within) .harbor-slider::-moz-range-thumb,
+.music-dock-volume .harbor-slider:active::-moz-range-thumb {
+  opacity: 1;
+}
+.music-dock-volume .harbor-slider:is(:active, :focus-visible)::-webkit-slider-thumb {
+  transform: scale(1.15);
+}
+.music-dock-volume .harbor-slider:is(:active, :focus-visible)::-moz-range-thumb {
+  transform: scale(1.15);
+}
+.music-dock-volume .harbor-slider:disabled {
+  cursor: default;
+}
+@media (prefers-reduced-motion: reduce) {
+  .music-dock-seek-track,
+  .music-dock-seek-thumb,
+  .music-dock-volume .harbor-slider::-webkit-slider-thumb {
+    transition: none;
+  }
+  .music-dock-volume .harbor-slider::-moz-range-thumb {
+    transition: none;
+  }
+}
+.music-dock-tab {
+  position: relative;
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  height: 100%;
+  max-inline-size: min(340px, 58vw);
+  margin-inline-start: 12px;
+  padding-inline: 4px 6px;
+  overflow: hidden;
+  border-start-start-radius: 12px;
+  border-start-end-radius: 12px;
+  background: var(--color-elevated);
+  box-shadow: 0 -10px 28px -16px rgb(0 0 0 / 0.8);
+  color: var(--color-ink-muted);
+  transition: background-color 320ms ease-out, color 320ms ease-out;
+  animation: music-dock-tab-in 240ms cubic-bezier(0.22, 0.61, 0.36, 1) backwards;
+}
+[data-music-dock-tab][data-closing] .music-dock-tab {
+  animation: music-dock-tab-out 190ms cubic-bezier(0.4, 0, 1, 1) forwards;
+}
+[data-music-dock-tab][data-art-colors] .music-dock-tab {
+  background: color-mix(in srgb, var(--music-art-accent) 18%, var(--color-elevated));
+  color: var(--music-art-ink, var(--color-ink));
+}
+/* Same contrast floor as the open dock: the fill must stay legible on a tinted
+   bar, so theme ink is mixed in rather than trusting the artwork palette. */
+[data-music-dock-tab][data-art-colors] .music-dock-tab-line {
+  background: color-mix(in srgb, var(--color-ink) 22%, transparent);
+}
+[data-music-dock-tab][data-art-colors] .music-dock-tab-line > span {
+  background: color-mix(in srgb, var(--music-art-tone) 55%, var(--color-ink));
+}
+.music-dock-tab-line {
+  position: absolute;
+  inset-block-start: 0;
+  inset-inline: 0;
+  block-size: 3px;
+  background: var(--color-edge-soft);
+}
+.music-dock-tab-line > span {
+  display: block;
+  block-size: 100%;
+  background: var(--music-art-accent, var(--color-ink));
+}
+.music-dock-tab-chev,
+.music-dock-tab-play {
+  display: grid;
+  place-items: center;
+  inline-size: 40px;
+  block-size: 40px;
+  flex-shrink: 0;
+  border-radius: 9px;
+  color: var(--color-ink-muted);
+  transition:
+    color 160ms ease-out,
+    background-color 160ms ease-out;
+}
+.music-dock-tab-chev:hover,
+.music-dock-tab-play:hover {
+  color: var(--color-ink);
+  background: var(--color-raised);
+}
+.music-dock-tab-chev:focus-visible,
+.music-dock-tab-play:focus-visible {
+  outline: 2px solid var(--color-accent);
+  outline-offset: -2px;
+}
+.music-dock-tab-open {
+  display: flex;
+  flex: 1;
+  min-inline-size: 0;
+  align-items: center;
+  gap: 9px;
+  text-align: start;
+}
+.music-dock-tab-art {
+  display: block;
+  inline-size: 34px;
+  block-size: 34px;
+  flex-shrink: 0;
+  overflow: hidden;
+  border-radius: 6px;
+  background: var(--color-raised);
+}
+.music-dock-tab-copy {
+  display: flex;
+  min-inline-size: 0;
+  flex-direction: column;
+  gap: 1px;
+}
+.music-dock-tab-title,
+.music-dock-tab-artist {
+  min-inline-size: 0;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+}
+.music-dock-tab-title {
+  font-size: 12.5px;
+  font-weight: 600;
+  line-height: 1.25;
+  color: var(--color-ink);
+}
+.music-dock-tab-artist {
+  font-size: 11px;
+  line-height: 1.25;
+  color: var(--color-ink-subtle);
+}
+@keyframes music-dock-tab-in {
+  from {
+    transform: translateY(100%);
+    opacity: 0;
+  }
+  to {
+    transform: none;
+    opacity: 1;
+  }
+}
+@keyframes music-dock-tab-out {
+  to {
+    transform: translateY(100%);
+    opacity: 0;
+  }
+}
+[data-music-dock]:not([data-music-dock-tab]) {
+  animation: music-dock-bar-in 260ms cubic-bezier(0.22, 0.61, 0.36, 1) backwards;
+}
+[data-music-dock][data-closing]:not([data-music-dock-tab]) {
+  animation: music-dock-bar-out 190ms cubic-bezier(0.4, 0, 1, 1) forwards;
+}
+@keyframes music-dock-bar-in {
+  from {
+    transform: translateY(100%);
+  }
+  to {
+    transform: none;
+  }
+}
+@keyframes music-dock-bar-out {
+  to {
+    transform: translateY(100%);
+  }
+}
+@media (prefers-reduced-motion: reduce) {
+  .music-dock-tab,
+  [data-music-dock]:not([data-music-dock-tab]),
+  [data-music-dock][data-closing]:not([data-music-dock-tab]),
+  [data-music-dock-tab][data-closing] .music-dock-tab {
+    animation: none;
+  }
+}
+
+/* narrow dock: volume rises above its icon */
+.music-dock-vol-wrap {
+  position: relative;
+  display: flex;
+  align-items: center;
+}
+.music-dock-vol-pop {
+  display: contents;
+}
+@container (max-width: 899px) {
+  [data-music-dock] .music-dock-vol-pop {
+    position: absolute;
+    bottom: calc(100% + 10px);
+    left: 50%;
+    display: block;
+    overflow: hidden;
+    width: 44px;
+    height: 140px;
+    margin-inline-start: -22px;
+    border-radius: 12px;
+    background: var(--color-elevated);
+    box-shadow: 0 12px 34px rgb(0 0 0 / 0.5);
+    opacity: 0;
+    visibility: hidden;
+    transform: translateY(6px);
+    transition:
+      opacity 0.16s ease,
+      transform 0.16s ease,
+      visibility 0s linear 0.16s;
+    z-index: 60;
+  }
+  [data-music-dock] .music-dock-vol-wrap:is(:hover, :focus-within) .music-dock-vol-pop {
+    opacity: 1;
+    visibility: visible;
+    transform: translateY(0);
+    transition-delay: 0s, 0s, 0s;
+  }
+  [data-music-dock] .music-dock-vol-pop .music-dock-volume {
+    position: absolute;
+    top: 50%;
+    left: 50%;
+    width: 116px;
+    height: 44px;
+    max-width: none;
+    margin: -22px 0 0 -58px;
+    transform: rotate(-90deg);
+    transform-origin: center center;
+  }
+}
+@media (prefers-reduced-motion: reduce) {
+  [data-music-dock] .music-dock-vol-pop {
+    transition: none;
+  }
+}
+
+[data-music-dock-like] {
+  position: relative;
+  isolation: isolate;
+}
+[data-music-dock-like] > svg {
+  position: relative;
+  z-index: 1;
+}
+[data-music-dock-like][data-burst] > svg {
+  animation: dock-like-pop 0.7s ease-in-out both;
+}
+

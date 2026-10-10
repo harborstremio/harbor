@@ -1,0 +1,23 @@
+.trakt-comments-shell {
+  display: grid;
+  grid-template-rows: 1fr;
+  transition: grid-template-rows 280ms cubic-bezier(0.22, 0.61, 0.36, 1);
+}
+
+[data-trakt-collapsed] .trakt-comments-shell {
+  grid-template-rows: 0fr;
+}
+
+.trakt-comments-shell > .trakt-comments-body {
+  min-height: 0;
+}
+
+[data-trakt-collapsed] .trakt-comments-shell > .trakt-comments-body {
+  overflow: hidden;
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .trakt-comments-shell {
+    transition: none;
+  }
+}

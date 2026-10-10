@@ -19,4 +19,5 @@ export type GridEpisode = {
   meta?: Meta;
   sourceMetaId?: string;
   play: (opts?: { resume?: boolean }) => void;
+  openDetail?: () => void;
 };

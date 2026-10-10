@@ -1,0 +1,113 @@
+.music-consent {
+  display: flex;
+  flex-direction: column;
+  gap: 18px;
+  padding: 24px;
+}
+.music-consent header {
+  display: flex;
+  align-items: center;
+  gap: 12px;
+  color: var(--color-ink);
+}
+.music-consent h2 {
+  font-size: 19px;
+  font-weight: 700;
+}
+.music-consent-body {
+  display: flex;
+  max-height: 300px;
+  flex-direction: column;
+  gap: 14px;
+  overflow-y: auto;
+  padding-inline-end: 8px;
+  color: var(--color-ink-muted);
+  font-size: 13.5px;
+  line-height: 1.65;
+}
+.music-consent-body:focus-visible {
+  outline: 2px solid var(--color-accent);
+  outline-offset: 4px;
+  border-radius: 6px;
+}
+.music-consent-links {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 8px;
+  padding-block-start: 4px;
+}
+.music-consent-links button {
+  min-height: 36px;
+  padding-inline: 12px;
+  border-radius: 6px;
+  background: var(--color-elevated);
+  color: var(--color-ink);
+  font-size: 12px;
+  font-weight: 600;
+}
+.music-consent-links button:hover {
+  background: var(--color-raised);
+}
+.music-consent-sources {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 10px 20px;
+  border-block-start: 1px solid var(--color-edge-soft);
+  padding-block-start: 16px;
+}
+.music-consent-sources legend {
+  padding-inline-end: 12px;
+  color: var(--color-ink);
+  font-size: 13px;
+  font-weight: 650;
+}
+.music-consent-sources label {
+  display: inline-flex;
+  align-items: center;
+  gap: 9px;
+  min-height: 40px;
+  color: var(--color-ink);
+  font-size: 13px;
+}
+.music-consent-sources input {
+  width: 18px;
+  height: 18px;
+  accent-color: var(--color-accent);
+}
+.music-consent footer {
+  display: flex;
+  align-items: center;
+  justify-content: flex-end;
+  gap: 10px;
+}
+.music-consent-hint {
+  margin-inline-end: auto;
+  color: var(--color-ink-subtle);
+  font-size: 12px;
+}
+.music-consent footer button {
+  min-height: 44px;
+  padding-inline: 18px;
+  border-radius: 8px;
+  font-size: 13px;
+  font-weight: 650;
+}
+.music-consent-cancel {
+  background: var(--color-elevated);
+  color: var(--color-ink);
+}
+.music-consent-cancel:hover {
+  background: var(--color-raised);
+}
+.music-consent-accept {
+  background: var(--color-ink);
+  color: var(--color-canvas);
+}
+.music-consent-accept:disabled {
+  opacity: 0.45;
+  cursor: not-allowed;
+}
+.music-consent footer button:focus-visible {
+  outline: 2px solid var(--color-accent);
+  outline-offset: 3px;
+}

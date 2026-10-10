@@ -2,6 +2,7 @@ import { Volume2, VolumeX } from "lucide-react";
 import { useEffect, useRef, useState } from "react";
 import type { PlayerSnapshot } from "@/lib/player/bridge";
 import { useT } from "@/lib/i18n";
+import { watchOutsideMouseDown } from "@/lib/player/overlay-dismiss";
 
 export function PipVolume({
   snap,
@@ -33,8 +34,7 @@ export function PipVolume({
     const onDown = (e: MouseEvent) => {
       if (!wrapRef.current?.contains(e.target as Node)) setOpen(false);
     };
-    window.addEventListener("mousedown", onDown);
-    return () => window.removeEventListener("mousedown", onDown);
+    return watchOutsideMouseDown(onDown);
   }, [open]);
   return (
     <div

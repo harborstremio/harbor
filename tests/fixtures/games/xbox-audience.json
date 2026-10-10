@@ -1,0 +1,785 @@
+{
+  "channels": {
+    "BROWSE_CHANNELID=POPULAR_FILTERS=": {
+      "channelKey": "BROWSE_CHANNELID=POPULAR_FILTERS=",
+      "products": [
+        {
+          "productId": "BT5P2X999VH2"
+        },
+        {
+          "productId": "BQ1TN1T79V9K"
+        },
+        {
+          "productId": "9MVXMVT8ZKWC"
+        },
+        {
+          "productId": "9N201KQXS5BM"
+        },
+        {
+          "productId": "C125W9BG2K0V"
+        },
+        {
+          "productId": "C12T09DSVP8J"
+        },
+        {
+          "productId": "9N3D82TFF6C4"
+        },
+        {
+          "productId": "BPJ686W6S0NH"
+        },
+        {
+          "productId": "9N8PMW7QMD3D"
+        },
+        {
+          "productId": "9N2R753H6WQD"
+        },
+        {
+          "productId": "9NJ6F163VF8C"
+        },
+        {
+          "productId": "BV9ML45J2Q5V"
+        },
+        {
+          "productId": "9NR1R1XWLCNB"
+        },
+        {
+          "productId": "9P079R5LGV4T"
+        },
+        {
+          "productId": "C1C4DZJPBC2V"
+        },
+        {
+          "productId": "9P9FTXPKQ35P"
+        },
+        {
+          "productId": "9NVD16NP4J8T"
+        },
+        {
+          "productId": "9P0CFMZ94Q8R"
+        },
+        {
+          "productId": "BPSWGQBW7R3G"
+        },
+        {
+          "productId": "9NJ2N85T2ZGS"
+        },
+        {
+          "productId": "9NFKCJNBR34N"
+        },
+        {
+          "productId": "9NLKS78C4F3Z"
+        },
+        {
+          "productId": "9P3PT7PQJD0M"
+        },
+        {
+          "productId": "9PJ6FV3130QZ"
+        },
+        {
+          "productId": "9P402RWR63H4"
+        }
+      ],
+      "totalItems": 478,
+      "encodedCT": "eyJIYXNNb3JlIjp0cnVlLCJTa2lwQ291bnQiOjI1LCJUb3RhbENvdW50Ijo0NzgsIlByZXZpb3VzUGFnZVByb2R1Y3RJZHMiOlsiQlQ1UDJYOTk5VkgyIiwiQlExVE4xVDc5VjlLIiwiOU1WWE1WVDhaS1dDIiwiOU4yMDFLUVhTNUJNIiwiQzEyNVc5QkcySzBWIiwiQzEyVDA5RFNWUDhKIiwiOU4zRDgyVEZGNkM0IiwiQlBKNjg2VzZTME5IIiwiOU44UE1XN1FNRDNEIiwiOU4yUjc1M0g2V1FEIiwiOU5KNkYxNjNWRjhDIiwiQlY5TUw0NUoyUTVWIiwiOU5SMVIxWFdMQ05CIiwiOVAwNzlSNUxHVjRUIiwiQzFDNERaSlBCQzJWIiwiOVA5RlRYUEtRMzVQIiwiOU5WRDE2TlA0SjhUIiwiOVAwQ0ZNWjk0UThSIiwiQlBTV0dRQlc3UjNHIiwiOU5KMk44NVQyWkdTIiwiOU5GS0NKTkJSMzROIiwiOU5MS1M3OEM0RjNaIiwiOVAzUFQ3UFFKRDBNIiwiOVBKNkZWMzEzMFFaIiwiOVA0MDJSV1I2M0g0Il19",
+      "title": "Most played games",
+      "isFilterable": true
+    }
+  },
+  "productSummaries": [
+    {
+      "productId": "BT5P2X999VH2",
+      "title": "Fortnite",
+      "productKind": "Game",
+      "images": {
+        "boxArt": {
+          "url": "https://store-images.s-microsoft.com/image/apps.20392.70702278257994163.6d75301b-59c3-4a73-b70c-5901ae9cbb44.24e2eab9-1b75-4157-ba8b-006f4624d839",
+          "width": 2160,
+          "height": 2160
+        },
+        "poster": {
+          "url": "https://store-images.s-microsoft.com/image/apps.17283.70702278257994163.6d75301b-59c3-4a73-b70c-5901ae9cbb44.bd4108fb-c5af-4a9a-90c5-9a25a46d76a1",
+          "width": 1440,
+          "height": 2160
+        },
+        "superHeroArt": {
+          "url": "https://store-images.s-microsoft.com/image/apps.9161.70702278257994163.6d75301b-59c3-4a73-b70c-5901ae9cbb44.315efab2-af78-4d3e-b99d-e89298f83ad9",
+          "width": 1920,
+          "height": 1080
+        },
+        "featurePromotionalSquareArt": {
+          "url": "https://store-images.s-microsoft.com/image/apps.39991.70702278257994163.e25e1cb1-ae4e-49b9-bbeb-a8db9942f1e6.20bdd72b-6007-4ed4-8e77-6e8cb2fa1fde",
+          "width": 1080,
+          "height": 1080
+        }
+      },
+      "shortDescription": "Everything you love, all in Fortnite. \n\nDrop into the action you love or discover something new with your squad. Be the last player standing in Battle Royale. Get nostalgic in Fortnite OG. Go tactical in Reload. Headline Fortnite Festival. Explore the worlds of LEGO Fortnite. There is always something new for you and your friends.\n\nPlay thousands of games made by developers like deathruns, tycoons, racing, zombie survival and more! Or, build your own games with Unreal Editor for Fortnite (UEFN) or Fortnite Creative tools for everyone to play.  Each game has an individual age rating so you can find what’s right for you."
+    },
+    {
+      "productId": "BQ1TN1T79V9K",
+      "title": "Roblox - Xbox",
+      "productKind": "Game",
+      "images": {
+        "boxArt": {
+          "url": "https://store-images.s-microsoft.com/image/apps.15542.68327322396008232.ddd32983-30da-4856-a0ef-70bb8840e88d.96867ef3-7275-4cb7-ba1d-edda9d40e760",
+          "width": 1080,
+          "height": 1080
+        },
+        "poster": {
+          "url": "https://store-images.s-microsoft.com/image/apps.3683.68327322396008232.ddd32983-30da-4856-a0ef-70bb8840e88d.cb3ff148-2c1f-4b84-9eea-ff80eda50c2d",
+          "width": 1440,
+          "height": 2160
+        },
+        "superHeroArt": {
+          "url": "https://store-images.s-microsoft.com/image/apps.15909.68327322396008232.effd08b7-88b7-43b0-b91d-4689a0c70a05.8cb751bd-d0c8-4352-a273-a7bb62dd5c4b",
+          "width": 1920,
+          "height": 1080
+        },
+        "featurePromotionalSquareArt": {
+          "url": "https://store-images.s-microsoft.com/image/apps.50501.68327322396008232.ddd32983-30da-4856-a0ef-70bb8840e88d.d2d9a151-1b71-4c8d-bea7-491b59c93494",
+          "width": 1080,
+          "height": 1080
+        }
+      },
+      "shortDescription": "Roblox is the ultimate virtual universe that lets you create, share experiences with friends, and be anything you can imagine. Join millions of people and discover an infinite variety of immersive experiences created by a global community!\n\nAlready have an account? Log in with your existing Roblox account and explore the infinite metaverse of Roblox.\n \nCreate your own experiences for FREE: roblox.com/develop"
+    },
+    {
+      "productId": "9MVXMVT8ZKWC",
+      "title": "Minecraft",
+      "productKind": "Game",
+      "images": {
+        "boxArt": {
+          "url": "https://store-images.s-microsoft.com/image/apps.46509.13850085746326678.06e2dc5c-7997-46e9-a8e6-0e48b57cb13b.86bf6099-e11f-428b-a60a-1947131b7c26",
+          "width": 1080,
+          "height": 1080
+        },
+        "poster": {
+          "url": "https://store-images.s-microsoft.com/image/apps.53095.13850085746326678.06e2dc5c-7997-46e9-a8e6-0e48b57cb13b.419e3c9d-9dd3-4a28-a9f3-a12350215871",
+          "width": 720,
+          "height": 1080
+        },
+        "superHeroArt": {
+          "url": "https://store-images.s-microsoft.com/image/apps.58378.13850085746326678.826cc014-d610-46af-bdb3-c5c96be4d22c.64287a91-c69e-4723-bb61-03fecd348c2a",
+          "width": 1920,
+          "height": 1080
+        },
+        "featurePromotionalSquareArt": {
+          "url": "https://store-images.s-microsoft.com/image/apps.63624.13850085746326678.06e2dc5c-7997-46e9-a8e6-0e48b57cb13b.595204d5-9ced-4192-9f66-3f9c36fc4737",
+          "width": 1080,
+          "height": 1080
+        }
+      },
+      "shortDescription": "Explore randomly generated worlds and build amazing things from the simplest of homes to the grandest of castles. Play in creative mode with unlimited resources or mine deep into the world in survival mode, crafting weapons and armor to fend off the dangerous mobs."
+    },
+    {
+      "productId": "9N201KQXS5BM",
+      "title": "Call of Duty®",
+      "productKind": "Game",
+      "images": {
+        "boxArt": {
+          "url": "https://store-images.s-microsoft.com/image/apps.57296.13966330883349940.4a39fabf-a215-4498-b8be-1b8fd688a7e8.d504f6f1-11b7-4bf6-a059-06b64cbd6e4c",
+          "width": 2160,
+          "height": 2160
+        },
+        "poster": {
+          "url": "https://store-images.s-microsoft.com/image/apps.30472.13966330883349940.9a0bbc3f-3231-4a17-ab16-55eb671f1755.d9aecc85-6637-4e56-a359-009944a02940",
+          "width": 1440,
+          "height": 2160
+        },
+        "superHeroArt": {
+          "url": "https://store-images.s-microsoft.com/image/apps.45467.13966330883349940.05d0b25a-8298-42a1-adba-3a6c21a95a32.eb8f770e-9122-4ab6-ab50-372aa6cc912c",
+          "width": 3840,
+          "height": 2160
+        },
+        "featurePromotionalSquareArt": {
+          "url": "https://store-images.s-microsoft.com/image/apps.13225.13966330883349940.05d0b25a-8298-42a1-adba-3a6c21a95a32.c04e4bc3-7cba-4ec7-8221-de106a0dee8a",
+          "width": 1080,
+          "height": 1080
+        }
+      },
+      "shortDescription": "The Call of Duty® experience supports Modern Warfare® 4, Black Ops 7 and Call of Duty®: Warzone™.\n\nGame Pass access to individual Call of Duty® titles dependent on your plan and each title's availability in Game Pass."
+    },
+    {
+      "productId": "C125W9BG2K0V",
+      "title": "Rocket League®",
+      "productKind": "Game",
+      "images": {
+        "boxArt": {
+          "url": "https://store-images.s-microsoft.com/image/apps.42368.65187692735347017.3990a461-2db8-41ef-8bf8-33d50ff2e82a.c3b82bee-c39d-4e94-b239-2ab0170c2551",
+          "width": 2160,
+          "height": 2160
+        },
+        "poster": {
+          "url": "https://store-images.s-microsoft.com/image/apps.6066.65187692735347017.3990a461-2db8-41ef-8bf8-33d50ff2e82a.7bb9a856-df77-4e8b-a605-7863390a7aa0",
+          "width": 1440,
+          "height": 2160
+        },
+        "superHeroArt": {
+          "url": "https://store-images.s-microsoft.com/image/apps.22320.65187692735347017.3990a461-2db8-41ef-8bf8-33d50ff2e82a.685b86cc-f3f3-4adb-b418-90e41312ac33",
+          "width": 1920,
+          "height": 1080
+        }
+      },
+      "shortDescription": "PLAY ROCKET LEAGUE FOR FREE!\r\n\r\nDownload and compete in the high-octane hybrid of arcade-style soccer and vehicular mayhem! Unlock items in Rocket Pass, climb the Competitive Ranks, compete in Competitive Tournaments, complete Challenges, enjoy cross-platform progression and more! The field is waiting. Take your shot! "
+    },
+    {
+      "productId": "C12T09DSVP8J",
+      "title": "Tom Clancy's Rainbow Six Siege",
+      "productKind": "Game",
+      "images": {
+        "boxArt": {
+          "url": "https://store-images.s-microsoft.com/image/apps.48586.65170969132831011.a13a22f3-5325-489a-9982-552262e2f09b.dd7696e9-b093-40a5-a469-189d1d098444",
+          "width": 2160,
+          "height": 2160
+        },
+        "poster": {
+          "url": "https://store-images.s-microsoft.com/image/apps.29593.65170969132831011.a13a22f3-5325-489a-9982-552262e2f09b.5f13bce4-c8b9-4b07-abba-2b72a2037ee0",
+          "width": 1440,
+          "height": 2160
+        },
+        "superHeroArt": {
+          "url": "https://store-images.s-microsoft.com/image/apps.64955.65170969132831011.a13a22f3-5325-489a-9982-552262e2f09b.2ce23843-c4b2-49da-857d-9ca4f84c9942",
+          "width": 3840,
+          "height": 2160
+        },
+        "featurePromotionalSquareArt": {
+          "url": "https://store-images.s-microsoft.com/image/apps.51387.65170969132831011.a13a22f3-5325-489a-9982-552262e2f09b.2c8c6629-a8ce-4c0a-93d0-a1129a9115cb",
+          "width": 1080,
+          "height": 1080
+        }
+      },
+      "shortDescription": "Tom Clancy's Rainbow Six Siege is an elite, tactical team-based shooter where superior planning and execution triumph.\n\nEnjoy free access to Quick Match and Unranked game modes with a selection of operators."
+    },
+    {
+      "productId": "9N3D82TFF6C4",
+      "title": "NBA 2K27",
+      "productKind": "Game",
+      "images": {
+        "boxArt": {
+          "url": "https://store-images.s-microsoft.com/image/apps.35266.13934234425416393.c16fba18-9d46-4e2f-9891-5efae739df3f.f93a322b-4eae-4641-b667-2eb393fd56d7",
+          "width": 2160,
+          "height": 2160
+        },
+        "poster": {
+          "url": "https://store-images.s-microsoft.com/image/apps.31609.13934234425416393.c16fba18-9d46-4e2f-9891-5efae739df3f.356d4164-080b-449e-ae1e-3c7b8c5e8277",
+          "width": 1440,
+          "height": 2160
+        },
+        "superHeroArt": {
+          "url": "https://store-images.s-microsoft.com/image/apps.2960.13934234425416393.c16fba18-9d46-4e2f-9891-5efae739df3f.a1fc1cd4-e402-46cc-b287-2dd684aa4d7b",
+          "width": 3840,
+          "height": 2160
+        },
+        "featurePromotionalSquareArt": {
+          "url": "https://store-images.s-microsoft.com/image/apps.45591.13934234425416393.c16fba18-9d46-4e2f-9891-5efae739df3f.c096a37d-e717-4bc3-820c-2c62d2d75144",
+          "width": 1080,
+          "height": 1080
+        }
+      },
+      "shortDescription": "The hustle doesn’t stop and the run never ends in NBA 2K27. Chase greatness around the clock in MyCAREER, MyTEAM, and MyNBA, and make your hoop dreams a reality."
+    },
+    {
+      "productId": "BPJ686W6S0NH",
+      "title": "Grand Theft Auto V (Xbox One)",
+      "productKind": "Game",
+      "images": {
+        "boxArt": {
+          "url": "https://store-images.s-microsoft.com/image/apps.7814.68565266983380288.0f5ef871-88c0-45f7-b108-6aacbc041fcf.b7e42789-b2bf-4b60-bf0a-f891f2f04226",
+          "width": 1080,
+          "height": 1080
+        },
+        "poster": {
+          "url": "https://store-images.s-microsoft.com/image/apps.32034.68565266983380288.0f5ef871-88c0-45f7-b108-6aacbc041fcf.9b094362-c51d-49e5-9e92-80710c585fca",
+          "width": 720,
+          "height": 1080
+        },
+        "superHeroArt": {
+          "url": "https://store-images.s-microsoft.com/image/apps.65175.68565266983380288.0f5ef871-88c0-45f7-b108-6aacbc041fcf.120f7c2d-b622-4dc4-bfa9-0ee1dd8f52bd",
+          "width": 1920,
+          "height": 1080
+        },
+        "featurePromotionalSquareArt": {
+          "url": "https://store-images.s-microsoft.com/image/apps.58755.68565266983380288.0f5ef871-88c0-45f7-b108-6aacbc041fcf.375aa9fc-e102-4eec-b05f-0fc7d5ee6e52",
+          "width": 1080,
+          "height": 1080
+        }
+      },
+      "shortDescription": "When a young street hustler, a retired bank robber and a terrifying psychopath find themselves entangled with some of the most frightening and deranged elements of the criminal underworld, the U.S. government and the entertainment industry, they must pull off a series of dangerous heists to survive in a ruthless city in which they can trust nobody, least of all each other."
+    },
+    {
+      "productId": "9N8PMW7QMD3D",
+      "title": "Marvel Rivals",
+      "productKind": "Game",
+      "images": {
+        "boxArt": {
+          "url": "https://store-images.s-microsoft.com/image/apps.62697.14045436403630681.721e7092-2338-4109-8673-03273a8939af.fdd13e3a-aa97-49ca-adf0-55f6e1091f50",
+          "width": 2160,
+          "height": 2160
+        },
+        "poster": {
+          "url": "https://store-images.s-microsoft.com/image/apps.29905.14045436403630681.721e7092-2338-4109-8673-03273a8939af.443103a8-492e-441b-9720-164c70f565ea",
+          "width": 1440,
+          "height": 2160
+        },
+        "superHeroArt": {
+          "url": "https://store-images.s-microsoft.com/image/apps.46906.14045436403630681.721e7092-2338-4109-8673-03273a8939af.277da33e-228b-4e63-92fc-7054cd5b3a65",
+          "width": 1920,
+          "height": 1080
+        },
+        "featurePromotionalSquareArt": {
+          "url": "https://store-images.s-microsoft.com/image/apps.64736.14045436403630681.721e7092-2338-4109-8673-03273a8939af.fb73b58a-e78e-4d2b-bb2e-07a86ecee1a2",
+          "width": 1080,
+          "height": 1080
+        }
+      },
+      "shortDescription": "Marvel Rivals is a Super Hero Team-Based PVP Shooter!\nAssemble an all-star Marvel squad, devise countless strategies by combining powers to form unique Team-Up skills and fight in destructible, ever-changing battlefields across the continually evolving Marvel universe!"
+    },
+    {
+      "productId": "9N2R753H6WQD",
+      "title": "EA SPORTS™ College Football 27",
+      "productKind": "Game",
+      "images": {
+        "boxArt": {
+          "url": "https://store-images.s-microsoft.com/image/apps.11728.13946893262409931.e37efafe-5896-49a5-afd6-8f0953cc3b17.540ae57d-d5bc-4ea4-ab2d-2f53c628f51d",
+          "width": 2160,
+          "height": 2160
+        },
+        "poster": {
+          "url": "https://store-images.s-microsoft.com/image/apps.19832.13946893262409931.e37efafe-5896-49a5-afd6-8f0953cc3b17.d352a03e-0574-4472-a4d8-9c3bbe1675a7",
+          "width": 1440,
+          "height": 2160
+        },
+        "superHeroArt": {
+          "url": "https://store-images.s-microsoft.com/image/apps.33128.13946893262409931.e37efafe-5896-49a5-afd6-8f0953cc3b17.0be05940-774b-4bf2-af4d-929dadc78df4",
+          "width": 3840,
+          "height": 2160
+        },
+        "featurePromotionalSquareArt": {
+          "url": "https://store-images.s-microsoft.com/image/apps.5450.13946893262409931.e37efafe-5896-49a5-afd6-8f0953cc3b17.73a06822-53ed-4498-8db2-3bf657536853",
+          "width": 1080,
+          "height": 1080
+        }
+      },
+      "shortDescription": "In EA SPORTS™ College Football 27, step into modern college football, where personal ambition meets program pride. Balance expectations, identity, and everything Saturday demands while immersed in the traditions and pageantry of game day."
+    },
+    {
+      "productId": "9NJ6F163VF8C",
+      "title": "EA SPORTS™ Madden NFL 27",
+      "productKind": "Game",
+      "images": {
+        "boxArt": {
+          "url": "https://store-images.s-microsoft.com/image/apps.39020.13686582981429608.7dffc024-5434-4f13-827f-95b16bf6448a.c80e323b-feaa-416c-89a5-c1160e53072a",
+          "width": 2160,
+          "height": 2160
+        },
+        "poster": {
+          "url": "https://store-images.s-microsoft.com/image/apps.48334.13686582981429608.7dffc024-5434-4f13-827f-95b16bf6448a.07ab73c6-264a-481a-85d6-5bcc29ee31b1",
+          "width": 1440,
+          "height": 2160
+        },
+        "superHeroArt": {
+          "url": "https://store-images.s-microsoft.com/image/apps.57738.13686582981429608.7dffc024-5434-4f13-827f-95b16bf6448a.c40ba95a-cc89-41e6-a2c3-0a7260be67e3",
+          "width": 3840,
+          "height": 2160
+        },
+        "featurePromotionalSquareArt": {
+          "url": "https://store-images.s-microsoft.com/image/apps.56173.14510250676222234.eb294512-dfbd-4de6-9935-37c9536fd46e.50190e06-cba0-4316-8c9e-aaf60c1e2566",
+          "width": 1080,
+          "height": 1080
+        }
+      },
+      "shortDescription": "Run the league one decision at a time. EA SPORTS™ Madden NFL 27, powered by the all-new Persona Engine."
+    },
+    {
+      "productId": "BV9ML45J2Q5V",
+      "title": "Apex Legends™",
+      "productKind": "Game",
+      "images": {
+        "boxArt": {
+          "url": "https://store-images.s-microsoft.com/image/apps.6205.71371076658790719.3dbfb588-82d5-4f2a-9c18-f4150199c9bb.9581935f-d4b3-43e7-ab50-e2fe9991001e",
+          "width": 2160,
+          "height": 2160
+        },
+        "poster": {
+          "url": "https://store-images.s-microsoft.com/image/apps.51509.71371076658790719.3dbfb588-82d5-4f2a-9c18-f4150199c9bb.fc404b4f-ad9e-4d40-9a5f-d77da604f033",
+          "width": 1440,
+          "height": 2160
+        },
+        "superHeroArt": {
+          "url": "https://store-images.s-microsoft.com/image/apps.52245.71371076658790719.3dbfb588-82d5-4f2a-9c18-f4150199c9bb.fdecfa06-6331-4be5-9408-7dc00dde40d4",
+          "width": 3840,
+          "height": 2160
+        },
+        "featurePromotionalSquareArt": {
+          "url": "https://store-images.s-microsoft.com/image/apps.59796.71371076658790719.3dbfb588-82d5-4f2a-9c18-f4150199c9bb.3ac4fc66-eb83-4ce6-a9c7-5f9b2816593d",
+          "width": 1080,
+          "height": 1080
+        }
+      },
+      "shortDescription": "Apex Legends is the award-winning, free-to-play Hero shooter from Respawn Entertainment. Master an ever-growing roster of legendary characters with powerful abilities and experience strategic squad play and innovative gameplay in the next evolution of Hero Shooter and Battle Royale."
+    },
+    {
+      "productId": "9NR1R1XWLCNB",
+      "title": "Forza Horizon 6",
+      "productKind": "Game",
+      "images": {
+        "boxArt": {
+          "url": "https://store-images.s-microsoft.com/image/apps.47378.13758467164481545.c998f207-34a5-4a78-8843-178e2acdf371.a6be6fee-fc3c-4547-9b9a-478ba3fd0d81",
+          "width": 2160,
+          "height": 2160
+        },
+        "poster": {
+          "url": "https://store-images.s-microsoft.com/image/apps.29856.13758467164481545.c998f207-34a5-4a78-8843-178e2acdf371.9472937a-30ec-4ce0-8cd4-62f282fd5d28",
+          "width": 1440,
+          "height": 2160
+        },
+        "superHeroArt": {
+          "url": "https://store-images.s-microsoft.com/image/apps.24935.13758467164481545.c998f207-34a5-4a78-8843-178e2acdf371.206793b9-f38b-4616-8029-fdb3c7d0db77",
+          "width": 3840,
+          "height": 2160
+        },
+        "featurePromotionalSquareArt": {
+          "url": "https://store-images.s-microsoft.com/image/apps.27455.13758467164481545.c998f207-34a5-4a78-8843-178e2acdf371.695e1625-dbfb-4799-ae60-1d8e810a190d",
+          "width": 1080,
+          "height": 1080
+        }
+      },
+      "shortDescription": "Discover the breathtaking landscapes of Japan in over 550 real-world cars and become a racing Legend in Forza Horizon's biggest open world driving adventure yet."
+    },
+    {
+      "productId": "9P079R5LGV4T",
+      "title": "Grand Theft Auto Online (Xbox Series X|S)",
+      "productKind": "Game",
+      "images": {
+        "boxArt": {
+          "url": "https://store-images.s-microsoft.com/image/apps.16469.14461740201982510.10849893-1b50-4a26-b3f1-c1402fe39b3e.3099aa84-2b32-43d4-811d-9aa8d4560d16",
+          "width": 2160,
+          "height": 2160
+        },
+        "poster": {
+          "url": "https://store-images.s-microsoft.com/image/apps.10245.14461740201982510.10849893-1b50-4a26-b3f1-c1402fe39b3e.c735378d-cafb-49a1-8992-17ceb3af4713",
+          "width": 1440,
+          "height": 2160
+        },
+        "superHeroArt": {
+          "url": "https://store-images.s-microsoft.com/image/apps.32330.14461740201982510.10849893-1b50-4a26-b3f1-c1402fe39b3e.ae4108b0-6eeb-41d3-9eac-5fa5e5deb68f",
+          "width": 3840,
+          "height": 2160
+        },
+        "featurePromotionalSquareArt": {
+          "url": "https://store-images.s-microsoft.com/image/apps.6105.14461740201982510.10849893-1b50-4a26-b3f1-c1402fe39b3e.fce451c3-86d0-472f-846c-6c8163fe8adb",
+          "width": 1080,
+          "height": 1080
+        }
+      },
+      "shortDescription": "Experience GTA Online, a dynamic and ever-evolving online universe for up to 30 players, where you can rise from street-level hustler to become a kingpin of your own criminal empire. "
+    },
+    {
+      "productId": "C1C4DZJPBC2V",
+      "title": "Overwatch®",
+      "productKind": "Game",
+      "images": {
+        "boxArt": {
+          "url": "https://store-images.s-microsoft.com/image/apps.46767.14548245473193065.9c82be1a-823e-414c-80e7-be1aa2cecce1.bef77154-7417-49ae-b2cf-8e9243e6f304",
+          "width": 2160,
+          "height": 2160
+        },
+        "poster": {
+          "url": "https://store-images.s-microsoft.com/image/apps.47151.14548245473193065.9c82be1a-823e-414c-80e7-be1aa2cecce1.dcee3fc6-0b79-488d-a428-3acdf879e6e3",
+          "width": 1440,
+          "height": 2160
+        },
+        "superHeroArt": {
+          "url": "https://store-images.s-microsoft.com/image/apps.18677.14548245473193065.9c82be1a-823e-414c-80e7-be1aa2cecce1.89a56f88-2bbb-413a-b4e4-0104c28c76cc",
+          "width": 3840,
+          "height": 2160
+        },
+        "featurePromotionalSquareArt": {
+          "url": "https://store-images.s-microsoft.com/image/apps.33521.14548245473193065.9c82be1a-823e-414c-80e7-be1aa2cecce1.574a7f5c-8b73-4f2c-90ce-bcbb0696350c",
+          "width": 1080,
+          "height": 1080
+        }
+      },
+      "shortDescription": "Overwatch, A FUTURE WORTH FIGHTING FOR! \n\nOverwatch is an always-on and ever-evolving free-to-play, team-based action game set in an optimistic future, where every match is the ultimate 5v5 or 6v6 battlefield brawl. "
+    },
+    {
+      "productId": "9P9FTXPKQ35P",
+      "title": "EA SPORTS FC™ 26 Xbox Series X|S",
+      "productKind": "Game",
+      "images": {
+        "boxArt": {
+          "url": "https://store-images.s-microsoft.com/image/apps.61743.14143997528953872.6dedfcb1-25c9-4700-a587-b5e8d2190c68.88681c0c-1bb4-4ea7-9c95-56273826d126",
+          "width": 2160,
+          "height": 2160
+        },
+        "poster": {
+          "url": "https://store-images.s-microsoft.com/image/apps.10782.14143997528953872.6dedfcb1-25c9-4700-a587-b5e8d2190c68.12c48214-554d-4f98-a995-c19b9101d1aa",
+          "width": 1440,
+          "height": 2160
+        },
+        "superHeroArt": {
+          "url": "https://store-images.s-microsoft.com/image/apps.35717.14143997528953872.6dedfcb1-25c9-4700-a587-b5e8d2190c68.a2f0289a-bfc2-427b-a171-7326ed42c9f2",
+          "width": 3840,
+          "height": 2160
+        },
+        "featurePromotionalSquareArt": {
+          "url": "https://store-images.s-microsoft.com/image/apps.37702.14143997528953872.6dedfcb1-25c9-4700-a587-b5e8d2190c68.5e047488-7abe-436c-92f0-9e26b5637b44",
+          "width": 1080,
+          "height": 1080
+        }
+      },
+      "shortDescription": "The Club is Yours in EA SPORTS FC™ 26.\nPlay your way with an overhauled gameplay experience powered by Community feedback, Manager Live Challenges that bring fresh storylines to the new season, and Archetypes inspired by greats of the game."
+    },
+    {
+      "productId": "9NVD16NP4J8T",
+      "title": "EA SPORTS™ Madden NFL 26",
+      "productKind": "Game",
+      "images": {
+        "boxArt": {
+          "url": "https://store-images.s-microsoft.com/image/apps.56628.14396710821719966.730a4ed9-c54b-46d0-88ec-a2e00b01241b.bf35d963-6a5a-4c64-9f9b-ef86ec462b87",
+          "width": 2160,
+          "height": 2160
+        },
+        "poster": {
+          "url": "https://store-images.s-microsoft.com/image/apps.17041.14396710821719966.730a4ed9-c54b-46d0-88ec-a2e00b01241b.b12dfe18-a64b-4faf-a7fe-0c50c900664f",
+          "width": 1440,
+          "height": 2160
+        },
+        "superHeroArt": {
+          "url": "https://store-images.s-microsoft.com/image/apps.19053.14396710821719966.730a4ed9-c54b-46d0-88ec-a2e00b01241b.7ea07636-fe1e-4c72-849c-92f8ac8c8944",
+          "width": 3840,
+          "height": 2160
+        },
+        "featurePromotionalSquareArt": {
+          "url": "https://store-images.s-microsoft.com/image/apps.53131.14396710821719966.730a4ed9-c54b-46d0-88ec-a2e00b01241b.013af324-08e3-4430-86c2-214280923f57",
+          "width": 1080,
+          "height": 1080
+        }
+      },
+      "shortDescription": "BUILT FROM SUNDAYS"
+    },
+    {
+      "productId": "9P0CFMZ94Q8R",
+      "title": "Battlefield™",
+      "productKind": "Game",
+      "images": {
+        "boxArt": {
+          "url": "https://store-images.s-microsoft.com/image/apps.16573.14463498338197768.3e5ea054-4234-43b0-8721-3a3173005f92.e2c7d181-926c-4ac4-903d-c6c578314158",
+          "width": 2160,
+          "height": 2160
+        },
+        "poster": {
+          "url": "https://store-images.s-microsoft.com/image/apps.53237.14463498338197768.3e5ea054-4234-43b0-8721-3a3173005f92.3ebf15d8-f2f0-4d94-8f95-49daa2771703",
+          "width": 1440,
+          "height": 2160
+        },
+        "superHeroArt": {
+          "url": "https://store-images.s-microsoft.com/image/apps.15550.14463498338197768.3e5ea054-4234-43b0-8721-3a3173005f92.7b09e0f7-0b44-41a0-89c0-2cf7126cb5cd",
+          "width": 3840,
+          "height": 2160
+        },
+        "featurePromotionalSquareArt": {
+          "url": "https://store-images.s-microsoft.com/image/apps.35605.14463498338197768.3e5ea054-4234-43b0-8721-3a3173005f92.52031817-26cd-4483-81e9-8afd53df6dc8",
+          "width": 1080,
+          "height": 1080
+        }
+      },
+      "shortDescription": "Dominate land, air, and sea in Season 4. Play now."
+    },
+    {
+      "productId": "BPSWGQBW7R3G",
+      "title": "Red Dead Redemption 2",
+      "productKind": "Game",
+      "images": {
+        "boxArt": {
+          "url": "https://store-images.s-microsoft.com/image/apps.46694.68182501197884443.ac728a87-7bc1-4a0d-8bc6-0712072da93c.f150105c-bb41-4bc6-bd72-2a7c63df9f90",
+          "width": 2160,
+          "height": 2160
+        },
+        "poster": {
+          "url": "https://store-images.s-microsoft.com/image/apps.34695.68182501197884443.ac728a87-7bc1-4a0d-8bc6-0712072da93c.25816f86-f27c-4ade-ae29-222661145f1f",
+          "width": 1440,
+          "height": 2160
+        },
+        "superHeroArt": {
+          "url": "https://store-images.s-microsoft.com/image/apps.58752.68182501197884443.ac728a87-7bc1-4a0d-8bc6-0712072da93c.0cf58754-9802-46f8-8557-8d3ff32a627a",
+          "width": 3840,
+          "height": 2160
+        },
+        "featurePromotionalSquareArt": {
+          "url": "https://store-images.s-microsoft.com/image/apps.20118.68182501197884443.ac728a87-7bc1-4a0d-8bc6-0712072da93c.17747de4-856e-4cb7-bf84-87a4b4942d7f",
+          "width": 2160,
+          "height": 2160
+        }
+      },
+      "shortDescription": "After a robbery goes badly wrong in the western town of Blackwater, Arthur Morgan and the Van der Linde gang are forced to flee.  With federal agents and the best bounty hunters in the nation massing on their heels, the gang must rob, steal and fight their way across the rugged heartland of America in order to survive.  As deepening internal divisions threaten to tear the gang apart, Arthur must make a choice between his own ideals and loyalty to the gang who raised him."
+    },
+    {
+      "productId": "9NJ2N85T2ZGS",
+      "title": "EA SPORTS FC™ 27 XBOX Series X|S",
+      "productKind": "Game",
+      "images": {
+        "boxArt": {
+          "url": "https://store-images.s-microsoft.com/image/apps.25611.13618679251812087.f1d2dec5-00f3-41fb-9f2b-37e86fac8773.b417e8e9-3ffc-467a-9b9d-8070d09c124b",
+          "width": 2160,
+          "height": 2160
+        },
+        "poster": {
+          "url": "https://store-images.s-microsoft.com/image/apps.27809.13618679251812087.f1d2dec5-00f3-41fb-9f2b-37e86fac8773.c75bdc92-b4b8-448c-9bbc-e6106fedd0c4",
+          "width": 1440,
+          "height": 2160
+        },
+        "superHeroArt": {
+          "url": "https://store-images.s-microsoft.com/image/apps.6785.13618679251812087.f1d2dec5-00f3-41fb-9f2b-37e86fac8773.d1fa7491-7c6d-4399-ab9b-f1e2838e73ea",
+          "width": 3840,
+          "height": 2160
+        },
+        "featurePromotionalSquareArt": {
+          "url": "https://store-images.s-microsoft.com/image/apps.21054.13618679251812087.f1d2dec5-00f3-41fb-9f2b-37e86fac8773.1345e474-409a-4513-a5f4-d0ce562676e5",
+          "width": 1080,
+          "height": 1080
+        }
+      },
+      "shortDescription": "Welcome to The World’s Game in EA SPORTS FC™ 27.\nStep into The Grounds to experience a football playground where the streets meet the stadium, and feel greater control in every mode as community-driven innovations deliver more true-to-football gameplay."
+    },
+    {
+      "productId": "9NFKCJNBR34N",
+      "title": "NBA 2K26 for Xbox Series X|S",
+      "productKind": "Game",
+      "images": {
+        "boxArt": {
+          "url": "https://store-images.s-microsoft.com/image/apps.50564.13597880418237927.1db3ecc3-d73b-4573-a4d1-d16bd9922438.652f42d1-6d0d-4c1d-a65f-e42e3cd2a7a9",
+          "width": 2160,
+          "height": 2160
+        },
+        "poster": {
+          "url": "https://store-images.s-microsoft.com/image/apps.23652.13597880418237927.1db3ecc3-d73b-4573-a4d1-d16bd9922438.69561e2d-167c-4608-b5f0-287c10e2e5d5",
+          "width": 1440,
+          "height": 2160
+        },
+        "superHeroArt": {
+          "url": "https://store-images.s-microsoft.com/image/apps.64882.13597880418237927.1db3ecc3-d73b-4573-a4d1-d16bd9922438.024fcdb2-3b80-4f63-9bf3-43b98235264c",
+          "width": 3840,
+          "height": 2160
+        },
+        "featurePromotionalSquareArt": {
+          "url": "https://store-images.s-microsoft.com/image/apps.3825.13597880418237927.1db3ecc3-d73b-4573-a4d1-d16bd9922438.aa2628ec-f95f-4dfd-9c2e-42e1d4068069",
+          "width": 1080,
+          "height": 1080
+        }
+      },
+      "shortDescription": "Bragging rights are on the line in NBA 2K26. Build your legend in MyCAREER, collect and compete with stars in MyTEAM, and make executive decisions in MyNBA on Xbox Series X|S or MyLEAGUE on Xbox One."
+    },
+    {
+      "productId": "9NLKS78C4F3Z",
+      "title": "EA SPORTS™ College Football 26",
+      "productKind": "Game",
+      "images": {
+        "boxArt": {
+          "url": "https://store-images.s-microsoft.com/image/apps.47574.13705897253211932.09e217c5-7820-4d7b-957c-a160cdfce255.28f1b22d-ea5e-4eba-9c14-8dc0e249d48f",
+          "width": 2160,
+          "height": 2160
+        },
+        "poster": {
+          "url": "https://store-images.s-microsoft.com/image/apps.49451.13705897253211932.09e217c5-7820-4d7b-957c-a160cdfce255.f94917f6-e0c5-418e-820b-09061b7afe2b",
+          "width": 1440,
+          "height": 2160
+        },
+        "superHeroArt": {
+          "url": "https://store-images.s-microsoft.com/image/apps.57251.13705897253211932.09e217c5-7820-4d7b-957c-a160cdfce255.a53b7fcc-891f-436f-9eff-3c22ca12e910",
+          "width": 3840,
+          "height": 2160
+        },
+        "featurePromotionalSquareArt": {
+          "url": "https://store-images.s-microsoft.com/image/apps.50116.13705897253211932.09e217c5-7820-4d7b-957c-a160cdfce255.ec773784-5641-4747-88a8-1c4ba5705f03",
+          "width": 1080,
+          "height": 1080
+        }
+      },
+      "shortDescription": "Bring Glory Home in EA SPORTS™ College Football 26 and experience the world of college football. Whatever path to greatness you choose, from high school recruit to the Heisman, or as a coach, you can forge your legacy."
+    },
+    {
+      "productId": "9P3PT7PQJD0M",
+      "title": "HELLDIVERS™ 2",
+      "productKind": "Game",
+      "images": {
+        "boxArt": {
+          "url": "https://store-images.s-microsoft.com/image/apps.43359.14538027815579556.f358fa02-3caa-4f29-8eca-2536de6dba94.a6d04e55-c120-4e92-bcf3-f8ca6015d1c9",
+          "width": 2160,
+          "height": 2160
+        },
+        "poster": {
+          "url": "https://store-images.s-microsoft.com/image/apps.32079.14538027815579556.f358fa02-3caa-4f29-8eca-2536de6dba94.46ab4493-6956-4471-95a8-16f0fe2bc320",
+          "width": 1440,
+          "height": 2160
+        },
+        "superHeroArt": {
+          "url": "https://store-images.s-microsoft.com/image/apps.28109.14538027815579556.f358fa02-3caa-4f29-8eca-2536de6dba94.9745261a-6606-4da0-9247-8a3774ceaa2e",
+          "width": 3840,
+          "height": 2160
+        },
+        "featurePromotionalSquareArt": {
+          "url": "https://store-images.s-microsoft.com/image/apps.5609.14538027815579556.f358fa02-3caa-4f29-8eca-2536de6dba94.eb95467a-8316-4246-8585-7353c7a0c11a",
+          "width": 1080,
+          "height": 1080
+        }
+      },
+      "shortDescription": "The Galaxy’s Last Line of Offence.\n\nEnlist in the Helldivers and join the fight for freedom across a hostile galaxy in a fast, frantic, and ferocious third-person shooter."
+    },
+    {
+      "productId": "9PJ6FV3130QZ",
+      "title": "Dune: Awakening",
+      "productKind": "Game",
+      "images": {
+        "boxArt": {
+          "url": "https://store-images.s-microsoft.com/image/apps.15231.14221973547534254.c9400a22-a0eb-4428-bc72-11e2270ad849.2d59a2c9-5ea7-4e0d-97d3-8ffc82818b7c",
+          "width": 2160,
+          "height": 2160
+        },
+        "poster": {
+          "url": "https://store-images.s-microsoft.com/image/apps.58998.14221973547534254.c9400a22-a0eb-4428-bc72-11e2270ad849.fcbce16e-22b4-4a1a-ae75-75fa207548b5",
+          "width": 1440,
+          "height": 2160
+        },
+        "superHeroArt": {
+          "url": "https://store-images.s-microsoft.com/image/apps.55432.14221973547534254.c9400a22-a0eb-4428-bc72-11e2270ad849.f8cbde99-ce2b-4a5f-bf63-5779de668107",
+          "width": 3840,
+          "height": 2160
+        },
+        "featurePromotionalSquareArt": {
+          "url": "https://store-images.s-microsoft.com/image/apps.25083.14221973547534254.c9400a22-a0eb-4428-bc72-11e2270ad849.c96f60c9-6cac-41ed-89ef-754fbbede63e",
+          "width": 1080,
+          "height": 1080
+        }
+      },
+      "shortDescription": "Dune: Awakening is a single- and multiplayer Open World Survival game with immersive adventure and RPG gameplay. Explore, build, craft, and unravel a cinematic Dune story as you rise from survival to greatness on the most legendary planet in the universe. Just remember: the sandworm always comes. "
+    },
+    {
+      "productId": "9P402RWR63H4",
+      "title": "RuneScape: Dragonwilds",
+      "productKind": "Game",
+      "images": {
+        "boxArt": {
+          "url": "https://store-images.s-microsoft.com/image/apps.5982.14598963835318421.d3340a04-fc78-4b06-9abb-2849494504b3.77f5bc2d-f8c7-4630-9567-dfd26fb43cb5",
+          "width": 2160,
+          "height": 2160
+        },
+        "poster": {
+          "url": "https://store-images.s-microsoft.com/image/apps.19279.14598963835318421.d3340a04-fc78-4b06-9abb-2849494504b3.db648883-647c-4b89-9427-69507858a55f",
+          "width": 1440,
+          "height": 2160
+        },
+        "superHeroArt": {
+          "url": "https://store-images.s-microsoft.com/image/apps.24113.14598963835318421.d3340a04-fc78-4b06-9abb-2849494504b3.9e4f7ee0-15fb-451f-8df8-b10941200e1b",
+          "width": 3840,
+          "height": 2160
+        },
+        "featurePromotionalSquareArt": {
+          "url": "https://store-images.s-microsoft.com/image/apps.48283.14598963835318421.d3340a04-fc78-4b06-9abb-2849494504b3.641925d1-4935-4f24-8c83-e3b62e0a35ce",
+          "width": 1080,
+          "height": 1080
+        }
+      },
+      "shortDescription": "On RuneScape's forgotten continent of Ashenfall, dragons have awoken. Gather, build, skill and craft in this co-operative survival adventure. Only by mastering survival and uncovering ancient secrets can you hope to face the ferocious Dragon Queen."
+    }
+  ]
+}

@@ -1,6 +1,7 @@
 import { useEffect, useRef, useSyncExternalStore } from "react";
 import { WifiOff } from "lucide-react";
 import { useDownloads } from "@/lib/download/downloads-store";
+import { useMusicDownloads } from "@/lib/music/downloads";
 import { useT } from "@/lib/i18n";
 import { useView } from "@/lib/view";
 
@@ -14,16 +15,21 @@ function subscribe(cb: () => void) {
 }
 
 export function useOnline(): boolean {
-  return useSyncExternalStore(subscribe, () => navigator.onLine, () => true);
+  return useSyncExternalStore(
+    subscribe,
+    () => navigator.onLine,
+    () => true,
+  );
 }
 
 export function OfflineBanner() {
   const online = useOnline();
   const { view, setView } = useView();
   const items = useDownloads();
+  const music = useMusicDownloads();
   const t = useT();
   const routed = useRef(false);
-  const hasSaved = items.some((d) => d.status === "done");
+  const hasSaved = items.some((d) => d.status === "done") || music.some((d) => d.status === "done");
 
   useEffect(() => {
     if (routed.current) return;
@@ -34,7 +40,7 @@ export function OfflineBanner() {
 
   if (online) return null;
   return (
-    <div className="pointer-events-none fixed inset-x-0 top-16 z-50 flex justify-center">
+    <div className="pointer-events-none fixed inset-x-0 top-[calc(var(--harbor-top-inset)+4rem)] z-50 flex justify-center">
       <div className="pointer-events-auto flex items-center gap-2.5 rounded-full border border-edge-soft bg-elevated/95 py-2 ps-4 pe-2 shadow-[0_8px_28px_-8px_rgba(0,0,0,0.55)] backdrop-blur-md">
         <WifiOff size={14} strokeWidth={2.2} className="text-ink-subtle" />
         <span className="text-[12.5px] font-medium text-ink-muted">
@@ -45,7 +51,7 @@ export function OfflineBanner() {
             onClick={() => setView("downloads")}
             className="rounded-full bg-ink px-3 py-1 text-[12px] font-semibold text-canvas transition-opacity hover:opacity-90"
           >
-            {t("nav.downloads")}
+            {t("Offline Room")}
           </button>
         ) : (
           <span className="w-1.5" />

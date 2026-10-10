@@ -1,0 +1,9 @@
+.games-row-motion { animation:games-row-arrive 240ms cubic-bezier(.16,1,.3,1) both; }
+.games-row-motion { --row-direction:1; }
+.games-page-controls .games-icon-button[aria-disabled=true]:not(:disabled) { opacity:.45;cursor:wait; }
+.games-row-motion .games-card-caption h3 { height:2.8em;display:-webkit-box;-webkit-line-clamp:2;-webkit-box-orient:vertical;overflow:hidden; }
+.games-row-motion[data-direction="-1"] { --row-direction:-1; }
+[dir=rtl] .games-row-motion { --row-direction:-1; }
+[dir=rtl] .games-row-motion[data-direction="-1"] { --row-direction:1; }
+@keyframes games-row-arrive { from{opacity:.7;transform:translateX(calc(var(--row-direction) * 12px))} to{opacity:1;transform:translateX(0)} }
+@media(prefers-reduced-motion:reduce){.games-row-motion,.games-row-motion>*{animation:none}}

@@ -4,10 +4,25 @@ import { useT } from "@/lib/i18n";
 import { MOVIE_GENRES } from "@/lib/feed/tags";
 import { useView, type MetaFilter } from "@/lib/view";
 import { runtimeRange } from "./rails-config";
+import { BrandHero, useBrandArt } from "./brand-hero";
+import { browsedId, isBrowsed } from "./browsed";
 
 export function Header({ filter }: { filter: MetaFilter }) {
   const t = useT();
   const { kicker, title, subtitle, Icon } = describe(filter, t);
+  const branded = isBrowsed(filter);
+  const art = useBrandArt(
+    branded ? browsedId(filter) : 0,
+    filter.mediaType,
+    branded ? filter.kind : "studio",
+  );
+  if (branded) {
+    return (
+      <BrandHero art={art} kicker={kicker} title={title} subtitle={subtitle}>
+        <MediaTypeToggle filter={filter} />
+      </BrandHero>
+    );
+  }
   return (
     <div className="relative px-12 pb-10 pt-28">
       <div className="flex items-center gap-2.5">
@@ -26,7 +41,6 @@ export function Header({ filter }: { filter: MetaFilter }) {
         </h1>
       )}
       <p className="mt-3 max-w-2xl text-[15px] leading-relaxed text-ink-muted">{subtitle}</p>
-      {filter.kind === "country" && <MediaTypeToggle filter={filter} />}
     </div>
   );
 }

@@ -2,6 +2,32 @@ import { getUserAddonsRaw, setUserAddonsRaw, type Addon } from "@/lib/addons";
 
 const BACKUP_KEY = "harbor.addonOrderBackups";
 const ORDER_KEY = "harbor.addonOrder";
+function scopedKey(base: string): string {
+  try {
+    const raw = localStorage.getItem("harbor.profiles.v1");
+    const state = raw ? JSON.parse(raw) : null;
+    const profiles = Array.isArray(state?.profiles) ? state.profiles : [];
+    const primary = profiles.find((p: { isPrimary?: boolean }) => p.isPrimary);
+    const active = profiles.find((p: { id?: string }) => p.id === state?.activeId) ?? primary;
+    const shared = profiles.find((p: { id?: string }) => p.id === active?.shareStremioWith);
+    const id = shared?.id ?? active?.id;
+    if (!id) return base;
+    const key = base + "." + id;
+    // Existing unscoped backup belongs to the original primary profile only.
+    // Keep the original bytes for recovery and never copy it to a new account.
+    const marker = base + ".jl-migrated-owner";
+    if (!localStorage.getItem(marker) && primary?.id) {
+      const legacy = localStorage.getItem(base);
+      const destination = base + "." + primary.id;
+      if (legacy && !localStorage.getItem(destination)) localStorage.setItem(destination, legacy);
+      localStorage.setItem(marker, primary.id);
+    }
+    return key;
+  } catch {
+    throw new Error("Could not read the active addon profile.");
+  }
+}
+
 const MAX_BACKUPS = 5;
 
 export type ReorderInvalid = "empty" | "length" | "null-item" | "url-multiset" | "item-identity";
@@ -26,7 +52,10 @@ export function hostOf(url: string): string {
   }
 }
 
-function urlCountsMatch(a: Array<{ transportUrl: string }>, b: Array<{ transportUrl: string }>): boolean {
+function urlCountsMatch(
+  a: Array<{ transportUrl: string }>,
+  b: Array<{ transportUrl: string }>,
+): boolean {
   if (a.length !== b.length) return false;
   const counts = new Map<string, number>();
   for (const item of a) counts.set(item.transportUrl, (counts.get(item.transportUrl) ?? 0) + 1);
@@ -41,7 +70,7 @@ function urlCountsMatch(a: Array<{ transportUrl: string }>, b: Array<{ transport
 function bijectiveItemMatch(a: Addon[], b: Addon[]): boolean {
   if (a.length !== b.length) return false;
   const aJson = a.map((x) => JSON.stringify(x));
-  const used = new Array<boolean>(a.length).fill(false);
+  const used = Array.from({ length: a.length }, () => false);
   for (const item of b) {
     const json = JSON.stringify(item);
     let matched = false;
@@ -63,9 +92,15 @@ export function validateReorder(
   next: Addon[],
 ): { ok: true } | { ok: false; reason: ReorderInvalid } {
   if (!Array.isArray(original) || original.length === 0) return { ok: false, reason: "empty" };
-  if (!Array.isArray(next) || next.length !== original.length) return { ok: false, reason: "length" };
+  if (!Array.isArray(next) || next.length !== original.length)
+    return { ok: false, reason: "length" };
   for (const item of next) {
-    if (!item || typeof item !== "object" || typeof item.transportUrl !== "string" || !item.transportUrl) {
+    if (
+      !item ||
+      typeof item !== "object" ||
+      typeof item.transportUrl !== "string" ||
+      !item.transportUrl
+    ) {
       return { ok: false, reason: "null-item" };
     }
   }
@@ -82,8 +117,11 @@ export function sequencesEqual(a: string[], b: string[]): boolean {
   return a.length === b.length && a.every((v, i) => v === b[i]);
 }
 
-export function applyOrderToItems<T extends { transportUrl: string }>(items: T[], urls: string[]): T[] {
-  const used = new Array<boolean>(items.length).fill(false);
+export function applyOrderToItems<T extends { transportUrl: string }>(
+  items: T[],
+  urls: string[],
+): T[] {
+  const used = Array.from({ length: items.length }, () => false);
   const out: T[] = [];
   for (const url of urls) {
     const idx = items.findIndex((item, i) => !used[i] && item.transportUrl === url);
@@ -97,6 +135,17 @@ export function applyOrderToItems<T extends { transportUrl: string }>(items: T[]
   return out;
 }
 
+export function replaceUrlsInOrder(order: string[], oldUrls: string[], newUrl: string): string[] {
+  const old = new Set(oldUrls);
+  const next: string[] = [];
+  for (const url of order) {
+    const replacement = old.has(url) ? newUrl : url;
+    if (!next.includes(replacement)) next.push(replacement);
+  }
+  if (!next.includes(newUrl)) next.push(newUrl);
+  return next;
+}
+
 export function moveItem<T>(list: T[], from: number, to: number): T[] {
   const target = Math.max(0, Math.min(list.length - 1, to));
   if (from < 0 || from >= list.length || from === target) return list;
@@ -108,7 +157,7 @@ export function moveItem<T>(list: T[], from: number, to: number): T[] {
 
 export function loadBackups(): AddonOrderBackup[] {
   try {
-    const raw = localStorage.getItem(BACKUP_KEY);
+    const raw = localStorage.getItem(scopedKey(BACKUP_KEY));
     if (!raw) return [];
     const parsed: unknown = JSON.parse(raw);
     if (!Array.isArray(parsed)) return [];
@@ -146,7 +195,7 @@ export function pushBackup(items: Addon[]): void {
   ];
   for (const list of attempts) {
     try {
-      localStorage.setItem(BACKUP_KEY, JSON.stringify(list));
+      localStorage.setItem(scopedKey(BACKUP_KEY), JSON.stringify(list));
       return;
     } catch {
       continue;
@@ -157,7 +206,7 @@ export function pushBackup(items: Addon[]): void {
 
 export function saveDisplayOrder(urls: string[]): void {
   try {
-    localStorage.setItem(ORDER_KEY, JSON.stringify(urls));
+    localStorage.setItem(scopedKey(ORDER_KEY), JSON.stringify(urls));
   } catch (e) {
     console.warn("[addons] couldn't persist addon display order", e);
   }
@@ -165,7 +214,7 @@ export function saveDisplayOrder(urls: string[]): void {
 
 export function loadDisplayOrder(): string[] {
   try {
-    const raw = localStorage.getItem(ORDER_KEY);
+    const raw = localStorage.getItem(scopedKey(ORDER_KEY));
     if (!raw) return [];
     const parsed: unknown = JSON.parse(raw);
     if (!Array.isArray(parsed)) return [];
@@ -195,7 +244,12 @@ export async function saveCollectionOrder(
   onStep?.("verifying");
   const readBack = await getUserAddonsRaw(authKey);
   if (readBack == null) return { ok: false, stage: "verify", current: null };
-  if (!sequencesEqual(readBack.map((a) => a.transportUrl), next.map((a) => a.transportUrl))) {
+  if (
+    !sequencesEqual(
+      readBack.map((a) => a.transportUrl),
+      next.map((a) => a.transportUrl),
+    )
+  ) {
     return { ok: false, stage: "verify", current: readBack };
   }
   return { ok: true, items: readBack };

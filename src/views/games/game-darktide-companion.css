@@ -1,0 +1,42 @@
+.games-darktide { margin-block: 48px 64px; }
+.games-darktide-heading { position: relative; isolation: isolate; min-height: 272px; overflow: hidden; display: flex; align-items: flex-end; border-radius: 10px; background: var(--color-surface); }
+.games-darktide-world { position: absolute; inset: 0; width: 100%; height: 100%; object-fit: cover; z-index: -2; }
+.games-darktide-heading::after { content: ""; position: absolute; inset: 0; z-index: -1; background: linear-gradient(90deg, #080b0de8, #080b0d70 65%, #080b0d25), linear-gradient(0deg, #080b0da0, transparent); }
+.games-darktide-heading-copy { padding: 28px 32px; max-width: 720px; color: #f7f7f7; }
+.games-darktide-logo { width: 220px; height: 72px; object-fit: contain; object-position: left center; margin-bottom: 18px; }
+.games-darktide-logo.games-art-empty { display: none; }
+.games-darktide-heading-copy > p { margin: 0 0 8px; font-size: 11px; letter-spacing: .12em; font-weight: 650; color: #d4cbb4; }
+.games-darktide-heading h2 { margin: 0 0 8px; font-size: clamp(26px, 3vw, 36px); line-height: 1.15; letter-spacing: -.035em; }
+.games-darktide-heading-copy > span { font-size: 14px; line-height: 1.6; color: #dedede; }
+.games-darktide-refresh { position: absolute; inset-block-start: 20px; inset-inline-end: 20px; }
+.games-darktide-tools { display: flex; align-items: center; flex-wrap: wrap; gap: 12px; margin-block: 24px; }
+.games-darktide-categories { display: flex; flex-wrap: wrap; gap: 4px; margin-inline-end: auto; }
+.games-darktide-categories button { padding: 10px 13px; border-radius: 6px; font-size: 13px; color: var(--color-ink-muted); }
+.games-darktide-categories button:hover { background: var(--color-elevated); color: var(--color-ink); }
+.games-darktide-categories button[aria-pressed="true"] { color: var(--color-canvas); background: var(--color-ink); }
+.games-darktide-search { display: flex; align-items: center; gap: 9px; width: 220px; min-width: 0; border-radius: 7px; background: var(--color-elevated); color: var(--color-ink-muted); padding: 10px 12px; }
+.games-darktide-search input { min-width: 0; width: 100%; outline: none; background: transparent; font-size: 13px; color: var(--color-ink); }
+.games-darktide-search:focus-within { outline: 2px solid var(--color-accent); outline-offset: 2px; }
+.games-darktide-grid { display: grid; grid-template-columns: repeat(3, minmax(0, 1fr)); gap: 18px; align-items: start; }
+.games-darktide-mission { background: var(--color-surface); border-radius: 8px; overflow: hidden; min-width: 0; }
+.games-darktide-mission summary { display: block; cursor: pointer; list-style: none; }
+.games-darktide-mission summary::-webkit-details-marker { display: none; }
+.games-darktide-mission summary:focus-visible { outline: 2px solid var(--color-accent); outline-offset: -3px; }
+.games-darktide-scene { position: relative; aspect-ratio: 16 / 9; overflow: hidden; background: var(--color-elevated); color: white; }
+.games-darktide-scene > img, .games-darktide-scene > .games-art-empty { width: 100%; height: 100%; object-fit: cover; transition: transform 180ms ease-out; }
+.games-darktide-mission summary:hover .games-darktide-scene > img { transform: scale(1.025); }
+.games-darktide-difficulty, .games-darktide-scene time { position: absolute; bottom: 12px; border-radius: 4px; background: #090d10dc; padding: 5px 8px; font-size: 11px; font-weight: 600; }
+.games-darktide-difficulty { inset-inline-start: 12px; }.games-darktide-scene time { inset-inline-end: 12px; display: flex; align-items: center; gap: 5px; font-variant-numeric: tabular-nums; }
+.games-darktide-mission-name { display: flex; align-items: center; justify-content: space-between; gap: 12px; padding: 16px; }.games-darktide-mission-name > div { min-width: 0; }
+.games-darktide-mission-name span { display: block; font-size: 11px; color: var(--color-ink-muted); margin-bottom: 5px; }
+.games-darktide-mission h3 { font-size: 16px; font-weight: 650; line-height: 1.35; overflow-wrap: anywhere; }.games-darktide-mission-name > svg { flex-shrink: 0; color: var(--color-ink-muted); transition: transform 160ms ease-out; }
+.games-darktide-mission[open] .games-darktide-mission-name > svg { transform: rotate(180deg); }
+.games-darktide-conditions { padding: 0 16px 16px; color: var(--color-ink-muted); font-size: 12px; line-height: 1.5; }
+.games-darktide-mission-info { margin: 0 16px; padding: 16px 0; border-top: 1px solid var(--color-edge-soft); font-size: 12px; color: var(--color-ink-muted); line-height: 1.6; }
+.games-darktide-mission-info dl { display: flex; gap: 20px; flex-wrap: wrap; margin-bottom: 14px; }.games-darktide-mission-info dd { color: var(--color-ink); font-size: 17px; font-weight: 600; }.games-darktide-mission-info code { overflow-wrap: anywhere; font-size: 11px; }
+.games-darktide-more { margin-top: 20px; }.games-darktide-status { font-size: 14px; color: var(--color-ink-muted); padding-block: 20px; line-height: 1.7; }.games-darktide-status > button { margin-inline-start: 12px; }
+.games-darktide footer { display: flex; flex-wrap: wrap; align-items: center; gap: 10px 20px; margin-top: 24px; color: var(--color-ink-muted); font-size: 12px; line-height: 1.6; }.games-darktide footer a { display: inline-flex; align-items: center; gap: 5px; }.games-darktide footer a:hover { color: var(--color-ink); }.games-darktide footer p { flex-basis: 100%; }
+.games-darktide-skeleton { min-height: 245px; border-radius: 8px; }
+@media (max-width: 1100px) { .games-darktide-grid { grid-template-columns: repeat(2, minmax(0,1fr)); }.games-darktide-search { flex: 1; min-width: 160px; }.games-darktide-categories { flex-basis: 100%; } }
+@media (max-width: 640px) { .games-darktide-grid { grid-template-columns: minmax(0,1fr); }.games-darktide-heading-copy { padding: 72px 20px 24px; }.games-darktide-tools { gap: 10px; }.games-darktide-categories button { padding-inline: 10px; }.games-darktide-heading { min-height: 270px; }.games-darktide-logo { max-width: 80%; height: 60px; }.games-darktide-search { flex-basis: 100%; } }
+@media (prefers-reduced-motion: reduce) { .games-darktide-scene > img, .games-darktide-mission-name > svg { transition: none; } }

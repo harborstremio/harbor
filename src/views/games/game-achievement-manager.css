@@ -1,0 +1,107 @@
+.games-achievement-manager-backdrop{background:transparent;padding:clamp(12px,3vw,32px)}
+.games-achievement-manager{display:flex;flex-direction:column;min-height:0;max-height:86vh;color:var(--color-ink);font-family:var(--font-sans);outline:none}
+.games-achievement-manager:not([data-step=consent]){min-height:min(86vh,calc(100vh - 76px))}
+.games-achievement-manager header{display:flex;align-items:flex-start;justify-content:space-between;gap:20px;padding:26px 28px 20px}
+.gam-game{font-size:13px;color:var(--color-ink-muted);margin:0 0 7px}
+.games-achievement-manager h2{font-size:25px;font-weight:650;letter-spacing:-.7px;line-height:1.2}
+.gam-close{display:grid;place-items:center;width:36px;height:36px;border-radius:8px;color:var(--color-ink-muted);flex:none}
+.gam-close:hover{background:var(--color-elevated);color:var(--color-ink)}
+.gam-account{display:flex;align-items:center;gap:10px;padding:0 28px 20px;font-size:12px;color:var(--color-ink-muted)}
+.gam-account>img{width:21px;height:21px;object-fit:contain}.gam-account>span{overflow-wrap:anywhere}.gam-account>strong{margin-inline-start:auto;white-space:nowrap;color:var(--color-ink);font-size:17px;font-variant-numeric:tabular-nums}.gam-account>strong>span{color:var(--color-ink-muted);font-size:13px;font-weight:400}
+.gam-search{display:flex;align-items:center;gap:10px;margin:0 28px 14px;padding:12px 14px;background:var(--color-canvas);border-radius:8px;color:var(--color-ink-muted)}
+.gam-search input{width:100%;min-width:0;background:transparent;font:inherit;font-size:14px;color:var(--color-ink);outline:none}
+.gam-search:focus-within{outline:2px solid var(--color-ink-muted);outline-offset:2px}
+.gam-scroll{overflow:auto;flex:1 1 auto;min-height:0;overscroll-behavior:contain;scrollbar-width:thin;scrollbar-gutter:stable;scrollbar-color:var(--color-raised) transparent;padding:0 20px 12px}
+.games-achievement-manager[data-step=consent] .gam-scroll{flex:0 1 auto;min-height:180px;max-height:49vh}
+.gam-items{margin:0;padding:0;list-style:none}.gam-items>li{display:grid;grid-template-columns:52px minmax(0,1fr) auto;gap:14px;align-items:center;padding:16px 8px;border-radius:8px;transition:background 160ms var(--ease-out)}
+.gam-items>li+li{border-top:1px solid var(--color-edge-soft)}.gam-items>li[data-changed=true]{background:var(--color-elevated)}
+.gam-icon{display:grid;place-items:center;width:52px;height:52px;overflow:hidden;border-radius:5px;background:var(--color-canvas);color:var(--color-ink-subtle)}.gam-icon img{width:100%;height:100%;object-fit:cover}
+.gam-copy h3{font-size:14px;font-weight:600;line-height:1.4;margin:0 0 4px}.gam-copy p{font-size:13px;color:var(--color-ink-muted);line-height:1.5;margin:0;overflow-wrap:anywhere}.gam-copy>span{display:block;font-size:11px;color:var(--color-ink-subtle);margin-top:7px}
+.gam-choice{display:flex;align-items:center;gap:8px;justify-content:flex-start;min-width:88px;min-height:40px;padding:8px;border-radius:7px;color:var(--color-ink-muted);font-size:12px}.gam-choice:hover{background:var(--color-raised);color:var(--color-ink)}
+.gam-checkbox{display:grid;place-items:center;flex:none;width:20px;height:20px;border-radius:5px;background:var(--color-canvas);box-shadow:inset 0 0 0 1px var(--color-edge)}.gam-choice[aria-pressed=true] .gam-checkbox{background:var(--color-ink);color:var(--color-canvas);box-shadow:none}
+.gam-items>li[data-changed=true] .gam-checkbox{box-shadow:0 0 0 2px var(--color-accent)}
+.gam-protected{display:grid;place-items:center;width:40px;height:40px;color:var(--color-ink-subtle);border-radius:7px}
+.games-achievement-manager footer{display:flex;align-items:center;justify-content:space-between;gap:20px;padding:18px 28px;border-top:1px solid var(--color-edge-soft);font-size:12px;color:var(--color-ink-muted)}
+.games-achievement-manager footer>div:first-child{display:flex;flex-direction:column;gap:6px;max-width:290px;line-height:1.5}.gam-footer-actions{display:flex;align-items:center;gap:8px;flex-shrink:0}
+.gam-text{text-align:start;color:var(--color-ink-subtle);font-size:11px}.gam-text:hover{color:var(--color-ink)}
+.gam-action{min-height:42px;padding:10px 15px;border-radius:8px;background:var(--color-elevated);color:var(--color-ink);font-size:13px;font-weight:550;transition:background 160ms var(--ease-out),transform 160ms var(--ease-out)}.gam-action:hover{background:var(--color-raised)}.gam-action:active{transform:scale(.98)}.gam-confirm{background:var(--color-raised)}.games-achievement-manager button:disabled{opacity:.45;cursor:default}.games-achievement-manager button:focus-visible,.gam-protected:focus-visible{outline:2px solid var(--color-ink);outline-offset:3px}
+.gam-message{padding:14px 8px 20px;font-size:14px;line-height:1.6;color:var(--color-ink-muted)}.gam-error{color:var(--color-danger)}.gam-expired{padding:8px 28px;font-size:13px;color:var(--color-ink-muted)}.gam-more{display:block;margin:12px auto}
+.gam-review-list{list-style:none;margin:0;padding:0}.gam-review-list>li{display:flex;align-items:center;gap:14px;padding:14px 8px;border-bottom:1px solid var(--color-edge-soft);font-size:13px}.gam-review-list img{width:40px;height:40px;object-fit:cover;border-radius:4px}.gam-review-list strong{flex:1;font-weight:550}.gam-review-list span{color:var(--color-ink-muted);font-size:12px}.gam-review-list b{min-width:52px;font-weight:550;text-align:end}
+.gam-loading>p{padding:16px 8px;font-size:14px;color:var(--color-ink-muted)}.gam-skeleton{display:flex;gap:14px;padding:16px 8px;align-items:center}.gam-skeleton i{display:block;border-radius:5px}.gam-skeleton>i:first-child{width:52px;height:52px}.gam-skeleton>span{flex:1}.gam-skeleton>span>i{height:12px;margin:10px 0;width:65%}.gam-skeleton>span>i+ i{width:90%}.gam-skeleton>i:last-child{width:72px;height:28px}
+@media(max-width:540px){.games-achievement-manager header{padding:20px 18px 16px}.games-achievement-manager h2{font-size:22px}.gam-account{padding:0 18px 16px;font-size:11px}.gam-search{margin-inline:18px}.gam-scroll{padding-inline:10px}.games-achievement-manager[data-step=consent] .gam-scroll{max-height:48vh}.gam-items>li{grid-template-columns:44px minmax(0,1fr) 32px;gap:10px}.gam-icon{width:44px;height:44px}.gam-choice{min-width:32px;padding:6px}.gam-choice>span:last-child{display:none}.gam-copy h3{font-size:13px}.gam-copy p{font-size:12px}.games-achievement-manager footer{padding:16px 18px;gap:12px;flex-wrap:wrap}.gam-footer-actions{margin-inline-start:auto}.gam-review-list>li{flex-wrap:wrap;gap:10px}.gam-review-list strong{flex-basis:calc(100% - 60px)}.gam-review-list>span{margin-inline-start:50px}}
+@media(prefers-reduced-motion:reduce){.games-achievement-manager *{transition:none!important}}
+@media(max-width:540px){.gam-footer-actions{max-width:100%;flex-wrap:wrap}.gam-footer-actions:has(button+button){width:100%}.gam-footer-actions:has(button+button) .gam-action{flex:1 1 0;min-width:0;overflow-wrap:anywhere}.gam-review-list strong{min-width:0;overflow-wrap:anywhere}}
+.games-achievement-actions{display:flex;align-items:center;justify-content:space-between;gap:12px;flex-wrap:wrap;margin-top:10px}
+.games-public-achievements footer>p{flex-basis:100%;font-size:12px;line-height:1.5}.games-public-achievements footer .gam-unlock-entry{padding:10px 14px;min-height:42px;background:var(--color-elevated);border-radius:6px;font-size:13px}.games-public-achievements footer .gam-unlock-entry:hover{background:var(--color-raised)}.games-public-achievements footer>button:last-child{margin-inline-start:auto;font-size:12px}
+.gam-unlock-entry{background:var(--color-elevated);color:var(--color-ink);padding:10px 13px;border-radius:6px;font-size:13px;font-weight:600;min-height:40px}.gam-unlock-entry:hover{background:var(--color-raised)}
+.gam-consent{padding:10px 8px 24px;color:var(--color-ink-muted);font-size:15px;line-height:1.7}.gam-consent>p{margin:12px 0 18px}.gam-consent>p:first-of-type{color:var(--color-ink);font-size:17px}.gam-consent>small{display:block;font-size:12px;margin-top:20px}
+.gam-consent-mark{display:grid;place-items:center;width:64px;height:64px;background:var(--color-elevated);color:var(--color-ink);border-radius:10px;margin-bottom:18px}
+.gam-sam{display:flex;align-items:center;gap:13px;color:var(--color-ink);text-decoration:none;min-width:0}.gam-sam>img{width:34px;height:34px;object-fit:contain;flex:none}.gam-sam>span{display:grid;gap:4px}.gam-sam strong{font-size:14px;font-weight:600}.gam-sam small{font-size:12px;line-height:1.5;color:var(--color-ink-muted)}.gam-sam:hover strong{text-decoration:underline}.gam-credit{padding:12px 28px 18px}.gam-credit .gam-sam>img{width:23px;height:23px}.gam-credit .gam-sam strong{font-size:12px}.gam-credit .gam-sam small{font-size:11px}
+.gam-tools{padding:0 28px 14px;display:grid;gap:14px}.gam-filters,.gam-bulk,.gam-public-tabs{display:flex;align-items:center;gap:6px;flex-wrap:wrap}.gam-filters button,.gam-public-tabs button{padding:9px 13px;border-radius:6px;color:var(--color-ink-muted);font-size:14px;min-height:38px}.gam-filters button[aria-pressed=true],.gam-public-tabs button[aria-pressed=true]{background:var(--color-elevated);color:var(--color-ink)}.gam-bulk button{display:flex;align-items:center;gap:7px;padding:7px 10px;font-size:12px;background:var(--color-elevated);border-radius:5px;min-height:34px}.gam-bulk button:hover{background:var(--color-raised)}
+.gam-copy h3{font-size:16px}.gam-copy p{font-size:14px}.gam-copy>span{font-size:12px}.gam-choice{font-size:13px}.gam-items>li[data-changed=true] .gam-copy>span{color:var(--color-ink)}
+.gam-reward-preview{display:flex;align-items:center;gap:10px;color:var(--color-ink);min-width:0;text-decoration:none}.gam-reward-preview>img,.gam-reward-preview>.games-art-empty{width:70px;height:55px;object-fit:contain;flex:none}.gam-reward-preview>span{display:grid;gap:4px;min-width:0}.gam-reward-preview strong{font-size:14px;line-height:1.4;font-weight:600}.gam-reward-preview small{font-size:11px;color:var(--color-ink-muted);line-height:1.5}.gam-reward-preview:hover strong{text-decoration:underline}.gam-copy .gam-reward-preview{margin-top:12px;padding-top:8px;border-top:1px solid var(--color-edge-soft)}
+.gam-reward-note{display:flex;align-items:start;gap:10px;font-size:12px;line-height:1.6;color:var(--color-ink-muted);padding:14px 8px;margin:0}.gam-reward-note>svg{flex:none;margin-top:2px}
+.gam-public-tabs{padding:0 24px 14px}.gam-reward-grid{display:grid;grid-template-columns:repeat(2,minmax(0,1fr));gap:10px}.gam-reward-grid>article{display:flex!important;flex-direction:column;align-items:stretch!important;gap:12px!important;padding:16px!important;background:var(--color-elevated);border:0!important;border-radius:8px;min-width:0}.gam-reward-grid .gam-reward-preview{flex-direction:column;align-items:start}.gam-reward-grid .gam-reward-preview>img{width:100%;height:110px;object-fit:contain}.gam-reward-grid>article>p{font-size:12px!important;line-height:1.5;color:var(--color-ink-muted);margin:0}.gam-reward-grid>article>button{display:flex;align-items:center;justify-content:center;gap:7px;background:var(--color-raised);color:var(--color-ink);padding:10px;border-radius:6px;font-size:13px;line-height:1.5;min-height:42px;margin-top:auto}.gam-reward-grid>article>button>svg{flex:none}
+.gam-reward-catalog a:focus-visible,.gam-reward-catalog button:focus-visible,.gam-sam:focus-visible{outline:2px solid var(--color-ink);outline-offset:3px}
+@media(max-width:540px){.gam-tools{padding-inline:18px}.gam-items>li{grid-template-columns:44px minmax(0,1fr)}.gam-choice,.gam-protected{grid-column:2;justify-self:start}.gam-choice>span:last-child{display:inline}.gam-copy h3{font-size:15px}.gam-copy p{font-size:13px}.gam-consent{font-size:14px}.gam-consent>p:first-of-type{font-size:16px}.gam-credit{padding-inline:18px}.gam-reward-grid{grid-template-columns:1fr}.gam-reward-grid .gam-reward-preview{flex-direction:row;align-items:center}.gam-reward-grid .gam-reward-preview>img{width:90px;height:75px}.gam-public-tabs{padding-inline:18px}.gam-filters button,.gam-public-tabs button{padding-inline:10px}}
+.gam-icon{position:relative}
+/* .gam-icon clips its overflow, so the badge has to sit inside the box. */
+.games-achievement-lock{position:absolute;inset-block-end:3px;inset-inline-end:3px;z-index:2;display:grid;place-items:center;width:19px;height:19px;border-radius:999px;background:rgb(8 10 12 / .86);color:#fff;box-shadow:0 2px 8px -2px rgb(0 0 0 / .85)}
+.gam-items>li[data-progress=locked] .gam-icon>img{opacity:.3;filter:grayscale(1) contrast(.85)}
+.gam-items>li[data-progress=locked] .gam-icon::after{content:"";position:absolute;inset:0;background:rgb(8 10 12 / .35)}
+.gam-items>li[data-progress=locked] .gam-copy h3{color:var(--color-ink-muted)}
+.gam-items>li[data-progress=earned] .gam-icon{box-shadow:inset 0 0 0 1px var(--color-success)}
+@media(prefers-reduced-motion:no-preference){.gam-icon>img,.gam-icon>span{transition:opacity 200ms ease-out,filter 200ms ease-out}}
+.gam-checkbox{width:26px;height:26px;border-radius:7px;box-shadow:inset 0 0 0 1.5px var(--color-edge);transition:background 140ms ease-out,box-shadow 140ms ease-out,color 140ms ease-out}
+.gam-choice{min-height:46px;font-size:12.5px;font-weight:550}
+.gam-choice:focus-visible{outline:2px solid var(--color-ink);outline-offset:2px}
+.gam-choice[aria-pressed=true] .gam-checkbox{box-shadow:inset 0 0 0 1.5px var(--color-ink)}
+.gam-items>li[data-changed=true]{background:color-mix(in oklch,var(--color-accent) 9%,transparent);border-radius:9px}
+.gam-items>li[data-changed=true] .gam-checkbox{background:var(--color-accent);color:var(--color-canvas);box-shadow:inset 0 0 0 1.5px var(--color-accent)}
+@media(prefers-reduced-motion:reduce){.gam-checkbox{transition:none}}
+.gam-step{animation:harbor-step-in 240ms var(--ease-out) backwards}
+@media(prefers-reduced-motion:reduce){.gam-step{animation:none}}
+.gam-footer-actions{min-height:42px}
+.gam-switch{display:flex;align-items:center;gap:7px;max-width:100%;margin:0 0 7px;margin-inline-start:-8px;padding:4px 8px;border-radius:7px;color:var(--color-ink-muted);font-size:13px;transition:background 160ms var(--ease-out),color 160ms var(--ease-out)}
+.gam-switch>span{overflow:hidden;text-overflow:ellipsis;white-space:nowrap}
+.gam-switch>svg{flex:none;opacity:.72}
+.gam-switch:hover:not(:disabled){background:var(--color-elevated);color:var(--color-ink)}
+.gam-avatar{display:grid;place-items:center;width:28px;height:28px;flex:none;border-radius:50%;overflow:hidden;background:var(--color-elevated);color:var(--color-ink)}
+.gam-avatar>img,.gam-avatar>.games-art-empty{width:100%;height:100%;object-fit:cover}
+.gam-account>.gam-identity{display:grid;gap:2px;min-width:0;overflow-wrap:anywhere}
+.gam-account .gam-persona{font-size:13px;font-weight:600;color:var(--color-ink)}
+.gam-account .gam-identity>small{font-size:11px;color:var(--color-ink-muted)}
+.gam-bar{display:block;height:12px;width:150px;border-radius:5px}
+.gam-account>.gam-identity>.gam-bar{width:min(220px,44vw)}
+.gam-account>strong>.gam-bar{width:58px;height:16px}
+.gam-api-id{font-family:ui-monospace,SFMono-Regular,Menlo,Consolas,monospace;font-size:.92em;color:var(--color-ink-subtle);overflow-wrap:anywhere}
+.gam-notice{margin:4px 8px 16px;padding:14px 16px;border-radius:9px;background:var(--color-elevated);color:var(--color-ink);font-size:13px;line-height:1.7}
+.gam-discard{display:flex;align-items:center;gap:12px;flex-wrap:wrap;margin:0 28px 14px;padding:11px 14px;border-radius:9px;background:var(--color-elevated);font-size:12px;line-height:1.6;color:var(--color-ink)}
+.gam-discard>span{flex:1;min-width:150px}
+.gam-discard>.gam-action{min-height:36px;padding:8px 13px;background:var(--color-raised)}
+.gam-picker>.gam-message{padding:10px 8px 14px}
+.gam-picker-grid{display:grid;grid-template-columns:repeat(2,minmax(0,1fr));gap:10px;margin:0;padding:0;list-style:none}
+.gam-picker-grid>li{min-width:0}
+.gam-picker-grid>li>.gam-bar{width:100%;height:65px;border-radius:9px}
+.gam-picker-grid button{display:grid;grid-template-columns:104px minmax(0,1fr);align-items:center;gap:12px;width:100%;padding:8px;border-radius:9px;text-align:start;transition:background 160ms var(--ease-out)}
+.gam-picker-grid button:hover{background:var(--color-elevated)}
+.gam-picker-grid button[aria-current=true]{background:color-mix(in oklch,var(--color-accent) 11%,transparent)}
+.gam-picker-grid img,.gam-picker-grid .games-art-empty{display:block;width:104px;height:49px;object-fit:cover;border-radius:5px;background:var(--color-canvas)}
+.gam-picker-grid button>span{display:grid;gap:4px;min-width:0}
+.gam-picker-grid strong{font-size:13px;font-weight:550;line-height:1.4;overflow:hidden;text-overflow:ellipsis;white-space:nowrap}
+.gam-picker-grid small{font-size:11px;color:var(--color-ink-subtle)}
+.gam-review-list>li[data-pending=true]{color:var(--color-ink-muted)}
+.gam-review-list>li[data-pending=true]>img{opacity:.5}
+.gam-review-list>li[data-pending=true]>b{color:transparent}
+@media(max-width:540px){.gam-picker-grid{grid-template-columns:1fr}.gam-discard{margin-inline:18px}.gam-notice{margin-inline:0}}
+.gam-recent-note{display:flex;align-items:flex-start;gap:9px;color:var(--color-ink-subtle)}
+.gam-recent-note>svg{flex:none;margin-top:2px}
+.gam-status{display:flex;flex-direction:column;align-items:flex-start;justify-content:center;gap:22px;min-height:310px;width:min(100%,540px);margin-inline:auto;padding:44px 20px;color:var(--color-ink)}
+.gam-status-mark{display:grid;place-items:center;flex:none;width:64px;height:64px;border-radius:18px;background:var(--color-elevated);color:var(--color-ink-muted)}
+.gam-status-copy{min-width:0;width:100%}.gam-status h3{margin:0 0 10px;font-size:23px;font-weight:600;line-height:1.25;letter-spacing:-.4px;text-wrap:balance}.gam-status p{margin:0;max-width:47ch;font-size:14px;line-height:1.7;color:var(--color-ink-muted);overflow-wrap:anywhere}
+.gam-status-actions{display:flex;flex-wrap:wrap;gap:10px;margin-top:24px}.gam-status .gam-action{display:inline-flex;align-items:center;justify-content:center;gap:8px;line-height:1.5;min-height:44px}.gam-status .gam-action>svg{flex:none}.gam-status .gam-confirm{background:var(--color-ink);color:var(--color-canvas)}.gam-status .gam-confirm:hover{background:color-mix(in oklch,var(--color-ink) 90%,var(--color-canvas))}
+.gam-status-secondary{flex-basis:100%}.gam-status-secondary .gam-action{background:transparent;color:var(--color-ink-muted);padding-inline:0}.gam-status-secondary .gam-action:hover{color:var(--color-ink);background:transparent}
+.games-achievement-manager[data-status-page=true] .gam-scroll{display:flex;flex-direction:column;justify-content:safe center}.games-achievement-manager[data-status-page=true] .gam-step{flex:0 0 auto}.games-achievement-manager[data-status-page=true] .gam-credit{border-top:1px solid var(--color-edge-soft)}
+.gam-status[data-compact=true]{flex-direction:row;align-items:flex-start;justify-content:flex-start;width:100%;min-height:0;padding:16px 8px;gap:14px}.gam-status[data-compact=true] .gam-status-mark{width:36px;height:36px;border-radius:10px}.gam-status[data-compact=true] .gam-status-mark>svg{width:21px;height:21px}.gam-status[data-compact=true] h3{font-size:16px;line-height:1.4;letter-spacing:0;margin-bottom:4px}.gam-status[data-compact=true] p{font-size:13px;max-width:none}.gam-status[data-compact=true] .gam-status-actions{margin-top:14px}
+.gam-expired{flex:0 1 auto;max-height:30vh;overflow:auto;padding-block:0}.gam-expired .gam-status{padding-inline:0}
+@media(max-width:540px){.gam-status{padding:28px 12px;min-height:280px;gap:18px}.gam-status h3{font-size:21px}.gam-status-actions{gap:8px}.gam-status-actions .gam-action{flex:1 1 auto}.gam-status[data-compact=true]{padding-inline:8px}.gam-status-mark{width:56px;height:56px;border-radius:15px}}

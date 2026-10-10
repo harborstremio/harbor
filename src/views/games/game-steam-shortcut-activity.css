@@ -1,0 +1,25 @@
+.games-shortcut-activity{display:flex;flex-direction:column;min-height:0;color:var(--color-ink)}
+.games-shortcut-activity header{display:flex;justify-content:space-between;align-items:flex-start;gap:20px;padding:24px 24px 18px}
+.games-shortcut-activity header>div{min-width:0;flex:1}.games-shortcut-activity header>.games-icon-button{flex:0 0 38px}
+.games-shortcut-activity h2{font-size:24px;font-weight:650;line-height:1.2;letter-spacing:-.025em;overflow-wrap:anywhere}
+.games-shortcut-activity header p{font-size:13px;line-height:1.6;color:var(--color-ink-muted);margin-block-start:9px}
+.games-shortcut-activity-options{display:grid;padding:0 24px 18px;gap:4px}
+.games-shortcut-activity-options label{display:flex;justify-content:space-between;align-items:center;gap:24px;min-height:40px;font-size:14px;cursor:pointer}
+.games-shortcut-activity-options input{width:18px;height:18px;flex:0 0 18px;accent-color:var(--color-accent);cursor:pointer}
+.games-shortcut-activity-scroll{min-height:140px;max-height:50vh;overflow:auto;overscroll-behavior:contain;padding:0 24px;scrollbar-gutter:stable}
+.games-shortcut-activity ol{list-style:none;padding:0;margin:0}
+.games-shortcut-activity li{padding:16px 0;border-top:1px solid var(--color-edge-soft)}
+.games-shortcut-activity-line{display:flex;justify-content:space-between;gap:20px;align-items:baseline}
+.games-shortcut-activity strong{font-size:14px;font-weight:600;line-height:1.5}
+.games-shortcut-activity time{font-size:11px;color:var(--color-ink-muted);white-space:nowrap;font-variant-numeric:tabular-nums}
+.games-shortcut-activity li p{font-size:13px;line-height:1.6;overflow-wrap:anywhere;margin-block-start:5px}
+.games-shortcut-activity li small,.games-shortcut-activity-detail{font-size:12px;color:var(--color-ink-muted);line-height:1.6;overflow-wrap:anywhere}
+.games-shortcut-activity-detail{display:flex;gap:4px 12px;flex-wrap:wrap;margin-block-start:5px}
+.games-shortcut-activity-detail small[dir]{flex-basis:100%}
+.games-shortcut-activity-detail code{font-size:11px}
+.games-shortcut-activity-error,.games-shortcut-activity-empty{font-size:13px;line-height:1.6;color:var(--color-ink-muted);padding:12px 24px}
+.games-shortcut-activity-error,.games-shortcut-activity li[data-error] strong{color:var(--color-danger)}
+.games-shortcut-activity-empty{padding:18px 0}
+.games-shortcut-activity footer{padding:18px 24px;display:flex;justify-content:flex-end;border-top:1px solid var(--color-edge-soft)}
+.games-shortcut-activity :is(button,input,[tabindex]):focus-visible{outline:2px solid var(--color-accent);outline-offset:3px}
+@media(max-width:500px){.games-shortcut-activity header{padding:20px}.games-shortcut-activity-options{padding-inline:20px}.games-shortcut-activity-scroll{padding-inline:20px;min-height:90px}.games-shortcut-activity-line{flex-wrap:wrap;gap:3px 16px}.games-shortcut-activity h2{font-size:22px}.games-shortcut-activity footer{padding:16px 20px}}

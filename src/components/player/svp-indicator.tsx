@@ -1,6 +1,7 @@
 import { useEffect, useState } from "react";
 import { invoke } from "@tauri-apps/api/core";
 import { useSettings } from "@/lib/settings";
+import { useT } from "@/lib/i18n";
 
 const isTauri = typeof window !== "undefined" && "__TAURI_INTERNALS__" in window;
 
@@ -18,6 +19,7 @@ export function SvpIndicator({
   suppressed?: boolean;
 }) {
   const { settings } = useSettings();
+  const t = useT();
   const enabled = settings.playerSvp && engine === "mpv" && isTauri;
   const [active, setActive] = useState(false);
 
@@ -49,7 +51,7 @@ export function SvpIndicator({
       className={`pointer-events-none absolute top-6 left-1/2 z-30 flex -translate-x-1/2 items-center gap-2 rounded-full border border-edge-soft bg-canvas/85 px-3 py-1.5 text-[11px] font-semibold tracking-wide text-ink/85 shadow-[0_8px_24px_-12px_rgba(0,0,0,0.6)] backdrop-blur-md transition-opacity duration-300 ${chromeVisible && !suppressed ? "opacity-100" : "opacity-0"}`}
     >
       <span className="h-1.5 w-1.5 rounded-full bg-accent" />
-      <span>SVP active</span>
+      <span>{t("SVP active")}</span>
     </div>
   );
 }

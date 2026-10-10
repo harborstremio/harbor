@@ -1,0 +1,423 @@
+import { useEffect, useRef, useState } from "react";
+import { HarborMark } from "@/components/icons/harbor-mark";
+import uploadGlyph from "@/assets/nav-icons/download.svg?raw";
+import { resizeAvatar } from "./account/avatar-utils";
+import { ProfileAvatar, SubtitleText } from "@/chrome/account-menu/account-menu-parts";
+import { useAuth } from "@/lib/auth";
+import { useT } from "@/lib/i18n";
+import { useProfiles } from "@/lib/profiles";
+import { useSettings } from "@/lib/settings";
+import { TOP_GROUPS } from "./groups";
+import { SECTION_ICONS } from "./section-icons";
+import { SetIcon } from "./set-icon";
+import { tabsFor, type TabEntry } from "./tab-registry";
+import { useNavSearch } from "./nav";
+import { settingsAnchor, type SectionId } from "./shared";
+
+function Glyph({ name, size }: { name: string; size: number }) {
+  return <SetIcon name={name} size={size} />;
+}
+
+type Band = { section: string; sections: SectionId[] };
+
+const PAGE_LABELS: Record<string, string> = {
+  "player.play": "When you press Play",
+  "player.engine": "Player engine",
+  "player.aspect": "Aspect ratio",
+  "player.onscreen": "On-screen controls",
+  "player.adskip": "Ad skipping",
+  "mpv.quality": "Video quality",
+  "mpv.picture": "Picture adjustments",
+  "mpv.network": "Playback buffering",
+  "anime.smooth": "Motion smoothing",
+  "anime.svp": "SVP interpolation",
+  "language.app": "App language",
+  "language.audio": "Audio languages",
+  "language.discovery": "Discovery languages",
+  "subtitles.languages": "Subtitle languages",
+  "subtitles.sources": "Subtitle sources",
+  "subtitles.sync": "Subtitle timing",
+  "subtitles.look": "Subtitle style",
+  "streaming.services": "Streaming services",
+  "streaming.filters": "Source preferences",
+  "streaming.sorting": "Stream sorting",
+  "streaming.picker": "Source picker",
+  "p2p.engine": "P2P engine",
+  "p2p.server": "Streaming server",
+  "plugins.plugins": "Installed plugins",
+  "plugins.repositories": "Plugin repositories",
+  "library.cards": "Poster cards",
+  "library.providers": "Metadata providers",
+  "badges.badges": "Stream badges",
+  "badges.rules": "Badge rules",
+  "badges.packs": "Badge packs",
+  "hotkeys.keys": "Keyboard shortcuts",
+  "hotkeys.behaviour": "Keyboard behavior",
+  "controllers.setup": "Controllers",
+  "controllers.mapping": "Buttons & sticks",
+  "tv.devices": "TV devices",
+  "tv.look": "TV appearance",
+  "tv.watching": "TV playback",
+  "tv.content": "TV content",
+  "storage.overview": "Storage overview",
+  "webhooks.destinations": "Notification destinations",
+  "webhooks.what": "Notification sources",
+  "webhooks.rules": "Notification rules",
+  "relay.status": "Harbor Relay",
+  "relay.manage": "Manage relay",
+  "advanced.system": "Startup & system",
+  "advanced.repair": "Repair & diagnostics",
+};
+
+const BAND_LABELS: Record<string, string> = {
+  SETUP: "Account & setup",
+  WATCHING: "Playback",
+  LANGUAGE: "Languages",
+  CONTENT: "Sources & library",
+  "LOOK & FEEL": "Appearance",
+  DEVICES: "Controls & devices",
+  SYSTEM: "System",
+  HELP: "Help & about",
+  PLUGINS: "Plugins",
+  UPDATES: "Updates & backup",
+};
+
+const BAND_ICONS: Record<string, string> = {
+  SETUP: "AccountSetup",
+  WATCHING: "Play",
+  LANGUAGE: "Languages",
+  CONTENT: "Library",
+  "LOOK & FEEL": "Palette",
+  DEVICES: "InputDevices",
+  SYSTEM: "SlidersHorizontal",
+  HELP: "HelpAbout",
+  PLUGINS: "Puzzle",
+  UPDATES: "ArrowUpCircle",
+};
+
+function flatPage(band: Band): SectionId | null {
+  return band.sections.length === 1 && tabsFor(band.sections[0]).length === 0
+    ? band.sections[0]
+    : null;
+}
+
+function bands(): Band[] {
+  const out: Band[] = [];
+  const bySection = new Map<string, Band>();
+  for (const group of TOP_GROUPS) {
+    const seen = bySection.get(group.section);
+    if (seen) {
+      seen.sections.push(...group.children);
+      continue;
+    }
+    const band: Band = { section: group.section, sections: [...group.children] };
+    bySection.set(group.section, band);
+    out.push(band);
+  }
+  return out;
+}
+
+function RailAccount() {
+  const t = useT();
+  const fileRef = useRef<HTMLInputElement | null>(null);
+  const { user } = useAuth();
+  const { profiles, activeProfile, updateProfile } = useProfiles();
+  const { settings, update } = useSettings();
+  const harborAvatar = settings.harborAvatar?.startsWith("/kids/avatars/")
+    ? null
+    : settings.harborAvatar;
+  const onPickAvatar = async (e: React.ChangeEvent<HTMLInputElement>) => {
+    const file = e.target.files?.[0];
+    e.target.value = "";
+    if (!file) return;
+    try {
+      const dataUrl = await resizeAvatar(file, 320);
+      update({ harborAvatar: dataUrl });
+      if (activeProfile) updateProfile(activeProfile.id, { avatar: dataUrl });
+    } catch (err) {
+      console.warn("[avatar] resize failed", err);
+    }
+  };
+
+  const name =
+    activeProfile?.name ?? user?.fullname ?? user?.email?.split("@")[0] ?? t("profile.fallback");
+
+  return (
+    <div data-tv-nav-cell className="hset-rail-me">
+      <button
+        type="button"
+        onClick={() => fileRef.current?.click()}
+        aria-label={t("Change your picture")}
+        className="hset-rail-me-avatar"
+      >
+        <ProfileAvatar
+          profile={activeProfile}
+          user={user}
+          fallbackAvatar={harborAvatar}
+          size="lg"
+        />
+        <span
+          aria-hidden
+          className="hset-rail-me-swap"
+          dangerouslySetInnerHTML={{ __html: uploadGlyph }}
+        />
+      </button>
+      <input
+        ref={fileRef}
+        type="file"
+        accept="image/*"
+        onChange={onPickAvatar}
+        className="hidden"
+      />
+      <span className="hset-rail-me-text">
+        <span className="hset-rail-me-name">{name}</span>
+        <span className="hset-rail-me-sub">
+          <SubtitleText active={activeProfile} profiles={profiles} user={user} />
+        </span>
+      </span>
+    </div>
+  );
+}
+
+function SectionRow({
+  id,
+  label,
+  on,
+  onPick,
+  tab,
+}: {
+  id: SectionId;
+  label: string;
+  tab?: TabEntry;
+  on: boolean;
+  onPick: (id: SectionId, tab?: string) => void;
+}) {
+  return (
+    <button
+      type="button"
+      onClick={() => onPick(id, tab?.id)}
+      aria-current={on ? "page" : undefined}
+      className={`hset-rail-row ${on ? "is-on" : ""}`}
+    >
+      <span className="hset-rail-chip">
+        {tab?.icon === "Harbor" ? (
+          <HarborMark className="h-5 w-5" />
+        ) : tab?.img ? (
+          <img
+            src={tab.img}
+            alt=""
+            draggable={false}
+            className="h-5 w-5 rounded-[4px] object-contain"
+          />
+        ) : (
+          <Glyph name={tab?.icon ?? SECTION_ICONS[id]} size={20} />
+        )}
+      </span>
+      <span className="hset-rail-label">{label}</span>
+    </button>
+  );
+}
+
+export function SettingsSidebar({
+  active,
+  activeTab,
+  meta,
+  query = "",
+  onSelect,
+  onJump,
+}: {
+  active: SectionId;
+  activeTab: string | null;
+  meta: Record<SectionId, { label: string; sub: string }>;
+  query?: string;
+  onSelect: (section: SectionId, tab?: string) => void;
+  onJump?: (section: SectionId, anchor?: string, tab?: string) => void;
+}) {
+  const t = useT();
+  const { settings } = useSettings();
+  const native = typeof window !== "undefined" && "__TAURI_INTERNALS__" in window;
+  const trimmed = query.trim().toLowerCase();
+  const { matches, optionMatches } = useNavSearch(trimmed);
+  const searching = trimmed.length > 0;
+  const activeBand = bands().find((band) => band.sections.includes(active))?.section ?? "SETUP";
+  const [openBands, setOpenBands] = useState(() => new Set([activeBand]));
+  useEffect(() => {
+    setOpenBands((current) =>
+      current.has(activeBand) ? current : new Set([...current, activeBand]),
+    );
+  }, [activeBand, active, searching]);
+  const toggleBand = (band: string) =>
+    setOpenBands((current) => {
+      const next = new Set(current);
+      if (next.has(band)) next.delete(band);
+      else next.add(band);
+      return next;
+    });
+
+  if (searching) {
+    const sections = matches ?? [];
+    const options = optionMatches ?? [];
+    const empty = sections.length === 0 && options.length === 0;
+    return (
+      <nav
+        id="hset-page-navigation"
+        data-harbor-sidebar
+        data-tv-nav-zone
+        className="hset-rail"
+        aria-label={t("Settings")}
+      >
+        <RailAccount />
+        <div className="hset-rail-nav" key="search">
+          <div className="hset-rail-band hset-rail-results">
+            {empty && <p className="hset-rail-empty">{t("No settings match that.")}</p>}
+            {sections.length > 0 && (
+              <>
+                <h2 className="hset-rail-band-title">{t("Pages")}</h2>
+                {sections.map((item) => (
+                  <div key={item.id} className="hset-rail-item">
+                    <SectionRow
+                      id={item.id}
+                      label={t(item.label)}
+                      on={item.id === active}
+                      onPick={onSelect}
+                    />
+                  </div>
+                ))}
+              </>
+            )}
+            {options.length > 0 && (
+              <>
+                <h2 className="hset-rail-band-title is-spaced">{t("Settings")}</h2>
+                {options.slice(0, 24).map((o, i) => (
+                  <button
+                    key={`${o.section}-${o.label}-${i}`}
+                    type="button"
+                    onClick={() =>
+                      onJump
+                        ? onJump(
+                            o.section,
+                            o.anchorTitle ? settingsAnchor(o.anchorTitle) : undefined,
+                            o.tab,
+                          )
+                        : onSelect(o.section, o.tab)
+                    }
+                    className="hset-rail-kid"
+                  >
+                    <span className="hset-rail-kid-chip">
+                      <Glyph name={SECTION_ICONS[o.section]} size={18} />
+                    </span>
+                    <span className="hset-rail-stack">
+                      <span className="hset-rail-label">{t(o.label)}</span>
+                      <span className="hset-rail-where">{t(meta[o.section].label)}</span>
+                    </span>
+                  </button>
+                ))}
+              </>
+            )}
+          </div>
+        </div>
+      </nav>
+    );
+  }
+
+  return (
+    <nav
+      id="hset-page-navigation"
+      data-harbor-sidebar
+      data-tv-nav-zone
+      className="hset-rail"
+      aria-label={t("Settings")}
+    >
+      <RailAccount />
+      <div className="hset-rail-nav" key="browse">
+        {bands().map((band) => {
+          const flat = flatPage(band);
+          if (flat) {
+            const on = flat === active;
+            return (
+              <div key={band.section} className="hset-rail-band" data-open={on || undefined}>
+                <button
+                  type="button"
+                  className={`hset-rail-category is-flat ${on ? "is-on" : ""}`}
+                  aria-current={on ? "page" : undefined}
+                  onClick={() => onSelect(flat)}
+                >
+                  <span className="hset-category-icon" aria-hidden>
+                    <Glyph name={BAND_ICONS[band.section] ?? SECTION_ICONS[flat]} size={20} />
+                  </span>
+                  <span className="hset-category-name">
+                    {t(BAND_LABELS[band.section] ?? meta[flat].label)}
+                  </span>
+                </button>
+              </div>
+            );
+          }
+          return (
+            <div
+              key={band.section}
+              className="hset-rail-band"
+              data-open={openBands.has(band.section) || undefined}
+            >
+              <button
+                type="button"
+                id={`hset-category-button-${band.section.replaceAll(" ", "-")}`}
+                className="hset-rail-category"
+                aria-expanded={openBands.has(band.section)}
+                aria-controls={`hset-category-${band.section.replaceAll(" ", "-")}`}
+                onClick={() => toggleBand(band.section)}
+              >
+                <span className="hset-category-icon" aria-hidden>
+                  <Glyph name={BAND_ICONS[band.section]} size={20} />
+                </span>
+                <span className="hset-category-name">
+                  {t(BAND_LABELS[band.section] ?? band.section)}
+                </span>
+                <span className="hset-category-caret" aria-hidden />
+              </button>
+              <div
+                id={`hset-category-${band.section.replaceAll(" ", "-")}`}
+                role="group"
+                aria-labelledby={`hset-category-button-${band.section.replaceAll(" ", "-")}`}
+                className="hset-category-pages"
+                hidden={!openBands.has(band.section)}
+              >
+                {band.sections.map((id) => {
+                  const tabs =
+                    (!native && (id === "mpv" || id === "shaders" || id === "plugins")) ||
+                    (id === "relay" && !settings.togetherRelayUrl)
+                      ? []
+                      : tabsFor(id).filter(
+                          (tab) => native || id !== "theme" || tab.id !== "window",
+                        );
+                  return (
+                    <div key={id} className="hset-rail-page-group">
+                      {tabs.length > 0 ? (
+                        tabs.map((tab) => (
+                          <SectionRow
+                            key={tab.id}
+                            id={id}
+                            tab={tab}
+                            label={t(PAGE_LABELS[id + "." + tab.id] ?? tab.label)}
+                            on={id === active && (activeTab ?? tabs[0].id) === tab.id}
+                            onPick={onSelect}
+                          />
+                        ))
+                      ) : (
+                        <SectionRow
+                          id={id}
+                          label={t(meta[id].label)}
+                          on={id === active}
+                          onPick={onSelect}
+                        />
+                      )}
+                    </div>
+                  );
+                })}
+              </div>
+            </div>
+          );
+        })}
+      </div>
+    </nav>
+  );
+}

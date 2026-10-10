@@ -10,6 +10,19 @@ import { HOST_HEARTBEAT_MS, SEEK_APPLY_DEBOUNCE_MS, SYNC_DRIFT_TOLERANCE_S, SYNC
 
 type ForeignNotice = { title: string | null; from: string };
 
+function syncRate(state: SyncState): number {
+  return typeof state.speed === "number" && Number.isFinite(state.speed) && state.speed > 0
+    ? state.speed
+    : 1;
+}
+
+function syncTarget(state: SyncState, duration: number): number {
+  const age = Math.min(SYNC_MAX_AGE_S, Math.max(0, (Date.now() - state.updatedAt) / 1000));
+  // Age and lookahead are wall-clock seconds; project them at the host's rate.
+  const target = state.positionSeconds + (state.playing ? (age + SYNC_PLAY_LOOKAHEAD_S) * syncRate(state) : 0);
+  return duration > 0 ? Math.min(target, Math.max(0, duration - 0.25)) : target;
+}
+
 function isDifferentMedia(state: SyncState, src: PlayerSrc): boolean {
   if (!state.mediaId) return false;
   if (state.mediaId !== src.meta.id) return true;
@@ -76,11 +89,12 @@ export function useRoomSync(params: {
   isHostRef.current = isHost;
   const syncCatchUpRef = useRef(false);
   const lastAppliedStateAtRef = useRef(0);
+  const mediaKey = `${src.meta.id}|${src.episode?.season ?? ""}|${src.episode?.episode ?? ""}`;
 
   useEffect(() => {
     syncCatchUpRef.current = false;
     lastAppliedStateAtRef.current = 0;
-  }, [src.url, src.meta.id]);
+  }, [src.url, mediaKey, inRoom]);
 
   const publishedRef = useRef<{ status: string; positionSec: number; at: number }>({
     status: "",
@@ -201,17 +215,12 @@ export function useRoomSync(params: {
       if (!state.mediaId) return;
       if (state.updatedAt < lastAppliedStateAtRef.current) return;
       lastAppliedStateAtRef.current = state.updatedAt;
-      if (state.speed != null && Math.abs(state.speed - rateRef.current) > 0.01) {
-        b.setRate(state.speed);
+      const rate = syncRate(state);
+      if (Math.abs(rate - rateRef.current) > 0.01) {
+        b.setRate(rate);
       }
       const livePos = getPlaybackPosition();
-      const ageS = Math.min(SYNC_MAX_AGE_S, Math.max(0, (Date.now() - state.updatedAt) / 1000));
-      let target = state.playing
-        ? state.positionSeconds + ageS + SYNC_PLAY_LOOKAHEAD_S
-        : state.positionSeconds;
-      if (durationRef.current > 0) {
-        target = Math.min(target, Math.max(0, durationRef.current - 0.25));
-      }
+      const target = syncTarget(state, durationRef.current);
       const drift = Math.abs(livePos - target);
       const playStateChanged = state.playing !== (snap.status === "playing");
       const driftTooBig = drift > SYNC_DRIFT_TOLERANCE_S;
@@ -239,26 +248,21 @@ export function useRoomSync(params: {
       if (state.playing && snap.status !== "playing") b.play().catch(() => {});
       if (!state.playing && snap.status === "playing") b.pause();
     });
-  }, [inRoom, onIncomingState, clientId, src.meta.id, suppressOutgoingFor, snap.status, snap.durationSec, cast]);
+  }, [inRoom, onIncomingState, clientId, mediaKey, suppressOutgoingFor, snap.status, snap.durationSec, cast]);
 
   useEffect(() => {
     if (!inRoom || !cast) return;
     return onIncomingState((state) => {
       if (state.updatedBy === clientId) return;
       if (!cast.activeRef.current) return;
+      if (!state.mediaId) return;
       if (isDifferentMedia(state, src)) {
         setForeignNotice({ title: state.mediaTitle, from: state.updatedBy });
         return;
       }
       if (state.updatedAt < lastAppliedStateAtRef.current) return;
       lastAppliedStateAtRef.current = state.updatedAt;
-      const ageS = Math.min(SYNC_MAX_AGE_S, Math.max(0, (Date.now() - state.updatedAt) / 1000));
-      let target = state.playing
-        ? state.positionSeconds + ageS + SYNC_PLAY_LOOKAHEAD_S
-        : state.positionSeconds;
-      if (durationRef.current > 0) {
-        target = Math.min(target, Math.max(0, durationRef.current - 0.25));
-      }
+      const target = syncTarget(state, durationRef.current);
       const playing = cast.isPlaying();
       const drift = Math.abs(cast.getPosition() - target);
       const playStateChanged = state.playing !== playing;
@@ -268,7 +272,7 @@ export function useRoomSync(params: {
       if (state.playing && !playing) void cast.play();
       if (!state.playing && playing) void cast.pause();
     });
-  }, [inRoom, cast, onIncomingState, clientId, src.meta.id, suppressOutgoingFor, setForeignNotice]);
+  }, [inRoom, cast, onIncomingState, clientId, mediaKey, suppressOutgoingFor, setForeignNotice]);
 
   useEffect(() => {
     if (!inRoom || !isHost || !cast) return;
@@ -296,8 +300,6 @@ export function useRoomSync(params: {
     const id = window.setInterval(publishCast, 3000);
     return () => window.clearInterval(id);
   }, [inRoom, isHost, cast, publishState, src.meta.id, src.meta.name, src.meta.poster, src.episode]);
-
-  const mediaKey = `${src.meta.id}|${src.episode?.season ?? ""}|${src.episode?.episode ?? ""}`;
 
   const prevMediaKeyRef = useRef(mediaKey);
   useEffect(() => {
@@ -370,22 +372,17 @@ export function useRoomSync(params: {
   useEffect(() => {
     if (!inRoom || isHost || !hasStarted || initialSyncDoneRef.current) return;
     const state = roomSnapshot.syncState;
-    if (!state || isDifferentMedia(state, src)) return;
+    if (!state?.mediaId || isDifferentMedia(state, src)) return;
     const b = bridgeRef.current;
     if (!b) return;
     initialSyncDoneRef.current = true;
-    const ageS = Math.min(SYNC_MAX_AGE_S, Math.max(0, (Date.now() - state.updatedAt) / 1000));
-    let target = state.playing
-      ? state.positionSeconds + ageS + SYNC_PLAY_LOOKAHEAD_S
-      : state.positionSeconds;
-    if (durationRef.current > 0) {
-      target = Math.min(target, Math.max(0, durationRef.current - 0.25));
-    }
+    const target = syncTarget(state, durationRef.current);
     suppressOutgoingFor(SYNC_SUPPRESS_MS);
-    if (state.speed != null) b.setRate(state.speed);
+    b.setRate(syncRate(state));
     b.seek(target);
-    b.play().catch(() => {});
-  }, [inRoom, isHost, hasStarted, roomSnapshot.syncState, src.meta.id, suppressOutgoingFor]);
+    if (state.playing) b.play().catch(() => {});
+    else b.pause();
+  }, [inRoom, isHost, hasStarted, roomSnapshot.syncState, mediaKey, suppressOutgoingFor]);
 
   return { inRoomRef, isHostRef, initialSyncDoneRef };
 }

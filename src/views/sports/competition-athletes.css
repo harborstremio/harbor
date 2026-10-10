@@ -1,0 +1,55 @@
+.sh-competition-athletes {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: center;
+  gap: 8px 18px;
+  min-width: 0;
+}
+.sh-competition-athlete {
+  display: inline-flex;
+  align-items: center;
+  gap: 12px;
+  min-width: 0;
+  max-width: 100%;
+}
+.sh-competition-portrait {
+  display: grid;
+  place-items: center;
+  width: 40px;
+  height: 40px;
+  flex: 0 0 40px;
+  overflow: hidden;
+  border-radius: 50%;
+  background: var(--color-canvas);
+  color: var(--color-ink-subtle);
+}
+.sh-competition-portrait > img,
+.sh-competition-athletes .sh-competition-portrait > img {
+  width: 100%;
+  height: 100%;
+  object-fit: cover;
+  object-position: center 20%;
+}
+.sh-bout-list .sh-competition-portrait {
+  width: 58px;
+  height: 58px;
+  flex: 0 0 58px;
+}
+.sh-competition-athlete .sh-competition-athlete-name {
+  min-width: 0;
+  color: var(--color-ink);
+  font: inherit;
+  white-space: normal;
+  overflow-wrap: anywhere;
+}
+.sh-race-sessions.sh-competition-field > div {
+  flex-wrap: nowrap;
+  padding-block: 12px;
+}
+.sh-competition-field > div > strong {
+  flex-basis: auto;
+}
+.sh-competition-field > div > span:last-child {
+  flex-shrink: 0;
+  text-align: end;
+}

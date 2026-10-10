@@ -1,7 +1,10 @@
 import { useEffect, useState } from "react";
-import { AlertCircle, Check, Download, Loader2, Search, Star, Upload } from "lucide-react";
+import { AlertCircle, Check, Download, Loader2, Star, Upload } from "../../icons";
+import { Search } from "@/components/icons/search-icon";
 import { browseThemes, downloadTheme, rateTheme, type StoreTheme } from "@/lib/theme-store";
+import { useT } from "@/lib/i18n";
 import { CommunityDetail } from "./community-detail";
+import { ThemeAuthorButton } from "./theme-author-button";
 import { ThemeUploadFlow } from "./theme-upload-flow";
 
 const SORTS = [
@@ -11,6 +14,7 @@ const SORTS = [
 ];
 
 export function CommunityPane() {
+  const t = useT();
   const [sort, setSort] = useState("top");
   const [query, setQuery] = useState("");
   const [debounced, setDebounced] = useState("");
@@ -21,8 +25,8 @@ export function CommunityPane() {
   const [uploadOpen, setUploadOpen] = useState(false);
 
   useEffect(() => {
-    const t = setTimeout(() => setDebounced(query.trim()), 300);
-    return () => clearTimeout(t);
+    const timer = setTimeout(() => setDebounced(query.trim()), 300);
+    return () => clearTimeout(timer);
   }, [query]);
 
   useEffect(() => {
@@ -45,26 +49,29 @@ export function CommunityPane() {
           <button
             key={s.id}
             onClick={() => setSort(s.id)}
-            className={`h-8 rounded-full border px-3.5 text-[12px] font-semibold transition-colors ${
-              sort === s.id ? "border-ink bg-ink text-canvas" : "border-edge-soft bg-elevated/40 text-ink-muted hover:border-edge hover:text-ink"
+            className={`h-11 rounded-full border px-4 text-[15.5px] font-semibold transition-colors ${
+              sort === s.id
+                ? "border-ink bg-ink text-canvas"
+                : "border-edge-soft bg-elevated text-ink-muted hover:border-edge hover:text-ink"
             }`}
           >
-            {s.label}
+            {t(s.label)}
           </button>
         ))}
         <button
           onClick={() => setUploadOpen(true)}
-          className="ms-auto flex h-9 items-center gap-1.5 rounded-full bg-ink px-4 text-[12.5px] font-semibold text-canvas transition-opacity hover:opacity-90"
+          className="ms-auto flex h-11 items-center gap-2 rounded-full bg-ink px-4 text-[15.5px] font-semibold text-canvas transition-opacity hover:opacity-90"
         >
-          <Upload size={14} strokeWidth={2.2} /> Share a theme
+          <Upload size={18} strokeWidth={2.2} /> {t("Share a theme")}
         </button>
-        <div className="flex h-9 items-center gap-2 rounded-full border border-edge-soft bg-elevated/40 px-3.5">
-          <Search size={15} className="text-ink-subtle" />
+        <div className="flex h-11 items-center gap-2 rounded-full bg-elevated px-4">
+          <Search size={18} className="text-ink-subtle" />
           <input
             value={query}
             onChange={(e) => setQuery(e.target.value)}
-            placeholder="Search themes"
-            className="w-44 bg-transparent text-[13px] text-ink placeholder:text-ink-subtle focus:outline-none"
+            placeholder={t("Search themes")}
+            aria-label={t("Search themes")}
+            className="h-11 w-44 min-w-0 bg-transparent text-[15.5px] text-ink placeholder:text-ink-subtle focus:outline-none"
           />
         </div>
       </div>
@@ -74,13 +81,17 @@ export function CommunityPane() {
           <Loader2 size={20} className="animate-spin" />
         </div>
       ) : error ? (
-        <div className="rounded-xl border border-danger/40 bg-danger/10 px-4 py-8 text-center text-[13px] text-danger">{error}</div>
+        <div className="rounded-[10px] border border-danger/40 bg-elevated px-4 py-8 text-center text-[15.5px] leading-[22px] text-danger">
+          {error}
+        </div>
       ) : themes.length === 0 ? (
-        <p className="rounded-xl border border-dashed border-edge px-4 py-12 text-center text-[13px] text-ink-subtle">
-          {debounced ? "No themes match your search." : "No community themes yet. Be the first to share one."}
+        <p className="rounded-[10px] border border-dashed border-edge px-4 py-12 text-center text-[15.5px] leading-[22px] text-ink-subtle">
+          {debounced
+            ? t("No themes match your search.")
+            : t("No community themes yet. Be the first to share one.")}
         </p>
       ) : (
-        <div className="grid gap-4 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4">
+        <div className="grid grid-cols-[repeat(auto-fill,minmax(260px,1fr))] gap-4">
           {themes.map((t) => (
             <CommunityCard key={t.id} theme={t} onOpen={() => setSelected(t)} />
           ))}
@@ -95,6 +106,7 @@ export function CommunityPane() {
 }
 
 function CommunityCard({ theme, onOpen }: { theme: StoreTheme; onOpen: () => void }) {
+  const tr = useT();
   const [t, setT] = useState(theme);
   const [state, setState] = useState<"idle" | "loading" | "done" | "error">("idle");
   const [myRating, setMyRating] = useState(0);
@@ -127,14 +139,14 @@ function CommunityCard({ theme, onOpen }: { theme: StoreTheme; onOpen: () => voi
   const shownRating = myRating || Math.round(t.ratingAvg);
 
   return (
-    <div
-      onClick={onOpen}
-      role="button"
-      tabIndex={0}
-      onKeyDown={(e) => (e.key === "Enter" || e.key === " ") && onOpen()}
-      className="group flex cursor-pointer flex-col overflow-hidden rounded-2xl border border-edge-soft bg-surface text-start transition-all hover:border-edge hover:shadow-[0_18px_36px_-22px_rgba(0,0,0,0.3)]"
-    >
-      <div className="relative h-36 w-full overflow-hidden bg-elevated">
+    <div className="group relative flex cursor-pointer flex-col overflow-hidden rounded-[10px] bg-surface text-start transition hover:bg-elevated hover:harbor-float">
+      <button
+        type="button"
+        onClick={onOpen}
+        aria-label={tr("Open {name}", { name: t.name })}
+        className="absolute inset-0 z-0 rounded-md focus-visible:ring-2 focus-visible:ring-accent"
+      />
+      <div className="pointer-events-none relative z-10 h-36 w-full overflow-hidden bg-elevated">
         {t.cover ? (
           <img
             src={t.cover}
@@ -149,50 +161,73 @@ function CommunityCard({ theme, onOpen }: { theme: StoreTheme; onOpen: () => voi
             ))}
           </div>
         )}
-        <div className="absolute bottom-2 end-2 flex items-center gap-1 rounded-md bg-black/55 px-1.5 py-0.5 text-[10.5px] font-semibold text-white backdrop-blur-sm transition-opacity group-hover:opacity-0">
-          <Star size={10} className="fill-amber-300 text-amber-300" /> {t.ratingAvg || "-"}
+        <div className="absolute bottom-2 end-2 inline-flex h-[22px] shrink-0 items-center gap-1.5 rounded-[6px] bg-canvas px-2 text-[13px] font-bold uppercase leading-[17px] tracking-[0.72px] text-ink transition-opacity group-hover:opacity-0">
+          <Star size={14} className="fill-accent text-accent" /> {t.ratingAvg || "-"}
         </div>
-        <div className="absolute inset-0 flex flex-col justify-end gap-2 bg-gradient-to-t from-black/85 via-black/35 to-transparent p-3 opacity-0 transition-opacity duration-200 group-hover:opacity-100">
-          <div className="flex items-center justify-center gap-0.5" role="group" aria-label="Rate this theme">
+        <div className="absolute inset-0 flex flex-col justify-end gap-2 bg-gradient-to-t from-canvas via-canvas/70 to-transparent p-3 opacity-0 transition-opacity duration-200 group-hover:opacity-100">
+          <div
+            className="pointer-events-auto flex items-center justify-center gap-0.5"
+            role="group"
+            aria-label={tr("Rate this theme")}
+          >
             {[1, 2, 3, 4, 5].map((n) => (
-              <button key={n} onClick={(e) => rate(e, n)} aria-label={`Rate ${n} stars`} className="p-0.5">
-                <Star size={15} className={n <= shownRating ? "fill-amber-300 text-amber-300" : "text-white/60"} />
+              <button
+                key={n}
+                onClick={(e) => rate(e, n)}
+                aria-label={tr("Rate {count} stars", { count: n })}
+                className="grid h-11 w-11 place-items-center"
+              >
+                <Star
+                  size={20}
+                  className={n <= shownRating ? "fill-accent text-accent" : "text-ink-subtle"}
+                />
               </button>
             ))}
           </div>
           <button
             onClick={download}
             disabled={state === "loading"}
-            className={`flex h-9 items-center justify-center gap-1.5 rounded-lg text-[12.5px] font-semibold transition-colors disabled:opacity-80 ${
+            className={`pointer-events-auto flex h-11 items-center justify-center gap-2 rounded-[8px] text-[15.5px] font-semibold transition-colors disabled:opacity-80 ${
               state === "done"
-                ? "bg-emerald-400 text-black"
+                ? "bg-success text-canvas"
                 : state === "error"
-                  ? "bg-danger text-white"
-                  : "bg-white text-black hover:opacity-90"
+                  ? "bg-danger text-canvas"
+                  : "bg-ink text-canvas hover:opacity-90"
             }`}
           >
             {state === "loading" ? (
-              <Loader2 size={14} className="animate-spin" />
+              <Loader2 size={18} className="animate-spin" />
             ) : state === "done" ? (
-              <Check key="done" size={14} className="harbor-pop" />
+              <Check key="done" size={18} className="harbor-pop" />
             ) : state === "error" ? (
-              <AlertCircle size={14} />
+              <AlertCircle size={18} />
             ) : (
-              <Download size={14} />
+              <Download size={18} />
             )}
-            {state === "done" ? "Added to library" : state === "error" ? "Failed" : state === "loading" ? "Downloading" : "Download"}
+            {state === "done"
+              ? tr("Added to library")
+              : state === "error"
+                ? tr("Failed")
+                : state === "loading"
+                  ? tr("Downloading")
+                  : tr("Download")}
           </button>
         </div>
-        <div className="absolute bottom-0 left-0 right-0 flex h-1.5">
+        <div className="absolute inset-x-0 bottom-0 flex h-1.5">
           {t.swatch.map((c, i) => (
             <span key={i} className="flex-1" style={{ background: c }} />
           ))}
         </div>
       </div>
-      <div className="flex min-w-0 flex-col px-4 py-3">
-        <span className="truncate text-[14.5px] font-semibold text-ink">{t.name}</span>
-        <span className="truncate text-[11.5px] text-ink-subtle">
-          {t.author} · {t.downloads} downloads
+      <div className="pointer-events-none relative z-10 flex min-w-0 flex-col px-4 py-3">
+        <span className="text-[16.5px] font-semibold leading-[24px] text-ink">{t.name}</span>
+        <span className="text-[15.5px] leading-[22px] text-ink-subtle">
+          {t.authorHandle ? (
+            <ThemeAuthorButton handle={t.authorHandle} name={t.author || tr("Anonymous")} />
+          ) : (
+            t.author || tr("Anonymous")
+          )}{" "}
+          · {t.downloads === 1 ? tr("1 download") : tr("{count} downloads", { count: t.downloads })}
         </span>
       </div>
     </div>

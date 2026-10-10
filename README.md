@@ -23,12 +23,12 @@ Offering things like a native player, a stream ranking engine, Wikidata, watch p
 
 <br/>
 
-[Why Harbor](#why-harbor) &middot; [Features](#feature-tour) &middot; [Install](#install) &middot; [Configuration](#configuration) &middot; [Architecture](#architecture) &middot; [FAQ](#faq) &middot; [Contributing](#contributing)
+[Why Harbor](#why-harbor) &middot; [Features](#feature-tour) &middot; [Home servers](#home-server-integrations) &middot; [Install](#install) &middot; [Configuration](#configuration) &middot; [Architecture](#architecture) &middot; [FAQ](#faq) &middot; [Contributing](#contributing)
 
 </div>
 
 <br/>
-<h4 align="center">💬 New: By popular demand, join our community discord for support and help (https://discord.gg/harbor)!</h4>
+<h4 align="center">💬 New: By popular demand, join our community discord for support and help (https://discord.gg/gUGg4YSsg)!</h4>
 <p align="center">
   <img src="https://harbor.site/readme-media/hero.png" width="900">
   <br/>
@@ -42,9 +42,9 @@ Offering things like a native player, a stream ranking engine, Wikidata, watch p
 > <br/>
 
 > [!NOTE]
-> Official Linux `.deb`, `.rpm`, Flatpak, and AppImage builds are maintained at [harborstremio-linux/harbor-linux-builds](https://github.com/harborstremio-linux/harbor-linux-builds).
+> Unofficial Linux `.deb`, `.rpm`, and Flatpak packages are maintained at [AdityaHebballe/harbor-linux-builds](https://github.com/AdityaHebballe/harbor-linux-builds). Official Linux packages are coming soon.
 
-ATTENTION: HARBOR DOES NOT AND WILL NOT ASK YOU FOR DONATIONS! If someone claims to be us and asks you for donations, IT IS NOT US. Have an issue? Open it on github so you and everyone else can know and see exactly how we messed up, and how we will fix it! Yes we do see your emails to bugs@harbor.site and Bug reports to the bug endpoint FYI the fastest way to get our attention is through github, we will still handle unique reports that have not been already sorted. Want to donate to a good cause visit: National Pediatric Cancer Foundation (https://nationalpcf.org/), Electronic Frontier Foundation (https://www.eff.org/) or St.Jude's (https://www.stjude.org/) email us with a receipt of your donation and we will implement your features in a priority manner. Include NPCF , EFF or SaintJude in title so we can track you! If you have a preferred cause visit https://www.charitynavigator.org/ and donate to a top rated charity of your choice and include CHARITY in email title
+ATTENTION: HARBOR DOES NOT AND WILL NOT ASK YOU FOR DONATIONS! If someone claims to be us and asks you for donations, IT IS NOT US. Have an issue? Open it on GitHub so everyone can see the report and follow its resolution. Want to donate to a good cause? Consider the National Pediatric Cancer Foundation (https://nationalpcf.org/), Electronic Frontier Foundation (https://www.eff.org/), or St. Jude's (https://www.stjude.org/). You can also find a charity at https://www.charitynavigator.org/.
 <br/>
 <br/>
 HARBOR IS A OPEN CONCEPT AND NOT A ENTITY. WE DO NOT PROFIT OR ACCEPT MONEY FOR IT. WE DO NOT PROVIDE ANY CONTENT OR TELL YOU HOW TO DO IT. IT IS JUST CODE ON A REPO. IT'S CONTRIBUTORS ARE NOT RESPONSIBLE FOR WHAT YOU DO WITH IT OR WHAT STREMIO ADDONS AND SOURCES YOU ALREADY HAVE. FOLLOW ALL LAWS OF YOUR JURIDSTICTION.
@@ -60,6 +60,7 @@ HARBOR IS A OPEN CONCEPT AND NOT A ENTITY. WE DO NOT PROFIT OR ACCEPT MONEY FOR 
 - [Feature Tour](#feature-tour)
   - [Rooms and views](#rooms-and-views)
   - [The stream engine](#the-stream-engine)
+  - [Home-server integrations](#home-server-integrations)
   - [The player](#the-player)
   - [Casting](#casting)
   - [Together: watch parties](#together-watch-parties)
@@ -101,8 +102,10 @@ HARBOR IS A OPEN CONCEPT AND NOT A ENTITY. WE DO NOT PROFIT OR ACCEPT MONEY FOR 
 - **Live TV and Multiview.** Bring M3U or Xtream playlists and get a real EPG grid guide, favorites, catchup, and up to four channels at once in a grid. Missed the show? play a rerun or record the next episode using built in DVR. Switch channels while in the live player at any time with the TV Guide
 - **Stream switcher** In player switcher allows you to hop streams if you get served a bad one without leaving the player and going through results again. Play next episodes with ease on the player UI controls or in a full "Next Up" sidebar.
 - **Casts across the room.** DLNA/UPnP, Chromecast, AirPlay, and Roku via a bundled Rust cast server and a web cast receiver.
+- **Your home servers, in one player.** Connect Plex, Jellyfin, or Emby to browse their libraries, choose a server copy alongside local files and online streams, and keep progress in sync.
 - **Integrations.** Feature rich discord rich presence integration, webhooks for Discord and Telegram, Trakt Sync, and native integrations to TMDB, OMDB, Fanart.Tv, RPDB and more! Customize the location and what badges are shown.
 - **And much more! (seriously this would be very long)**
+
 <p align="right"><a href="#readme-top">&#9650; back to top</a></p>
 
 ## Feature Tour
@@ -217,6 +220,26 @@ parse  ->  trust  ->  score  ->  rank
 | **Rank**  | Sorts into quality tiers (4K DV, 4K HDR, 4K, 1080p HDR, 1080p, 720p, SD) and surfaces the best cached pick first, with partial results streamed to the UI as addons respond                                                                                                                                        |
 
 Debrid services are checked live and uniformly: **Real-Debrid, AllDebrid, Premiumize, Debrid-Link, and TorBox**. Cache hints embedded by popular addons are read directly, and every torrent hash is cross checked against your debrid library to catch what the cache API misses. No debrid is required: Harbor can stream torrents directly through the bundled Stremio Server engine. All keys stay on your device.
+
+<p align="right"><a href="#readme-top">&#9650; back to top</a></p>
+
+### Home-server integrations
+
+Harbor can now work as a client for your existing media server. Connect a server once, then browse and play its versions alongside Harbor's local library and online sources—without moving or re-importing your files.
+
+<p align="center">
+  <a href="https://www.plex.tv/"><img src="https://cdn.simpleicons.org/plex/E5A00D" height="42" alt="Plex"></a>
+  &nbsp;&nbsp;&nbsp;
+  <a href="https://jellyfin.org/"><img src="https://cdn.simpleicons.org/jellyfin/AA5CC3" height="42" alt="Jellyfin"></a>
+  &nbsp;&nbsp;&nbsp;
+  <a href="https://emby.media/"><img src="https://cdn.simpleicons.org/emby/52B54B" height="42" alt="Emby"></a>
+</p>
+
+- **[Plex](https://www.plex.tv/), [Jellyfin](https://jellyfin.org/), and [Emby](https://emby.media/).** Add and manage connections from Harbor, then synchronize their libraries into one source-aware view.
+- **One title, every available copy.** A movie or episode can show local files, server versions, and online streams together, with provider, connection, quality, and direct-play/transcode context before playback.
+- **Reliable episode matching.** Harbor uses exact server episode items first and filename matching as a fallback. Dual-episode files are deduplicated while remaining available from each covered episode.
+- **Progress that follows you.** Resume and watched state synchronize with the home-server items Harbor can identify, while retaining Harbor's existing Stremio, Trakt, and Simkl tracking.
+- **Choose how Play behaves.** Ask every time, prefer this device, prefer online streams, or prefer a connected home server.
 
 <p align="right"><a href="#readme-top">&#9650; back to top</a></p>
 
@@ -379,14 +402,20 @@ Harbor is built to keep your data on your machine.
 
 ## Install
 
-Download the latest build for macOS or Windows from the [Releases page][releases], use the [official Linux builds](https://github.com/harborstremio-linux/harbor-linux-builds), or open Harbor in your browser.
+Download the latest build for macOS or Windows from the [Releases page][releases], use the [unofficial Linux packages](https://github.com/AdityaHebballe/harbor-linux-builds), or open Harbor in your browser.
 
-| Platform    | Format                                                                                                              |
-| ----------- | ------------------------------------------------------------------------------------------------------------------- |
-| **macOS**   | `.dmg` (macOS 11.0 or newer)                                                                                        |
-| **Windows** | `.exe` NSIS installer (current user install)                                                                        |
-| **Web**     | Open in any modern browser, nothing to install                                                                      |
-| **Linux**   | [Official `.deb`, `.rpm`, Flatpak, and AppImage builds](https://github.com/harborstremio-linux/harbor-linux-builds) |
+| Platform    | Format                                                                                                   |
+| ----------- | -------------------------------------------------------------------------------------------------------- |
+| **macOS**   | `.dmg` (macOS 15.0 or newer, Apple silicon)                                                              |
+| **Windows** | `.exe` NSIS installer (current user install), or `winget install HarborStremio.Harbor`                   |
+| **Web**     | Open in any modern browser, nothing to install                                                           |
+| **Linux**   | [Unofficial `.deb`, `.rpm`, and Flatpak packages](https://github.com/AdityaHebballe/harbor-linux-builds) |
+
+> [!NOTE]
+> Linux packages above are community-maintained. Official Harbor Linux packages are coming soon.
+
+> [!NOTE]
+> **First launch on macOS.** Harbor's macOS builds carry an ad-hoc code signature rather than an Apple Developer ID, so Gatekeeper reports it as coming from an unidentified developer and some antivirus tools flag the download. Drag Harbor to Applications, then either run `xattr -dr com.apple.quarantine /Applications/Harbor.app` in Terminal, or open **System Settings > Privacy & Security** and choose **Open Anyway**. If you would rather not trust a binary, [build from source](#build-from-source).
 
 **Out of the box, Harbor works on Cinemeta.** You can browse, play, and cast immediately. Adding a free **TMDB key** in Settings is optional and unlocks the richer trending, theaters, per service, and Watch on experiences described above. Your installed Stremio addons merge in automatically when you sign in, deduplicated against the built in rails.
 
@@ -632,17 +661,10 @@ Thank you to everyone, named and unnamed, whose open work Harbor builds upon.
 <sub>Built with care for the people who love good cinema and an open web. <a href="#readme-top">&#9650; back to top</a></sub>
 </div>
 
-<br/>
-
-Package repository hosting for Linux is graciously provided by [Cloudsmith](https://cloudsmith.com).
-<br/>
-
-<a href="https://cloudsmith.com"><img alt="OSS hosting by Cloudsmith" src="https://img.shields.io/badge/OSS%20hosting%20by-cloudsmith-blue?logo=cloudsmith&amp;style=flat-square" /></a>
-
 <!-- reference links -->
 
 [releases]: https://github.com/harborstremio/harbor/releases
-[linux-packages]: https://github.com/harborstremio-linux/harbor-linux-builds
+[linux-packages]: https://github.com/AdityaHebballe/harbor-linux-builds
 [issues]: https://github.com/harborstremio/harbor/issues
 [discussions]: https://github.com/harborstremio/harbor/discussions
 [license]: ./LICENSE

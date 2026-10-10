@@ -182,6 +182,24 @@ function labelFor(type: AwardType): string {
       return "Venice";
     case "berlin":
       return "Berlin";
+    case "bafta_tv":
+      return "BAFTA TV";
+    case "annie":
+      return "Annie";
+    case "spirit":
+      return "Spirit";
+    case "saturn":
+      return "Saturn";
+    case "cesar":
+      return "César";
+    case "goya":
+      return "Goya";
+    case "blue_dragon":
+      return "Blue Dragon";
+    case "baeksang":
+      return "Baeksang";
+    case "bifa":
+      return "BIFA";
     default:
       return "Award";
   }

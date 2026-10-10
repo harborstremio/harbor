@@ -1,10 +1,11 @@
-import type { ComponentType } from "react";
+import type { ComponentType, ReactNode } from "react";
 import type { Meta } from "@/lib/cinemeta";
 import type { PlayerCapabilities, PlayerSnapshot } from "@/lib/player/bridge";
 import type { SubtitleAddHandler } from "@/lib/player/subtitle-load";
 
 export type PlayerShellProps = {
   snap: PlayerSnapshot;
+  isLive?: boolean;
   capabilities: PlayerCapabilities;
   visible: boolean;
   fullscreen: boolean;
@@ -43,6 +44,7 @@ export type PlayerShellProps = {
   subtitle?: string;
   resolution?: string | null;
   quality?: string | null;
+  releaseName?: string | null;
   hoverTitle?: string;
   hoverSub?: string;
   hasPrevEp: boolean;
@@ -66,6 +68,7 @@ export type PlayerShellProps = {
   onDownloadReset?: () => void;
   onOpenDvr?: () => void;
   sleep?: import("@/views/player/hooks/use-sleep-timer").SleepTimerState;
+  homeServerQualityControl?: ReactNode;
 };
 
 export type PlayerShellMeta = {

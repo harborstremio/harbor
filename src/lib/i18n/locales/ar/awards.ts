@@ -1,0 +1,35 @@
+const awards: Record<string, string> = {
+  "No data shipped for this award yet. Re-run": "لم تُشحن بيانات لهذه الجائزة بعد. أعد تشغيل",
+  "to refresh the bundled dataset.": "لتحديث مجموعة البيانات المُرفقة.",
+  "No data shipped for this award yet.": "لم تُشحن بيانات لهذه الجائزة بعد.",
+  "No winners match these filters.": "لا فائزين يطابقون هذه المرشّحات.",
+  "No match found": "لم يُعثر على نتيجة مطابقة",
+  "Clear filters": "مسح المرشّحات",
+  "Search by recipient or title…": "ابحث حسب المُكرَّم أو العنوان…",
+  "All years": "كل السنوات",
+  "Founded {year}": "تأسّست {year}",
+  "{n} years": "{n} سنة",
+  "{n} year": "{n} سنة",
+  "Winning films & shows": "الأفلام والمسلسلات الفائزة",
+  "View all {n} winners": "عرض كل الفائزين الـ{n}",
+  "{n} title": "{n} عنوان",
+  "{n} titles": "{n} عنوان",
+  "Celebrated actors": "ممثلون مُحتفى بهم",
+  "Acclaimed directors": "مخرجون مرموقون",
+  "Honored writers": "كُتّاب مُكرَّمون",
+  "{n} wins": "{n} فوز",
+  "Add a TMDB key in Settings to unlock posters and the artists behind this award.":
+    "أضف مفتاح TMDB في الإعدادات لإظهار الملصقات والفنانين وراء هذه الجائزة.",
+  "No winners are catalogued for this award yet.": "لا يوجد فائزون مُفهرَسون لهذه الجائزة بعد.",
+
+  "Anime award": "جائزة أنمي",
+  "recorded winners": "فائزون مسجّلون",
+  category: "فئة",
+  categories: "فئات",
+  "Search winners or categories…": "ابحث عن الفائزين أو الفئات…",
+  Grand: "كبرى",
+  "{n} winner": "{n} فائز",
+  "{n} winners": "{n} فائزين",
+};
+
+export default awards;

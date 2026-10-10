@@ -1,4 +1,5 @@
-import { ArrowLeft, Search, X } from "lucide-react";
+import { ArrowLeft, X } from "lucide-react";
+import { Search } from "@/components/icons/search-icon";
 import { useEffect, useMemo, useRef, useState } from "react";
 import { BackToTop } from "@/components/back-to-top";
 import { CollectionCard } from "@/components/collection-card";
@@ -14,7 +15,7 @@ import { useCategoryFeed } from "./collections/use-category-feed";
 const FEED_QUERY = "collection";
 
 function stripSuffix(name: string): string {
-  return name.replace(/\s*[-:]?\s*(?:the\s+)?collection$/i, "").trim() || name;
+  return name.replace(/\s*(?:-|:)?\s*(?:the\s+)?collection$/i, "").trim() || name;
 }
 
 export function CollectionsView() {
@@ -127,7 +128,7 @@ export function CollectionsView() {
   return (
     <main ref={scrollRef} className="absolute inset-0 z-30 overflow-y-auto bg-canvas">
       <div className="mx-auto flex w-full max-w-[1700px] flex-col px-12 pb-24">
-        <div className="flex items-center gap-5 pt-24">
+        <div data-tv-chrome-offset className="flex items-center gap-5 pt-24">
           {!layoutHasGlobalBack() && (
             <button
               onClick={goBack}

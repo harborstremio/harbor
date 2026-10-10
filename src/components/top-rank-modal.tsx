@@ -1,4 +1,5 @@
-import { ArrowUp, ExternalLink, Search, X } from "lucide-react";
+import { ArrowUp, ExternalLink, X } from "lucide-react";
+import { Search } from "@/components/icons/search-icon";
 import { useEffect, useMemo, useRef, useState } from "react";
 import { createPortal } from "react-dom";
 import tmdbLogo from "@/assets/addon-logos/tmdb.png";
@@ -82,7 +83,7 @@ export function TopRankModal() {
 
   return createPortal(
     <div
-      className="fixed inset-0 z-[130] flex items-stretch justify-center bg-canvas/85 backdrop-blur-sm"
+      className="animate-scrim-in fixed inset-0 z-[175] flex items-stretch justify-center bg-canvas/80 backdrop-blur-[2px]"
       role="dialog"
       aria-modal="true"
       aria-label={t(meta.title)}
@@ -90,11 +91,11 @@ export function TopRankModal() {
     >
       <div
         onClick={(e) => e.stopPropagation()}
-        className="relative m-6 flex max-h-[calc(100vh-3rem)] w-full max-w-[1240px] flex-col overflow-hidden rounded-3xl border border-edge-soft bg-surface shadow-[0_30px_120px_-30px_rgba(0,0,0,0.85)] animate-popover-in"
+        className="animate-dialog-in relative m-6 flex max-h-[calc(100vh-3rem)] w-full max-w-[1240px] flex-col overflow-hidden rounded-lg bg-elevated ring-1 ring-edge-soft shadow-[0_10px_30px_-12px_rgba(0,0,0,0.6)]"
       >
-        <header className="flex items-center justify-between gap-4 border-b border-edge-soft px-7 py-5">
+        <header className="flex items-center justify-between gap-4 border-b border-edge-soft/45 px-7 py-5">
           <div>
-            <h2 className="font-display text-[24px] font-medium leading-tight tracking-tight text-ink">
+            <h2 className="font-display text-[21px] font-medium leading-tight tracking-tight text-ink">
               {t(meta.title)}
             </h2>
             <p className="flex items-center gap-1.5 text-[12.5px] text-ink-muted">
@@ -106,7 +107,7 @@ export function TopRankModal() {
             </p>
           </div>
           <div className="flex items-center gap-2">
-            <div className="flex h-10 items-center gap-2 rounded-full border border-edge bg-canvas/60 px-3 transition-colors focus-within:border-ink-subtle">
+            <div className="flex h-9 items-center gap-2 rounded-lg bg-canvas px-3 ring-1 ring-inset ring-edge-soft transition-[box-shadow] duration-150 focus-within:ring-edge">
               <Search size={14} className="text-ink-subtle" strokeWidth={2} />
               <input
                 value={query}
@@ -119,7 +120,7 @@ export function TopRankModal() {
             <button
               onClick={close}
               aria-label={t("Close")}
-              className="flex h-10 w-10 items-center justify-center rounded-full border border-edge text-ink-muted transition-colors hover:bg-elevated hover:text-ink"
+              className="flex h-9 w-9 items-center justify-center rounded-md bg-white/[0.06] text-ink-subtle transition-colors duration-150 hover:bg-white/[0.10] hover:text-ink active:scale-[0.97]"
             >
               <X size={16} strokeWidth={2} />
             </button>
@@ -156,7 +157,7 @@ export function TopRankModal() {
         <button
           onClick={() => scrollRef.current?.scrollTo({ top: 0, behavior: "smooth" })}
           aria-label={t("Back to top")}
-          className={`absolute bottom-5 end-5 z-10 flex h-8 w-8 items-center justify-center rounded-md border border-edge-soft/40 bg-canvas/90 text-ink-muted transition-[transform,opacity,background-color,color] duration-300 hover:bg-canvas hover:text-ink ${
+          className={`absolute bottom-5 end-5 z-10 flex h-8 w-8 items-center justify-center rounded-md bg-raised text-ink-muted ring-1 ring-edge-soft transition-[transform,opacity,background-color,color] duration-200 ease-in-out hover:text-ink ${
             showTop ? "translate-y-0 opacity-100" : "pointer-events-none translate-y-2 opacity-0"
           }`}
         >
@@ -185,10 +186,10 @@ function PersonRow({
   const handleImdb = useImdbOpener(person.id, tmdbKey);
 
   return (
-    <div className="group flex h-full gap-4 rounded-2xl border border-edge-soft bg-canvas/40 p-4 transition-colors hover:border-edge hover:bg-canvas/65">
+    <div className="group flex h-full gap-4 rounded-lg bg-canvas/55 p-4 ring-1 ring-inset ring-edge-soft transition-colors duration-150 hover:bg-canvas">
       <button
         onClick={() => onOpenPerson(person.id)}
-        className="relative h-full w-[120px] shrink-0 overflow-hidden rounded-xl bg-elevated/60 ring-1 ring-edge-soft/60"
+        className="relative h-full w-[120px] shrink-0 overflow-hidden rounded-md bg-canvas ring-1 ring-inset ring-edge-soft"
         aria-label={t("Open {name}", { name: person.name })}
       >
         {photo ? (
@@ -198,14 +199,14 @@ function PersonRow({
         )}
         <span className="absolute start-1.5 top-1.5 flex items-center gap-0.5 rounded-md bg-canvas/95 px-1.5 py-0.5 text-[10px] font-bold">
           <span className="text-[8.5px] uppercase tracking-[0.18em] text-ink-subtle">#</span>
-          <span className="text-accent">{person.rank}</span>
+          <span className="text-ink">{person.rank}</span>
         </span>
       </button>
 
       <div className="flex min-w-0 flex-1 flex-col gap-2 overflow-hidden">
         <button
           onClick={() => onOpenPerson(person.id)}
-          className="truncate text-start text-[15px] font-semibold leading-tight text-ink transition-colors hover:text-accent"
+          className="truncate text-start text-[15px] font-semibold leading-tight text-ink transition-opacity duration-150 hover:opacity-80"
         >
           {person.name}
         </button>
@@ -219,7 +220,7 @@ function PersonRow({
         <div className="mt-auto flex items-center gap-2 pt-1">
           <button
             onClick={() => onOpenPerson(person.id)}
-            className="inline-flex h-8 items-center gap-1.5 rounded-full bg-ink px-3 text-[12px] font-semibold text-canvas transition-transform hover:scale-[1.04]"
+            className="inline-flex h-8 items-center gap-1.5 rounded-md bg-ink px-3 text-[12px] font-semibold text-canvas transition-opacity duration-150 hover:opacity-90 active:scale-[0.98] motion-reduce:active:scale-100"
           >
             {t("View profile")}
             <ExternalLink size={11} strokeWidth={2.4} />
@@ -227,7 +228,7 @@ function PersonRow({
           <button
             onClick={handleImdb.open}
             disabled={handleImdb.loading}
-            className="inline-flex h-8 items-center gap-1.5 rounded-full border border-edge px-3 text-[12px] text-ink-muted transition-colors hover:bg-elevated hover:text-ink disabled:opacity-60"
+            className="inline-flex h-8 items-center gap-1.5 rounded-md bg-white/[0.06] px-3 text-[12px] text-ink-muted transition-colors duration-150 hover:bg-white/[0.10] hover:text-ink active:scale-[0.98] disabled:opacity-60 motion-reduce:active:scale-100"
             aria-label={t("Open on IMDb")}
           >
             <ImdbIcon className="h-[12px] w-auto rounded-[2px]" />
@@ -251,17 +252,17 @@ function KnownChip({ entry, onClick }: { entry: KnownForEntry; onClick: () => vo
   return (
     <button
       onClick={onClick}
-      className="group/chip inline-flex max-w-[170px] items-center gap-1.5 rounded-full border border-edge-soft bg-elevated/40 py-0.5 ps-0.5 pe-2.5 transition-colors hover:border-edge hover:bg-elevated"
+      className="group/chip inline-flex max-w-[170px] items-center gap-1.5 rounded-full bg-white/[0.06] py-0.5 ps-0.5 pe-2.5 transition-colors duration-150 hover:bg-white/[0.10]"
       title={entry.title}
     >
-      <span className="h-7 w-5 shrink-0 overflow-hidden rounded-full bg-canvas">
+      <span className="h-7 w-5 shrink-0 overflow-hidden rounded-[3px] bg-canvas">
         {poster.src ? (
           <img src={poster.src} alt="" loading="lazy" onError={poster.onError} className="h-full w-full object-cover" />
         ) : (
-          <span className="block h-full w-full bg-gradient-to-br from-canvas to-elevated" />
+          <span className="block h-full w-full bg-canvas" />
         )}
       </span>
-      <span className="truncate text-[11.5px] font-medium text-ink group-hover/chip:text-accent">
+      <span className="truncate text-[11.5px] font-medium text-ink-muted transition-colors duration-150 group-hover/chip:text-ink">
         {entry.title}
       </span>
       {entry.releaseInfo && (

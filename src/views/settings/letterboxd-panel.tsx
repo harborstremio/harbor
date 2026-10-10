@@ -1,4 +1,4 @@
-import { Check, ExternalLink, Link2, Loader2, LogOut, Plus, Trash2, X } from "lucide-react";
+import { Check, ExternalLink, Link2, Loader2, LogOut, Plus, Trash2, X } from "./icons";
 import { useState } from "react";
 import { useSettings } from "@/lib/settings";
 import { useLetterboxd } from "@/lib/stremboxd/provider";
@@ -12,19 +12,55 @@ import { invalidateLetterboxdCache } from "@/lib/stremboxd/cache";
 import { openUrl } from "@/lib/window";
 import { useT } from "@/lib/i18n";
 import { Section, Segmented, ToggleRow } from "./shared";
+import { ROW_DESC, SettingGroup, SettingRow } from "./kit";
+import { SButton, SRow } from "./ui";
 import type { LetterboxdSettings } from "@/lib/settings/types";
 
-type CatalogOption = { id: string; label: string; fullOnly?: boolean };
+type CatalogOption = { id: string; label: string; sub: string; fullOnly?: boolean };
 
 const CATALOG_OPTIONS: CatalogOption[] = [
-  { id: "letterboxd-watchlist", label: "Watchlist" },
-  { id: "letterboxd-diary", label: "Diary", fullOnly: true },
-  { id: "letterboxd-liked", label: "Liked Films" },
-  { id: "letterboxd-friends", label: "Friends", fullOnly: true },
-  { id: "letterboxd-recommended", label: "Recommended for You", fullOnly: true },
-  { id: "letterboxd-popular", label: "Popular This Week" },
-  { id: "letterboxd-top250", label: "Top 250" },
+  {
+    id: "letterboxd-watchlist",
+    label: "Watchlist",
+    sub: "Shows the films you have saved to watch on Letterboxd.",
+  },
+  {
+    id: "letterboxd-diary",
+    label: "Diary",
+    sub: "Shows everything you have logged, most recent first.",
+    fullOnly: true,
+  },
+  {
+    id: "letterboxd-liked",
+    label: "Liked Films",
+    sub: "Shows the films you have hearted on Letterboxd.",
+  },
+  {
+    id: "letterboxd-friends",
+    label: "Friends",
+    sub: "Shows what the people you follow have been watching lately.",
+    fullOnly: true,
+  },
+  {
+    id: "letterboxd-recommended",
+    label: "Recommended for You",
+    sub: "Shows the picks Letterboxd makes from your own viewing history.",
+    fullOnly: true,
+  },
+  {
+    id: "letterboxd-popular",
+    label: "Popular This Week",
+    sub: "Shows the films the whole of Letterboxd is watching right now.",
+  },
+  {
+    id: "letterboxd-top250",
+    label: "Top 250",
+    sub: "Shows the highest rated narrative features of all time.",
+  },
 ];
+
+const TEXT_FIELD =
+  "h-11 w-full max-w-[520px] min-w-0 rounded-[10px] border border-edge-soft bg-elevated px-4 text-[16.5px] text-ink outline-none placeholder:text-ink-subtle/55 focus-visible:border-edge focus-visible:outline focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-accent";
 
 export function LetterboxdPanel() {
   const t = useT();
@@ -137,25 +173,51 @@ export function LetterboxdPanel() {
     invalidateLetterboxdCache();
   };
 
-  return (
-    <>
-      <Section
-        title={t("Letterboxd")}
-        subtitle={t("Bring your Letterboxd watchlist, diary, liked films and lists into Harbor via the Stremboxd bridge.")}
-      >
-        <ToggleRow
-          label={t("Enable Letterboxd integration")}
-          sub={t("Shows your Letterboxd catalogs on the home page and a Letterboxd panel on film pages.")}
-          value={lb.enabled}
-          onChange={(on) => update({ letterboxd: { ...lb, enabled: on } })}
-        />
+  const listMeta = (ref: LetterboxdSettings["listRefs"][number]) => {
+    if (ref.owner && ref.filmCount != null)
+      return t("A list by {owner}, {n} films.", { owner: ref.owner, n: ref.filmCount });
+    if (ref.owner) return t("A list by {owner}.", { owner: ref.owner });
+    if (ref.filmCount != null) return t("{n} films.", { n: ref.filmCount });
+    return t("A Letterboxd list you added by address.");
+  };
 
-        {lb.enabled && (
-          <>
-            <div className="flex flex-col gap-2">
-              <label className="text-[12px] font-semibold uppercase tracking-[0.14em] text-ink-subtle">
-                {t("Mode")}
-              </label>
+  const fullLock = t("Sign in with Full mode to use this catalog.");
+  const isPublic = lb.mode === "public";
+  const connectDisabled = isPublic
+    ? busy || username.trim().length === 0
+    : busy || username.trim().length === 0 || password.length === 0;
+
+  return (
+    <Section
+      title={t("Letterboxd")}
+      subtitle={t(
+        "Bring your Letterboxd watchlist, diary, liked films and lists into Harbor through the Stremboxd bridge.",
+      )}
+    >
+      <ToggleRow
+        label={t("Enable Letterboxd integration")}
+        sub={t(
+          "Turning this on adds your Letterboxd catalogs to the home page and a Letterboxd panel to every film page.",
+        )}
+        value={lb.enabled}
+        onChange={(on) => update({ letterboxd: { ...lb, enabled: on } })}
+      />
+
+      {lb.enabled && (
+        <>
+          <SettingGroup label={t("Connection")}>
+            <SettingRow
+              label={t("Mode")}
+              desc={
+                isPublic
+                  ? t(
+                      "Public mode reads your account with nothing but your username. You get your watchlist, liked films, popular this week and the Top 250, and no password is needed.",
+                    )
+                  : t(
+                      "Full mode signs in with your Letterboxd password so your diary, friends activity and personal ratings work too. The password goes only to Stremboxd to fetch a token, and Harbor never stores it.",
+                    )
+              }
+            >
               <Segmented
                 value={lb.mode}
                 options={[
@@ -164,17 +226,13 @@ export function LetterboxdPanel() {
                 ]}
                 onChange={(m) => update({ letterboxd: { ...lb, mode: m } })}
               />
-              <p className="text-[12.5px] leading-relaxed text-ink-subtle">
-                {lb.mode === "public"
-                  ? t("Public mode uses just your username: watchlist, liked films, popular and Top 250. No password needed.")
-                  : t("Full mode signs in with your Letterboxd password to also unlock your diary, friends activity and your personal ratings. Your password is sent only to Stremboxd to obtain a token — Harbor never stores it.")}
-              </p>
-            </div>
+            </SettingRow>
 
-            <div className="flex flex-col gap-2.5">
-              <label className="text-[12px] font-semibold uppercase tracking-[0.14em] text-ink-subtle">
-                {t("Letterboxd username")}
-              </label>
+            <SettingRow
+              wide
+              label={t("Letterboxd username")}
+              desc={t("The handle in your profile address, letterboxd.com/your-name.")}
+            >
               <input
                 type="text"
                 value={username}
@@ -182,18 +240,20 @@ export function LetterboxdPanel() {
                   setUsername(e.target.value);
                   setVerify(null);
                 }}
-                placeholder="e.g. karsten_runquist"
+                placeholder="your-name"
                 spellCheck={false}
                 autoComplete="off"
-                className="h-12 rounded-xl border border-edge-soft bg-elevated px-4 text-[15px] text-ink placeholder:text-ink-subtle/55 outline-none focus:border-ink"
+                className={TEXT_FIELD}
               />
-            </div>
+            </SettingRow>
 
-            {lb.mode === "full" && (
-              <div className="flex flex-col gap-2.5">
-                <label className="text-[12px] font-semibold uppercase tracking-[0.14em] text-ink-subtle">
-                  {t("Letterboxd password")}
-                </label>
+            {!isPublic && (
+              <SettingRow
+                wide
+                label={t("Letterboxd password")}
+                desc={t("Sent once to Stremboxd to obtain a sign-in token. Harbor never keeps it.")}
+                warn={loginError ?? undefined}
+              >
                 <input
                   type="password"
                   value={password}
@@ -201,168 +261,118 @@ export function LetterboxdPanel() {
                   placeholder={t("Your Letterboxd password")}
                   spellCheck={false}
                   autoComplete="off"
-                  className="h-12 rounded-xl border border-edge-soft bg-elevated px-4 text-[15px] text-ink placeholder:text-ink-subtle/55 outline-none focus:border-ink"
+                  className={TEXT_FIELD}
                 />
-                {needs2fa && (
-                  <input
-                    type="text"
-                    value={totp}
-                    onChange={(e) => setTotp(e.target.value)}
-                    placeholder={t("Two-factor authentication code")}
-                    inputMode="numeric"
-                    spellCheck={false}
-                    autoComplete="off"
-                    className="h-12 rounded-xl border border-edge-soft bg-elevated px-4 text-[15px] text-ink placeholder:text-ink-subtle/55 outline-none focus:border-ink"
-                  />
-                )}
-                {loginError && (
-                  <p className="text-[12.5px] text-red-300">{loginError}</p>
-                )}
-              </div>
+              </SettingRow>
             )}
 
-            <div className="flex flex-wrap items-center gap-3">
-              {lb.mode === "public" ? (
-                <button
-                  onClick={handleVerify}
-                  disabled={busy || username.trim().length === 0}
-                  className="flex h-11 items-center gap-2.5 rounded-xl bg-ink px-5 text-[13.5px] font-semibold text-canvas transition-transform hover:scale-[1.02] active:scale-[0.97] disabled:opacity-50"
-                >
-                  {busy ? <Loader2 size={15} className="animate-spin" /> : <Link2 size={15} strokeWidth={2.2} />}
-                  {t("Connect / Verify")}
-                </button>
-              ) : (
-                <button
-                  onClick={handleLogin}
-                  disabled={busy || username.trim().length === 0 || password.length === 0}
-                  className="flex h-11 items-center gap-2.5 rounded-xl bg-ink px-5 text-[13.5px] font-semibold text-canvas transition-transform hover:scale-[1.02] active:scale-[0.97] disabled:opacity-50"
-                >
-                  {busy ? <Loader2 size={15} className="animate-spin" /> : <Link2 size={15} strokeWidth={2.2} />}
-                  {needs2fa ? t("Verify & connect") : t("Connect")}
-                </button>
-              )}
-              <button
-                onClick={() => openUrl("https://stremboxd.com/configure")}
-                className="flex h-11 items-center gap-2 rounded-xl border border-edge-soft px-4 text-[13.5px] font-medium text-ink-muted transition-colors hover:border-edge hover:text-ink"
+            {!isPublic && needs2fa && (
+              <SettingRow
+                wide
+                label={t("Two-factor authentication code")}
+                desc={t("Letterboxd asked for a second step. Enter the six digit code, then connect again.")}
               >
-                {t("About Stremboxd")}
-                <ExternalLink size={13} strokeWidth={2.2} />
-              </button>
-            </div>
+                <input
+                  type="text"
+                  value={totp}
+                  onChange={(e) => setTotp(e.target.value)}
+                  placeholder="123456"
+                  inputMode="numeric"
+                  spellCheck={false}
+                  autoComplete="off"
+                  className={TEXT_FIELD}
+                />
+              </SettingRow>
+            )}
+
+            <SettingRow
+              label={isPublic ? t("Connect / Verify") : t("Connect")}
+              desc={
+                isPublic
+                  ? t("Checks the username against Stremboxd and turns on the catalogs it finds.")
+                  : t("Signs in to Letterboxd and unlocks your diary, friends activity and ratings.")
+              }
+            >
+              <SButton
+                variant="primary"
+                onClick={isPublic ? handleVerify : handleLogin}
+                disabled={connectDisabled}
+              >
+                {busy ? (
+                  <Loader2 size={18} className="animate-spin" />
+                ) : (
+                  <Link2 size={18} strokeWidth={2.2} />
+                )}
+                {isPublic ? t("Connect") : needs2fa ? t("Verify & connect") : t("Connect")}
+              </SButton>
+            </SettingRow>
 
             {verify && (
-              <div
-                className={`flex items-center gap-2 rounded-xl border px-4 py-3 text-[13px] ${
-                  verify.ok
-                    ? "border-emerald-400/30 bg-emerald-400/5 text-emerald-200"
-                    : "border-red-400/30 bg-red-400/5 text-red-200"
-                }`}
-              >
+              <div className="flex items-start gap-2.5 rounded-[10px] bg-elevated px-4 py-3">
                 {verify.ok ? (
-                  <>
-                    <Check size={15} strokeWidth={2.4} />
-                    {t("Connected — {n} catalogs available", { n: verify.catalogs })}
-                  </>
+                  <Check size={18} strokeWidth={2.4} className="mt-[2px] shrink-0 text-success" />
                 ) : (
-                  <>
-                    <X size={15} strokeWidth={2.4} />
-                    {verify.message}
-                  </>
+                  <X size={18} strokeWidth={2.4} className="mt-[2px] shrink-0 text-danger" />
                 )}
+                <p className={`max-w-[66ch] ${ROW_DESC}`}>
+                  {verify.ok
+                    ? t("Connected. {n} catalogs are available.", { n: verify.catalogs })
+                    : verify.message}
+                </p>
               </div>
             )}
 
             {isFullConnected && session && (
-              <div className="flex items-center justify-between gap-4 rounded-xl border border-edge-soft bg-canvas/40 px-4 py-3">
-                <div className="flex items-center gap-3">
-                  <span className="flex h-10 w-10 shrink-0 items-center justify-center rounded-full bg-emerald-400/12 ring-1 ring-emerald-400/30 text-emerald-300">
-                    <Check size={16} strokeWidth={2.4} />
-                  </span>
-                  <div className="flex flex-col gap-0.5">
-                    <span className="text-[14px] font-medium text-ink">
-                      {session.displayName ? `${session.displayName} (@${session.username})` : `@${session.username}`}
-                    </span>
-                    <span className="text-[12px] text-ink-subtle">{t("Full mode — diary, friends & ratings enabled")}</span>
-                  </div>
-                </div>
-                <button
-                  onClick={handleDisconnect}
-                  className="flex h-9 items-center gap-1.5 rounded-lg border border-edge-soft px-3 text-[12.5px] font-medium text-ink-muted transition-colors hover:border-red-400/40 hover:text-red-300"
-                >
-                  <LogOut size={12} strokeWidth={2.4} />
+              <SettingRow
+                label={t("Signed in")}
+                desc={
+                  <>
+                    {session.displayName
+                      ? `${session.displayName} (@${session.username})`
+                      : `@${session.username}`}
+                    {". "}
+                    {t("Full mode is active, so diary, friends activity and your ratings all work.")}
+                  </>
+                }
+              >
+                <SButton variant="danger" onClick={handleDisconnect}>
+                  <LogOut size={18} strokeWidth={2.2} />
                   {t("Disconnect")}
-                </button>
-              </div>
+                </SButton>
+              </SettingRow>
             )}
 
-            <div className="flex flex-col gap-2.5">
-              <label className="text-[12px] font-semibold uppercase tracking-[0.14em] text-ink-subtle">
-                {t("Catalogs to show")}
-              </label>
-              <div className="grid grid-cols-2 gap-2">
-                {CATALOG_OPTIONS.map((opt) => {
-                  const selected = lb.selectedCatalogs.includes(opt.id);
-                  const locked = !!opt.fullOnly && !isFullConnected;
-                  return (
-                    <button
-                      key={opt.id}
-                      onClick={() => !locked && toggleCatalog(opt.id, !selected)}
-                      disabled={locked}
-                      className={`flex items-center gap-2.5 rounded-xl border px-3.5 py-2.5 text-start text-[13px] transition-colors ${
-                        locked
-                          ? "cursor-not-allowed border-edge-soft/40 opacity-50"
-                          : selected
-                            ? "border-ink bg-ink/5 text-ink"
-                            : "border-edge-soft text-ink-muted hover:border-edge"
-                      }`}
-                    >
-                      <span
-                        className={`flex h-5 w-5 shrink-0 items-center justify-center rounded-md border transition-colors ${
-                          selected && !locked ? "border-ink bg-ink text-canvas" : "border-edge"
-                        }`}
-                      >
-                        {selected && !locked && <Check size={13} strokeWidth={3} />}
-                      </span>
-                      {t(opt.label)}
-                      {opt.fullOnly && (
-                        <span className="ms-auto text-[10px] uppercase tracking-wider text-ink-subtle">{t("Full")}</span>
-                      )}
-                    </button>
-                  );
-                })}
-              </div>
-            </div>
-
-            <div className="flex flex-col gap-2.5">
-              <label className="text-[12px] font-semibold uppercase tracking-[0.14em] text-ink-subtle">
-                {t("Custom lists")}
-              </label>
-              {lb.listRefs.length > 0 && (
-                <div className="flex flex-col gap-1.5">
-                  {lb.listRefs.map((ref) => (
-                    <div
-                      key={ref.id}
-                      className="flex items-center justify-between gap-3 rounded-xl border border-edge-soft bg-canvas/40 px-4 py-2.5"
-                    >
-                      <div className="flex min-w-0 flex-col gap-0.5">
-                        <span className="truncate text-[13.5px] font-medium text-ink">{ref.name}</span>
-                        <span className="text-[11.5px] text-ink-subtle">
-                          {ref.owner ? `${ref.owner} · ` : ""}
-                          {ref.filmCount != null ? `${ref.filmCount} films` : ""}
-                        </span>
-                      </div>
-                      <button
-                        onClick={() => removeList(ref.id)}
-                        className="flex h-8 w-8 shrink-0 items-center justify-center rounded-lg text-ink-subtle transition-colors hover:bg-red-400/10 hover:text-red-300"
-                        aria-label={t("Remove list")}
-                      >
-                        <Trash2 size={14} />
-                      </button>
-                    </div>
-                  ))}
-                </div>
+            <SRow
+              title={t("About Stremboxd")}
+              description={t(
+                "Opens stremboxd.com, the community bridge that reads Letterboxd on Harbor's behalf.",
               )}
-              <div className="flex items-center gap-2">
+              trailing={<ExternalLink size={18} className="text-ink-subtle" />}
+              onClick={() => openUrl("https://stremboxd.com/configure")}
+            />
+          </SettingGroup>
+
+          <SettingGroup label={t("Catalogs to show")}>
+            {CATALOG_OPTIONS.map((opt) => (
+              <ToggleRow
+                key={opt.id}
+                label={t(opt.label)}
+                sub={t(opt.sub)}
+                value={lb.selectedCatalogs.includes(opt.id)}
+                onChange={(on) => toggleCatalog(opt.id, on)}
+                lockReason={opt.fullOnly && !isFullConnected ? fullLock : undefined}
+              />
+            ))}
+          </SettingGroup>
+
+          <SettingGroup label={t("Custom lists")}>
+            <SettingRow
+              wide
+              label={t("Add a list")}
+              desc={t("Paste the address of any public Letterboxd list to add it as its own row.")}
+              warn={listError ?? undefined}
+            >
+              <div className="flex w-full max-w-[520px] flex-wrap items-center gap-2.5">
                 <input
                   type="text"
                   value={listUrl}
@@ -370,61 +380,87 @@ export function LetterboxdPanel() {
                   placeholder={t("letterboxd.com/username/list/slug")}
                   spellCheck={false}
                   autoComplete="off"
-                  className="h-11 flex-1 rounded-xl border border-edge-soft bg-elevated px-4 text-[14px] text-ink placeholder:text-ink-subtle/55 outline-none focus:border-ink"
+                  className="h-11 min-w-[220px] flex-1 rounded-[10px] border border-edge-soft bg-elevated px-4 text-[16.5px] text-ink outline-none placeholder:text-ink-subtle/55 focus-visible:border-edge focus-visible:outline focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-accent"
                 />
-                <button
+                <SButton
                   onClick={handleAddList}
                   disabled={listBusy || listUrl.trim().length === 0}
-                  className="flex h-11 items-center gap-2 rounded-xl border border-edge-soft px-4 text-[13.5px] font-medium text-ink-muted transition-colors hover:border-edge hover:text-ink disabled:opacity-50"
                 >
-                  {listBusy ? <Loader2 size={15} className="animate-spin" /> : <Plus size={15} />}
+                  {listBusy ? <Loader2 size={18} className="animate-spin" /> : <Plus size={18} />}
                   {t("Add")}
-                </button>
+                </SButton>
               </div>
-              {listError && <p className="text-[12.5px] text-red-300">{listError}</p>}
-            </div>
+            </SettingRow>
 
+            {lb.listRefs.map((ref) => (
+              <SRow
+                key={ref.id}
+                title={ref.name}
+                description={listMeta(ref)}
+                trailing={
+                  <SButton variant="danger" onClick={() => removeList(ref.id)}>
+                    <Trash2 size={18} />
+                    {t("Remove")}
+                  </SButton>
+                }
+              />
+            ))}
+          </SettingGroup>
+
+          <SettingGroup label={t("On screen")}>
             <ToggleRow
               label={t("Show my rating on movie posters")}
-              sub={t("Overlays your Letterboxd rating on catalog posters (when available).")}
+              sub={t(
+                "Puts the score you gave a film in the corner of its poster, wherever Letterboxd has one for you.",
+              )}
               value={lb.showRatingsOnPosters}
               onChange={(on) => syncConfig({ showRatingsOnPosters: on })}
             />
 
             <ToggleRow
-              label={t("Blur reviews by default")}
-              sub={t("Reviews on film pages are blurred until you reveal them.")}
+              label={t("Blur comments and reviews by default")}
+              sub={t(
+                "Comments and reviews on detail pages stay blurred until you reveal them, even when they are not tagged as spoilers. This one switch covers Trakt and Letterboxd.",
+              )}
               value={!!settings.blurComments}
               onChange={(on) => update({ blurComments: on })}
             />
+          </SettingGroup>
 
-            {lb.hiddenCatalogs.length > 0 && (
-              <div className="flex flex-col gap-2">
-                <label className="text-[12px] font-semibold uppercase tracking-[0.14em] text-ink-subtle">
-                  {t("Hidden catalogs")}
-                </label>
-                <div className="flex flex-wrap gap-2">
-                  {lb.hiddenCatalogs.map((id) => {
-                    const opt = CATALOG_OPTIONS.find((o) => o.id === id);
-                    const listRef = lb.listRefs.find((r) => `letterboxd-list-${r.id}` === id);
-                    const label = opt?.label ?? listRef?.name ?? id;
-                    return (
-                      <button
-                        key={id}
-                        onClick={() => update({ letterboxd: { ...lb, hiddenCatalogs: lb.hiddenCatalogs.filter((h) => h !== id) } })}
-                        className="flex items-center gap-1.5 rounded-full border border-edge-soft bg-canvas/40 px-3 py-1.5 text-[12px] font-medium text-ink-muted transition-colors hover:border-edge hover:text-ink"
+          {lb.hiddenCatalogs.length > 0 && (
+            <SettingGroup label={t("Hidden catalogs")}>
+              <p className={`max-w-[70ch] ${ROW_DESC}`}>
+                {t("These rows are switched on but hidden from your home page. Choose Show to bring one back.")}
+              </p>
+              {lb.hiddenCatalogs.map((id) => {
+                const opt = CATALOG_OPTIONS.find((o) => o.id === id);
+                const listRef = lb.listRefs.find((r) => `letterboxd-list-${r.id}` === id);
+                const label = opt ? t(opt.label) : (listRef?.name ?? id);
+                return (
+                  <SRow
+                    key={id}
+                    title={label}
+                    trailing={
+                      <SButton
+                        onClick={() =>
+                          update({
+                            letterboxd: {
+                              ...lb,
+                              hiddenCatalogs: lb.hiddenCatalogs.filter((h) => h !== id),
+                            },
+                          })
+                        }
                       >
-                        {label}
-                        <span className="text-[10px] uppercase tracking-wider text-accent">{t("Show")}</span>
-                      </button>
-                    );
-                  })}
-                </div>
-              </div>
-            )}
-          </>
-        )}
-      </Section>
-    </>
+                        {t("Show")}
+                      </SButton>
+                    }
+                  />
+                );
+              })}
+            </SettingGroup>
+          )}
+        </>
+      )}
+    </Section>
   );
 }

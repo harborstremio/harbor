@@ -1,0 +1,20 @@
+export default {
+  "Search shortcuts": "検索ショートカット",
+  "Steam search shortcut": "Steam検索ショートカット",
+  "Type “st ” or “st:” to search the Steam store. Turn off to use normal Harbor search for these queries.": "「st 」または「st:」と入力するとSteamストアを検索します。オフにすると、これらの入力でも通常のHarbor検索を使用します。",
+  "games.storeSearch.title": "Steamストア",
+  "games.storeSearch.hint": "Harborの検索で「st 」を入力すると、Steamを直接検索できます。",
+  "games.storeSearch.automatic": "自動",
+  "games.storeSearch.region": "ストアの地域",
+  "games.storeSearch.showLibrary": "ライブラリにあるゲームに印を付ける",
+  "games.storeSearch.settingsError": "検索設定を保存または読み込めませんでした。変更する前に再試行してください。",
+  "games.storeSearch.openError": "リンクを開けませんでした。Steamまたはブラウザーが利用可能か確認して再試行してください。",
+  "games.storeSearch.empty": "ゲーム名を入力してください。",
+  "games.storeSearch.saved": "{date}に保存された結果と価格です。",
+  "games.storeSearch.error": "Steam検索を利用できません。再試行してください。",
+  "games.storeSearch.comingSoon": "近日登場",
+  "games.storeSearch.inLibrary": "ライブラリにあります",
+  "games.storeSearch.unavailable": "価格を取得できません",
+  "games.storeSearch.web": "ウェブサイト",
+  "games.storeSearch.client": "Steamで開く"
+};

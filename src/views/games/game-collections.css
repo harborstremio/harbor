@@ -1,0 +1,12 @@
+.games-collection-page .games-collection-search { width:420px; min-height:50px; gap:12px; border-radius:8px; border:0; background:color-mix(in srgb,var(--color-canvas) 88%,transparent); outline:none!important; box-shadow:none!important; transition:background 150ms ease-in-out; }
+.games-collection-page .games-collection-search:focus-within { background:var(--color-raised); }
+.games-collection-banner h1:focus { outline:none; }
+.games-collection-page .games-collection-search>svg { flex-shrink:0; }
+.games-collection-page .games-collection-search>input { min-width:0; flex:1; height:50px; border:0; background:none; font-size:15px; outline:none!important; box-shadow:none!important; }
+.games-collection-page .games-collection-search>button { display:grid; place-items:center; flex-shrink:0; width:30px; height:34px; border-radius:5px; color:var(--color-ink-muted); }
+.games-collection-page .games-collection-search>button:hover { background:var(--color-elevated); color:var(--color-ink); }
+.games-collection-page .games-collection-search>button:focus-visible { outline:2px solid var(--color-ink-muted); outline-offset:2px; }
+.games-collection-page .games-catalog-embedded-actions { display:flex; justify-content:flex-end; margin:0 0 16px; }
+.games-collection-page .games-catalog-actions { display:flex; flex-wrap:wrap; flex-shrink:1; min-width:0; max-width:100%; justify-content:flex-end; }
+@media(prefers-reduced-motion:reduce) { .games-collection-page .games-collection-search { transition:none; } }
+.games-collection-page .games-collection-banner-copy { width:100%; min-width:0; }

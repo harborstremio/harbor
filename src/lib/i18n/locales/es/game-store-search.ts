@@ -1,0 +1,20 @@
+export default {
+  "Search shortcuts": "Atajos de búsqueda",
+  "Steam search shortcut": "Atajo de búsqueda en Steam",
+  "Type “st ” or “st:” to search the Steam store. Turn off to use normal Harbor search for these queries.": "Escribe «st » o «st:» para buscar en la tienda de Steam. Desactívalo para usar la búsqueda normal de Harbor con estas consultas.",
+  "games.storeSearch.title": "Tienda de Steam",
+  "games.storeSearch.hint": "Usa «st » en la búsqueda de Harbor para buscar directamente en Steam.",
+  "games.storeSearch.automatic": "Automática",
+  "games.storeSearch.region": "Región de la tienda",
+  "games.storeSearch.showLibrary": "Marcar los juegos que ya están en mi biblioteca",
+  "games.storeSearch.settingsError": "No se pudieron guardar o leer las preferencias de búsqueda. Reinténtalo antes de cambiarlas.",
+  "games.storeSearch.openError": "No se pudo abrir el enlace. Comprueba que Steam o tu navegador estén disponibles e inténtalo de nuevo.",
+  "games.storeSearch.empty": "Introduce el nombre de un juego.",
+  "games.storeSearch.saved": "Resultados y precios guardados el {date}.",
+  "games.storeSearch.error": "La búsqueda de Steam no está disponible. Inténtalo de nuevo.",
+  "games.storeSearch.comingSoon": "Próximamente",
+  "games.storeSearch.inLibrary": "En tu biblioteca",
+  "games.storeSearch.unavailable": "Precio no disponible",
+  "games.storeSearch.web": "Sitio web",
+  "games.storeSearch.client": "Abrir en Steam"
+};

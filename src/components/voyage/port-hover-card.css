@@ -1,0 +1,33 @@
+.voyage-info-bubble {
+  position: fixed;
+  z-index: 230;
+  border: 1px solid var(--color-edge-soft);
+  border-radius: 12px;
+  background: var(--color-elevated);
+  box-shadow: 0 5px 16px -10px rgb(0 0 0 / 35%);
+  animation: voyage-info-appear 130ms ease-out both;
+}
+.voyage-info-content {
+  position: relative;
+  max-height: calc(100dvh - var(--harbor-dock-gap, 0px) - 24px);
+  overflow-y: auto;
+  overscroll-behavior: contain;
+  border-radius: inherit;
+  background: inherit;
+}
+.voyage-info-pointer {
+  position: absolute;
+  width: 10px;
+  height: 10px;
+  background: inherit;
+  border: inherit;
+  transform: translate(-50%, -50%) rotate(45deg);
+}
+.voyage-info-bubble[data-side="right"] .voyage-info-pointer { left: 0; }
+.voyage-info-bubble[data-side="left"] .voyage-info-pointer { left: 100%; }
+.voyage-info-bubble[data-side="bottom"] .voyage-info-pointer { top: 0; }
+.voyage-info-bubble[data-side="top"] .voyage-info-pointer { top: 100%; }
+@keyframes voyage-info-appear { from { opacity: 0; } to { opacity: 1; } }
+@media (prefers-reduced-motion: reduce) {
+  .voyage-info-bubble { animation: none; }
+}

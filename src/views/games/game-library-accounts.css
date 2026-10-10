@@ -1,0 +1,10 @@
+.games-library-accounts{display:flex;align-items:flex-start;flex-wrap:wrap;gap:10px;margin-bottom:24px}
+.games-library-account-control{display:grid;grid-template-columns:minmax(0,auto);align-items:center;gap:8px;min-width:0;max-width:100%;margin-bottom:24px}
+.games-library-account-control:has(>.games-library-account-refresh){grid-template-columns:minmax(0,auto) auto}
+.games-library-accounts>.games-library-account-control{margin-bottom:0}
+.games-library-account-tooltip{min-width:0;max-width:100%}
+.games-library-account-button.games-button{min-height:44px;max-width:100%;gap:10px;padding-inline:16px;font-size:13px;text-align:start;white-space:normal}
+.games-library-account-button>.games-library-account-action{color:var(--color-ink-muted);font-weight:400}
+.games-library-account-name{min-width:0;max-width:24ch;overflow:hidden;text-overflow:ellipsis;white-space:nowrap}
+.games-library-account-control>.games-account-error{grid-column:1/-1;margin:0}
+.games-library-account-button:focus-visible{outline:2px solid var(--color-ink);outline-offset:3px}

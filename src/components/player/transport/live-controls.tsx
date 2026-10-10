@@ -119,10 +119,12 @@ export function LiveSeekBar({
     <div className="pointer-events-auto group/seek relative h-12">
       <div
         ref={ref}
+        data-player-seekbar
         onPointerMove={onMove}
         onPointerLeave={onLeave}
         onPointerDown={onDown}
         onPointerUp={onUp}
+        onClick={(e) => { if (!e.isTrusted) onSeek(fromEvent(e.clientX)); }}
         className="absolute inset-x-0 top-1/2 -translate-y-1/2 cursor-pointer"
       >
         <SeekBarVisual

@@ -1,0 +1,48 @@
+@font-face { font-family:SpooktoberNightmare;src:url("/spooktober/assets/fonts/nightmare.otf") format("opentype");font-display:swap; }
+.spooktober-home { position:relative;display:flex;flex:1;min-width:0;min-height:0; }
+.spooktober-home-base { position:absolute;inset:0;display:flex;min-height:0;flex-direction:column; }
+.spooktober-surface { position:absolute;inset:0 0 var(--harbor-dock-gap,0px);display:flex;flex-direction:column;min-width:0;min-height:0;background:var(--color-canvas); }
+.spooktober-surface[hidden] { display:none; }
+.spooktober-loading { display:grid;place-items:center;flex:1; }
+.spooktober-invitation-shell { position:relative; }
+.spooktober-invitation { display:flex;align-items:center;gap:24px;position:relative;isolation:isolate;min-height:118px;width:100%;padding:24px 30px;border-radius:var(--radius-lg,14px);--spook-hill:color-mix(in srgb,var(--color-surface) 70%,var(--color-raised));--spook-field:color-mix(in srgb,var(--color-surface) 85%,var(--color-raised));background:var(--color-surface);color:var(--color-ink);text-align:start; }
+.spooktober-invitation-landscape { position:absolute;inset:0;z-index:-1;overflow:hidden;border-radius:inherit;pointer-events:none;transition:filter 180ms ease-out; }
+.spooktober-invitation-landscape>svg { width:100%;height:100%; }
+.spooktober-invitation-stone { position:absolute;background:var(--color-canvas);transform-origin:bottom center; }
+.spooktober-invitation-stone.stone-round { width:19px;height:29px;left:63%;top:calc(49% - 27px);border-radius:10px 10px 1px 1px;rotate:-8deg; }
+.spooktober-invitation-stone.stone-cross { width:8px;height:36px;left:77%;top:calc(48% - 34px);rotate:8deg; }
+.spooktober-invitation-stone.stone-cross::before { content:"";position:absolute;width:24px;height:7px;left:-8px;top:10px;background:inherit; }
+.spooktober-invitation-grass { position:absolute;width:16px;height:11px;background:var(--spook-hill);clip-path:polygon(0 100%,8% 28%,31% 81%,39% 0,52% 75%,76% 18%,68% 86%,100% 47%,85% 100%); }
+.spooktober-invitation-grass.grass-one { left:54%;top:calc(55% - 8px);height:8px; }
+.spooktober-invitation-grass.grass-two { left:69%;top:calc(49% - 11px);rotate:-6deg; }
+.spooktober-invitation-grass.grass-three { left:83%;top:calc(52% - 9px);height:9px;transform:scaleX(-1); }
+.spooktober-invitation-pumpkin { position:relative;flex:none;width:78px;height:78px; }
+.spooktober-invitation-pumpkin-art { position:relative;z-index:1;width:100%;height:100%;object-fit:contain;transform-origin:50% 88%;transition:transform 260ms ease-out; }
+.spooktober-invitation:is(:hover,:focus-visible) .spooktober-invitation-pumpkin-art { animation:spooktoberPumpkinSway 760ms cubic-bezier(.22,.75,.35,1) both; }
+@keyframes spooktoberPumpkinSway { 0%,100% { transform:rotate(0); } 25% { transform:rotate(-7deg) translateY(-2px); } 57% { transform:rotate(5deg) translateY(-1px); } 80% { transform:rotate(-2deg); } }
+.spooktober-invitation:hover .spooktober-invitation-landscape { filter:brightness(1.12); }
+.spooktober-invitation:focus-visible { outline:2px solid var(--color-ink);outline-offset:4px; }
+.spooktober-invitation-copy { display:flex;flex-direction:column;gap:5px; }
+.spooktober-invitation-copy strong { font-family:SpooktoberNightmare,Georgia,serif;font-size:38px;font-weight:400;letter-spacing:-.015em;line-height:1.05;color:var(--color-ink); }
+.spooktober-invitation-copy>span { color:var(--color-ink-muted);font-size:13px; }
+.spooktober-invitation-action { margin-inline-start:auto;display:flex;gap:12px;align-items:center;font-size:13px;white-space:nowrap; }
+.spooktober-invitation-dismiss-zone { position:absolute;inset-block-start:-16px;inset-inline-end:-16px;width:64px;height:56px;z-index:2; }
+.spooktober-invitation-dismiss { position:absolute;inset-block-start:0;inset-inline-end:0;display:grid;place-items:center;width:32px;height:32px;border-radius:50%;color:var(--color-ink-muted);opacity:0;transition:opacity 150ms; }
+.spooktober-invitation-dismiss-zone:hover .spooktober-invitation-dismiss { opacity:1; }
+.spooktober-invitation-dismiss:focus-visible { opacity:1;outline:2px solid var(--color-ink);outline-offset:2px; }
+
+@media(max-width:700px){.spooktober-invitation { gap:15px;padding:22px; }.spooktober-invitation-pumpkin { width:68px;height:68px; }.spooktober-invitation-copy strong { font-size:34px; }.spooktober-invitation-action { font-size:0;gap:0; }.spooktober-invitation-action svg { width:20px; }.spooktober-invitation-stone.stone-round { left:75%; }.spooktober-invitation-stone.stone-cross { left:87%; }}
+@media(prefers-reduced-motion:reduce){.spooktober-invitation-pumpkin-art { animation:none!important;transition:none; }}
+
+/* Hero corner slot: the seasonal invitation overlays the backdrop, so it drops the
+   full-width band proportions and reads as a compact card. */
+[data-hero-overlay-slot="seasonal"] .spooktober-invitation { min-height:0;gap:14px;padding:14px 16px;box-shadow:0 18px 40px -22px rgb(0 0 0 / .55); }
+[data-hero-overlay-slot="seasonal"] .spooktober-invitation-pumpkin { width:46px;height:46px; }
+[data-hero-overlay-slot="seasonal"] .spooktober-invitation-copy strong { font-size:24px; }
+[data-hero-overlay-slot="seasonal"] .spooktober-invitation-copy>span { font-size:12px; }
+[data-hero-overlay-slot="seasonal"] .spooktober-invitation-action { font-size:12px;gap:8px; }
+
+/* Collapsed chip: what dismissal leaves behind, so the festival stays reachable. */
+.spooktober-invitation-chip { display:inline-flex;align-items:center;gap:8px;padding:7px 13px 7px 8px;border-radius:999px;background:color-mix(in srgb,var(--color-surface) 82%,var(--color-canvas));color:var(--color-ink-muted);font-size:13px;font-weight:600;border:1px solid var(--color-edge-soft);transition:color 160ms ease-out,background 160ms ease-out; }
+.spooktober-invitation-chip:is(:hover,:focus-visible) { color:var(--color-ink);background:var(--color-surface); }
+.spooktober-invitation-chip-art { width:22px;height:22px;object-fit:contain; }

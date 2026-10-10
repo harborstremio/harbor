@@ -46,7 +46,8 @@ function fillTemplate(template: string, id: ParsedId): string | undefined {
 }
 
 function rpdbPath(base: string, key: string, id: ParsedId): string | undefined {
-  const keySeg = key || "default";
+  if (!key) return undefined;
+  const keySeg = key;
   if (id.imdb) {
     return `${base}/${keySeg}/imdb/poster-default/${id.imdb}.jpg?fallback=true`;
   }

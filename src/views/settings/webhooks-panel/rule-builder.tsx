@@ -1,11 +1,28 @@
-import { Plus, Trash2, X, Zap } from "lucide-react";
-import { useState } from "react";
+import { Check, ChevronRight, Info, Plus, Trash2 } from "../icons";
+import { useLayoutEffect, useRef, useState, type ReactNode, type RefObject } from "react";
 import { useT } from "@/lib/i18n";
 import { MOVIE_GENRES } from "@/lib/feed/tags";
+import { tvFocus } from "@/lib/keyboard-navigation";
+import { navOwnsFocus } from "@/lib/keyboard-navigation/geometry";
+import { Dropdown } from "@/components/dropdown";
 import type { Settings, WebhookTrigger } from "@/lib/settings";
+import { ROW_DESC, Section, Segmented, ToggleRow } from "../shared";
+import { ModalButton, ROW_ACTION_DANGER, SettingGroup, SettingRow, SettingsModal } from "../kit";
+import { usePageActions } from "../page-actions";
+import { SButton, SRow } from "../ui";
 
 type Rule = Settings["webhookRules"][number];
 type TrackedPerson = Settings["customCalendar"]["trackedPeople"][number];
+type Translate = (key: string, vars?: Record<string, string | number>) => string;
+
+const QUAL =
+  "inline-flex h-[22px] shrink-0 items-center rounded-[6px] px-2 text-[13px] font-bold uppercase leading-[17px] tracking-[0.72px]";
+
+const CHIP_BASE =
+  "harbor-press-pop flex h-11 shrink-0 items-center gap-2 rounded-[8px] border px-4 text-[15.5px] font-medium transition-colors focus-visible:outline focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-accent";
+
+const TEXT_INPUT =
+  "h-11 w-full min-w-0 max-w-[520px] rounded-[10px] border border-edge-soft bg-elevated px-4 text-[16.5px] text-ink outline-none transition-colors placeholder:text-ink-subtle/55 focus-visible:border-edge focus-visible:outline focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-accent";
 
 const EVENT_LABELS: Record<WebhookTrigger["event"], string> = {
   newMovie: "A new movie comes out",
@@ -56,6 +73,8 @@ const COUNTRIES: Array<{ code: string; name: string }> = [
   { code: "IN", name: "India" },
 ];
 
+const LEAD_MINUTES = [5, 10, 15, 30, 60, 120];
+
 function defaultTrigger(event: WebhookTrigger["event"]): WebhookTrigger {
   switch (event) {
     case "fromGenre":
@@ -73,38 +92,66 @@ function defaultTrigger(event: WebhookTrigger["event"]): WebhookTrigger {
   }
 }
 
-function describeTrigger(t: WebhookTrigger, trackedPeople: TrackedPerson[]): string {
-  switch (t.event) {
-    case "newMovie": return "Any new movie";
-    case "newSeries": return "Any new series";
-    case "newAnime": return "Any new anime";
+function leadLabel(m: number, t: Translate): string {
+  if (m < 60) return t("{n} minutes before", { n: m });
+  if (m === 60) return t("1 hour before");
+  return t("{n} hours before", { n: m / 60 });
+}
+
+function describeTrigger(
+  trigger: WebhookTrigger,
+  trackedPeople: TrackedPerson[],
+  t: Translate,
+): string {
+  switch (trigger.event) {
+    case "newMovie":
+      return t("Any new movie");
+    case "newSeries":
+      return t("Any new series");
+    case "newAnime":
+      return t("Any new anime");
     case "fromTrackedPerson": {
-      const ids = t.personIds ?? [];
-      if (ids.length === 0) return `Any of your ${trackedPeople.length} tracked people`;
+      const ids = trigger.personIds ?? [];
+      if (ids.length === 0)
+        return t("Any of your {count} tracked people", { count: trackedPeople.length });
       const names = ids
-        .map((id) => trackedPeople.find((p) => p.id === id)?.name)
+        .map((id) => trackedPeople.find((person) => person.id === id)?.name)
         .filter(Boolean) as string[];
-      return names.join(", ") || "Tracked people";
+      return names.join(", ") || t("Tracked people");
     }
-    case "fromGenre":
-      return t.genreIds.length === 0
-        ? "Any genre"
-        : `${t.mediaType === "movie" ? "Movies" : "Series"}: ${t.genreIds
-            .map((id) => Object.entries(MOVIE_GENRES).find(([, gid]) => gid === id)?.[0])
-            .filter(Boolean)
-            .join(", ")}`;
+    case "fromGenre": {
+      if (trigger.genreIds.length === 0) return t("Any genre");
+      const names = trigger.genreIds
+        .map((id) => Object.entries(MOVIE_GENRES).find(([, genreId]) => genreId === id)?.[0])
+        .filter(Boolean)
+        .join(", ");
+      return t("{mediaType}: {names}", {
+        mediaType: trigger.mediaType === "movie" ? t("Movies") : t("Series"),
+        names,
+      });
+    }
     case "fromProvider":
-      return t.providerIds.length === 0
-        ? "Any streamer"
-        : t.providerIds.map((id) => PROVIDERS.find((p) => p.id === id)?.name).filter(Boolean).join(", ");
+      return trigger.providerIds.length === 0
+        ? t("Any streamer")
+        : trigger.providerIds
+            .map((id) => PROVIDERS.find((provider) => provider.id === id)?.name)
+            .filter(Boolean)
+            .join(", ");
     case "fromCountry":
-      return t.countryCodes.length === 0
-        ? "Any country"
-        : t.countryCodes.map((c) => COUNTRIES.find((x) => x.code === c)?.name ?? c).join(", ");
-    case "fromTraktAnticipated": return "Trakt anticipated";
-    case "fromTraktWatchlist": return "Your Trakt watchlist";
+      return trigger.countryCodes.length === 0
+        ? t("Any country")
+        : trigger.countryCodes
+            .map((code) => COUNTRIES.find((country) => country.code === code)?.name ?? code)
+            .join(", ");
+    case "fromTraktAnticipated":
+      return t("Trakt anticipated");
+    case "fromTraktWatchlist":
+      return t("Your Trakt watchlist");
     case "liveTvEvent":
-      return `Live TV · ${t.favoritesOnly ? "favorites" : "all channels"} · ${t.leadMinutes ?? 15} min lead`;
+      return t("Live TV, {scope}, {minutes} min lead", {
+        scope: trigger.favoritesOnly ? t("favorites") : t("all channels"),
+        minutes: trigger.leadMinutes ?? 15,
+      });
   }
 }
 
@@ -118,482 +165,530 @@ export function RuleBuilder({
   trackedPeople,
   canDiscord,
   canTelegram,
+  onSetUp,
+  canDesktop,
 }: {
   rules: Rule[];
   onChange: (rules: Rule[]) => void;
   trackedPeople: TrackedPerson[];
   canDiscord: boolean;
   canTelegram: boolean;
+  onSetUp: () => void;
+  canDesktop: boolean;
 }) {
   const t = useT();
   const [editing, setEditing] = useState<Rule | null>(null);
+  const noChannel = !canDiscord && !canTelegram && !canDesktop;
+
+  const listRef = useRef<HTMLDivElement>(null);
+  const nameRef = useRef<HTMLInputElement>(null);
+  const ring = useRef(false);
+  const returnId = useRef<string | null>(null);
+  const editingId = editing?.id ?? null;
+
+  const arm = (id: string | null) => {
+    const el = document.activeElement;
+    ring.current = el instanceof HTMLElement && navOwnsFocus(el);
+    returnId.current = id;
+  };
+
+  useLayoutEffect(() => {
+    if (!ring.current) return;
+    ring.current = false;
+    if (editingId) {
+      if (nameRef.current) tvFocus(nameRef.current);
+      return;
+    }
+    const at = rules.findIndex((r) => r.id === returnId.current);
+    const rows = listRef.current?.parentElement?.querySelectorAll<HTMLElement>(".harbor-rule-row");
+    const target =
+      (at >= 0 ? rows?.[at] : null) ??
+      listRef.current?.querySelector<HTMLElement>("button:not([disabled])") ??
+      rows?.[0];
+    if (target) tvFocus(target);
+  }, [editingId, rules]);
 
   const upsert = (rule: Rule) => {
     const exists = rules.some((r) => r.id === rule.id);
+    arm(rule.id);
     onChange(exists ? rules.map((r) => (r.id === rule.id ? rule : r)) : [...rules, rule]);
     setEditing(null);
   };
-  const remove = (id: string) => onChange(rules.filter((r) => r.id !== id));
-  const toggleEnabled = (id: string) =>
-    onChange(rules.map((r) => (r.id === id ? { ...r, enabled: !r.enabled } : r)));
+  const remove = (id: string) => {
+    arm(null);
+    onChange(rules.filter((r) => r.id !== id));
+    setEditing(null);
+  };
+  const cancel = () => {
+    arm(editingId);
+    setEditing(null);
+  };
 
-  const startNew = () =>
+  const startEdit = (rule: Rule) => {
+    arm(rule.id);
+    setEditing(rule);
+  };
+
+  const startNew = () => {
+    arm(null);
     setEditing({
       id: genId(),
       name: "",
       enabled: true,
       trigger: { event: "newMovie" },
-      channels: { discord: canDiscord, telegram: false },
+      channels: { discord: canDiscord, telegram: !canDiscord && canTelegram, desktop: canDesktop },
     });
+  };
 
   return (
-    <div className="flex flex-col gap-3 rounded-xl border border-edge-soft bg-canvas/40 p-5">
-      <div className="flex items-center justify-between gap-3">
-        <div className="flex flex-col gap-1">
-          <span className="flex items-center gap-1.5 text-[11.5px] font-bold uppercase tracking-[0.16em] text-ink-subtle">
-            <Zap size={11} strokeWidth={2.3} />
-            {t("AUTOMATIONS")}
-          </span>
-          <p className="text-[12.5px] text-ink-muted">
-            {t("Each rule fires independently. Define what triggers a ping and where it goes.")}
-          </p>
-        </div>
-        <button
-          type="button"
-          onClick={startNew}
-          disabled={!canDiscord && !canTelegram}
-          className="flex h-9 items-center gap-1.5 rounded-full bg-ink px-3.5 text-[12.5px] font-semibold text-canvas transition-opacity hover:opacity-90 disabled:opacity-40"
-        >
-          <Plus size={13} strokeWidth={2.4} />
-          {t("New rule")}
-        </button>
-      </div>
-      {!canDiscord && !canTelegram && (
-        <div className="rounded-lg border border-amber-200/30 bg-amber-200/5 px-3 py-2 text-[11.5px] text-amber-200/85">
-          {t("Add a Discord or Telegram URL above before creating rules.")}
-        </div>
-      )}
-      {rules.length === 0 ? (
-        <div className="rounded-lg border border-dashed border-edge-soft/60 bg-canvas/20 px-3 py-6 text-center text-[12.5px] text-ink-subtle">
-          {t("No automations yet. Hit New rule to wire one up.")}
-        </div>
-      ) : (
-        <ul className="flex flex-col gap-2">
-          {rules.map((r) => (
-            <li
-              key={r.id}
-              className={`flex items-center gap-3 rounded-lg border px-3.5 py-2.5 transition-colors ${
-                r.enabled ? "border-edge-soft bg-elevated/40" : "border-edge-soft/40 bg-canvas/20 opacity-60"
-              }`}
-            >
-              <button
-                type="button"
-                onClick={() => toggleEnabled(r.id)}
-                aria-label={r.enabled ? "Disable rule" : "Enable rule"}
-                className="shrink-0"
-              >
-                <span
-                  className={`relative block h-5 w-9 rounded-full transition-colors ${
-                    r.enabled ? "bg-ink" : "bg-edge"
-                  }`}
-                >
-                  <span
-                    className={`absolute start-0 top-0.5 block h-4 w-4 rounded-full bg-canvas transition-transform ${
-                      r.enabled ? "translate-x-[18px] rtl:-translate-x-[18px]" : "translate-x-0.5 rtl:-translate-x-0.5"
-                    }`}
-                  />
-                </span>
-              </button>
-              <div className="flex min-w-0 flex-1 flex-col">
-                <span className="truncate text-[13px] font-semibold text-ink">
-                  {r.name || EVENT_LABELS[r.trigger.event]}
-                </span>
-                <span className="truncate text-[11.5px] text-ink-subtle">
-                  {describeTrigger(r.trigger, trackedPeople)} →{" "}
-                  {[r.channels.discord && "Discord", r.channels.telegram && "Telegram"]
-                    .filter(Boolean)
-                    .join(" + ") || "no channel"}
-                </span>
-              </div>
-              <button
-                type="button"
-                onClick={() => setEditing(r)}
-                className="rounded-full px-2.5 py-1 text-[11.5px] font-medium text-ink-muted hover:bg-canvas/60 hover:text-ink"
-              >
-                Edit
-              </button>
-              <button
-                type="button"
-                onClick={() => remove(r.id)}
-                aria-label="Delete rule"
-                className="flex h-7 w-7 items-center justify-center rounded-full text-ink-subtle transition-colors hover:bg-danger/15 hover:text-danger"
-              >
-                <Trash2 size={12} strokeWidth={1.9} />
-              </button>
-            </li>
-          ))}
-        </ul>
-      )}
-
-      {editing && (
+    <Section
+      title={t("Automations")}
+      subtitle={t("Choose which releases trigger an alert and where each alert goes.")}
+    >
+      {editing ? (
         <RuleEditor
           rule={editing}
+          isNew={!rules.some((r) => r.id === editing.id)}
           trackedPeople={trackedPeople}
           canDiscord={canDiscord}
           canTelegram={canTelegram}
+          canDesktop={canDesktop}
+          nameRef={nameRef}
           onSave={upsert}
-          onCancel={() => setEditing(null)}
+          onDelete={() => remove(editing.id)}
+          onCancel={cancel}
         />
+      ) : (
+        <>
+          {noChannel && (
+            <Callout>
+              {t(
+                "Add a Discord or Telegram destination, or turn on Desktop notifications, first. Rules need somewhere to send their alerts.",
+              )}
+            </Callout>
+          )}
+          {rules.length === 0 ? (
+            <p className={`max-w-[70ch] ${ROW_DESC}`}>
+              {t("No rules yet. Add one to choose which releases you hear about.")}
+            </p>
+          ) : (
+            rules.map((r) => (
+              <RuleRow
+                key={r.id}
+                rule={r}
+                trackedPeople={trackedPeople}
+                onEdit={() => startEdit(r)}
+              />
+            ))
+          )}
+          <div ref={listRef} className="flex">
+            {noChannel ? (
+              <SButton variant="primary" onClick={onSetUp}>
+                {t("Set up a destination")}
+              </SButton>
+            ) : (
+              <SButton variant="primary" onClick={startNew}>
+                <Plus size={18} strokeWidth={2.4} className="shrink-0" />
+                {t("New rule")}
+              </SButton>
+            )}
+          </div>
+        </>
       )}
+    </Section>
+  );
+}
+
+function Callout({ children }: { children: ReactNode }) {
+  return (
+    <div className="flex max-w-[66ch] items-start gap-2.5">
+      <Info size={18} className="mt-[2px] shrink-0 text-ink-subtle" />
+      <p className={ROW_DESC}>{children}</p>
     </div>
+  );
+}
+
+function RuleRow({
+  rule,
+  trackedPeople,
+  onEdit,
+}: {
+  rule: Rule;
+  trackedPeople: TrackedPerson[];
+  onEdit: () => void;
+}) {
+  const t = useT();
+  const name = rule.name || t(EVENT_LABELS[rule.trigger.event]);
+  const channels =
+    [
+      rule.channels.desktop && "Desktop",
+      rule.channels.discord && "Discord",
+      rule.channels.telegram && "Telegram",
+    ]
+      .filter(Boolean)
+      .join(" + ") || t("nowhere yet");
+  return (
+    <SRow
+      title={
+        <span className="inline-flex min-w-0 flex-wrap items-center gap-2">
+          <span className="min-w-0">{name}</span>
+          {!rule.enabled && (
+            <span className={`${QUAL} bg-elevated text-ink-subtle`}>{t("Paused")}</span>
+          )}
+        </span>
+      }
+      description={t("{trigger}. Sends to {channels}.", {
+        trigger: describeTrigger(rule.trigger, trackedPeople, t),
+        channels,
+      })}
+      trailing={<ChevronRight size={18} className="text-ink-subtle rtl:-scale-x-100" />}
+      onClick={onEdit}
+      className="harbor-rule-row"
+    />
   );
 }
 
 function RuleEditor({
   rule,
+  isNew,
   trackedPeople,
   canDiscord,
   canTelegram,
+  canDesktop,
+  nameRef,
   onSave,
+  onDelete,
   onCancel,
 }: {
   rule: Rule;
+  isNew: boolean;
   trackedPeople: TrackedPerson[];
   canDiscord: boolean;
   canTelegram: boolean;
+  canDesktop: boolean;
+  nameRef: RefObject<HTMLInputElement | null>;
   onSave: (rule: Rule) => void;
+  onDelete: () => void;
   onCancel: () => void;
 }) {
   const [draft, setDraft] = useState<Rule>(rule);
+  const [confirmDelete, setConfirmDelete] = useState(false);
+  const t = useT();
 
-  const setEvent = (event: WebhookTrigger["event"]) => {
+  const noChannel =
+    !(draft.channels.discord && canDiscord) &&
+    !(draft.channels.telegram && canTelegram) &&
+    !(draft.channels.desktop && canDesktop);
+  const live = useRef({ draft, onSave, onDelete, onCancel });
+  live.current = { draft, onSave, onDelete, onCancel };
+
+  usePageActions(
+    [
+      ...(isNew
+        ? []
+        : [
+            {
+              id: "webhook-rule-delete",
+              label: "Delete rule",
+              tone: "danger" as const,
+              icon: <Trash2 size={18} strokeWidth={2.2} />,
+              onSelect: () => setConfirmDelete(true),
+            },
+          ]),
+      {
+        id: "webhook-rule-cancel",
+        label: "Cancel",
+        onSelect: () => live.current.onCancel(),
+      },
+      {
+        id: "webhook-rule-save",
+        label: "Save rule",
+        tone: "primary" as const,
+        disabled: noChannel,
+        onSelect: () => live.current.onSave(live.current.draft),
+      },
+    ],
+    noChannel ? "Pick at least one channel to notify." : undefined,
+  );
+
+  const setEvent = (event: WebhookTrigger["event"]) =>
     setDraft((d) => ({ ...d, trigger: defaultTrigger(event) }));
-  };
+
+  const genre = draft.trigger.event === "fromGenre" ? draft.trigger : null;
+  const provider = draft.trigger.event === "fromProvider" ? draft.trigger : null;
+  const country = draft.trigger.event === "fromCountry" ? draft.trigger : null;
+  const person = draft.trigger.event === "fromTrackedPerson" ? draft.trigger : null;
+  const liveTv = draft.trigger.event === "liveTvEvent" ? draft.trigger : null;
+
+  const setTrigger = (trigger: WebhookTrigger) => setDraft((d) => ({ ...d, trigger }));
 
   return (
-    <div className="fixed inset-0 z-[120] flex items-center justify-center bg-canvas/80 p-6 backdrop-blur-sm">
-      <div className="flex max-h-[88vh] w-full max-w-[560px] flex-col gap-5 overflow-y-auto rounded-2xl border border-edge-soft bg-elevated p-6 shadow-[0_28px_80px_-20px_rgba(0,0,0,0.7)]">
-        <div className="flex items-start justify-between">
-          <h2 className="text-[18px] font-semibold text-ink">
-            {rule.name ? "Edit rule" : "New rule"}
-          </h2>
-          <button
-            type="button"
-            onClick={onCancel}
-            aria-label="Close"
-            className="flex h-8 w-8 items-center justify-center rounded-full text-ink-subtle hover:bg-canvas/70 hover:text-ink"
-          >
-            <X size={14} strokeWidth={2.2} />
-          </button>
-        </div>
-
-        <Field label="Name">
+    <>
+      <SettingsModal
+        open={confirmDelete}
+        onClose={() => setConfirmDelete(false)}
+        title={t("Delete this rule?")}
+        sub={t("{name} will be removed. Alerts from your other rules will continue.", {
+          name: rule.name || t(EVENT_LABELS[rule.trigger.event]),
+        })}
+        actions={
+          <>
+            <ModalButton ghost onClick={() => setConfirmDelete(false)}>
+              {t("Keep rule")}
+            </ModalButton>
+            <button type="button" className={ROW_ACTION_DANGER} onClick={onDelete}>
+              {t("Delete rule")}
+            </button>
+          </>
+        }
+      >
+        <p className={ROW_DESC}>
+          {t("You can also turn off Rule is active to pause it without deleting it.")}
+        </p>
+      </SettingsModal>
+      <SettingGroup label={isNew ? t("New rule") : t("Edit rule")}>
+        <SettingRow
+          wide
+          label={t("Rule name")}
+          desc={t(
+            "What this rule is called in your list. Leave it empty and Harbor names it after the trigger.",
+          )}
+        >
           <input
+            aria-label={t("Rule name")}
+            ref={nameRef}
             type="text"
             value={draft.name}
             onChange={(e) => setDraft({ ...draft, name: e.target.value })}
-            placeholder={EVENT_LABELS[draft.trigger.event]}
+            placeholder={t(EVENT_LABELS[draft.trigger.event])}
             maxLength={80}
-            className="h-11 w-full rounded-xl border border-edge bg-canvas px-3.5 text-[13px] text-ink placeholder:text-ink-subtle outline-none focus:border-ink"
+            spellCheck={false}
+            className={TEXT_INPUT}
           />
-        </Field>
+        </SettingRow>
 
-        <Field label="WHEN">
-          <select
-            value={draft.trigger.event}
-            onChange={(e) => setEvent(e.target.value as WebhookTrigger["event"])}
-            className="h-11 w-full rounded-xl border border-edge bg-canvas px-3 text-[13px] text-ink outline-none focus:border-ink"
+        <SettingRow
+          wide
+          label={t("Trigger")}
+          desc={t("The release Harbor watches for. Everything else on this page narrows it down.")}
+        >
+          <div className="w-full max-w-[420px]">
+            <Dropdown
+              size="md"
+              value={draft.trigger.event}
+              options={EVENT_ORDER.map((ev) => ({ value: ev, label: t(EVENT_LABELS[ev]) }))}
+              onChange={(v) => setEvent(v as WebhookTrigger["event"])}
+            />
+          </div>
+        </SettingRow>
+
+        {genre && (
+          <SettingRow
+            label={t("Media type")}
+            desc={t("Decide whether the genres below apply to movies or to series.")}
           >
-            {EVENT_ORDER.map((ev) => (
-              <option key={ev} value={ev}>
-                {EVENT_LABELS[ev]}
-              </option>
-            ))}
-          </select>
-        </Field>
-
-        {draft.trigger.event === "fromGenre" && (
-          <TriggerSubFields>
-            <SubSelect
-              label="Media type"
-              value={draft.trigger.mediaType}
+            <Segmented
+              value={genre.mediaType}
               options={[
-                { value: "movie", label: "Movies" },
-                { value: "tv", label: "Series" },
+                { value: "movie", label: t("Movies") },
+                { value: "tv", label: t("Series") },
               ]}
-              onChange={(v) =>
-                setDraft({ ...draft, trigger: { ...(draft.trigger as Extract<WebhookTrigger, { event: "fromGenre" }>), mediaType: v as "movie" | "tv" } })
-              }
+              onChange={(v) => setTrigger({ ...genre, mediaType: v })}
             />
-            <SubChips
-              label="Genres"
-              items={Object.entries(MOVIE_GENRES).map(([name, id]) => ({
-                key: String(id),
-                label: name,
-                selected: (draft.trigger as Extract<WebhookTrigger, { event: "fromGenre" }>).genreIds.includes(id),
-                onToggle: () => {
-                  const t = draft.trigger as Extract<WebhookTrigger, { event: "fromGenre" }>;
-                  const next = t.genreIds.includes(id)
-                    ? t.genreIds.filter((x) => x !== id)
-                    : [...t.genreIds, id];
-                  setDraft({ ...draft, trigger: { ...t, genreIds: next } });
-                },
-              }))}
-            />
-          </TriggerSubFields>
+          </SettingRow>
         )}
 
-        {draft.trigger.event === "fromProvider" && (
-          <TriggerSubFields>
-            <SubChips
-              label="Streamers"
-              items={PROVIDERS.map((p) => ({
-                key: String(p.id),
-                label: p.name,
-                selected: (draft.trigger as Extract<WebhookTrigger, { event: "fromProvider" }>).providerIds.includes(p.id),
-                onToggle: () => {
-                  const t = draft.trigger as Extract<WebhookTrigger, { event: "fromProvider" }>;
-                  const next = t.providerIds.includes(p.id)
-                    ? t.providerIds.filter((x) => x !== p.id)
-                    : [...t.providerIds, p.id];
-                  setDraft({ ...draft, trigger: { ...t, providerIds: next } });
-                },
-              }))}
-            />
-          </TriggerSubFields>
+        {liveTv && (
+          <ToggleRow
+            label={t("Only my favorited channels")}
+            sub={t(
+              "Turn this on and Harbor watches just the Live TV channels you starred. Off means every channel in your playlists.",
+            )}
+            value={liveTv.favoritesOnly !== false}
+            onChange={(v) => setTrigger({ ...liveTv, favoritesOnly: v })}
+          />
         )}
 
-        {draft.trigger.event === "fromCountry" && (
-          <TriggerSubFields>
-            <SubChips
-              label="Countries"
-              items={COUNTRIES.map((c) => ({
-                key: c.code,
-                label: c.name,
-                selected: (draft.trigger as Extract<WebhookTrigger, { event: "fromCountry" }>).countryCodes.includes(c.code),
-                onToggle: () => {
-                  const t = draft.trigger as Extract<WebhookTrigger, { event: "fromCountry" }>;
-                  const next = t.countryCodes.includes(c.code)
-                    ? t.countryCodes.filter((x) => x !== c.code)
-                    : [...t.countryCodes, c.code];
-                  setDraft({ ...draft, trigger: { ...t, countryCodes: next } });
-                },
-              }))}
-            />
-          </TriggerSubFields>
-        )}
-
-        {draft.trigger.event === "liveTvEvent" && (
-          <TriggerSubFields>
-            <label className="flex items-center gap-3">
-              <input
-                type="checkbox"
-                checked={(draft.trigger as Extract<WebhookTrigger, { event: "liveTvEvent" }>).favoritesOnly !== false}
-                onChange={(e) => {
-                  const t = draft.trigger as Extract<WebhookTrigger, { event: "liveTvEvent" }>;
-                  setDraft({ ...draft, trigger: { ...t, favoritesOnly: e.target.checked } });
-                }}
-                className="h-4 w-4 accent-ink"
+        {liveTv && (
+          <SettingRow
+            label={t("Heads-up time")}
+            desc={t(
+              "How far ahead of the start time Harbor pings you. It scans your playlist EPG every 30 minutes.",
+            )}
+          >
+            <div className="w-[280px] max-w-full">
+              <Dropdown
+                size="md"
+                value={String(liveTv.leadMinutes ?? 15)}
+                options={LEAD_MINUTES.map((m) => ({ value: String(m), label: leadLabel(m, t) }))}
+                onChange={(v) => setTrigger({ ...liveTv, leadMinutes: Number(v) })}
               />
-              <span className="text-[12.5px] text-ink">Only my favorited channels</span>
-            </label>
-            <label className="flex items-center gap-3">
-              <span className="w-[140px] shrink-0 text-[11px] font-semibold uppercase tracking-[0.14em] text-ink-subtle">
-                Heads up
-              </span>
-              <select
-                value={String(
-                  (draft.trigger as Extract<WebhookTrigger, { event: "liveTvEvent" }>).leadMinutes ?? 15,
-                )}
-                onChange={(e) => {
-                  const t = draft.trigger as Extract<WebhookTrigger, { event: "liveTvEvent" }>;
-                  setDraft({ ...draft, trigger: { ...t, leadMinutes: Number(e.target.value) } });
-                }}
-                className="h-9 flex-1 rounded-lg border border-edge bg-canvas px-3 text-[12.5px] text-ink outline-none focus:border-ink"
-              >
-                {[5, 10, 15, 30, 60, 120].map((m) => (
-                  <option key={m} value={m}>
-                    {m < 60 ? `${m} minutes before` : `${m / 60} hour${m === 60 ? "" : "s"} before`}
-                  </option>
-                ))}
-              </select>
-            </label>
-            <p className="text-[11.5px] text-ink-subtle">
-              Harbor scans your IPTV playlists' EPG every 30 min for programs about to start.
-            </p>
-          </TriggerSubFields>
+            </div>
+          </SettingRow>
         )}
+      </SettingGroup>
 
-        {draft.trigger.event === "fromTrackedPerson" && trackedPeople.length === 0 && (
-          <div className="rounded-lg border border-amber-200/30 bg-amber-200/5 px-3 py-2 text-[12px] text-amber-200/85">
-            Add people in the Custom calendar manager first, then come back here.
-          </div>
-        )}
+      {genre && (
+        <ChipPicker
+          label={t("Genres")}
+          hint={t("Pick as many as you like. With none picked, every genre counts.")}
+          items={Object.entries(MOVIE_GENRES).map(([name, id]) => ({
+            key: String(id),
+            label: name,
+            selected: genre.genreIds.includes(id),
+            onToggle: () =>
+              setTrigger({
+                ...genre,
+                genreIds: genre.genreIds.includes(id)
+                  ? genre.genreIds.filter((x) => x !== id)
+                  : [...genre.genreIds, id],
+              }),
+          }))}
+        />
+      )}
 
-        {draft.trigger.event === "fromTrackedPerson" && trackedPeople.length > 0 && (
-          <TriggerSubFields>
-            <SubChips
-              label="People (empty = all tracked)"
-              items={trackedPeople.map((p) => ({
-                key: String(p.id),
-                label: p.name,
-                selected: (
-                  (draft.trigger as Extract<WebhookTrigger, { event: "fromTrackedPerson" }>).personIds ?? []
-                ).includes(p.id),
-                onToggle: () => {
-                  const t = draft.trigger as Extract<WebhookTrigger, { event: "fromTrackedPerson" }>;
-                  const cur = t.personIds ?? [];
-                  const next = cur.includes(p.id) ? cur.filter((x) => x !== p.id) : [...cur, p.id];
-                  setDraft({ ...draft, trigger: { ...t, personIds: next } });
-                },
-              }))}
-            />
-          </TriggerSubFields>
-        )}
+      {provider && (
+        <ChipPicker
+          label={t("Streamers")}
+          hint={t("Pick the services you care about. With none picked, every service counts.")}
+          items={PROVIDERS.map((p) => ({
+            key: String(p.id),
+            label: p.name,
+            selected: provider.providerIds.includes(p.id),
+            onToggle: () =>
+              setTrigger({
+                ...provider,
+                providerIds: provider.providerIds.includes(p.id)
+                  ? provider.providerIds.filter((x) => x !== p.id)
+                  : [...provider.providerIds, p.id],
+              }),
+          }))}
+        />
+      )}
 
-        <Field label="THEN notify on">
-          <div className="flex gap-2">
-            <ChannelToggle
-              label="Discord"
-              on={draft.channels.discord}
-              disabled={!canDiscord}
-              onToggle={() => setDraft({ ...draft, channels: { ...draft.channels, discord: !draft.channels.discord } })}
-            />
-            <ChannelToggle
-              label="Telegram"
-              on={draft.channels.telegram}
-              disabled={!canTelegram}
-              onToggle={() => setDraft({ ...draft, channels: { ...draft.channels, telegram: !draft.channels.telegram } })}
-            />
-          </div>
-        </Field>
+      {country && (
+        <ChipPicker
+          label={t("Countries")}
+          hint={t(
+            "Pick the countries of origin you follow. With none picked, every country counts.",
+          )}
+          items={COUNTRIES.map((c) => ({
+            key: c.code,
+            label: c.name,
+            selected: country.countryCodes.includes(c.code),
+            onToggle: () =>
+              setTrigger({
+                ...country,
+                countryCodes: country.countryCodes.includes(c.code)
+                  ? country.countryCodes.filter((x) => x !== c.code)
+                  : [...country.countryCodes, c.code],
+              }),
+          }))}
+        />
+      )}
 
-        <div className="flex items-center justify-end gap-2 pt-2">
-          <button
-            type="button"
-            onClick={onCancel}
-            className="h-10 rounded-xl px-4 text-[13px] font-medium text-ink-muted hover:text-ink"
-          >
-            Cancel
-          </button>
-          <button
-            type="button"
-            onClick={() => onSave(draft)}
-            disabled={!draft.channels.discord && !draft.channels.telegram}
-            className="h-10 rounded-xl bg-ink px-5 text-[13px] font-semibold text-canvas transition-opacity hover:opacity-90 disabled:opacity-40"
-          >
-            Save rule
-          </button>
-        </div>
-      </div>
-    </div>
+      {person && trackedPeople.length === 0 && (
+        <Callout>
+          {t("Add people in the Custom calendar manager first, then come back to this rule.")}
+        </Callout>
+      )}
+
+      {person && trackedPeople.length > 0 && (
+        <ChipPicker
+          label={t("People")}
+          hint={t("Pick who this rule watches. With nobody picked, everyone you track counts.")}
+          items={trackedPeople.map((p) => {
+            const cur = person.personIds ?? [];
+            return {
+              key: String(p.id),
+              label: p.name,
+              selected: cur.includes(p.id),
+              onToggle: () =>
+                setTrigger({
+                  ...person,
+                  personIds: cur.includes(p.id) ? cur.filter((x) => x !== p.id) : [...cur, p.id],
+                }),
+            };
+          })}
+        />
+      )}
+
+      <SettingGroup label={t("Then notify")}>
+        <ToggleRow
+          label="Desktop"
+          sub={t("Show a system notification on this device.")}
+          value={draft.channels.desktop}
+          onChange={(v) => setDraft({ ...draft, channels: { ...draft.channels, desktop: v } })}
+          lockReason={
+            canDesktop
+              ? undefined
+              : t("Turn on Desktop notifications on the Destinations tab first.")
+          }
+        />
+        <ToggleRow
+          label="Discord"
+          sub={t("Post the alert to the Discord channel set up on the Destinations tab.")}
+          value={draft.channels.discord}
+          onChange={(v) => setDraft({ ...draft, channels: { ...draft.channels, discord: v } })}
+          lockReason={
+            canDiscord ? undefined : t("Add a Discord webhook URL on the Destinations tab first.")
+          }
+        />
+        <ToggleRow
+          label="Telegram"
+          sub={t("Send the alert through the Telegram bot set up on the Destinations tab.")}
+          value={draft.channels.telegram}
+          onChange={(v) => setDraft({ ...draft, channels: { ...draft.channels, telegram: v } })}
+          lockReason={
+            canTelegram ? undefined : t("Add a Telegram bot token on the Destinations tab first.")
+          }
+        />
+      </SettingGroup>
+
+      {!isNew && (
+        <SettingGroup label={t("Manage this rule")}>
+          <ToggleRow
+            label={t("Rule is active")}
+            sub={t("Turn this off to keep the rule but stop it sending anything for now.")}
+            value={draft.enabled}
+            onChange={(v) => setDraft({ ...draft, enabled: v })}
+          />
+        </SettingGroup>
+      )}
+    </>
   );
 }
 
-function Field({ label, children }: { label: string; children: React.ReactNode }) {
-  return (
-    <label className="flex flex-col gap-1.5">
-      <span className="text-[11px] font-semibold uppercase tracking-[0.14em] text-ink-subtle">{label}</span>
-      {children}
-    </label>
-  );
-}
-
-function TriggerSubFields({ children }: { children: React.ReactNode }) {
-  return (
-    <div className="flex flex-col gap-3 rounded-xl border border-edge-soft/60 bg-canvas/30 p-3.5">
-      {children}
-    </div>
-  );
-}
-
-function SubSelect({
+function ChipPicker({
   label,
-  value,
-  options,
-  onChange,
-}: {
-  label: string;
-  value: string;
-  options: Array<{ value: string; label: string }>;
-  onChange: (v: string) => void;
-}) {
-  return (
-    <label className="flex items-center gap-3">
-      <span className="w-[100px] shrink-0 text-[11px] font-semibold uppercase tracking-[0.14em] text-ink-subtle">
-        {label}
-      </span>
-      <select
-        value={value}
-        onChange={(e) => onChange(e.target.value)}
-        className="h-9 flex-1 rounded-lg border border-edge bg-canvas px-3 text-[12.5px] text-ink outline-none focus:border-ink"
-      >
-        {options.map((o) => (
-          <option key={o.value} value={o.value}>
-            {o.label}
-          </option>
-        ))}
-      </select>
-    </label>
-  );
-}
-
-function SubChips({
-  label,
+  hint,
   items,
 }: {
   label: string;
+  hint: string;
   items: Array<{ key: string; label: string; selected: boolean; onToggle: () => void }>;
 }) {
   return (
-    <div className="flex flex-col gap-2">
-      <span className="text-[11px] font-semibold uppercase tracking-[0.14em] text-ink-subtle">{label}</span>
-      <div className="flex flex-wrap gap-1.5">
+    <SettingGroup label={label}>
+      <p className={`max-w-[70ch] ${ROW_DESC}`}>{hint}</p>
+      <div className="flex flex-wrap gap-2.5">
         {items.map((it) => (
           <button
             key={it.key}
             type="button"
             onClick={it.onToggle}
-            className={`h-7 rounded-full border px-2.5 text-[11.5px] font-medium transition-colors ${
+            aria-pressed={it.selected}
+            className={`${CHIP_BASE} ${
               it.selected
-                ? "border-accent/55 bg-accent/15 text-accent"
-                : "border-edge-soft bg-canvas/40 text-ink-muted hover:border-edge hover:text-ink"
+                ? "border-accent bg-accent-soft text-accent"
+                : "border-edge-soft bg-elevated text-ink-muted hover:border-edge hover:text-ink"
             }`}
           >
+            {it.selected && <Check size={17} strokeWidth={2.6} className="shrink-0" />}
             {it.label}
           </button>
         ))}
       </div>
-    </div>
-  );
-}
-
-function ChannelToggle({
-  label,
-  on,
-  disabled,
-  onToggle,
-}: {
-  label: string;
-  on: boolean;
-  disabled?: boolean;
-  onToggle: () => void;
-}) {
-  return (
-    <button
-      type="button"
-      onClick={() => !disabled && onToggle()}
-      disabled={disabled}
-      className={`flex h-10 items-center gap-2 rounded-full border px-4 text-[12.5px] font-semibold transition-colors ${
-        disabled
-          ? "cursor-not-allowed border-edge-soft/40 text-ink-subtle opacity-60"
-          : on
-            ? "border-ink bg-ink text-canvas"
-            : "border-edge-soft bg-canvas/40 text-ink-muted hover:border-edge hover:text-ink"
-      }`}
-      title={disabled ? "Configure URL above first" : undefined}
-    >
-      {label}
-    </button>
+    </SettingGroup>
   );
 }

@@ -1,0 +1,590 @@
+.sh-venue {
+  --venue-line: #edf5e9b8;
+  position: relative;
+  aspect-ratio: 2 / 1;
+  isolation: isolate;
+  container-type: inline-size;
+  overflow: hidden;
+  border-radius: 8px;
+  background: repeating-linear-gradient(90deg, #174c3a 0 10%, #1b5340 10% 20%);
+  color: #f4f4ed;
+}
+.sh-venue-marks {
+  position: absolute;
+  inset: 0;
+  pointer-events: none;
+  overflow: hidden;
+  border-radius: inherit;
+}
+.sh-venue-marks i {
+  position: absolute;
+  display: block;
+  box-sizing: border-box;
+}
+.sh-venue-boundary {
+  inset: 1px;
+  border: 1px solid var(--venue-line);
+  border-radius: inherit;
+}
+.sh-venue-center {
+  left: 50%;
+  top: 0;
+  bottom: 0;
+  border-left: 1px solid var(--venue-line);
+}
+.sh-venue-roster {
+  display: grid;
+  grid-template-columns: repeat(auto-fill, minmax(170px, 1fr));
+  gap: 8px;
+  margin-top: 14px;
+}
+.sh-venue-position {
+  position: absolute;
+  transform: translate(-50%, -50%);
+  width: 15%;
+  font-size: 10px;
+  z-index: 1;
+}
+.sh-venue-position > span {
+  display: grid;
+  place-items: center;
+  width: 28px;
+  height: 28px;
+  margin: auto;
+  border-radius: 50%;
+  background: #1b3341;
+  color: #fff;
+}
+.sh-venue-athlete {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  min-width: 0;
+}
+.sh-venue-portrait {
+  display: grid;
+  place-items: center;
+  width: 36px;
+  height: 36px;
+  flex-shrink: 0;
+  border-radius: 50%;
+  background: #ecf0f3;
+  color: #213542;
+  overflow: hidden;
+}
+.sh-venue-portrait img {
+  width: 100%;
+  height: 100%;
+  object-fit: cover;
+  object-position: top;
+}
+.sh-venue-position .sh-venue-athlete,
+.sh-venue-competitor .sh-venue-athlete {
+  flex-direction: column;
+  gap: 3px;
+}
+.sh-venue-position .sh-venue-portrait {
+  width: clamp(20px, 4cqw, 36px);
+  height: clamp(20px, 4cqw, 36px);
+  border: 1px solid #ffffffc0;
+}
+.sh-venue-position .sh-athlete-link {
+  display: block;
+  max-width: 100%;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+  font-size: clamp(9px, 1vw, 11px);
+  line-height: 1.3;
+  background: #132c3af2;
+  color: #fff;
+  padding: 2px 4px;
+  border-radius: 3px;
+}
+.sh-venue-position .sh-athlete-link svg {
+  display: none;
+}
+.sh-venue-competitor {
+  position: absolute;
+  top: 50%;
+  transform: translate(-50%, -50%);
+  width: 34%;
+  z-index: 1;
+}
+.sh-venue-competitor.home {
+  left: 20%;
+}
+.sh-venue-competitor.away {
+  left: 80%;
+}
+.sh-venue-competitor .sh-venue-portrait {
+  width: clamp(38px, 6vw, 72px);
+  height: clamp(38px, 6vw, 72px);
+}
+.sh-venue-competitor .sh-athlete-link {
+  font-size: 12px;
+  max-width: 100%;
+  white-space: normal;
+  text-align: center;
+  background: #132c3af2;
+  color: #fff;
+  padding: 4px 7px;
+}
+.sh-venue-roster .sh-venue-athlete {
+  padding: 9px;
+  background: var(--color-elevated);
+  border-radius: 6px;
+}
+.sh-venue-roster .sh-athlete-link {
+  min-width: 0;
+  font-size: 12px;
+  white-space: normal;
+}
+/* NHL 200 × 85 ft rink, 75 ft blue lines, 11 ft goal lines. */
+.sh-venue-hockey {
+  aspect-ratio: 200 / 85;
+  border-radius: 14% / 33%;
+  background: #dce8ed;
+  color: #182c38;
+  --venue-line: #ba3d48;
+}
+.sh-venue-hockey .sh-venue-boundary {
+  inset: 1%;
+  border: 2px solid #81969d;
+  border-radius: 14% / 33%;
+}
+.sh-venue-hockey .sh-venue-center {
+  border-left: 2px dashed #bd4450;
+}
+.sh-rink-blue {
+  top: 0;
+  bottom: 0;
+  border-left: 3px solid #3875b1;
+}
+.sh-rink-goal-line {
+  top: 0;
+  bottom: 0;
+  border-left: 1px solid #bc4350;
+}
+.sh-rink-circle {
+  width: 15%;
+  aspect-ratio: 1;
+  border: 1px solid #bc4350;
+  border-radius: 50%;
+  transform: translate(-50%, -50%);
+}
+.sh-rink-circle::after,
+.sh-rink-dot {
+  content: "";
+  width: 0.8%;
+  aspect-ratio: 1;
+  background: #bc4350;
+  border-radius: 50%;
+  position: absolute;
+  left: 50%;
+  top: 50%;
+  transform: translate(-50%, -50%);
+}
+.sh-rink-circle::after {
+  width: 6%;
+}
+.sh-rink-circle.center {
+  left: 50%;
+  top: 50%;
+  border-color: #3875b1;
+}
+.sh-rink-circle.center::after {
+  background: #3875b1;
+}
+.sh-rink-goal {
+  top: 46.47%;
+  width: 2%;
+  height: 7.06%;
+  border: 2px solid #ab3442;
+  background: repeating-linear-gradient(0deg, transparent 0 3px, #607e8b40 3px 4px);
+}
+.sh-rink-goal.left {
+  left: 3.5%;
+  border-radius: 40% 0 0 40%;
+}
+.sh-rink-goal.right {
+  right: 3.5%;
+  border-radius: 0 40% 40% 0;
+}
+.sh-rink-crease {
+  width: 3%;
+  height: 14.12%;
+  top: 42.94%;
+  border: 1px solid #bc4350;
+  background: #8cbad27d;
+}
+.sh-rink-crease.left {
+  left: 5.5%;
+  border-radius: 0 100% 100% 0 / 0 50% 50% 0;
+}
+.sh-rink-crease.right {
+  right: 5.5%;
+  border-radius: 100% 0 0 100% / 50% 0 0 50%;
+}
+/* ITF doubles court; 6.40 m service lines and 8.23 m singles width. */
+.sh-venue-tennis {
+  aspect-ratio: 23.77 / 10.97;
+  background: #255a83;
+  border: 1px solid #edf5e9b8;
+}
+.sh-tennis-singles {
+  inset: 12.49% 0;
+  border-block: 1px solid var(--venue-line);
+}
+.sh-tennis-service {
+  inset: 12.49% 23.075%;
+  border-inline: 1px solid var(--venue-line);
+}
+.sh-tennis-center-service {
+  left: 23.075%;
+  right: 23.075%;
+  top: 50%;
+  border-top: 1px solid var(--venue-line);
+}
+.sh-venue-tennis .sh-venue-center {
+  width: 3px;
+  border: none;
+  background: repeating-linear-gradient(0deg, #edf5e9 0 2px, #314652 2px 4px);
+}
+.sh-tennis-mark {
+  width: 1%;
+  top: 50%;
+  border-top: 1px solid var(--venue-line);
+}
+.sh-tennis-mark.left {
+  left: 0;
+}
+.sh-tennis-mark.right {
+  right: 0;
+}
+/* Rugby union: 100 × 70 m field with representative 10 m in-goals. */
+.sh-venue-rugby {
+  aspect-ratio: 120 / 70;
+}
+.sh-rugby-try,
+.sh-rugby-22 {
+  top: 0;
+  bottom: 0;
+  border-left: 1px solid var(--venue-line);
+}
+.sh-rugby-dash.vertical {
+  top: 0;
+  bottom: 0;
+  border-left: 1px dashed var(--venue-line);
+}
+.sh-rugby-dash.horizontal {
+  left: 8.333%;
+  right: 8.333%;
+  border-top: 1px dashed var(--venue-line);
+}
+.sh-venue-goal {
+  top: 45.714%;
+  width: 1.5%;
+  height: 8.572%;
+  border-block: 2px solid #f7f8ea;
+  border-inline-end: 2px solid #f7f8ea;
+}
+.sh-venue-goal.left {
+  left: 7%;
+}
+.sh-venue-goal.right {
+  right: 7%;
+  transform: rotate(180deg);
+}
+/* Oval boundaries vary by ground; central cricket strip retains 20.12:3.05. */
+.sh-venue-cricket,
+.sh-venue-aussie {
+  border-radius: 50%;
+  aspect-ratio: 165 / 135;
+}
+.sh-venue-cricket .sh-venue-center,
+.sh-venue-aussie .sh-venue-center {
+  display: none;
+}
+.sh-venue-cricket .sh-venue-boundary,
+.sh-venue-aussie .sh-venue-boundary {
+  inset: 2%;
+  border-radius: 50%;
+}
+.sh-cricket-inner {
+  inset: 26% 25%;
+  border: 1px dashed var(--venue-line);
+  border-radius: 50%;
+}
+.sh-cricket-pitch {
+  width: 18%;
+  aspect-ratio: 20.12 / 3.05;
+  left: 41%;
+  top: 50%;
+  transform: translateY(-50%);
+  background: #c0ad7e;
+}
+.sh-cricket-crease {
+  top: -30%;
+  bottom: -30%;
+  width: 10%;
+  border-inline: 1px solid #fff9dc;
+}
+.sh-cricket-crease.left {
+  left: 0;
+}
+.sh-cricket-crease.right {
+  right: 0;
+}
+.sh-cricket-wicket {
+  width: 2%;
+  height: 24%;
+  top: 38%;
+  background: repeating-linear-gradient(0deg, #f9f3db 0 20%, transparent 20% 40%);
+}
+.sh-cricket-wicket.left {
+  left: 0;
+}
+.sh-cricket-wicket.right {
+  right: 0;
+}
+.sh-aussie-square {
+  left: 34.848%;
+  top: 31.481%;
+  width: 30.303%;
+  height: 37.037%;
+  border: 1px solid var(--venue-line);
+}
+.sh-aussie-circle {
+  left: 50%;
+  top: 50%;
+  width: 6.061%;
+  aspect-ratio: 1;
+  transform: translate(-50%, -50%);
+  border: 1px solid var(--venue-line);
+  border-radius: 50%;
+}
+.sh-aussie-circle.inner {
+  width: 1.818%;
+}
+.sh-aussie-arc {
+  top: 50%;
+  width: 60.606%;
+  aspect-ratio: 1;
+  transform: translateY(-50%);
+  border: 1px solid var(--venue-line);
+  border-radius: 50%;
+}
+.sh-aussie-arc.left {
+  left: -28.303%;
+}
+.sh-aussie-arc.right {
+  right: -28.303%;
+}
+.sh-aussie-goal-square {
+  top: 47.407%;
+  width: 5.455%;
+  height: 5.185%;
+  border: 1px solid var(--venue-line);
+}
+.sh-aussie-goal-square.left {
+  left: 2%;
+}
+.sh-aussie-goal-square.right {
+  right: 2%;
+}
+.sh-aussie-posts {
+  top: 43%;
+  width: 1%;
+  height: 14%;
+  background: linear-gradient(
+    0deg,
+    #fff 0 4%,
+    transparent 4% 31%,
+    #fff 31% 35%,
+    transparent 35% 65%,
+    #fff 65% 69%,
+    transparent 69% 96%,
+    #fff 96%
+  );
+}
+.sh-aussie-posts.left {
+  left: 2%;
+}
+.sh-aussie-posts.right {
+  right: 2%;
+}
+/* Men's outdoor lacrosse 110 × 60 yd; 9 ft crease radius. */
+.sh-venue-lacrosse {
+  aspect-ratio: 110 / 60;
+}
+.sh-lacrosse-restrain {
+  top: 0;
+  bottom: 0;
+  border-left: 1px solid var(--venue-line);
+}
+.sh-lacrosse-wing {
+  width: 18.182%;
+  left: 40.909%;
+  border-top: 1px solid var(--venue-line);
+}
+.sh-lacrosse-wing.top {
+  top: 16.667%;
+}
+.sh-lacrosse-wing.bottom {
+  bottom: 16.667%;
+}
+.sh-lacrosse-crease {
+  width: 5.455%;
+  aspect-ratio: 1;
+  top: 50%;
+  border: 1px solid var(--venue-line);
+  border-radius: 50%;
+  transform: translate(-50%, -50%);
+}
+.sh-lacrosse-crease.left {
+  left: 13.636%;
+}
+.sh-lacrosse-crease.right {
+  left: 86.364%;
+}
+.sh-lacrosse-goal {
+  top: 48.333%;
+  width: 1.818%;
+  height: 3.334%;
+  border: 1px solid #efcaa1;
+}
+.sh-lacrosse-goal.left {
+  left: 11.818%;
+}
+.sh-lacrosse-goal.right {
+  right: 11.818%;
+}
+.sh-venue-combat,
+.sh-venue-boxing {
+  aspect-ratio: 1;
+  max-width: 560px;
+  margin-inline: auto;
+}
+.sh-venue-combat {
+  --cage-shape: polygon(
+    29.289% 0,
+    70.711% 0,
+    100% 29.289%,
+    100% 70.711%,
+    70.711% 100%,
+    29.289% 100%,
+    0 70.711%,
+    0 29.289%
+  );
+  background: #7a868c;
+  clip-path: var(--cage-shape);
+}
+.sh-venue-combat .sh-venue-boundary,
+.sh-venue-boxing .sh-venue-boundary,
+.sh-venue-combat .sh-venue-center,
+.sh-venue-boxing .sh-venue-center {
+  display: none;
+}
+.sh-cage-mat {
+  inset: 3%;
+  clip-path: var(--cage-shape);
+  background: #363f45;
+}
+.sh-cage-center {
+  inset: 25%;
+  clip-path: var(--cage-shape);
+  background: #ffffff07;
+}
+.sh-cage-corner {
+  width: 5%;
+  height: 22%;
+  top: 39%;
+}
+.sh-cage-corner.red {
+  left: 0;
+  background: #be4051;
+}
+.sh-cage-corner.blue {
+  right: 0;
+  background: #427ba8;
+}
+.sh-venue-boxing {
+  background: #2b4d68;
+  border-radius: 3px;
+}
+.sh-ring-rope {
+  border: 1px solid #d8e3e5;
+}
+.sh-ring-rope.outer {
+  inset: 4%;
+}
+.sh-ring-rope.middle {
+  inset: 5.5%;
+}
+.sh-ring-rope.inner {
+  inset: 7%;
+}
+.sh-ring-corner {
+  width: 5%;
+  height: 5%;
+  border-radius: 2px;
+}
+.sh-ring-corner.red {
+  left: 3%;
+  top: 3%;
+  background: #bf4351;
+}
+.sh-ring-corner.blue {
+  right: 3%;
+  bottom: 3%;
+  background: #4280b6;
+}
+.sh-ring-corner.neutral-a {
+  right: 3%;
+  top: 3%;
+  background: #d8e3e5;
+}
+.sh-ring-corner.neutral-b {
+  left: 3%;
+  bottom: 3%;
+  background: #d8e3e5;
+}
+@media (max-width: 600px) {
+  .sh-venue-position > span {
+    width: 22px;
+    height: 22px;
+    font-size: 9px;
+  }
+  .sh-venue-competitor {
+    max-width: 30%;
+  }
+  .sh-venue-competitor .sh-athlete-link {
+    font-size: 11px;
+  }
+}
+.sh-venue-events {
+  margin-top: 18px;
+  border-top: 1px solid var(--color-edge-soft);
+}
+.sh-venue-events p {
+  display: flex;
+  gap: 14px;
+  align-items: baseline;
+  margin: 0;
+  padding: 10px 0;
+  font-size: 12px;
+  line-height: 1.5;
+}
+.sh-venue-events p + p {
+  border-top: 1px solid var(--color-edge-soft);
+}
+.sh-venue-events time {
+  flex: 0 0 48px;
+  font-variant-numeric: tabular-nums;
+  color: var(--color-ink-muted);
+}
+.sh-venue-events span {
+  min-width: 0;
+  overflow-wrap: anywhere;
+}

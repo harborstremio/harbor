@@ -6,10 +6,13 @@ import {
   fetchUpcomingMovies,
 } from "./trakt/calendar";
 import type { CalendarItem } from "./calendar";
+import { localDateTimeFromIso } from "./calendar-time";
 import { resolveSavedCalendar, type SavedCandidate } from "./calendar-library";
 import { fetchWatchlist as fetchSimklWatchlist, fetchWatchingItems } from "./simkl/watchlist";
 import { fetchSimklCdnCalendar } from "./simkl/calendar";
 import { isAuthenticated as simklConnected } from "./simkl/session";
+import { fetchAniListAiringCalendar as fetchAniListAiring } from "./anilist/airing";
+import { fetchDubSchedule } from "./providers/anime-dub-sub";
 
 export { fetchLibraryCalendar } from "./calendar-library";
 
@@ -76,6 +79,59 @@ export async function fetchSimklPremieresCalendar(
   return withCalendarCache(cacheKey, () => fetchSimklCdnCalendar(year, month).catch(() => []));
 }
 
+export async function fetchAniListAiringCalendar(
+  year: number,
+  month: number,
+): Promise<CalendarItem[]> {
+  const cacheKey = `anilist-airing:${year}-${month}`;
+  return withCalendarCache(cacheKey, () => fetchAniListAiring(year, month).catch(() => []));
+}
+
+export async function fetchAnimeDubCalendar(year: number, month: number): Promise<CalendarItem[]> {
+  const cacheKey = `anime-dub:${year}-${month}`;
+  return withCalendarCache(cacheKey, () => mapDubFeedToCalendar(year, month).catch(() => []));
+}
+
+async function mapDubFeedToCalendar(year: number, month: number): Promise<CalendarItem[]> {
+  const entries = await fetchDubSchedule();
+  const out: CalendarItem[] = [];
+  const seen = new Set<string>();
+  for (const e of entries) {
+    const media = e?.media?.media;
+    if (!media) continue;
+    if (media.isAdult) continue;
+    if (media.format === "MOVIE" || e.episodeNumber == null) continue;
+    const { date: dateISO, time, atMs } = localDateTimeFromIso(e.episodeDate);
+    if (!inMonth(dateISO, year, month)) continue;
+    const title =
+      media.title?.english?.trim() ||
+      media.title?.romaji?.trim() ||
+      e.english?.trim() ||
+      e.romaji?.trim() ||
+      "Untitled";
+    const baseId = media.idMal != null ? `mal:${media.idMal}` : `anilist:${media.id}`;
+    const id = `${baseId}:1:${e.episodeNumber}`;
+    if (seen.has(id)) continue;
+    seen.add(id);
+    out.push({
+      id,
+      imdbId: null,
+      type: "tv",
+      name: `${title} S1E${pad(e.episodeNumber)}`,
+      poster: media.coverImage?.extraLarge ?? media.coverImage?.medium ?? null,
+      background: media.bannerImage ?? null,
+      releaseDate: dateISO,
+      releaseTime: time,
+      releaseAtMs: atMs,
+      isAnime: true,
+      overview: "",
+      voteAverage: 0,
+    });
+  }
+  out.sort((a, b) => a.releaseDate.localeCompare(b.releaseDate));
+  return out;
+}
+
 export async function fetchSimklCalendar(
   year: number,
   month: number,
@@ -135,26 +191,28 @@ function isAnimationGenre(genres: string[] | undefined): boolean {
   return genres.some((g) => wanted.includes(g.toLowerCase()));
 }
 
-export async function fetchTraktCalendar(
-  year: number,
-  month: number,
-): Promise<CalendarItem[]> {
+export async function fetchTraktCalendar(year: number, month: number): Promise<CalendarItem[]> {
   const today = new Date();
   const cur = new Date(year, month, 1);
   const fwdMonths =
     (cur.getFullYear() - today.getFullYear()) * 12 + (cur.getMonth() - today.getMonth());
   if (fwdMonths < 0 || fwdMonths > TRAKT_MAX_FORWARD_MONTHS) return [];
   const days = Math.max(31, (fwdMonths + 1) * 31);
-  const [eps, mvs] = await Promise.all([
-    fetchUpcomingEpisodes(days),
-    fetchUpcomingMovies(days),
-  ]);
+  const [eps, mvs] = await Promise.all([fetchUpcomingEpisodes(days), fetchUpcomingMovies(days)]);
 
-  const epsInMonth = eps.filter((ep) => inMonth((ep.airDate ?? "").slice(0, 10), year, month));
-  const mvsInMonth = mvs.filter((m) => inMonth((m.contextDate ?? "").slice(0, 10), year, month));
+  const epsInMonth = eps
+    .map((ep) => ({ ep, ...localDateTimeFromIso(ep.airDate) }))
+    .filter((x) => inMonth(x.date, year, month));
+  const mvsInMonth = mvs
+    .map((m) => ({ m, ...localDateTimeFromIso(m.contextDate) }))
+    .filter((x) => inMonth(x.date, year, month));
 
-  const showIds = [...new Set(epsInMonth.map((e) => e.ids.imdb).filter((x): x is string => !!x))];
-  const movieIds = [...new Set(mvsInMonth.map((m) => m.ids.imdb).filter((x): x is string => !!x))];
+  const showIds = [
+    ...new Set(epsInMonth.map((x) => x.ep.ids.imdb).filter((x): x is string => !!x)),
+  ];
+  const movieIds = [
+    ...new Set(mvsInMonth.map((x) => x.m.ids.imdb).filter((x): x is string => !!x)),
+  ];
   const [showMetas, movieMetas] = await Promise.all([
     Promise.all(showIds.map((id) => cinemetaMeta("series", id).catch(() => null))),
     Promise.all(movieIds.map((id) => cinemetaMeta("movie", id).catch(() => null))),
@@ -163,10 +221,9 @@ export async function fetchTraktCalendar(
   const movieMeta = new Map(movieIds.map((id, i) => [id, movieMetas[i]] as const));
 
   const out: CalendarItem[] = [];
-  for (const ep of epsInMonth) {
-    const date = (ep.airDate ?? "").slice(0, 10);
+  for (const { ep, date, time, atMs } of epsInMonth) {
     const imdb = ep.ids.imdb ?? null;
-    const meta = imdb ? showMeta.get(imdb) ?? null : null;
+    const meta = imdb ? (showMeta.get(imdb) ?? null) : null;
     const baseId = imdb ?? `trakt:${ep.ids.tmdb ?? ep.ids.tvdb ?? ep.title}`;
     const epLabel = `S${pad(ep.season)}E${pad(ep.number)}`;
     const vid = meta?.videos?.find(
@@ -179,18 +236,19 @@ export async function fetchTraktCalendar(
       name: ep.episodeTitle
         ? `${ep.title} ${epLabel}: ${ep.episodeTitle}`
         : `${ep.title} ${epLabel}`,
-      poster: vid?.thumbnail ?? meta?.poster ?? null,
+      poster: meta?.poster ?? vid?.thumbnail ?? null,
       background: meta?.background ?? null,
       releaseDate: date,
+      releaseTime: time,
+      releaseAtMs: atMs,
       isAnime: isAnimationGenre(meta?.genres),
       overview: meta?.description ?? "",
       voteAverage: parseFloat(meta?.imdbRating ?? "0") || 0,
     });
   }
-  for (const m of mvsInMonth) {
-    const date = (m.contextDate ?? "").slice(0, 10);
+  for (const { m, date, time, atMs } of mvsInMonth) {
     const imdb = m.ids.imdb ?? null;
-    const meta = imdb ? movieMeta.get(imdb) ?? null : null;
+    const meta = imdb ? (movieMeta.get(imdb) ?? null) : null;
     const id = imdb ?? `trakt:${m.ids.tmdb ?? m.title}`;
     out.push({
       id,
@@ -200,6 +258,8 @@ export async function fetchTraktCalendar(
       poster: meta?.poster ?? null,
       background: meta?.background ?? null,
       releaseDate: date,
+      releaseTime: time,
+      releaseAtMs: atMs,
       isAnime: isAnimationGenre(meta?.genres),
       overview: meta?.description ?? "",
       voteAverage: parseFloat(meta?.imdbRating ?? "0") || 0,
@@ -213,10 +273,7 @@ export async function fetchAnticipatedCalendar(
   year: number,
   month: number,
 ): Promise<CalendarItem[]> {
-  const [shows, mvs] = await Promise.all([
-    fetchAnticipatedShows(),
-    fetchAnticipatedMovies(),
-  ]);
+  const [shows, mvs] = await Promise.all([fetchAnticipatedShows(), fetchAnticipatedMovies()]);
   const inMonthShows = shows.filter((s) => inMonth(s.firstAired, year, month));
   const inMonthMovies = mvs.filter((m) => inMonth(m.released, year, month));
   const [showMetas, movieMetas] = await Promise.all([

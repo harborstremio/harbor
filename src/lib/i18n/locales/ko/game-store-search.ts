@@ -1,0 +1,20 @@
+export default {
+  "Search shortcuts": "검색 바로가기",
+  "Steam search shortcut": "Steam 검색 바로가기",
+  "Type “st ” or “st:” to search the Steam store. Turn off to use normal Harbor search for these queries.": "“st ” 또는 “st:”를 입력하면 Steam 상점을 검색합니다. 끄면 해당 검색어에도 일반 Harbor 검색을 사용합니다.",
+  "games.storeSearch.title": "Steam 상점",
+  "games.storeSearch.hint": "Harbor 검색에 “st ”를 입력하면 Steam에서 바로 검색할 수 있습니다.",
+  "games.storeSearch.automatic": "자동",
+  "games.storeSearch.region": "상점 지역",
+  "games.storeSearch.showLibrary": "내 라이브러리에 있는 게임 표시",
+  "games.storeSearch.settingsError": "검색 설정을 저장하거나 읽을 수 없습니다. 변경하기 전에 다시 시도하세요.",
+  "games.storeSearch.openError": "링크를 열 수 없습니다. Steam 또는 브라우저를 사용할 수 있는지 확인하고 다시 시도하세요.",
+  "games.storeSearch.empty": "게임 이름을 입력하세요.",
+  "games.storeSearch.saved": "{date}에 저장된 결과 및 가격입니다.",
+  "games.storeSearch.error": "Steam 검색을 사용할 수 없습니다. 다시 시도하세요.",
+  "games.storeSearch.comingSoon": "출시 예정",
+  "games.storeSearch.inLibrary": "내 라이브러리에 있음",
+  "games.storeSearch.unavailable": "가격 정보 없음",
+  "games.storeSearch.web": "웹사이트",
+  "games.storeSearch.client": "Steam에서 열기"
+};

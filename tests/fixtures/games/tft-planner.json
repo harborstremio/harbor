@@ -1,0 +1,424 @@
+{
+  "sets": {
+    "LCTFTModeData": {
+      "mActiveSets": [
+        {
+          "SetName": "TFTSetTutorial",
+          "SetCoreName": "TFTSetTutorial",
+          "SetDisplayName": "TUTORIAL",
+          "SetAugmentName": "Hexcore Augments",
+          "SetAugmentContainer": "/lol-game-data/assets/ASSETS/UX/TFTMobile/PostGame/gear.png",
+          "SetPortalSystemName": "",
+          "SetTeamPlannerData": null
+        },
+        {
+          "SetName": "TFTSetEventCT",
+          "SetCoreName": "TFTSet16",
+          "SetDisplayName": "Lore & Legends",
+          "SetAugmentName": "Hexcore Augments",
+          "SetAugmentContainer": "/lol-game-data/assets/ASSETS/UX/TFTMobile/PostGame/gear.png",
+          "SetPortalSystemName": "",
+          "SetTeamPlannerData": {
+            "TranslatedShortDisplayName": "@TextIconKey@ Set 16",
+            "TranslatedSetHeaderName": "Revival: Lore & Legends",
+            "TextIconData": {
+              "UnselectedDefault": "%i:TFTSR15CTUnselectedDefault%",
+              "UnselectedClicked": "%i:TFTSR15CTUnselectedClicked%",
+              "UnselectedHover": "%i:TFTSR15CTUnselectedHover%",
+              "UnselectedInactive": "%i:TFTSR15CTUnselectedInactive%",
+              "SelectedDefault": "%i:TFTSR15CTSelectedDefault%",
+              "SelectedClicked": "%i:TFTSR15CTSelectedClicked%",
+              "SelectedHover": "%i:TFTSR15CTSelectedHover%",
+              "SelectedInactive": "%i:TFTSR15CTSelectedInactive%"
+            }
+          }
+        },
+        {
+          "SetName": "TFTSet17",
+          "SetCoreName": "TFTSet17",
+          "SetDisplayName": "Space Gods",
+          "SetAugmentName": "Hexcore Augments",
+          "SetAugmentContainer": "/lol-game-data/assets/ASSETS/UX/TFTMobile/PostGame/gear.png",
+          "SetPortalSystemName": "",
+          "SetTeamPlannerData": {
+            "TranslatedShortDisplayName": "@TextIconKey@ Set 17",
+            "TranslatedSetHeaderName": "Space Gods",
+            "TextIconData": {
+              "UnselectedDefault": "%i:TFTSet4RevivalUnselectedDefault%",
+              "UnselectedClicked": "%i:TFTSet4RevivalUnselectedClicked%",
+              "UnselectedHover": "%i:TFTSet4RevivalUnselectedHover%",
+              "UnselectedInactive": "%i:TFTSet4RevivalUnselectedInactive%",
+              "SelectedDefault": "%i:TFTSet4RevivalSelectedDefault%",
+              "SelectedClicked": "%i:TFTSet4RevivalSelectedClicked%",
+              "SelectedHover": "%i:TFTSet4RevivalSelectedHover%",
+              "SelectedInactive": "%i:TFTSet4RevivalSelectedInactive%"
+            }
+          }
+        },
+        {
+          "SetName": "TFTSet7_Stage2_CT",
+          "SetCoreName": "TFTSet15",
+          "SetDisplayName": "Revival: KO Coliseum",
+          "SetAugmentName": "Hexcore Augments",
+          "SetAugmentContainer": "/lol-game-data/assets/ASSETS/UX/TFTMobile/PostGame/gear.png",
+          "SetPortalSystemName": "",
+          "SetTeamPlannerData": {
+            "TranslatedShortDisplayName": "@TextIconKey@ Set 15",
+            "TranslatedSetHeaderName": "Revival: KO Coliseum",
+            "TextIconData": {
+              "UnselectedDefault": "%i:TFTSR15CTUnselectedDefault%",
+              "UnselectedClicked": "%i:TFTSR15CTUnselectedClicked%",
+              "UnselectedHover": "%i:TFTSR15CTUnselectedHover%",
+              "UnselectedInactive": "%i:TFTSR15CTUnselectedInactive%",
+              "SelectedDefault": "%i:TFTSR15CTSelectedDefault%",
+              "SelectedClicked": "%i:TFTSR15CTSelectedClicked%",
+              "SelectedHover": "%i:TFTSR15CTSelectedHover%",
+              "SelectedInactive": "%i:TFTSR15CTSelectedInactive%"
+            }
+          }
+        },
+        {
+          "SetName": "TFTSetEvent5YR",
+          "SetCoreName": "TFTSet17",
+          "SetDisplayName": "Space Gods",
+          "SetAugmentName": "Hexcore Augments",
+          "SetAugmentContainer": "/lol-game-data/assets/ASSETS/UX/TFTMobile/PostGame/gear.png",
+          "SetPortalSystemName": "",
+          "SetTeamPlannerData": {
+            "TranslatedShortDisplayName": "@TextIconKey@ Set 17",
+            "TranslatedSetHeaderName": "Space Gods",
+            "TextIconData": {
+              "UnselectedDefault": "%i:TFTSet4RevivalUnselectedDefault%",
+              "UnselectedClicked": "%i:TFTSet4RevivalUnselectedClicked%",
+              "UnselectedHover": "%i:TFTSet4RevivalUnselectedHover%",
+              "UnselectedInactive": "%i:TFTSet4RevivalUnselectedInactive%",
+              "SelectedDefault": "%i:TFTSet4RevivalSelectedDefault%",
+              "SelectedClicked": "%i:TFTSet4RevivalSelectedClicked%",
+              "SelectedHover": "%i:TFTSet4RevivalSelectedHover%",
+              "SelectedInactive": "%i:TFTSet4RevivalSelectedInactive%"
+            }
+          }
+        },
+        {
+          "SetName": "TFTSet16",
+          "SetCoreName": "TFTSet16",
+          "SetDisplayName": "Lore & Legends",
+          "SetAugmentName": "Hexcore Augments",
+          "SetAugmentContainer": "/lol-game-data/assets/ASSETS/UX/TFTMobile/PostGame/gear.png",
+          "SetPortalSystemName": "",
+          "SetTeamPlannerData": {
+            "TranslatedShortDisplayName": "@TextIconKey@ Set 16",
+            "TranslatedSetHeaderName": "Revival: Lore & Legends",
+            "TextIconData": {
+              "UnselectedDefault": "%i:TFTSR15CTUnselectedDefault%",
+              "UnselectedClicked": "%i:TFTSR15CTUnselectedClicked%",
+              "UnselectedHover": "%i:TFTSR15CTUnselectedHover%",
+              "UnselectedInactive": "%i:TFTSR15CTUnselectedInactive%",
+              "SelectedDefault": "%i:TFTSR15CTSelectedDefault%",
+              "SelectedClicked": "%i:TFTSR15CTSelectedClicked%",
+              "SelectedHover": "%i:TFTSR15CTSelectedHover%",
+              "SelectedInactive": "%i:TFTSR15CTSelectedInactive%"
+            }
+          }
+        },
+        {
+          "SetName": "TFTSetEventER",
+          "SetCoreName": "TFTSet16",
+          "SetDisplayName": "Lore & Legends",
+          "SetAugmentName": "Hexcore Augments",
+          "SetAugmentContainer": "/lol-game-data/assets/ASSETS/UX/TFTMobile/PostGame/gear.png",
+          "SetPortalSystemName": "",
+          "SetTeamPlannerData": {
+            "TranslatedShortDisplayName": "@TextIconKey@ Set 16",
+            "TranslatedSetHeaderName": "Revival: Lore & Legends",
+            "TextIconData": {
+              "UnselectedDefault": "%i:TFTSR15CTUnselectedDefault%",
+              "UnselectedClicked": "%i:TFTSR15CTUnselectedClicked%",
+              "UnselectedHover": "%i:TFTSR15CTUnselectedHover%",
+              "UnselectedInactive": "%i:TFTSR15CTUnselectedInactive%",
+              "SelectedDefault": "%i:TFTSR15CTSelectedDefault%",
+              "SelectedClicked": "%i:TFTSR15CTSelectedClicked%",
+              "SelectedHover": "%i:TFTSR15CTSelectedHover%",
+              "SelectedInactive": "%i:TFTSR15CTSelectedInactive%"
+            }
+          }
+        },
+        {
+          "SetName": "TFTSet18",
+          "SetCoreName": "TFTSet18",
+          "SetDisplayName": "Enchanted Wilds",
+          "SetAugmentName": "Boombox Augment",
+          "SetAugmentContainer": "/lol-game-data/assets/ASSETS/UX/TFTMobile/PostGame/EOG_AugmentProp_Set10.png",
+          "SetPortalSystemName": "",
+          "SetTeamPlannerData": {
+            "TranslatedShortDisplayName": "@TextIconKey@ Set18",
+            "TranslatedSetHeaderName": "Enchanted Wilds",
+            "TextIconData": {
+              "UnselectedDefault": "%i:TFTSet10RevivalUnselectedDefault%",
+              "UnselectedClicked": "%i:TFTSet10RevivalUnselectedClicked%",
+              "UnselectedHover": "%i:TFTSet10RevivalUnselectedHover%",
+              "UnselectedInactive": "%i:TFTSet10RevivalUnselectedInactive%",
+              "SelectedDefault": "%i:TFTSet10RevivalSelectedDefault%",
+              "SelectedClicked": "%i:TFTSet10RevivalSelectedClicked%",
+              "SelectedHover": "%i:TFTSet10RevivalSelectedHover%",
+              "SelectedInactive": "%i:TFTSet10RevivalSelectedInactive%"
+            }
+          }
+        }
+      ],
+      "mDefaultSet": {
+        "SetName": "TFTSet18",
+        "SetCoreName": "TFTSet18",
+        "SetDisplayName": "Enchanted Wilds",
+        "SetAugmentName": "Boombox Augment",
+        "SetAugmentContainer": "/lol-game-data/assets/ASSETS/UX/TFTMobile/PostGame/EOG_AugmentProp_Set10.png",
+        "SetPortalSystemName": "",
+        "SetTeamPlannerData": {
+          "TranslatedShortDisplayName": "@TextIconKey@ Set18",
+          "TranslatedSetHeaderName": "Enchanted Wilds",
+          "TextIconData": {
+            "UnselectedDefault": "%i:TFTSet10RevivalUnselectedDefault%",
+            "UnselectedClicked": "%i:TFTSet10RevivalUnselectedClicked%",
+            "UnselectedHover": "%i:TFTSet10RevivalUnselectedHover%",
+            "UnselectedInactive": "%i:TFTSet10RevivalUnselectedInactive%",
+            "SelectedDefault": "%i:TFTSet10RevivalSelectedDefault%",
+            "SelectedClicked": "%i:TFTSet10RevivalSelectedClicked%",
+            "SelectedHover": "%i:TFTSet10RevivalSelectedHover%",
+            "SelectedInactive": "%i:TFTSet10RevivalSelectedInactive%"
+          }
+        }
+      },
+      "mDefaultTeamPlannerSet": {
+        "SetName": "TFTSet18",
+        "SetCoreName": "TFTSet18",
+        "SetDisplayName": "Enchanted Wilds",
+        "SetAugmentName": "Boombox Augment",
+        "SetAugmentContainer": "/lol-game-data/assets/ASSETS/UX/TFTMobile/PostGame/EOG_AugmentProp_Set10.png",
+        "SetPortalSystemName": "",
+        "SetTeamPlannerData": {
+          "TranslatedShortDisplayName": "@TextIconKey@ Set18",
+          "TranslatedSetHeaderName": "Enchanted Wilds",
+          "TextIconData": {
+            "UnselectedDefault": "%i:TFTSet10RevivalUnselectedDefault%",
+            "UnselectedClicked": "%i:TFTSet10RevivalUnselectedClicked%",
+            "UnselectedHover": "%i:TFTSet10RevivalUnselectedHover%",
+            "UnselectedInactive": "%i:TFTSet10RevivalUnselectedInactive%",
+            "SelectedDefault": "%i:TFTSet10RevivalSelectedDefault%",
+            "SelectedClicked": "%i:TFTSet10RevivalSelectedClicked%",
+            "SelectedHover": "%i:TFTSet10RevivalSelectedHover%",
+            "SelectedInactive": "%i:TFTSet10RevivalSelectedInactive%"
+          }
+        }
+      },
+      "mEventSet": {
+        "SetName": "TFTSet17",
+        "SetCoreName": "TFTSet17",
+        "SetDisplayName": "Space Gods",
+        "SetAugmentName": "Hexcore Augments",
+        "SetAugmentContainer": "/lol-game-data/assets/ASSETS/UX/TFTMobile/PostGame/gear.png",
+        "SetPortalSystemName": "",
+        "SetTeamPlannerData": {
+          "TranslatedShortDisplayName": "@TextIconKey@ Set 17",
+          "TranslatedSetHeaderName": "Space Gods",
+          "TextIconData": {
+            "UnselectedDefault": "%i:TFTSet4RevivalUnselectedDefault%",
+            "UnselectedClicked": "%i:TFTSet4RevivalUnselectedClicked%",
+            "UnselectedHover": "%i:TFTSet4RevivalUnselectedHover%",
+            "UnselectedInactive": "%i:TFTSet4RevivalUnselectedInactive%",
+            "SelectedDefault": "%i:TFTSet4RevivalSelectedDefault%",
+            "SelectedClicked": "%i:TFTSet4RevivalSelectedClicked%",
+            "SelectedHover": "%i:TFTSet4RevivalSelectedHover%",
+            "SelectedInactive": "%i:TFTSet4RevivalSelectedInactive%"
+          }
+        }
+      },
+      "mDefaultTeamName": "New Team",
+      "mDefaultTeamNameNumbered": "New Team (@NUMBER@)"
+    }
+  },
+  "champions": {
+    "TFTSet18": [
+      {
+        "path": "Characters/DA_Gromp18_AP/CharacterRecords/Root",
+        "character_id": "DA_Gromp18_AP",
+        "tier": 2,
+        "display_name": "Gromp",
+        "team_planner_code": 1026,
+        "traits": [
+          {
+            "name": "Riftbeast",
+            "id": "DA_Riftbeast18",
+            "amount": 1
+          },
+          {
+            "name": "Adaptor",
+            "id": "DA_18_Adaptor",
+            "amount": 1
+          }
+        ],
+        "squareIconPath": "/lol-game-data/assets/ASSETS/Characters/TFT18_Gromp/TFT18_Gromp_Square.TFT_Set18.jpg",
+        "squareSplashIconPath": "/lol-game-data/assets/ASSETS/Characters/TFT18_Gromp/Skins/Base/Images/T_18_Gromp_TeamPlannerSplash.png"
+      },
+      {
+        "path": "Characters/DA_18_ElderDragon/CharacterRecords/Root",
+        "character_id": "DA_18_ElderDragon",
+        "tier": 5,
+        "display_name": "Elder Dragon",
+        "team_planner_code": 1020,
+        "traits": [
+          {
+            "name": "Apex Predator",
+            "id": "DA_18_ApexPredator",
+            "amount": 1
+          },
+          {
+            "name": "Riftbeast",
+            "id": "DA_Riftbeast18",
+            "amount": 2
+          }
+        ],
+        "squareIconPath": "/lol-game-data/assets/ASSETS/Characters/TFT18_ElderDragon/TFT18_ElderDragon_Square.TFT_Set18.jpg",
+        "squareSplashIconPath": "/lol-game-data/assets/ASSETS/Characters/TFT18_ElderDragon/Skins/Base/Images/T_18_ElderDragon_TeamPlannerSplash.png"
+      }
+    ]
+  },
+  "traits": [
+    {
+      "display_name": "Adaptor",
+      "trait_id": "DA_18_Adaptor",
+      "set": "TFTSet18",
+      "icon_path": "/lol-game-data/assets/ASSETS/UX/TraitIcons/Trait_Icon_18_Adaptor.TFT_Set18.png",
+      "tooltip_text": "Innate: Adaptor abilities change depending on if their Attack Damage or Ability Power is higher.<br><br>Adaptors gain Ability Power or Attack Damage, depending on which is higher.<br><row>(@MinUnits@) @ADAPGain*100@%  OR</row><br><row>(@MinUnits@) @ADAPGain*100@%  OR</row><br><row>(@MinUnits@) @ADAPGain*100@%  OR</row>",
+      "innate_trait_sets": [],
+      "conditional_trait_sets": [
+        {
+          "constants": [
+            {
+              "name": "ADAPGain",
+              "value": 0.25
+            }
+          ],
+          "min_units": 2,
+          "max_units": 2,
+          "style_idx": 2,
+          "style_name": "kBronze"
+        },
+        {
+          "constants": [
+            {
+              "name": "ADAPGain",
+              "value": 0.35
+            }
+          ],
+          "min_units": 3,
+          "max_units": 3,
+          "style_idx": 3,
+          "style_name": "kSilver"
+        },
+        {
+          "constants": [
+            {
+              "name": "ADAPGain",
+              "value": 0.5
+            }
+          ],
+          "min_units": 4,
+          "style_idx": 5,
+          "style_name": "kGold"
+        }
+      ]
+    },
+    {
+      "display_name": "Apex Predator",
+      "trait_id": "DA_18_ApexPredator",
+      "set": "TFTSet18",
+      "icon_path": "/lol-game-data/assets/ASSETS/UX/TraitIcons/Trait_Icon_18_ApexPredator.TFT_Set18.png",
+      "tooltip_text": "Elder Dragon takes up 2 team slots and grants +2 to the Riftbeast trait.",
+      "innate_trait_sets": [],
+      "conditional_trait_sets": [
+        {
+          "constants": [],
+          "min_units": 1,
+          "style_idx": 4,
+          "style_name": "kUnique"
+        }
+      ]
+    },
+    {
+      "display_name": "Riftbeast",
+      "trait_id": "DA_Riftbeast18",
+      "set": "TFTSet18",
+      "icon_path": "/lol-game-data/assets/ASSETS/UX/TraitIcons/Trait_Icon_18_Riftbeast.TFT_Set18.png",
+      "tooltip_text": "<row>(@MinUnits@) Use the Alpha Mark to grant a Riftbeast their unique Buff</row><br><row>(@MinUnits@) Every @OverrunCombats@ combats, your next shop is overrun with Riftbeasts.</row><br><row>(@MinUnits@) On combat start and every 5 seconds Riftbeasts grow gaining <br>@CapstoneAD*100@% %i:scaleAD% @CapstoneAP*100@% %i:scaleAP% @CapstoneAspd*100@% %i:scaleAS%<br>+@CapstoneArmor@ %i:scaleArmor% +@CapstoneMR@ %i:scaleMR%  +@CapstoneHealth@ %i:scaleHealth% +@CapstoneManaRegen@ %i:scaleManaRegen%</row><br><row>(@MinUnits@) +@TeamSize@ maximum team size</row>",
+      "innate_trait_sets": [],
+      "conditional_trait_sets": [
+        {
+          "constants": [],
+          "min_units": 3,
+          "max_units": 4,
+          "style_idx": 2,
+          "style_name": "kBronze"
+        },
+        {
+          "constants": [
+            {
+              "name": "OverrunCombats",
+              "value": 3
+            }
+          ],
+          "min_units": 5,
+          "max_units": 6,
+          "style_idx": 3,
+          "style_name": "kSilver"
+        },
+        {
+          "constants": [
+            {
+              "name": "CapstoneAD",
+              "value": 0.05
+            },
+            {
+              "name": "CapstoneAP",
+              "value": 0.05
+            },
+            {
+              "name": "CapstoneArmor",
+              "value": 5
+            },
+            {
+              "name": "CapstoneAspd",
+              "value": 0.05
+            },
+            {
+              "name": "CapstoneHealth",
+              "value": 50
+            },
+            {
+              "name": "CapstoneMR",
+              "value": 5
+            },
+            {
+              "name": "CapstoneManaRegen",
+              "value": 1
+            }
+          ],
+          "min_units": 7,
+          "max_units": 9,
+          "style_idx": 5,
+          "style_name": "kGold"
+        },
+        {
+          "constants": [
+            {
+              "name": "TeamSize",
+              "value": 2
+            }
+          ],
+          "min_units": 10,
+          "style_idx": 5,
+          "style_name": "kGold"
+        }
+      ]
+    }
+  ]
+}

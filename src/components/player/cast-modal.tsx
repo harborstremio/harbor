@@ -1,8 +1,12 @@
-import { ChevronLeft, ListVideo, Search, X } from "lucide-react";
-import { useCallback, useEffect, useLayoutEffect, useRef, useState } from "react";
+import { ChevronLeft, ListVideo, X } from "lucide-react";
+import { Search } from "@/components/icons/search-icon";
+import { UiIcon } from "@/components/ui-icon";
+import { lazy, Suspense, useCallback, useEffect, useLayoutEffect, useRef, useState } from "react";
 import type { Meta } from "@/lib/cinemeta";
 import { useT } from "@/lib/i18n";
 import { useQueue } from "@/lib/queue";
+import { captureFocusReturn } from "@/lib/keyboard-navigation";
+import { isBackKey } from "@/lib/keyboard-navigation/geometry";
 import type { PlayEpisode } from "@/lib/view";
 import { EpisodePicker } from "./cast-modal/episode-picker";
 import { ExitConfirm, SKIP_EXIT_CONFIRM_KEY } from "./cast-modal/exit-confirm";
@@ -13,11 +17,16 @@ import { QueuePanel } from "./cast-modal/queue-panel";
 import { SearchPanel } from "./cast-modal/search-panel";
 import { TitlePanel } from "./cast-modal/title-panel";
 
+const LibraryPanel = lazy(() =>
+  import("./cast-modal/library-panel").then((m) => ({ default: m.LibraryPanel })),
+);
+
 type StackView =
   | { kind: "title"; meta: Meta }
   | { kind: "person"; id: number; name: string }
   | { kind: "search" }
   | { kind: "queue" }
+  | { kind: "library" }
   | { kind: "episodes"; meta: Meta; imdbId: string | null }
   | { kind: "genre"; name: string; genreId?: number; mediaType: "movie" | "tv" };
 
@@ -29,6 +38,7 @@ export function CastModal({
   onOpenDetail,
   onPlay,
   currentEpisode,
+  initialPerson,
 }: {
   open: boolean;
   onClose: () => void;
@@ -37,14 +47,28 @@ export function CastModal({
   onOpenDetail?: (m: Meta) => void;
   onPlay?: (m: Meta, episode?: PlayEpisode) => void;
   currentEpisode?: PlayEpisode | null;
+  initialPerson?: { id: number; name: string };
 }) {
   const t = useT();
   const queue = useQueue();
-  const [stack, setStack] = useState<StackView[]>([{ kind: "title", meta }]);
+  const initialStack = useCallback(
+    (): StackView[] =>
+      initialPerson ? [{ kind: "person", ...initialPerson }] : [{ kind: "title", meta }],
+    [initialPerson, meta],
+  );
+  const [stack, setStack] = useState<StackView[]>(initialStack);
+  const closeRef = useRef<HTMLButtonElement>(null);
 
   useEffect(() => {
-    if (open) setStack([{ kind: "title", meta }]);
-  }, [open, meta]);
+    if (!open) return;
+    const restore = captureFocusReturn();
+    closeRef.current?.focus();
+    return restore;
+  }, [open]);
+
+  useEffect(() => {
+    if (open) setStack(initialStack());
+  }, [open, initialStack]);
 
   const [confirmTarget, setConfirmTarget] = useState<Meta | null>(null);
   useEffect(() => {
@@ -60,6 +84,11 @@ export function CastModal({
   );
 
   const view = stack[stack.length - 1];
+  useEffect(() => {
+    // A Back button or credit card may unmount when the stack changes.
+    // Keep keyboard/controller focus inside the person browser.
+    if (open) closeRef.current?.focus();
+  }, [open, view]);
   const canBack = stack.length > 1;
   const back = () => setStack((s) => (s.length > 1 ? s.slice(0, -1) : s));
   const openTitle = (m: Meta) => setStack((s) => [...s, { kind: "title", meta: m }]);
@@ -69,6 +98,8 @@ export function CastModal({
     setStack((s) => (s[s.length - 1].kind === "search" ? s : [...s, { kind: "search" }]));
   const openQueueView = () =>
     setStack((s) => (s[s.length - 1].kind === "queue" ? s : [...s, { kind: "queue" }]));
+  const openLibrary = () =>
+    setStack((s) => (s[s.length - 1].kind === "library" ? s : [...s, { kind: "library" }]));
   const openEpisodes = (m: Meta, id: string | null) =>
     setStack((s) => [...s, { kind: "episodes", meta: m, imdbId: id }]);
   const openGenre = (name: string, genreId: number, mediaType: "movie" | "tv") => {
@@ -94,9 +125,10 @@ export function CastModal({
   useEffect(() => {
     if (!open) return;
     const onKey = (e: KeyboardEvent) => {
-      if (e.key !== "Escape") return;
+      if (e.defaultPrevented) return;
+      if (!isBackKey(e)) return;
       e.preventDefault();
-      e.stopPropagation();
+      e.stopImmediatePropagation();
       if (confirmTarget) setConfirmTarget(null);
       else if (stack.length > 1) back();
       else onClose();
@@ -139,7 +171,29 @@ export function CastModal({
       }}
     >
       <div
+        role="dialog"
+        aria-modal="true"
         data-tv-focus-scope
+        aria-label={view.kind === "person" ? view.name : t("About this title")}
+        onKeyDown={(e) => {
+          e.stopPropagation();
+          if (e.key !== "Tab") return;
+          const controls = Array.from(
+            e.currentTarget.querySelectorAll<HTMLElement>(
+              'button:not(:disabled), a[href], input:not(:disabled), [tabindex="0"]',
+            ),
+          ).filter((el) => el.getClientRects().length);
+          const first = controls[0];
+          const last = controls[controls.length - 1];
+          if (e.shiftKey && document.activeElement === first) {
+            e.preventDefault();
+            last?.focus();
+          } else if (!e.shiftKey && document.activeElement === last) {
+            e.preventDefault();
+            first?.focus();
+          }
+        }}
+        onKeyUp={(e) => e.stopPropagation()}
         style={cardHeight ? { height: cardHeight } : undefined}
         className={`relative flex max-h-[88vh] w-[72vw] min-w-0 max-w-6xl flex-col overflow-hidden rounded-[18px] bg-neutral-950/75 ring-1 ring-white/10 shadow-[0_44px_120px_-32px_rgba(0,0,0,0.9)] backdrop-blur-2xl transition-[height,opacity] duration-300 ease-[cubic-bezier(0.16,1,0.3,1)] animate-in zoom-in-95 fade-in ${confirmTarget ? "pointer-events-none opacity-0" : ""}`}
       >
@@ -167,6 +221,7 @@ export function CastModal({
             <button
               type="button"
               onClick={back}
+              data-tv-modal-close
               className="flex items-center gap-1 rounded-full py-1.5 pl-2 pr-3.5 text-[13px] font-semibold text-white/80 transition-colors hover:bg-white/10 hover:text-white"
             >
               <ChevronLeft size={18} strokeWidth={2.3} />
@@ -174,11 +229,11 @@ export function CastModal({
             </button>
           ) : (
             <span className="pl-1 text-[11px] font-bold uppercase tracking-[0.28em] text-white/45">
-              {t("About this title")}
+              {initialPerson ? t("X-Ray") : t("About this title")}
             </span>
           )}
           <div className="flex shrink-0 items-center gap-1.5">
-            {view.kind !== "queue" && (
+            {!initialPerson && view.kind !== "queue" && (
               <button
                 type="button"
                 onClick={openQueueView}
@@ -193,6 +248,16 @@ export function CastModal({
                 )}
               </button>
             )}
+            {!initialPerson && view.kind !== "library" && (
+              <button
+                type="button"
+                onClick={openLibrary}
+                className="flex h-11 w-11 items-center justify-center rounded-full bg-white/10 text-white/80 transition-colors hover:bg-white/20 hover:text-white"
+                aria-label={t("Library")}
+              >
+                <UiIcon name="library" className="h-[18px] w-[18px]" />
+              </button>
+            )}
             {view.kind !== "search" && (
               <button
                 type="button"
@@ -204,9 +269,10 @@ export function CastModal({
               </button>
             )}
             <button
+              ref={closeRef}
               type="button"
+              data-tv-modal-close={!canBack ? "" : undefined}
               onClick={onClose}
-              data-tv-modal-close
               className="flex h-11 w-11 items-center justify-center rounded-full bg-white/10 text-white/80 transition-colors hover:bg-white/20 hover:text-white"
               aria-label={t("Close")}
             >
@@ -239,9 +305,9 @@ export function CastModal({
                   tmdbKey={tmdbKey}
                   onOpenPerson={openPerson}
                   onOpenTitle={openTitle}
-                  onOpenDetail={requestExit}
+                  onOpenDetail={onOpenDetail ? requestExit : undefined}
                   onPlay={onPlay ? play : undefined}
-                  onOpenEpisodes={openEpisodes}
+                  onOpenEpisodes={onPlay ? openEpisodes : undefined}
                   onOpenGenre={openGenre}
                 />
               ) : view.kind === "genre" ? (
@@ -268,6 +334,16 @@ export function CastModal({
                 />
               ) : view.kind === "queue" ? (
                 <QueuePanel onPlay={play} currentMeta={meta} currentEpisode={currentEpisode} />
+              ) : view.kind === "library" ? (
+                <Suspense
+                  fallback={
+                    <p className="px-5 py-10 text-center text-[13px] text-white/50">
+                      {t("Loading your library…")}
+                    </p>
+                  }
+                >
+                  <LibraryPanel />
+                </Suspense>
               ) : (
                 <SearchPanel tmdbKey={tmdbKey} onOpenTitle={openTitle} onOpenPerson={openPerson} />
               )}

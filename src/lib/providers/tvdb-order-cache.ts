@@ -1,13 +1,13 @@
-import type { Episode, Season } from "@/lib/providers/tmdb";
-import type { TvdbOrder } from "./tvdb-order";
+import type { Season } from "@/lib/providers/tmdb";
+import type { OrderedEpisode, TvdbOrder } from "./tvdb-order";
 
-const PREFIX = "harbor.tvdbo.v3.";
+const PREFIX = "harbor.tvdbo.v5.";
 const TTL = 3 * 24 * 60 * 60 * 1000;
 
 type Serialized = {
   t: number;
   seasons: Season[];
-  bySeason: [number, Episode[]][];
+  bySeason: [number, OrderedEpisode[]][];
   absByEpId: [number, number][];
   imageByAbs: [number, string][];
 };

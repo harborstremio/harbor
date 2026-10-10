@@ -1,0 +1,22 @@
+.games-save-card { position:relative;min-width:0; }
+.games-card-open { display:block;width:100%;text-align:inherit;border-radius:9px; }
+.games-poster-save { position:absolute;inset-block-start:8px;inset-inline-end:8px;z-index:3;display:grid;place-items:center;width:34px;height:34px;border-radius:50%;background:rgb(15 16 17 / .88);color:#f4f4f4;opacity:0;pointer-events:none;transition:opacity 160ms,background-color 160ms; }
+.games-poster-save[aria-pressed=true] { color:#ffadba; }
+.games-card-overlays { position:absolute;inset:0 0 auto;aspect-ratio:616/353;pointer-events:none; }
+.games-poster .games-card-overlays { aspect-ratio:2/3; }
+.games-card-overlays>.games-poster-save { inset-block-start:auto;bottom:13px;inset-inline-end:53px; }
+.games-save-card:is(:hover,:focus-within) .games-card-overlays>.games-poster-save { opacity:1;pointer-events:auto; }
+.games-card-overlays>.games-studio-rating-tab { position:absolute;top:12px;inset-inline-start:0;inset-inline-end:auto;pointer-events:auto; }
+.games-view .games-card-overlays>.games-studio-rating-tab>button { border-radius:0 3px 3px 0; }
+[dir=rtl] .games-view .games-card-overlays>.games-studio-rating-tab>button { border-radius:3px 0 0 3px; }
+.games-save-card:is(:hover,:focus-within)>.games-poster-save,.games-poster-save[aria-pressed=true] { opacity:1;pointer-events:auto; }
+.games-poster-save:hover { background:#101112; }
+.games-poster-save:focus-visible,.games-card-open:focus-visible { outline:2px solid var(--color-accent);outline-offset:3px; }
+.games-card:focus-within .games-card-enter { opacity:1;transform:none; }
+.games-save-card .games-card-kind { max-width:calc(100% - 60px); }
+/* Ratings and Save each have their own corner. */
+.games-save-card>.games-highlight-rating,.games-save-card>.games-studio-rating-tab { right:auto;left:auto;inset-inline-start:0;inset-inline-end:auto; }
+.games-save-card>.games-highlight-rating>.games-review-seal,.games-view .games-save-card>.games-studio-rating-tab>button { border-radius:0 3px 3px 0; }
+[dir=rtl] .games-save-card>.games-highlight-rating>.games-review-seal,[dir=rtl] .games-view .games-save-card>.games-studio-rating-tab>button { border-radius:3px 0 0 3px; }
+@media(hover:none) { .games-poster-save { opacity:1;pointer-events:auto; } }
+@media(prefers-reduced-motion:reduce) { .games-poster-save { transition:none; } }

@@ -1,4 +1,5 @@
-import { Globe, Library, Star } from "lucide-react";
+import { useSubTabs } from "./sub-tabs";
+import { Globe, Library, Star } from "./icons";
 import { useRef, useState } from "react";
 import traktLogo from "@/assets/trakt.svg";
 import { fireWebhook, type WebhookKind, type WebhookPayload } from "@/lib/calendar";
@@ -6,7 +7,7 @@ import { useAuth } from "@/lib/auth";
 import { useSettings, type Settings } from "@/lib/settings";
 import { useTrakt } from "@/lib/trakt/provider";
 import { useT } from "@/lib/i18n";
-import { Section } from "./shared";
+import { Section, ToggleRow } from "./shared";
 import { RuleBuilder } from "./webhooks-panel/rule-builder";
 import {
   DiscordMark,
@@ -15,6 +16,7 @@ import {
   type FieldStatus,
 } from "./webhooks-panel/webhook-field";
 import { TelegramComposedField } from "./webhooks-panel/telegram-field";
+import { DesktopNotifyField } from "./webhooks-panel/desktop-field";
 
 const idleStatus: FieldStatus = { state: "idle", message: null };
 
@@ -32,48 +34,57 @@ const SOURCES: SourceMeta[] = [
   {
     id: "library",
     label: "My library",
-    description: "Episodes and movies from shows you've saved on Stremio.",
-    icon: () => <Library size={14} strokeWidth={2} />,
-    prereq: (_s, { authKey }) => (authKey ? null : "Sign in to Stremio first."),
+    description: "Episodes and movies from shows saved in your JL library.",
+    icon: () => <Library size={19} strokeWidth={2} />,
+    prereq: (_s, { authKey }) => (authKey ? null : "Choose a JL profile first."),
   },
   {
     id: "all",
     label: "All upcoming",
     description: "Everything releasing in the current month from TMDB.",
-    icon: () => <Globe size={14} strokeWidth={2} />,
+    icon: () => <Globe size={19} strokeWidth={2} />,
     prereq: (s) => (s.tmdbKey ? null : "Add a TMDB key in Library settings."),
   },
   {
     id: "trakt",
     label: "My Trakt",
     description: "Upcoming episodes and movies from your Trakt watchlist.",
-    icon: () => <img src={traktLogo} alt="" className="h-3.5 w-3.5 object-contain" />,
+    icon: () => <img src={traktLogo} alt="" className="h-[19px] w-[19px] object-contain" />,
     prereq: (_s, { traktConnected }) => (traktConnected ? null : "Connect Trakt first."),
   },
   {
     id: "anticipated",
     label: "Anticipated",
     description: "The most anticipated upcoming releases on Trakt. No login needed.",
-    icon: () => <img src={traktLogo} alt="" className="h-3.5 w-3.5 object-contain" />,
+    icon: () => <img src={traktLogo} alt="" className="h-[19px] w-[19px] object-contain" />,
     prereq: () => null,
   },
   {
     id: "custom",
     label: "Custom calendar",
-    description: "Anything matching your Custom calendar: tracked people, genres, providers, countries.",
-    icon: () => <Star size={14} strokeWidth={2} />,
+    description:
+      "Anything matching your Custom calendar: tracked people, genres, providers, countries.",
+    icon: () => <Star size={19} strokeWidth={2} />,
     prereq: (s) => (s.tmdbKey ? null : "Add a TMDB key in Library settings."),
   },
 ];
 
+type Tab = "destinations" | "what" | "rules";
+
 export function WebhooksPanel() {
   const t = useT();
+  const [tab, setTab] = useState<Tab>("destinations");
   const { settings, update } = useSettings();
   const { authKey } = useAuth();
   const { isConnected: traktConnected } = useTrakt();
   const [discordStatus, setDiscordStatus] = useState<FieldStatus>(idleStatus);
   const [telegramStatus, setTelegramStatus] = useState<FieldStatus>(idleStatus);
-  const inFlightRef = useRef<{ discord: boolean; telegram: boolean }>({ discord: false, telegram: false });
+  const [desktopStatus, setDesktopStatus] = useState<FieldStatus>(idleStatus);
+  const inFlightRef = useRef<{ discord: boolean; telegram: boolean; desktop: boolean }>({
+    discord: false,
+    telegram: false,
+    desktop: false,
+  });
 
   const setUrl = (which: "discordUrl" | "telegramUrl", v: string) =>
     update({ webhooks: { ...settings.webhooks, [which]: v.trim() } });
@@ -91,20 +102,36 @@ export function WebhooksPanel() {
 
   const send = async (kind: WebhookKind) => {
     if (inFlightRef.current[kind]) return;
-    const url = kind === "discord" ? settings.webhooks.discordUrl : settings.webhooks.telegramUrl;
-    const setStatus = kind === "discord" ? setDiscordStatus : setTelegramStatus;
-    if (!url) return;
+    const url =
+      kind === "discord"
+        ? settings.webhooks.discordUrl
+        : kind === "telegram"
+          ? settings.webhooks.telegramUrl
+          : "";
+    const setStatus =
+      kind === "discord"
+        ? setDiscordStatus
+        : kind === "telegram"
+          ? setTelegramStatus
+          : setDesktopStatus;
+    if (kind === "desktop" ? !settings.webhooks.desktopEnabled : !url) return;
     inFlightRef.current[kind] = true;
-    setStatus({ state: "busy", message: "Sending…" });
+    setStatus({ state: "busy", message: t("Sending…") });
+    const service =
+      kind === "discord" ? "Discord" : kind === "telegram" ? "Telegram" : "your desktop";
     const testPayload: WebhookPayload = {
-      text: `Harbor test message (${kind === "discord" ? "Discord" : "Telegram"}). If you can read this, your webhook is wired up.`,
+      text: t("Harbor test message ({service}). If you can read this, it's wired up.", {
+        service,
+      }),
       items: [],
     };
     try {
       const res = await fireWebhook(kind, url, testPayload);
       setStatus({
         state: res.ok ? "ok" : "error",
-        message: res.ok ? "Sent. Check your channel." : res.error ?? "Failed",
+        message: res.ok
+          ? t(kind === "desktop" ? "Sent. Check your notifications." : "Sent. Check your channel.")
+          : (res.error ?? t("Failed")),
       });
     } finally {
       inFlightRef.current[kind] = false;
@@ -112,13 +139,31 @@ export function WebhooksPanel() {
     setTimeout(() => setStatus(idleStatus), 4000);
   };
 
+  useSubTabs(
+    [
+      { id: "destinations", label: t("Destinations") },
+      { id: "what", label: t("Sources") },
+      { id: "rules", label: t("Rules") },
+    ],
+    tab,
+    (id) => setTab(id as Tab),
+  );
+
   return (
-    <>
-      <Section
-        title={t("Where alerts go")}
-        subtitle={t("Connect Discord or Telegram and Harbor posts a message when something you follow is about to drop. Hit Test to send yourself a sample first.")}
-      >
-        <div className="flex flex-col gap-5">
+    <div key={tab} className="harbor-cascade flex flex-col gap-10">
+      {tab === "destinations" && (
+        <Section
+          title={t("Where alerts go")}
+          subtitle={t(
+            "Connect Discord or Telegram, or turn on desktop notifications, and Harbor alerts you when something you follow is about to drop. Hit Send test to send yourself a sample first.",
+          )}
+        >
+          <DesktopNotifyField
+            enabled={settings.webhooks.desktopEnabled}
+            onChange={(v) => update({ webhooks: { ...settings.webhooks, desktopEnabled: v } })}
+            onTest={() => send("desktop")}
+            status={desktopStatus}
+          />
           <WebhookField
             label={t("Discord webhook URL")}
             logo={<DiscordMark />}
@@ -135,49 +180,64 @@ export function WebhooksPanel() {
             onTest={() => send("telegram")}
             status={telegramStatus}
           />
-        </div>
-      </Section>
-
-      <Section
-        title={t("What to send")}
-        subtitle={t("Pick which calendars feed your alerts. Items are deduped across sources before sending.")}
-      >
-        <div className="flex flex-col gap-2">
-          {SOURCES.map((s) => {
-            const blocker = s.prereq(settings, { authKey, traktConnected });
-            const on = settings.webhooks.sources[s.id];
-            return (
+        </Section>
+      )}
+      {tab === "what" && (
+        <>
+          <Section
+            title={t("What to send")}
+            subtitle={t(
+              "Choose the calendars to follow. A release appears once in your alerts, even if several calendars list it.",
+            )}
+          >
+            {SOURCES.map((s) => (
               <SourceToggle
                 key={s.id}
                 source={s}
-                on={on}
-                blocker={blocker}
+                on={settings.webhooks.sources[s.id]}
+                blocker={s.prereq(settings, { authKey, traktConnected })}
                 onChange={(v) => setSource(s.id, v)}
               />
-            );
-          })}
-        </div>
-      </Section>
+            ))}
+          </Section>
 
-      <Section
-        title={t("Media types")}
-        subtitle={t("Filter by type after the sources merge. Leave them all on to send everything.")}
-      >
-        <div className="flex flex-wrap gap-2">
-          <ChipToggle label={t("Movies")} on={settings.webhooks.notifyMovies} onToggle={(v) => setNotify("notifyMovies", v)} />
-          <ChipToggle label={t("TV")} on={settings.webhooks.notifyTv} onToggle={(v) => setNotify("notifyTv", v)} />
-          <ChipToggle label={t("Anime")} on={settings.webhooks.notifyAnime} onToggle={(v) => setNotify("notifyAnime", v)} />
-        </div>
-      </Section>
-
-      <RuleBuilder
-        rules={settings.webhookRules}
-        onChange={(rules) => update({ webhookRules: rules })}
-        trackedPeople={settings.customCalendar.trackedPeople}
-        canDiscord={!!settings.webhooks.discordUrl}
-        canTelegram={!!settings.webhooks.telegramUrl}
-      />
-    </>
+          <Section
+            title={t("Media types")}
+            subtitle={t("Choose which types of releases to include in calendar alerts.")}
+          >
+            <ToggleRow
+              label={t("Movies")}
+              sub={t("Include film releases from every source you turned on above.")}
+              value={settings.webhooks.notifyMovies}
+              onChange={(v) => setNotify("notifyMovies", v)}
+            />
+            <ToggleRow
+              label={t("TV")}
+              sub={t("Include series premieres and new episodes. Anime is counted separately.")}
+              value={settings.webhooks.notifyTv}
+              onChange={(v) => setNotify("notifyTv", v)}
+            />
+            <ToggleRow
+              label={t("Anime")}
+              sub={t("Include anime episodes and seasons, even when TV is turned off.")}
+              value={settings.webhooks.notifyAnime}
+              onChange={(v) => setNotify("notifyAnime", v)}
+            />
+          </Section>
+        </>
+      )}
+      {tab === "rules" && (
+        <RuleBuilder
+          rules={settings.webhookRules}
+          onChange={(rules) => update({ webhookRules: rules })}
+          trackedPeople={settings.customCalendar.trackedPeople}
+          canDiscord={!!settings.webhooks.discordUrl}
+          canTelegram={!!settings.webhooks.telegramUrl}
+          onSetUp={() => setTab("destinations")}
+          canDesktop={settings.webhooks.desktopEnabled}
+        />
+      )}
+    </div>
   );
 }
 
@@ -193,70 +253,14 @@ function SourceToggle({
   onChange: (v: boolean) => void;
 }) {
   const t = useT();
-  const disabled = blocker !== null;
-  const effective = on && !disabled;
   return (
-    <button
-      type="button"
-      onClick={() => !disabled && onChange(!on)}
-      disabled={disabled}
-      className={`flex items-center justify-between gap-4 rounded-lg border px-3.5 py-3 text-start transition-colors ${
-        disabled
-          ? "cursor-not-allowed border-edge-soft/50 bg-canvas/20 opacity-70"
-          : effective
-            ? "border-ink/40 bg-elevated/40"
-            : "border-edge-soft hover:border-edge"
-      }`}
-    >
-      <div className="flex min-w-0 flex-1 items-center gap-3">
-        <span
-          className={`flex h-8 w-8 shrink-0 items-center justify-center rounded-lg ${
-            effective ? "bg-ink text-canvas" : "bg-canvas/60 text-ink-muted"
-          }`}
-        >
-          {source.icon()}
-        </span>
-        <div className="flex min-w-0 flex-col gap-0.5">
-          <span className="text-[13.5px] font-semibold text-ink">{t(source.label)}</span>
-          <span className={`text-[12px] ${blocker ? "text-amber-200/85" : "text-ink-subtle"}`}>
-            {blocker ? t(blocker) : t(source.description)}
-          </span>
-        </div>
-      </div>
-      <span
-        aria-hidden
-        className={`relative h-5 w-9 shrink-0 rounded-full transition-colors ${
-          effective ? "bg-ink" : "bg-edge"
-        }`}
-      >
-        <span
-          className={`absolute start-0 top-0.5 h-4 w-4 rounded-full bg-canvas transition-transform ${
-            effective ? "translate-x-[18px] rtl:-translate-x-[18px]" : "translate-x-0.5 rtl:-translate-x-0.5"
-          }`}
-        />
-      </span>
-    </button>
-  );
-}
-
-function ChipToggle({
-  label,
-  on,
-  onToggle,
-}: {
-  label: string;
-  on: boolean;
-  onToggle: (v: boolean) => void;
-}) {
-  const t = useT();
-  return (
-    <button
-      onClick={() => onToggle(!on)}
-      className={`rounded-full px-4 py-1.5 text-[12.5px] font-semibold transition-colors ${
-        on ? "bg-ink text-canvas" : "border border-edge-soft text-ink-muted hover:border-edge hover:text-ink"
-      }`}
-    >
-      {t(label)}
-    </button>
+    <ToggleRow
+      label={t(source.label)}
+      sub={t(source.description)}
+      value={on}
+      onChange={onChange}
+      lockReason={blocker ? t(blocker) : undefined}
+      leading={source.icon()}
+    />
   );
 }

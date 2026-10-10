@@ -2,6 +2,7 @@ import { useEffect, useRef, useState } from "react";
 import type { PlayerCapabilities, PlayerSnapshot } from "@/lib/player/bridge";
 import type { SubtitleAddHandler } from "@/lib/player/subtitle-load";
 import type { Meta } from "@/lib/cinemeta";
+import { isLivePlaybackSrc } from "@/lib/player/live-src";
 import {
   controlsInSlot,
   PLAYER_CHROME_CHANGED_EVENT,
@@ -20,11 +21,12 @@ import {
   RenderedStremioControl,
   type StremioRenderCtx,
 } from "./transport/control-renderer-stremio";
-import { useView } from "@/lib/view";
+import { usePlayerNavigation } from "@/lib/view";
 import { useCastModalPlay } from "./use-cast-modal-play";
 
 export type TransportStremioProps = {
   snap: PlayerSnapshot;
+  isLive?: boolean;
   capabilities: PlayerCapabilities;
   visible: boolean;
   fullscreen: boolean;
@@ -61,6 +63,7 @@ export type TransportStremioProps = {
   subtitle?: string;
   resolution?: string | null;
   quality?: string | null;
+  releaseName?: string | null;
   hasPrevEp: boolean;
   hasNextEp: boolean;
   onPrevEp: () => void;
@@ -82,6 +85,7 @@ export type TransportStremioProps = {
   onDownloadReset?: () => void;
   onOpenDvr?: () => void;
   sleep?: import("@/views/player/hooks/use-sleep-timer").SleepTimerState;
+  homeServerQualityControl?: import("react").ReactNode;
 };
 
 export function TransportStremio(p: TransportStremioProps) {
@@ -123,6 +127,7 @@ export function TransportStremio(p: TransportStremioProps) {
     subtitle,
     resolution,
     quality,
+    releaseName,
     hasPrevEp,
     hasNextEp,
     onPrevEp,
@@ -144,6 +149,7 @@ export function TransportStremio(p: TransportStremioProps) {
     onDownloadReset,
     onOpenDvr,
     sleep,
+    homeServerQualityControl,
   } = p;
 
   const playing = snap.status === "playing";
@@ -156,9 +162,9 @@ export function TransportStremio(p: TransportStremioProps) {
   const [castModalOpen, setCastModalOpen] = useState(false);
   const [showRemaining, setShowRemaining] = useState(false);
   const [config, setConfig] = useState<PlayerChromeConfig>(() => readPlayerChromeConfig("stremio"));
-  const isLiveChannel = !!meta?.id?.startsWith("iptv:");
+  const isLiveChannel = isLivePlaybackSrc({ meta: meta ?? {}, isLive: p.isLive });
   const titleClickable = !!meta && !isLiveChannel;
-  const { openMeta, exitPlayer } = useView();
+  const { openMeta, exitPlayer } = usePlayerNavigation();
   const castModalPlay = useCastModalPlay();
   const controlsRef = useRef<HTMLDivElement>(null);
 
@@ -221,6 +227,7 @@ export function TransportStremio(p: TransportStremioProps) {
     subtitle,
     resolution,
     quality,
+    releaseName,
     titleClickable,
     onBack,
     onFullscreen,
@@ -268,6 +275,7 @@ export function TransportStremio(p: TransportStremioProps) {
     onDownloadReveal,
     onDownloadReset,
     onOpenDvr,
+    homeServerQualityControl,
   };
 
   const renderSlot = (slot: PlayerSlot) =>

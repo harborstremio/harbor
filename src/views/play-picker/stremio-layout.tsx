@@ -7,7 +7,8 @@ import { StremioRow } from "./stremio-row";
 import { FACET_DIMS, facetOptions, matchesFacets, type FacetState } from "./stream-facets";
 import { addonInstanceKey, buildAddonOptions } from "./picker-utils";
 import { useSettings } from "@/lib/settings";
-import { matchesCustomFilter, type CustomStreamFilter } from "@/lib/streams/custom-filters";
+import { useT } from "@/lib/i18n";
+import type { CustomStreamFilter } from "@/lib/streams/custom-filters";
 import { FacetMenuRow } from "./facet-menu-row";
 import { FilterBuilder } from "./filter-builder";
 
@@ -21,6 +22,7 @@ export function StremioLayout({
   matchFor,
   onPlay,
   download = false,
+  downloadStateFor,
   isAnime = false,
 }: {
   streams: ScoredStream[];
@@ -32,17 +34,19 @@ export function StremioLayout({
   matchFor?: (s: ScoredStream) => "same" | "close" | null;
   onPlay: (stream: ScoredStream) => void;
   download?: boolean;
+  downloadStateFor?: (stream: ScoredStream) => "idle" | "preparing" | "queued";
   isAnime?: boolean;
 }) {
+  const t = useT();
   const [filter, setFilter] = useState<string>("all");
   const [filterOpen, setFilterOpen] = useState(false);
   const [facet, setFacet] = useState<FacetState>({});
   const { settings, update } = useSettings();
   const customFilters = settings.customStreamFilters;
-  const [activeFilterId, setActiveFilterId] = useState<string | null>(null);
+  const activeFilterId = settings.activeStreamFilterId;
+  const setActiveFilterId = (id: string | null) => update({ activeStreamFilterId: id });
   const [builderOpen, setBuilderOpen] = useState(false);
   const [editingFilter, setEditingFilter] = useState<CustomStreamFilter | null>(null);
-  const activeFilter = customFilters.find((f) => f.id === activeFilterId) ?? null;
   const addonLogoMap = useMemo(() => {
     const m = new Map<string, string | null>();
     for (const a of addons ?? []) {
@@ -64,17 +68,18 @@ export function StremioLayout({
     () => (filter === "all" ? streams : streams.filter((s) => addonInstanceKey(s) === filter)),
     [streams, filter],
   );
-  const customFiltered = useMemo(
-    () => (activeFilter ? addonFiltered.filter((s) => matchesCustomFilter(s, activeFilter)) : addonFiltered),
-    [addonFiltered, activeFilter],
-  );
   const facetData = useMemo(
     () =>
       FACET_DIMS.map((dim) => {
-        const base = customFiltered.filter((s) => matchesFacets(s, facet, dim.key));
-        return { dim, options: facetOptions(base, dim), total: base.length, value: facet[dim.key] ?? "all" };
+        const base = addonFiltered.filter((s) => matchesFacets(s, facet, dim.key));
+        return {
+          dim,
+          options: facetOptions(base, dim),
+          total: base.length,
+          value: facet[dim.key] ?? "all",
+        };
       }),
-    [customFiltered, facet],
+    [addonFiltered, facet],
   );
   useEffect(() => {
     for (const f of facetData) {
@@ -84,10 +89,10 @@ export function StremioLayout({
     }
   }, [facetData]);
   useEffect(() => {
-    if (activeFilterId && !customFilters.some((f) => f.id === activeFilterId)) setActiveFilterId(null);
-  }, [customFilters, activeFilterId]);
+    if (filter !== "all" && addonFiltered.length === 0 && streams.length > 0) setFilter("all");
+  }, [filter, addonFiltered.length, streams.length]);
   const visibleStreams = useMemo(() => {
-    const filtered = customFiltered.filter((s) => matchesFacets(s, facet));
+    const filtered = addonFiltered.filter((s) => matchesFacets(s, facet));
     if (filter !== "all") return filtered;
     if (preserveOrder) return filtered;
     const downloadRx = /[⏳⌛⬇⏬🔽📥]|\bdownload(ing)?\b|\bqueued?\b|\bnot[\s_-]?cached\b/iu;
@@ -110,11 +115,10 @@ export function StremioLayout({
       if (ai !== bi) return bi - ai;
       return 0;
     });
-  }, [customFiltered, facet, filter, addonRank, preserveOrder]);
-  const filterLabel = filter === "all"
-    ? "All"
-    : addonOptions.find((o) => o.id === filter)?.name ?? "All";
-  const filterLogo = filter === "all" ? null : addonLogoMap.get(filter) ?? null;
+  }, [addonFiltered, facet, filter, addonRank, preserveOrder]);
+  const filterLabel =
+    filter === "all" ? t("All") : (addonOptions.find((o) => o.id === filter)?.name ?? t("All"));
+  const filterLogo = filter === "all" ? null : (addonLogoMap.get(filter) ?? null);
   return (
     <div className="flex flex-col gap-3">
       <div className="relative">
@@ -149,8 +153,8 @@ export function StremioLayout({
                 filter === "all" ? "text-ink font-semibold" : "text-ink-muted"
               }`}
             >
-              <CircleLogo addonId={null} addonName="All" logo={null} />
-              <span className="flex-1 truncate">All sources</span>
+              <CircleLogo addonId={null} addonName={t("All")} logo={null} />
+              <span className="flex-1 truncate">{t("All sources")}</span>
               <span className="text-[12px] text-ink-subtle">{streams.length}</span>
             </button>
             {addonOptions.map((opt) => (
@@ -201,16 +205,31 @@ export function StremioLayout({
             match={matchFor ? matchFor(s) : null}
             onPlay={() => onPlay(s)}
             download={download}
+            downloadState={downloadStateFor?.(s)}
             isAnime={isAnime}
           />
         ))}
       </div>
+      {streams.length > 0 && visibleStreams.length === 0 && (
+        <div className="flex flex-col items-center gap-3 rounded-2xl bg-elevated/60 px-5 py-6 text-center ring-1 ring-edge-soft">
+          <p className="text-[14px] text-ink-muted">
+            {streams.length === 1
+              ? t("All {n} source is hidden by the active filter.", { n: streams.length })
+              : t("All {n} sources are hidden by the active filter.", { n: streams.length })}
+          </p>
+          <button
+            onClick={() => {
+              setFilter("all");
+              setFacet({});
+            }}
+            className="rounded-full bg-accent-soft px-4 py-2 text-[13px] font-semibold text-accent ring-1 ring-edge-soft transition-transform hover:scale-[1.02] active:scale-[0.98] motion-reduce:transition-none motion-reduce:hover:scale-100"
+          >
+            {t("Clear filters")}
+          </button>
+        </div>
+      )}
       {!pipelineDone && (
-        <PendingAddonsPill
-          addons={addons}
-          streams={streams}
-          fallbackCount={loadingAddonCount}
-        />
+        <PendingAddonsPill addons={addons} streams={streams} fallbackCount={loadingAddonCount} />
       )}
       <FilterBuilder
         open={builderOpen}
@@ -222,13 +241,15 @@ export function StremioLayout({
             customStreamFilters: exists
               ? customFilters.map((x) => (x.id === f.id ? f : x))
               : [...customFilters, f],
+            activeStreamFilterId: f.id,
           });
-          setActiveFilterId(f.id);
           setBuilderOpen(false);
         }}
         onDelete={(id) => {
-          update({ customStreamFilters: customFilters.filter((x) => x.id !== id) });
-          if (activeFilterId === id) setActiveFilterId(null);
+          update({
+            customStreamFilters: customFilters.filter((x) => x.id !== id),
+            ...(activeFilterId === id ? { activeStreamFilterId: null } : {}),
+          });
           setBuilderOpen(false);
         }}
       />
@@ -245,6 +266,7 @@ function PendingAddonsPill({
   streams: ScoredStream[];
   fallbackCount: number;
 }) {
+  const t = useT();
   const pending = useMemo(() => {
     if (!addons || addons.length === 0) return [] as Addon[];
     const returned = new Set(streams.map((s) => s.addonId));
@@ -278,8 +300,10 @@ function PendingAddonsPill({
         ) : (
           <span className="text-[12px] text-ink-muted">
             {fallbackCount > 0
-              ? `${fallbackCount} ${fallbackCount === 1 ? "addon" : "addons"} loading`
-              : "Loading more sources"}
+              ? fallbackCount === 1
+                ? t("{n} addon loading", { n: fallbackCount })
+                : t("{n} addons loading", { n: fallbackCount })
+              : t("Loading more sources")}
           </span>
         )}
       </div>
@@ -297,6 +321,7 @@ function Spinner() {
 }
 
 function PendingChip({ addon }: { addon: Addon }) {
+  const t = useT();
   const id = addon.manifest?.id ?? "";
   const name = addon.manifest?.name ?? id ?? "addon";
   const remoteLogo = resolveAddonLogo(addon.manifest?.logo, addon.transportUrl);
@@ -304,7 +329,7 @@ function PendingChip({ addon }: { addon: Addon }) {
   const src = remoteLogo ?? bundled ?? null;
   return (
     <span className="flex items-center gap-2 text-[12px] text-ink">
-      <span className="text-ink-subtle">Waiting for</span>
+      <span className="text-ink-subtle">{t("Waiting for")}</span>
       <span className="flex items-center gap-1.5">
         {src ? (
           <img src={src} alt="" className="h-4 w-4 rounded-sm object-contain" />
@@ -338,10 +363,46 @@ function CircleLogo({
     return (
       <div className="flex h-9 w-9 shrink-0 items-center justify-center rounded-full bg-elevated ring-1 ring-edge-soft">
         <svg width="16" height="16" viewBox="0 0 24 24" fill="none" aria-hidden>
-          <rect x="3" y="3" width="7" height="7" rx="1.5" stroke="currentColor" strokeWidth="2" className="text-ink-muted" />
-          <rect x="14" y="3" width="7" height="7" rx="1.5" stroke="currentColor" strokeWidth="2" className="text-ink-muted" />
-          <rect x="3" y="14" width="7" height="7" rx="1.5" stroke="currentColor" strokeWidth="2" className="text-ink-muted" />
-          <rect x="14" y="14" width="7" height="7" rx="1.5" stroke="currentColor" strokeWidth="2" className="text-ink-muted" />
+          <rect
+            x="3"
+            y="3"
+            width="7"
+            height="7"
+            rx="1.5"
+            stroke="currentColor"
+            strokeWidth="2"
+            className="text-ink-muted"
+          />
+          <rect
+            x="14"
+            y="3"
+            width="7"
+            height="7"
+            rx="1.5"
+            stroke="currentColor"
+            strokeWidth="2"
+            className="text-ink-muted"
+          />
+          <rect
+            x="3"
+            y="14"
+            width="7"
+            height="7"
+            rx="1.5"
+            stroke="currentColor"
+            strokeWidth="2"
+            className="text-ink-muted"
+          />
+          <rect
+            x="14"
+            y="14"
+            width="7"
+            height="7"
+            rx="1.5"
+            stroke="currentColor"
+            strokeWidth="2"
+            className="text-ink-muted"
+          />
         </svg>
       </div>
     );

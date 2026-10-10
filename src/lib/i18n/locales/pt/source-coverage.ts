@@ -1,0 +1,547 @@
+const sourceCoverage: Record<string, string> = {
+  // Namespaced and recently introduced source strings.
+  "nav.people": "Pessoas em alta",
+  "nav.catalogs": "Catálogos",
+  "nav.manga": "Mangá",
+  "Who is breaking out this week. Live, with weekly movement.":
+    "Quem está se destacando nesta semana, com atualização e movimentação semanais.",
+  Actor: "Ator",
+  Producer: "Produtor",
+  "11-25": "11-25",
+  "26-50": "26-50",
+  "51-100": "51-100",
+  "101+": "101+",
+  "14s": "14 s",
+  "20s": "20 s",
+  "Changing the metadata language reloads Harbor so the new language takes effect. Apply when you're done with the options above.":
+    "Alterar o idioma dos metadados recarrega o Harbor para aplicar o novo idioma. Faça a alteração depois de concluir as opções acima.",
+  Colored: "Colorido",
+  "Content advisory style": "Estilo do aviso de conteúdo",
+  "Cursor speed": "Velocidade do cursor",
+  "Export your Harbor setup to a single file — pick exactly what goes in. Restore brings back only what the file contains. Your Stremio sign-in is always left out.":
+    "Exporte a configuração do Harbor para um único arquivo e escolha exatamente o que incluir. A restauração recupera apenas o conteúdo desse arquivo. O login do Stremio nunca é incluído.",
+  "How quickly the Harbor cursor moves with the right stick.":
+    "Define a velocidade do cursor do Harbor ao usar o analógico direito.",
+  "Keyboard size": "Tamanho do teclado",
+  "Monochrome (White)": "Monocromático (branco)",
+  "On shows titles in your metadata language (English by default). Off keeps titles in English.":
+    "Quando ativado, mostra os títulos no idioma dos metadados (inglês por padrão). Quando desativado, mantém os títulos em inglês.",
+  "Player screen lock": "Bloqueio da tela do player",
+  "Show a lock control in the player that blocks mouse, keyboard, remote, and media-key input until you unlock it.":
+    "Mostra no player um controle que bloqueia o mouse, o teclado, o controle remoto e as teclas de mídia até ser desbloqueado.",
+  "Size of the controller on-screen keyboard.": "Tamanho do teclado virtual usado com o controle.",
+  "Use color to distinguish severity, or keep every advisory monochrome.":
+    "Use cores para diferenciar a gravidade ou mantenha todos os avisos monocromáticos.",
+  "When a movie or episode starts, briefly show its Common Sense Media parental guide (violence, nudity, profanity, substances) with severity. Fades on its own.":
+    "Ao iniciar um filme ou episódio, mostra brevemente o guia parental do Common Sense Media, com níveis de violência, nudez, linguagem imprópria e substâncias. O aviso desaparece sozinho.",
+  "{n} px/s": "{n} px/s",
+  Detecting: "Detectando",
+  Continuing: "Em andamento",
+  Film: "Filme",
+  Isekai: "Isekai",
+  Slice: "Cotidiano",
+  Score: "Trilha sonora",
+  Song: "Música",
+  Opening: "Abertura",
+  Ending: "Encerramento",
+  Boy: "Garoto",
+  Girl: "Garota",
+  Hero: "Herói",
+  Villain: "Vilão",
+  Supporting: "Coadjuvante",
+  Couple: "Casal",
+  Fight: "Luta",
+  Bromance: "Bromance",
+  GL: "GL",
+  BL: "BL",
+  CGI: "CGI",
+  Heartwarming: "Comovente",
+  Packaged: "Em pacote",
+  Excellence: "Excelência",
+  Social: "Social",
+  Short: "Curta",
+  VA: "Dublagem",
+  Character: "Personagem",
+  Suspense: "Suspense",
+  "Official age rating": "Classificação etária oficial",
+  left: "esquerda",
+  center: "centro",
+  right: "direita",
+  "Autoplay trailer on detail pages": "Reproduzir trailer automaticamente nas páginas de detalhes",
+  "YOUR FILTERS": "SEUS FILTROS",
+  "Change your handle?": "Alterar seu identificador?",
+  "once every 14 days": "uma vez a cada 14 dias",
+  soon: "em breve",
+  Sun: "Dom",
+  Mon: "Seg",
+  Tue: "Ter",
+  Wed: "Qua",
+  Thu: "Qui",
+  Fri: "Sex",
+  Sat: "Sáb",
+  Thrillers: "Suspenses",
+  Whodunit: "Mistério policial",
+  service: "serviço",
+  services: "serviços",
+  Arabic: "Árabe",
+  "Chinese (Simplified)": "Chinês (simplificado)",
+  French: "Francês",
+  German: "Alemão",
+  Hindi: "Híndi",
+  Indonesian: "Indonésio",
+  Italian: "Italiano",
+  Japanese: "Japonês",
+  Korean: "Coreano",
+  Polish: "Polonês",
+  Portuguese: "Português",
+  Russian: "Russo",
+  Spanish: "Espanhol",
+  Turkish: "Turco",
+  Vietnamese: "Vietnamita",
+  "Right to left": "Da direita para a esquerda",
+  "Type what you want in plain language and let a model find it. Bring your own API key from either service.":
+    "Descreva o que deseja em linguagem natural e deixe um modelo encontrar. Use sua própria chave de API de qualquer um dos serviços.",
+  "Live web": "Web em tempo real",
+  "Jina Reader": "Jina Reader",
+  "Open the TMDB API page": "Abra a página da API do TMDB",
+  "Use the button below. If you are not signed in yet TMDB says you do not have permission, which is normal. Click the link in that message to sign in.":
+    "Use o botão abaixo. Se você ainda não estiver conectado, o TMDB dirá que não tem permissão, o que é normal. Clique no link dessa mensagem para entrar.",
+  "Sign in, or make an account": "Entre ou crie uma conta",
+  "Already have a TMDB login? Sign in and skip ahead. Otherwise press Register and fill in a username, password and email.":
+    "Já tem uma conta do TMDB? Entre e avance. Caso contrário, pressione Registrar e informe um nome de usuário, uma senha e um e-mail.",
+  "Prove you are human": "Confirme que você é uma pessoa",
+  "TMDB may show a captcha while you register. Complete it to carry on.":
+    "O TMDB pode mostrar um captcha durante o cadastro. Conclua-o para continuar.",
+  "Your account needs activating": "Sua conta precisa ser ativada",
+  "Right after registering TMDB tells you the account is not active yet. Nothing is broken, the email is on its way.":
+    "Logo após o cadastro, o TMDB informa que a conta ainda não está ativa. Não há problema: o e-mail de ativação está a caminho.",
+  "Click Activate in the email": "Clique em Ativar no e-mail",
+  "Open the email TMDB sent to the address you registered with and press the activate button inside it. Check spam if it has not arrived.":
+    "Abra o e-mail que o TMDB enviou ao endereço cadastrado e pressione o botão de ativação. Verifique a pasta de spam se ele não tiver chegado.",
+  "Open your account settings": "Abra as configurações da sua conta",
+  "Back on TMDB, click your avatar in the top right and choose Settings from the menu.":
+    "De volta ao TMDB, clique no seu avatar no canto superior direito e escolha Configurações no menu.",
+  "Choose API in the sidebar": "Escolha API na barra lateral",
+  "The settings page has a list down the left. Click API near the bottom.":
+    "A página de configurações tem uma lista à esquerda. Clique em API, perto do fim.",
+  "Request a key": "Solicite uma chave",
+  "You have no key yet, so TMDB asks you to request one. Follow the link to create it.":
+    "Como você ainda não tem uma chave, o TMDB pede que solicite uma. Siga o link para criá-la.",
+  "Say it is for personal use": "Informe que é para uso pessoal",
+  "TMDB asks what the key is for. Choose Yes, this is for my own personal use only.":
+    "O TMDB pergunta para que serve a chave. Escolha Sim, é somente para meu uso pessoal.",
+  "Accept the terms": "Aceite os termos",
+  "Confirm personal use once more and tick the box to agree to the API terms.":
+    "Confirme novamente o uso pessoal e marque a caixa para aceitar os termos da API.",
+  "Fill in the details, then Subscribe": "Preencha os dados e pressione Inscrever-se",
+  "This is the part people get stuck on. None of it is checked and nothing is billed. Give the app any name, any URL, pick a type of use, and write a sentence for the summary. The contact fields can be anything real enough to look sensible. Tick the agreement and press Subscribe.":
+    "Esta é a parte que costuma causar dúvidas. Nenhum dado é verificado e não há cobrança. Dê qualquer nome e URL ao aplicativo, escolha um tipo de uso e escreva uma frase no resumo. Preencha os campos de contato com dados plausíveis, marque o aceite e pressione Inscrever-se.",
+  "For Application URL anything works, for example https://harbor.site. TMDB never visits it.":
+    "Qualquer endereço funciona como URL do aplicativo, por exemplo https://harbor.site. O TMDB não acessa esse endereço.",
+  "That was the hard part": "A parte difícil terminou",
+  "TMDB confirms the key is created. Follow the link it gives you to see your API key details.":
+    "O TMDB confirma a criação da chave. Siga o link exibido para ver os detalhes da sua chave de API.",
+  "Copy your API Key": "Copie sua chave de API",
+  "Back on the API page, scroll to the bottom. Copy the value under API Key and paste it into Harbor. Harbor saves it on its own.":
+    "De volta à página da API, role até o fim. Copie o valor em API Key e cole no Harbor. O Harbor salva automaticamente.",
+  "Take the short API Key at the very bottom, not the long API Read Access Token above it.":
+    "Use a chave curta no fim da página, não o longo API Read Access Token exibido acima.",
+  "Get your free TMDB key": "Obtenha sua chave gratuita do TMDB",
+  "Free forever for personal use. No payment, ever.":
+    "Gratuita para sempre no uso pessoal. Nenhuma cobrança.",
+  "Bring your own keys": "Use suas próprias chaves",
+  "Where you watch from": "De onde você assiste",
+  "Sets streaming availability and the Now Playing release window. Pick a country and Harbor offers to match the interface, metadata, subtitle, and audio languages to it.":
+    "Define a disponibilidade de streaming e a janela de lançamentos Em cartaz. Escolha um país e o Harbor poderá ajustar os idiomas da interface, dos metadados, das legendas e do áudio.",
+  "repo.json identifies and versions the plugin. Filtering, title cleanup, volumes, chapters, dates, and views are returned by example.plugin.js.":
+    "O repo.json identifica e controla a versão do plugin. Filtros, limpeza de títulos, volumes, capítulos, datas e visualizações são retornados por example.plugin.js.",
+  "70s": "Anos 70",
+  "80s": "Anos 80",
+  "90s": "Anos 90",
+  "2000s": "Anos 2000",
+  "2010s": "Anos 2010",
+
+  // Targeted terminology and variant repairs that must win over broad sweep layers.
+  "No correction (default)": "Sem correção (padrão)",
+  "Theme preset": "Tema predefinido",
+  "No metadata addon detected. Harbor is falling back to Cinemeta so titles still load, but turn this back on unless you are installing one.":
+    "Nenhum addon de metadados foi detectado. O Harbor está usando o Cinemeta para continuar carregando os títulos, mas reative esta opção a menos que esteja instalando outro addon.",
+  "Auto sync": "Sincronização automática",
+  "Cancel sync": "Cancelar sincronização",
+  "Choose where subtitle timing feedback appears and how large it is.":
+    "Escolha onde aparece o aviso de sincronização das legendas e qual será o tamanho dele.",
+  "Show subtitle sync indicator": "Mostrar indicador de sincronização da legenda",
+  "Subtitle sync indicator": "Indicador de sincronização da legenda",
+  "Sync Offset": "Deslocamento da sincronização",
+  "Turn off auto-sync": "Desativar sincronização automática",
+  "Text sync unavailable for embedded tracks":
+    "Sincronização por texto indisponível para faixas incorporadas",
+  "Sync unavailable": "Sincronização indisponível",
+  "Subtitle sync": "Sincronização de legenda",
+  "Sync options": "Opções de sincronização",
+  "Text Sync": "Sincronização por texto",
+  "Home layout": "Layout do Início",
+  "How the Home page assembles its rails.": "Como a página Início organiza suas fileiras.",
+  "Home hero audio": "Áudio do destaque do Início",
+  "The home hero trailer plays with sound and a mute button in the corner, then shows a replay button when it ends. Auto-rotation pauses so it stays on the featured title.":
+    "O trailer do destaque do Início é reproduzido com som e um botão para silenciar no canto. Ao terminar, aparece um botão para reproduzi-lo novamente. A rotação automática é pausada para manter o título em destaque.",
+  "Home hero": "Destaque do Início",
+  "Make the featured banner on Home bigger and sharper.":
+    "Deixa o banner em destaque do Início maior e mais nítido.",
+  "Removes the Anime tab and any Trending/Popular/Upcoming/New anime rows from Home.":
+    "Remove a aba Anime e as fileiras de animes Em alta, Populares, Em breve e Novos do Início.",
+  "Hides anime from the Home Continue Watching row. It still appears in the Anime tab's own Continue Watching.":
+    "Oculta animes da fileira Continuar assistindo do Início. Eles continuam aparecendo no Continuar assistindo da aba Anime.",
+  "When you finish an episode, the Home Continue Watching card moves on to the next episode instead of sitting at 0 minutes left.":
+    "Ao terminar um episódio, o cartão Continuar assistindo do Início avança para o próximo em vez de permanecer com 0 minutos restantes.",
+  "Home hero shadow": "Sombra do destaque do Início",
+  "Home languages": "Idiomas do Início",
+  "Home Rail Settings": "Configurações das fileiras do Início",
+  "How dark the gradient behind the featured title on Home is. 100% is the classic look; lower it to let more of the artwork show through.":
+    "Define a intensidade do gradiente atrás do título em destaque no Início. 100% mantém o visual clássico; reduza para mostrar mais da arte.",
+  "Marks movies and shows across Home, the catalogs, and detail pages when a matching file already exists in your local library.":
+    "Marca filmes e séries no Início, nos catálogos e nas páginas de detalhes quando já existe um arquivo correspondente na biblioteca local.",
+  "Movies and shows with a future release date stop appearing in the built-in home catalog rows, so Home only shows what you can watch right now.":
+    "Filmes e séries com data de lançamento futura deixam de aparecer nas fileiras de catálogo integradas, para que o Início mostre apenas o que já pode ser assistido.",
+  "Only show titles in these original languages on the Home catalogs. Leave all off to show everything.":
+    "Mostra nos catálogos do Início apenas títulos com estes idiomas originais. Deixe todos desativados para mostrar tudo.",
+  "The quick brown fox jumps over the lazy dog":
+    "Um pequeno jabuti xereta viu dez cegonhas felizes",
+  "Picture in Picture": "Imagem sobre imagem",
+  "Stream / addons": "Stream / addons",
+  "Live action": "Live-action",
+
+  // Adult financial-literacy question bank. Keys preserve source option order.
+  'Giving "two weeks\' notice" at a job means:':
+    "Dar um aviso prévio de duas semanas no trabalho significa:",
+  "Booking two weeks of holiday": "Reservar duas semanas de férias",
+  "Telling your boss you're quitting": "Avisar seu chefe de que você vai pedir demissão",
+  "Starting a probation period": "Iniciar um período de experiência",
+  "Demanding a raise within 14 days": "Exigir um aumento em até 14 dias",
+  'A landlord asks for a "deposit" before move-in. What\'s it for?':
+    "Um proprietário pede um depósito caução antes da mudança. Para que ele serve?",
+  "Pre-paying the last month's rent": "Pagar antecipadamente o último mês de aluguel",
+  "A property registration tax": "Pagar uma taxa de registro do imóvel",
+  "Cover for damage when you leave": "Cobrir danos quando você sair",
+  "Fee to the listing agent": "Pagar a comissão do corretor do anúncio",
+  'Your account goes "overdrawn". What happened?':
+    "Sua conta ficou no cheque especial. O que aconteceu?",
+  "You earned interest above the limit": "Você recebeu juros acima do limite",
+  "You spent past your balance": "Você gastou mais do que tinha na conta",
+  "You hit the savings ceiling": "Você atingiu o limite da poupança",
+  "Your bank locked the account": "Seu banco bloqueou a conta",
+  '"Compound" interest is calculated on:': "Os juros compostos são calculados sobre:",
+  "Only the original sum borrowed": "Somente o valor original emprestado",
+  "Sum borrowed plus earned interest": "O valor emprestado mais os juros acumulados",
+  "A fixed amount every month": "Um valor fixo todo mês",
+  "Whatever's left at year-end": "O que restar no fim do ano",
+  "You make an insurance claim. Before the insurer pays out, you usually:":
+    "Ao acionar um seguro, antes de a seguradora pagar, normalmente você:",
+  "Get all your past payments refunded": "Recebe de volta todos os pagamentos anteriores",
+  "Pay a set amount yourself first": "Paga primeiro uma franquia definida",
+  "Receive a loyalty bonus instead": "Recebe um bônus de fidelidade",
+  "Have the policy cancelled automatically": "Tem a apólice cancelada automaticamente",
+  'Friend asks you to "co-sign" a loan. You agree to:':
+    "Um amigo pede que você seja fiador de um empréstimo. Você concorda em:",
+  "Split the borrowed amount equally": "Dividir igualmente o valor emprestado",
+  "Pay if the friend defaults": "Pagar se o amigo não cumprir a dívida",
+  "Witness the contract only": "Apenas testemunhar o contrato",
+  "Receive interest from the friend": "Receber juros do amigo",
+  'You buy something "in installments". That means you:':
+    "Você compra algo parcelado. Isso significa que você:",
+  "Pay a one-time fee to reserve it": "Paga uma taxa única para reservar",
+  "Pay the total in smaller amounts over time":
+    "Paga o total em parcelas menores ao longo do tempo",
+  "Get a discount for paying early": "Recebe um desconto por pagar antes",
+  "Lease it and return it after a while": "Aluga e devolve depois de um tempo",
+  'A bill is set up via "direct debit". The biller can:':
+    "Uma conta está configurada em débito automático. A empresa pode:",
+  "Charge a one-time fee only": "Cobrar apenas uma taxa única",
+  "Pull money on a schedule": "Debitar o dinheiro nas datas programadas",
+  "Reverse old transactions": "Estornar transações antigas",
+  "Convert your currency": "Converter sua moeda",
+  "A mortgage is essentially:": "Um financiamento imobiliário é, em essência:",
+  "Insurance that covers the home": "Um seguro que cobre o imóvel",
+  "A loan tied to the property": "Um empréstimo vinculado ao imóvel",
+  "An agreement between landlord and tenant": "Um acordo entre proprietário e inquilino",
+  "A yearly property tax bill": "Uma cobrança anual de imposto predial",
+  "You only ever pay the minimum on a credit card each month. Over time you:":
+    "Você paga apenas o valor mínimo do cartão de crédito todo mês. Com o tempo, você:",
+  "Pay no interest as long as the minimum is met": "Não paga juros desde que quite o mínimo",
+  "Owe more, because interest keeps building on the rest":
+    "Passa a dever mais porque os juros continuam incidindo sobre o restante",
+  "Clear the balance in equal monthly steps": "Quita o saldo em parcelas mensais iguais",
+  "Lower the card's interest rate automatically": "Reduz automaticamente a taxa de juros do cartão",
+  'The economy has "inflation". What\'s happening?':
+    "A economia está com inflação. O que está acontecendo?",
+  "GDP is shrinking": "O PIB está diminuindo",
+  "Prices are rising overall": "Os preços estão subindo de forma geral",
+  "Currency is gaining strength": "A moeda está se valorizando",
+  "Unemployment is climbing": "O desemprego está aumentando",
+  'A document needs to be "notarised". You take it to someone who will:':
+    "Um documento precisa ser reconhecido em cartório. Você o leva a alguém que vai:",
+  "Translate it into another language": "Traduzi-lo para outro idioma",
+  "Verify and witness the signing": "Verificar e atestar a assinatura",
+  "File it with the government": "Protocolá-lo no governo",
+  "Legally enforce it": "Fazê-lo valer judicialmente",
+  'You\'re given "power of attorney" for a relative. You can:':
+    "Você recebe uma procuração de um parente. Com ela, pode:",
+  "Inherit their property automatically": "Herdar os bens dele automaticamente",
+  "Make decisions on their behalf": "Tomar decisões em nome dele",
+  "Practise law in court for them": "Atuar como advogado dele no tribunal",
+  "Override their existing will": "Anular o testamento existente",
+  'A laid-off employee receives "severance". That\'s:':
+    "Um funcionário demitido recebe uma verba rescisória. Isso é:",
+  "The standard year-end bonus": "O bônus padrão de fim de ano",
+  "A payout when employment ends": "Um pagamento feito no fim do vínculo de trabalho",
+  "A retirement-fund withdrawal": "Um saque do fundo de aposentadoria",
+  "The signing bonus from year one": "O bônus de contratação do primeiro ano",
+  'A will names someone as "executor". Their job is to:':
+    "Um testamento nomeia alguém como inventariante. A função dessa pessoa é:",
+  "Inherit the largest share": "Herdar a maior parte",
+  "Settle the estate's affairs": "Resolver os assuntos do espólio",
+  "Witness the signing only": "Apenas testemunhar a assinatura",
+  "Approve the will in court": "Aprovar o testamento no tribunal",
+  'Your payslip shows "gross" and "net" pay. Net is:':
+    "Seu contracheque mostra salário bruto e líquido. O líquido é:",
+  "The hourly rate": "O valor por hora",
+  "What lands in your bank": "O valor que entra na sua conta bancária",
+  "Just the bonus portion": "Somente a parte do bônus",
+  "The same as gross": "O mesmo valor do bruto",
+  'You sign an "NDA" with a company. You\'re agreeing to:':
+    "Você assina um acordo de confidencialidade com uma empresa. Com isso, concorda em:",
+  "Not quit without long notice": "Não pedir demissão sem um aviso longo",
+  "Not share their confidential info": "Não compartilhar informações confidenciais da empresa",
+  "Waive any overtime claim": "Abrir mão de qualquer pedido de horas extras",
+  "Relocate if they ask": "Mudar de cidade se a empresa pedir",
+  "Interest rate on a loan is shown as a percentage. It tells you:":
+    "A taxa de juros de um empréstimo aparece como porcentagem. Ela informa:",
+  "How many months the loan lasts": "Quantos meses dura o empréstimo",
+  "The cost of borrowing per year": "O custo anual do empréstimo",
+  "The bank's quarterly profit": "O lucro trimestral do banco",
+  "Total fees in fixed dollars": "O total de tarifas em valor fixo",
+  'A charge on your bank app sits as "pending" for a day. The merchant is:':
+    "Uma cobrança aparece como pendente por um dia no aplicativo do banco. O estabelecimento está:",
+  "Reversing it back to you": "Estornando o valor para você",
+  "Holding the funds before settling": "Reservando o valor antes de concluir a cobrança",
+  "Charging double next week": "Cobrando o dobro na próxima semana",
+  "Refusing the transaction": "Recusando a transação",
+  'Your boss says "submit your timesheet by Friday". You\'re recording:':
+    "Seu chefe pede que você envie a folha de ponto até sexta-feira. Você está registrando:",
+  "Receipts for expenses": "Recibos de despesas",
+  "Hours you worked this week": "As horas trabalhadas nesta semana",
+  "Your holiday plans": "Seus planos de férias",
+  "A complaint to HR": "Uma reclamação ao RH",
+  "A new job's salary is \"pro-rated\" because you start mid-year. You'll receive:":
+    "O salário de um novo emprego é proporcional porque você começa no meio do ano. Você receberá:",
+  "The full annual amount upfront": "O valor anual completo adiantado",
+  "A share matching your months worked": "Uma parte correspondente aos meses trabalhados",
+  "Double pay to catch you up": "Pagamento em dobro para compensar",
+  "Nothing until next year begins": "Nada até o início do próximo ano",
+  'A subscription "auto-renews" at the end of the term. That means:':
+    "Uma assinatura é renovada automaticamente no fim do período. Isso significa que:",
+  "It pauses until you reactivate": "Ela fica pausada até você reativar",
+  "It charges you for another period": "Ela cobra por mais um período",
+  "The price drops by half": "O preço cai pela metade",
+  "It cancels and refunds": "Ela é cancelada e reembolsada",
+  'A job offer\'s compensation is described as "competitive". That tells you:':
+    "A remuneração de uma vaga é descrita como competitiva. Isso indica que:",
+  "You'll compete with peers for it": "Você vai disputar o salário com colegas",
+  "It's broadly in line with the market": "Ela está, em geral, alinhada ao mercado",
+  "It changes every quarter": "Ela muda a cada trimestre",
+  "It's commission-only": "Ela é composta somente por comissão",
+  'You file a tax return as a "sole proprietor" or self-employed. You owe tax on:':
+    "Você declara imposto como empresário individual ou autônomo. O imposto incide sobre:",
+  "Only the cash you withdrew": "Somente o dinheiro que você retirou",
+  "Your business profit": "O lucro da sua atividade",
+  "The total revenue": "A receita total",
+  "Whatever's in your bank account": "O valor que estiver na sua conta bancária",
+};
+
+const pluralForms: Record<string, readonly [string, string]> = {
+  "Add {n} titles from your Harbor watchlist to Trakt? Trakt skips any it already has.": [
+    "Adicionar {n} título da sua lista do Harbor ao Trakt? O Trakt ignora o que já tiver.",
+    "Adicionar {n} títulos da sua lista do Harbor ao Trakt? O Trakt ignora os que já tiver.",
+  ],
+  "Add {n} titles from your Trakt watchlist to Harbor?": [
+    "Adicionar {n} título da sua lista do Trakt ao Harbor?",
+    "Adicionar {n} títulos da sua lista do Trakt ao Harbor?",
+  ],
+  "After {n} episodes": ["Após {n} episódio", "Após {n} episódios"],
+  "All {n} channels loaded": ["{n} canal carregado", "Todos os {n} canais carregados"],
+  "All {total} channels loaded": ["{total} canal carregado", "Todos os {total} canais carregados"],
+  "Any of your {n} tracked people": [
+    "Qualquer uma das {n} pessoas que você acompanha",
+    "Qualquer uma das {n} pessoas que você acompanha",
+  ],
+  "Back {n} seconds": ["Voltar {n} segundo", "Voltar {n} segundos"],
+  "Checking {n} items…": ["Verificando {n} item…", "Verificando {n} itens…"],
+  "Fetching {n} items…": ["Buscando {n} item…", "Buscando {n} itens…"],
+  "Forward {n} seconds": ["Avançar {n} segundo", "Avançar {n} segundos"],
+  "Health for {n} service": ["Status de {n} serviço", "Status de {n} serviços"],
+  "Health for {n} services": ["Status de {n} serviço", "Status de {n} serviços"],
+  "Health for {n} services below": [
+    "Status de {n} serviço abaixo",
+    "Status de {n} serviços abaixo",
+  ],
+  "Import {n} JavaScript sources": [
+    "Importar {n} fonte JavaScript",
+    "Importar {n} fontes JavaScript",
+  ],
+  "Nothing to send. All {n} watchlist items are anime, which Trakt can't track.": [
+    "Nada para enviar. O {n} item da lista é um anime que o Trakt não consegue acompanhar.",
+    "Nada para enviar. Todos os {n} itens da lista são animes que o Trakt não consegue acompanhar.",
+  ],
+  "Remove this folder and its {n} items? Files on your disk are not deleted.": [
+    "Remover esta pasta e seu {n} item? Os arquivos no disco não serão excluídos.",
+    "Remover esta pasta e seus {n} itens? Os arquivos no disco não serão excluídos.",
+  ],
+  "Remove {n} items from your library? Files on your disk are not deleted.": [
+    "Remover {n} item da sua biblioteca? Os arquivos no disco não serão excluídos.",
+    "Remover {n} itens da sua biblioteca? Os arquivos no disco não serão excluídos.",
+  ],
+  "Rising · +{n} star in 24h": [
+    "Em alta · +{n} estrela em 24 h",
+    "Em alta · +{n} estrelas em 24 h",
+  ],
+  "Rising · +{n} stars in 24h": [
+    "Em alta · +{n} estrela em 24 h",
+    "Em alta · +{n} estrelas em 24 h",
+  ],
+  "Saved harbor-anime-diagnostics.txt ({n} entries). Send us that file.": [
+    "harbor-anime-diagnostics.txt salvo ({n} entrada). Envie esse arquivo para nós.",
+    "harbor-anime-diagnostics.txt salvo ({n} entradas). Envie esse arquivo para nós.",
+  ],
+  "Saved {n} entries to {path}. Send us that file.": [
+    "{n} entrada salva em {path}. Envie esse arquivo para nós.",
+    "{n} entradas salvas em {path}. Envie esse arquivo para nós.",
+  ],
+  "Search {n} EPG channels": ["Pesquisar {n} canal do EPG", "Pesquisar {n} canais do EPG"],
+  "Search {n} channels": ["Pesquisar {n} canal", "Pesquisar {n} canais"],
+  "Search {n} favorite": ["Pesquisar {n} favorito", "Pesquisar {n} favoritos"],
+  "Search {n} favorites": ["Pesquisar {n} favorito", "Pesquisar {n} favoritos"],
+  "Searching {count} sources…": ["Buscando {count} fonte…", "Buscando {count} fontes…"],
+  "Show {n} more addons": ["Mostrar mais {n} addon", "Mostrar mais {n} addons"],
+  "Show {n} more reviews": ["Mostrar mais {n} avaliação", "Mostrar mais {n} avaliações"],
+  "Up {n} spots this week": ["Subiu {n} posição nesta semana", "Subiu {n} posições nesta semana"],
+  "View all {n} winners": ["Ver {n} vencedor", "Ver todos os {n} vencedores"],
+  "You've reached the end · {count} titles": [
+    "Você chegou ao fim · {count} título",
+    "Você chegou ao fim · {count} títulos",
+  ],
+  "You've reached the end · {n} addons": [
+    "Você chegou ao fim · {n} addon",
+    "Você chegou ao fim · {n} addons",
+  ],
+  "in {n} weeks": ["em {n} semana", "em {n} semanas"],
+  "{avg} avg · {n} rated": ["média {avg} · {n} avaliação", "média {avg} · {n} avaliações"],
+  "{count} community ratings on stremio-addons.net": [
+    "{count} avaliação da comunidade no stremio-addons.net",
+    "{count} avaliações da comunidade no stremio-addons.net",
+  ],
+  "{count} films, in the order you picked them. Nothing plays until you start.": [
+    "{count} filme, na ordem escolhida. Nada é reproduzido até você iniciar.",
+    "{count} filmes, na ordem escolhida. Nada é reproduzido até você iniciar.",
+  ],
+  "{count} friends in common": ["{count} amigo em comum", "{count} amigos em comum"],
+  "{label} · {n} collection": ["{label} · {n} coleção", "{label} · {n} coleções"],
+  "{label} · {n} collections": ["{label} · {n} coleção", "{label} · {n} coleções"],
+  "{n} addon": ["{n} addon", "{n} addons"],
+  "{n} addons": ["{n} addon", "{n} addons"],
+  "{n} addons don't provide streams and aren't listed.": [
+    "{n} addon não fornece streams e não aparece aqui.",
+    "{n} addons não fornecem streams e não aparecem aqui.",
+  ],
+  "{n} avatars across film, TV, and anime.": [
+    "{n} avatar de filmes, TV e anime.",
+    "{n} avatares de filmes, TV e anime.",
+  ],
+  "{n} award": ["{n} prêmio", "{n} prêmios"],
+  "{n} awards": ["{n} prêmio", "{n} prêmios"],
+  "{n} chapter": ["{n} capítulo", "{n} capítulos"],
+  "{n} chapters": ["{n} capítulo", "{n} capítulos"],
+  "{n} countries": ["{n} país", "{n} países"],
+  "{n} country": ["{n} país", "{n} países"],
+  "{n} day ago": ["há {n} dia", "há {n} dias"],
+  "{n} episode": ["{n} episódio", "{n} episódios"],
+  "{n} episodes": ["{n} episódio", "{n} episódios"],
+  "{n} episodes on disk": ["{n} episódio no disco", "{n} episódios no disco"],
+  "{n} episodes · {file}": ["{n} episódio · {file}", "{n} episódios · {file}"],
+  "{n} files": ["{n} arquivo", "{n} arquivos"],
+  "{n} film": ["{n} filme", "{n} filmes"],
+  "{n} films": ["{n} filme", "{n} filmes"],
+  "{n} frame stored. Wiping rebuilds them next time you watch.": [
+    "{n} quadro armazenado. A limpeza o recria na próxima reprodução.",
+    "{n} quadros armazenados. A limpeza os recria na próxima reprodução.",
+  ],
+  "{n} genre": ["{n} gênero", "{n} gêneros"],
+  "{n} genres": ["{n} gênero", "{n} gêneros"],
+  "{n} item": ["{n} item", "{n} itens"],
+  "{n} items": ["{n} item", "{n} itens"],
+  "{n} languages": ["{n} idioma", "{n} idiomas"],
+  "{n} month ago": ["há {n} mês", "há {n} meses"],
+  "{n} new episodes since you last watched": [
+    "{n} episódio novo desde a última vez que você assistiu",
+    "{n} episódios novos desde a última vez que você assistiu",
+  ],
+  "{n} option": ["{n} opção", "{n} opções"],
+  "{n} options": ["{n} opção", "{n} opções"],
+  "{n} pages": ["{n} página", "{n} páginas"],
+  "{n} people": ["{n} pessoa", "{n} pessoas"],
+  "{n} provider": ["{n} provedor", "{n} provedores"],
+  "{n} providers": ["{n} provedor", "{n} provedores"],
+  "{n} seasons": ["{n} temporada", "{n} temporadas"],
+  "{n} service needs attention": [
+    "{n} serviço precisa de atenção",
+    "{n} serviços precisam de atenção",
+  ],
+  "{n} services need attention": [
+    "{n} serviço precisa de atenção",
+    "{n} serviços precisam de atenção",
+  ],
+  "{n} source": ["{n} fonte", "{n} fontes"],
+  "{n} sources": ["{n} fonte", "{n} fontes"],
+  "{n} sources available": ["{n} fonte disponível", "{n} fontes disponíveis"],
+  "{n} tab": ["{n} aba", "{n} abas"],
+  "{n} tab locked": ["{n} aba bloqueada", "{n} abas bloqueadas"],
+  "{n} tab requires this profile's PIN.": [
+    "{n} aba exige o PIN deste perfil.",
+    "{n} abas exigem o PIN deste perfil.",
+  ],
+  "{n} tabs": ["{n} aba", "{n} abas"],
+  "{n} tabs locked": ["{n} aba bloqueada", "{n} abas bloqueadas"],
+  "{n} tabs require this profile's PIN.": [
+    "{n} aba exige o PIN deste perfil.",
+    "{n} abas exigem o PIN deste perfil.",
+  ],
+  "{n} title": ["{n} título", "{n} títulos"],
+  "{n} titles": ["{n} título", "{n} títulos"],
+  "{n} titles need review — help us identify them.": [
+    "{n} título precisa de revisão. Ajude-nos a identificá-lo.",
+    "{n} títulos precisam de revisão. Ajude-nos a identificá-los.",
+  ],
+  "{n} titles together": ["{n} título junto", "{n} títulos juntos"],
+  "{n} tracker request blocked this session. Harbor itself sends zero telemetry.": [
+    "{n} solicitação de rastreador bloqueada nesta sessão. O Harbor não envia telemetria.",
+    "{n} solicitações de rastreador bloqueadas nesta sessão. O Harbor não envia telemetria.",
+  ],
+  "{n} votes": ["{n} voto", "{n} votos"],
+  "{n} winner": ["{n} vencedor", "{n} vencedores"],
+  "{n} winners": ["{n} vencedor", "{n} vencedores"],
+  "{n} wins": ["{n} vitória", "{n} vitórias"],
+  "{n} year": ["{n} ano", "{n} anos"],
+  "{n} years": ["{n} ano", "{n} anos"],
+  "{wins} wins": ["{wins} vitória", "{wins} vitórias"],
+  "{word} {n} seconds": ["{word} {n} segundo", "{word} {n} segundos"],
+  "{word} {n} seconds. Hold for options": [
+    "{word} {n} segundo. Segure para ver opções",
+    "{word} {n} segundos. Segure para ver opções",
+  ],
+};
+
+for (const [key, [one, few]] of Object.entries(pluralForms)) {
+  sourceCoverage[`${key}#one`] = one;
+  sourceCoverage[`${key}#few`] = few;
+}
+
+export default sourceCoverage;

@@ -1,0 +1,203 @@
+.music-artist-overview {
+  display: grid;
+  gap: 28px;
+  border-top: 1px solid var(--color-edge-soft);
+  padding-block: 28px;
+}
+.music-artist-overview h2 {
+  font-size: 23px;
+  font-weight: 700;
+  margin-bottom: 12px;
+}
+.music-artist-overview h3 {
+  font-size: 15px;
+  font-weight: 600;
+  margin-bottom: 12px;
+}
+.music-artist-story {
+  display: grid;
+  grid-template-columns: minmax(180px, 0.8fr) minmax(0, 1.4fr);
+  gap: 28px;
+  align-items: start;
+}
+.music-artist-story:not(:has(.music-artist-story-image)) {
+  grid-template-columns: 1fr;
+}
+.music-artist-story-image {
+  position: relative;
+  overflow: hidden;
+  border-radius: 8px;
+  min-width: 0;
+}
+.music-artist-story-image img {
+  width: 100%;
+  aspect-ratio: 4/3;
+  object-fit: cover;
+}
+.music-artist-story-image span {
+  position: absolute;
+  inset-inline: 0;
+  inset-block-start: 0;
+  padding: 20px;
+  background: linear-gradient(#0009, transparent);
+  font-size: 18px;
+  color: white;
+  font-weight: 650;
+}
+.music-artist-story-copy {
+  min-width: 0;
+}
+.music-artist-story p {
+  max-width: 76ch;
+  font-size: 14px;
+  line-height: 1.8;
+  color: var(--color-ink-muted);
+  white-space: pre-line;
+  display: -webkit-box;
+  -webkit-line-clamp: 5;
+  -webkit-box-orient: vertical;
+  overflow: hidden;
+}
+.music-artist-story p[data-expanded] {
+  display: block;
+}
+.music-artist-read-more,
+.music-artist-biography-source {
+  margin-top: 12px;
+  min-height: 32px;
+}
+.music-artist-facts {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 16px 32px;
+  margin-block: 18px;
+}
+.music-artist-facts dt {
+  font-size: 11px;
+  color: var(--color-ink-subtle);
+}
+.music-artist-facts dd {
+  font-size: 13px;
+  margin-top: 4px;
+}
+.music-artist-genres {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 7px;
+}
+.music-artist-genres button {
+  font-size: 12px;
+  padding: 5px 10px;
+  border-radius: 4px;
+  background: var(--color-elevated);
+  color: var(--color-ink);
+  transition:
+    background-color 140ms ease,
+    color 140ms ease;
+}
+.music-artist-genres button:hover {
+  background: var(--color-accent);
+  color: var(--color-canvas);
+}
+.music-artist-links {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 10px;
+}
+.music-artist-links button {
+  min-height: 44px;
+  max-width: 100%;
+  display: inline-flex;
+  align-items: center;
+  gap: 10px;
+  padding: 10px 14px;
+  text-align: start;
+  border-radius: 5px;
+  background: var(--color-elevated);
+  font-size: 13px;
+}
+.music-artist-links button:hover {
+  background: var(--color-raised);
+}
+.music-artist-links small {
+  display: block;
+  margin-top: 3px;
+  font-size: 11px;
+  color: var(--color-ink-muted);
+  overflow-wrap: anywhere;
+}
+.music-buy-links {
+  border-bottom: 1px solid var(--color-edge-soft);
+  padding-bottom: 16px;
+}
+.music-buy-links summary {
+  display: flex;
+  gap: 8px;
+  align-items: center;
+  min-height: 44px;
+  width: fit-content;
+  cursor: pointer;
+  font-size: 13px;
+  color: var(--color-ink-muted);
+}
+.music-buy-links summary::-webkit-details-marker {
+  display: none;
+}
+.music-buy-links summary:hover {
+  color: var(--color-ink);
+}
+.music-buy-links[open] .music-artist-links {
+  margin-top: 8px;
+}
+.music-artist-overview[data-compact] {
+  border-top: 0;
+  padding-top: 16px;
+}
+.music-artist-overview[data-compact] .music-artist-story {
+  grid-template-columns: 1fr;
+  gap: 18px;
+}
+.music-artist-overview[data-compact] .music-artist-story-image img {
+  aspect-ratio: 16/9;
+}
+.music-artist-overview[data-compact] h2 {
+  font-size: 20px;
+}
+.music-artist-overview button:focus-visible,
+.music-buy-links summary:focus-visible {
+  outline: 2px solid var(--color-accent);
+  outline-offset: 3px;
+}
+@container (max-width:600px) {
+  .music-artist-story {
+    grid-template-columns: 1fr;
+    gap: 20px;
+  }
+  .music-artist-story-image img {
+    aspect-ratio: 16/9;
+  }
+}
+
+.music-link-favicon {
+  inline-size: 18px;
+  block-size: 18px;
+  flex-shrink: 0;
+  border-radius: 3px;
+  object-fit: contain;
+}
+.music-artist-member-art {
+  display: grid;
+  place-items: center;
+  flex-shrink: 0;
+  width: 26px;
+  height: 26px;
+  overflow: hidden;
+  border-radius: 999px;
+  background: var(--color-canvas);
+  color: var(--color-ink-subtle);
+}
+.music-artist-member-art img {
+  width: 100%;
+  height: 100%;
+  object-fit: cover;
+}

@@ -22,8 +22,11 @@ export function WebhookLoopMount() {
   }, []);
 
   useEffect(() => {
-    const hasUrl = !!settings.webhooks.discordUrl || !!settings.webhooks.telegramUrl;
-    if (!hasUrl) return;
+    const hasDestination =
+      !!settings.webhooks.discordUrl ||
+      !!settings.webhooks.telegramUrl ||
+      settings.webhooks.desktopEnabled;
+    if (!hasDestination) return;
     let cancelled = false;
 
     const tick = async () => {
@@ -65,7 +68,7 @@ export function WebhookLoopMount() {
           return null;
         }
       })();
-      const last = raw ? (JSON.parse(raw) as { at?: number }).at ?? 0 : 0;
+      const last = raw ? ((JSON.parse(raw) as { at?: number }).at ?? 0) : 0;
       if (Date.now() - last > TICK_INTERVAL_MS) void tick();
     };
     window.addEventListener("focus", onFocus);
@@ -76,7 +79,11 @@ export function WebhookLoopMount() {
       window.clearInterval(interval);
       window.removeEventListener("focus", onFocus);
     };
-  }, [settings.webhooks.discordUrl, settings.webhooks.telegramUrl]);
+  }, [
+    settings.webhooks.discordUrl,
+    settings.webhooks.telegramUrl,
+    settings.webhooks.desktopEnabled,
+  ]);
 
   return null;
 }

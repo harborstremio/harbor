@@ -73,6 +73,10 @@ async function fetchPopular(key: string): Promise<RankMaps | null> {
   for (const p of all) {
     const dept = p.known_for_department;
     if (!dept || !(dept in buckets)) continue;
+    if (p.adult) continue;
+    const kf: any[] = Array.isArray(p.known_for) ? p.known_for : [];
+    if (kf.some((k) => k.adult)) continue;
+    if (!kf.some((k) => (k.vote_count ?? 0) >= 200)) continue;
     if (seen.has(p.id)) continue;
     if (buckets[dept].length >= TOP) continue;
     seen.add(p.id);

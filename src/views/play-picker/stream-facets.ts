@@ -1,4 +1,5 @@
 import type { ScoredStream } from "@/lib/streams/types";
+import { isP2pStream } from "@/lib/streams/cached";
 import { qualityTier, sourceGroup } from "./quality-filter";
 
 export type FacetDim = {
@@ -70,8 +71,8 @@ export const FACET_DIMS: FacetDim[] = [
   {
     key: "cached",
     label: "Availability",
-    valueOf: (s) => (isCached(s) ? "Cached" : "P2P"),
-    order: ["Cached", "P2P"],
+    valueOf: (s) => (isP2pStream(s) ? "P2P" : isCached(s) ? "Cached" : "Debrid"),
+    order: ["Cached", "Debrid", "P2P"],
   },
 ];
 

@@ -81,6 +81,7 @@ export function Scrubber({
   return (
     <div
       ref={ref}
+      data-tauri-drag-region="false"
       onPointerDown={onPointerDown}
       onPointerMove={onPointerMove}
       onPointerUp={onPointerUp}
@@ -228,6 +229,7 @@ export function VolumeControl({
       </Tooltip>
       <div
         ref={ref}
+        data-tauri-drag-region="false"
         onPointerDown={onPointerDown}
         onPointerMove={onPointerMove}
         onPointerUp={onPointerUp}

@@ -1,7 +1,7 @@
 [package]
 name = "harbor"
-version = "0.9.21"
-description = "A Stremio client built for adventure"
+version = "0.9.132"
+description = "JL Media Vision desktop media center"
 edition = "2021"
 
 [lib]
@@ -11,43 +11,68 @@ crate-type = ["staticlib", "cdylib", "rlib"]
 [build-dependencies]
 tauri-build = { version = "2", features = [] }
 
+[features]
+default = []
+silero-vad = ["dep:ort", "dep:ndarray"]
+asr-whisper = ["dep:whisper-rs"]
+chromaprint = []
+
 [dependencies]
-tauri = { version = "2", features = ["protocol-asset", "tray-icon"] }
+anyhow = "1"
+tauri = { version = "2.12.0", features = ["protocol-asset", "tray-icon", "image-png", "image-ico"] }
 tauri-plugin-opener = "2"
+tauri-plugin-clipboard-manager = "2.3.2"
 tauri-plugin-os = "2"
 tauri-plugin-shell = "2"
 tauri-plugin-http = "2"
 tauri-plugin-dialog = "2"
 tauri-plugin-fs = "2"
 tauri-plugin-deep-link = "2"
-tauri-plugin-single-instance = { version = "2", features = ["deep-link"] }
-tauri-plugin-updater = "2"
-tauri-plugin-process = "2"
-tauri-plugin-window-state = "2"
+tauri-plugin-notification = "2"
 walkdir = "2"
+dunce = "1"
 serde = { version = "1", features = ["derive"] }
 serde_json = "1"
+httpdate = "1"
 tokio = { version = "1", features = ["full"] }
 tokio-util = { version = "0.7", features = ["io", "rt"] }
 axum = { version = "0.8", features = ["ws"] }
 reqwest = { version = "0.12", default-features = false, features = [
-  "native-tls",
   "stream",
   "multipart",
   "json",
   "gzip",
-  "hickory-dns",
 ] }
 flate2 = "1"
+tar = "0.4"
+plist = "1.9"
+zip = { version = "4", default-features = false, features = ["deflate-flate2", "aes-crypto"] }
+zeroize = "1"
+sevenz-rust2 = { version = "=0.20.2", default-features = false, features = [
+  "aes256",
+  "bzip2",
+  "ppmd",
+  "deflate",
+] }
+unrar_sys = { path = "vendor/unrar_sys" }
+hadris-iso = { version = "=2.5.0", default-features = false, features = ["std", "sync", "joliet"] }
+harbor-udfread = { path = "vendor/harbor-udfread" }
+regex = "1"
 encoding_rs = "0.8"
+quick-xml = { version = "=0.38.4", features = ["serialize"] }
+yaml-rust2 = { version = "0.13", default-features = false }
 uuid = { version = "1", features = ["v4"] }
 futures-util = "0.3"
-libmpv2 = "4"
-libmpv2-sys = "4"
+gilrs = { version = "0.11", default-features = false, features = ["xinput"] }
 libc = "0.2"
+socket2 = "0.5"
 base64 = "0.22"
+sha2 = "0.10"
+sha1 = "0.10"
 png = "0.17"
+image = { version = "0.25", default-features = false, features = ["jpeg", "png", "gif", "webp"] }
 hound = "3.5"
+kothok-edge-tts = "0.2.10"
 discord-rich-presence = "1.1"
 rust_cast = { path = "vendor/rust_cast", version = "0.20" }
 mdns-sd = "0.13"
@@ -58,35 +83,125 @@ rustls = { version = "0.23", default-features = false, features = [
   "logging",
 ] }
 harbor-core = { path = "../harbor-core" }
+harbor-install-recovery = { path = "../harbor-install-recovery" }
 librqbit = { version = "=8.1.1", default-features = false, features = ["rust-tls"] }
 url = "2"
 realfft = "3"
-hickory-resolver = "0.25"
+ort = { version = "=2.0.0-rc.10", optional = true }
+ndarray = { version = "0.16", optional = true }
+whisper-rs = { version = "0.14", optional = true }
+
+# Desktop-only crates. Cargo resolves `[target.'cfg(...)']` from the target spec
+# before any build script runs, so it cannot see tauri-build's `desktop`/`mobile`
+# cfg aliases. Writing `cfg(desktop)` here silently matches nothing. Spell the
+# target_os predicate out.
+#
+#   libmpv2-sys/build.rs emits an unconditional `cargo:rustc-link-lib=mpv`, and
+#   there is no libmpv in an NDK sysroot, so the Android link step dies here.
+#   window-state and single-instance are `#![cfg(not(android|ios))]` at the crate
+#   root: on Android they compile to an empty crate and every path into them is
+#   unresolved. updater and process declare Android support level "none".
+[target.'cfg(not(any(target_os = "android", target_os = "ios")))'.dependencies]
+leveldb-sys = { path = "vendor/leveldb-sys", features = ["snappy"] }
+trash = "=5.2.9"
+libmpv2 = "4"
+libmpv2-sys = "4"
+tauri-plugin-single-instance = { version = "2", features = ["deep-link"] }
+tauri-plugin-updater = "2"
+minisign-verify = "0.2"
+tauri-plugin-process = "2"
+tauri-plugin-window-state = "2"
+notify-rust = "4"
+# native-tls means schannel on Windows and Security.framework on macOS, but it
+# means a cross-compiled OpenSSL on Android. Keep `default-features = false` on
+# both halves or Cargo turns reqwest's defaults back on for every target.
+reqwest = { version = "0.12", default-features = false, features = ["native-tls"] }
+rusqlite = { version = "0.32.0", features = ["bundled"] }
+async-trait = "0.1"
+md5 = "0.7"
+sha2 = "0.10"
+futures = "0.3"
+lofty = "0.22"
+# Spotify Premium playback. Keep librespot component crates in lockstep.
+parking_lot = "0.12"
+librespot-core = "0.8"
+librespot-playback = "0.8"
+librespot-oauth = "0.8"
+
+[target.'cfg(any(target_os = "android", target_os = "ios"))'.dependencies]
+reqwest = { version = "0.12", default-features = false, features = ["rustls-tls"] }
 
 [target.'cfg(windows)'.dependencies]
-windows = { version = "0.61", features = [
+windows = { version = "0.62", features = [
   "Win32_Foundation",
+  "Win32_Security",
+  "Win32_Security_Cryptography",
   "Win32_UI_WindowsAndMessaging",
   "Win32_UI_Shell",
   "Win32_Graphics_Gdi",
   "Win32_Graphics_Dxgi",
   "Win32_Graphics_Dxgi_Common",
+  "Win32_Devices_Display",
   "Win32_System_Threading",
+  "Win32_System_Com",
+  "Win32_System_Com_StructuredStorage",
+  "Win32_System_Variant",
+  "Win32_Media_Audio",
+  "Win32_System_Registry",
+  "Win32_Storage_FileSystem",
+  "Win32_System_Power",
+  "Win32_System_JobObjects",
   "Win32_System_ProcessStatus",
   "Win32_System_Diagnostics_ToolHelp",
+  "Win32_System_Diagnostics_Debug",
   "Win32_System_SystemInformation",
   "Win32_System_LibraryLoader",
+  "Win32_System_WinRT",
+  "Win32_System_WinRT_Direct3D11",
+  "Win32_System_WinRT_Graphics_Capture",
+  "Win32_Graphics_Direct3D",
+  "Win32_Graphics_Direct3D11",
+  "Graphics_Capture",
+  "Graphics_DirectX_Direct3D11",
+  "Graphics_Imaging",
+  "Media",
+  "Foundation",
+  "Storage_Streams",
 ] }
 window-vibrancy = "0.6"
 wasapi = "0.15"
-webview2-com = "0.38"
+webview2-com = "0.39"
 
 [target.'cfg(target_os = "linux")'.dependencies]
 gtk = { version = "0.18", features = ["v3_24"] }
 zbus = { version = "5", default-features = false, features = ["tokio"] }
 
+
+[dev-dependencies]
+sevenz-rust2 = { version = "=0.20.2", default-features = false, features = ["compress"] }
+crc32fast = "1"
+
 [profile.dev]
 debug = "line-tables-only"
+# The harbor crate itself, not just its dependencies. It sat at 0 to keep
+# incremental rebuilds cheap, which is the right trade on a desktop dev loop and
+# the wrong one for Android: every measurement taken against an Android debug
+# build was measuring unoptimised Harbor code, so the numbers described a binary
+# nobody ships. Release is not an option for measuring either, because it turns
+# off the debuggable webview and with it every CDP probe in tools/tv-bench.mjs.
+# opt-level 2 rather than 3: 3 buys little here and costs noticeably more build
+# time on a loop that already runs eleven minutes.
+opt-level = 2
+
+# Tauri brotli-compresses the frontend into the binary and calls BrotliDecompress on
+# every asset request (tauri-utils/src/assets.rs). At opt-level 0 that path served
+# 3,360 KB in 4,512 ms and 2,895 KB in 5,818 ms on a Fire TV Stick 4K Max, and it does
+# not parallelise, which is most of the 11.8s to first paint. Optimising dependencies
+# while leaving the harbor crate at 0 keeps incremental rebuilds cheap. Not target
+# scoped, so the first dev build on EVERY target rebuilds its whole graph, desktop
+# included, and desktop dev gains nothing because it loads from devUrl. Delete to revert.
+[profile.dev.package."*"]
+opt-level = 2
 
 [target.'cfg(target_os = "macos")'.dependencies]
 objc2 = "0.6"
@@ -107,3 +222,12 @@ objc2-app-kit = { version = "0.3", features = [
 objc2-web-kit = { version = "0.3", features = ["WKWebView"] }
 core-foundation = "0.10"
 core-video = "0.4"
+
+# librqbit enables governor's quanta default clock while librespot 0.8 hardcodes
+# MonotonicClock in its rate limiter. The vendored patch uses DefaultClock so
+# both crates can share governor safely. Drop this patch after librespot ships
+# the same fix. Cargo.lock also pins vergen 9.0.6 for librespot's build script.
+[patch.crates-io]
+librespot-core = { path = "vendor/librespot-core" }
+# Expose cached connected-seeder counts until librqbit provides them upstream.
+librqbit = { path = "vendor/librqbit" }

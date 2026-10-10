@@ -1,13 +1,10 @@
+import { MediaStartPage } from "@/components/media-start-page";
 import { useEffect, useRef, useState } from "react";
 import {
   ArrowLeft,
   ArrowRight,
   CalendarRange,
-  Clock,
   Globe2,
-  Grid2x2,
-  Radio,
-  ShieldCheck,
   Tv,
 } from "lucide-react";
 import { useT } from "@/lib/i18n";
@@ -23,94 +20,21 @@ export function PlaylistEmpty({
   onSave: (entry: PlaylistFormValue) => void;
 }) {
   const [stage, setStage] = useState<"intro" | "form">("intro");
+  const actionRef = useRef<HTMLButtonElement>(null);
+  const restoreFocus = useRef(false);
+  useEffect(() => {
+    if (stage === "intro" && restoreFocus.current) {
+      actionRef.current?.focus();
+      restoreFocus.current = false;
+    }
+  }, [stage]);
   return stage === "intro" ? (
-    <Intro onContinue={() => setStage("form")} />
+    <MediaStartPage kind="live" actionRef={actionRef} onSetup={() => setStage("form")} />
   ) : (
-    <Form onBack={() => setStage("intro")} onSave={onSave} />
-  );
-}
-
-function Intro({ onContinue }: { onContinue: () => void }) {
-  const t = useT();
-  return (
-    <div className="relative flex min-h-full flex-col px-12 py-20">
-      <div className="mx-auto flex w-full max-w-[820px] flex-1 flex-col justify-center gap-14">
-        <header className="flex flex-col gap-6">
-          <span className="text-[11px] font-bold uppercase tracking-[0.42em] text-ink-subtle">
-            {t("Live TV")}
-          </span>
-          <h1
-            className="font-display text-[60px] font-medium leading-[1.02] tracking-tight text-ink"
-            style={{ fontFamily: '"Fraunces", "Iowan Old Style", "Georgia", serif' }}
-          >
-            {t("Connect a playlist to get started.")}
-          </h1>
-          <p className="max-w-[560px] text-[16.5px] leading-relaxed text-ink-muted">
-            {t(
-              "Connect any IPTV provider. Channels are sorted by category, EPG is pulled automatically when your provider supplies it, and playback runs through native libmpv.",
-            )}
-          </p>
-          <div className="pt-2">
-            <button
-              onClick={onContinue}
-              className="group inline-flex h-12 items-center gap-2.5 rounded-full bg-ink ps-6 pe-5 text-[14.5px] font-semibold text-canvas transition-all duration-150 ease-out hover:opacity-90 active:scale-[0.97]"
-            >
-              {t("Connect a provider")}
-              <ArrowRight
-                size={16}
-                strokeWidth={2.4}
-                className="dir-icon transition-transform group-hover:translate-x-0.5 rtl:group-hover:-translate-x-0.5"
-              />
-            </button>
-          </div>
-        </header>
-
-        <div className="grid grid-cols-1 gap-x-12 gap-y-7 border-t border-edge-soft/40 pt-10 md:grid-cols-2">
-          <Feature
-            icon={<Grid2x2 size={17} strokeWidth={1.9} />}
-            title={t("Multi-view")}
-            body={t("Four channels at once, pre-spawned and swap-ready.")}
-          />
-          <Feature
-            icon={<Clock size={17} strokeWidth={1.9} />}
-            title={t("Live EPG")}
-            body={t("Now-playing and a seven-day guide when your provider supplies it.")}
-          />
-          <Feature
-            icon={<Radio size={17} strokeWidth={1.9} />}
-            title={t("Native libmpv")}
-            body={t("HEVC, HDR, TrueHD, plus real subtitle and audio menus.")}
-          />
-          <Feature
-            icon={<ShieldCheck size={17} strokeWidth={1.9} />}
-            title={t("Local only")}
-            body={t("Credentials stored on this device. Nothing leaves your machine.")}
-          />
-        </div>
-      </div>
-    </div>
-  );
-}
-
-function Feature({
-  icon,
-  title,
-  body,
-}: {
-  icon: React.ReactNode;
-  title: string;
-  body: string;
-}) {
-  return (
-    <div className="flex gap-4">
-      <span className="mt-0.5 flex h-8 w-8 shrink-0 items-center justify-center rounded-md text-ink-muted">
-        {icon}
-      </span>
-      <div className="flex flex-col gap-1.5">
-        <h3 className="text-[14.5px] font-semibold text-ink">{title}</h3>
-        <p className="text-[13px] leading-relaxed text-ink-muted">{body}</p>
-      </div>
-    </div>
+    <Form onBack={() => {
+      restoreFocus.current = true;
+      setStage("intro");
+    }} onSave={onSave} />
   );
 }
 
@@ -201,11 +125,11 @@ function Form({
   };
 
   return (
-    <div className="relative flex min-h-full flex-col px-12 py-20">
-      <div className="mx-auto flex w-full max-w-[640px] flex-1 flex-col justify-center gap-8">
+    <div className="media-start-page">
+      <div className="media-start-inner flex flex-col gap-8">
         <button
           onClick={onBack}
-          className="group inline-flex h-11 items-center gap-2 self-start rounded-full border border-edge-soft bg-elevated/60 ps-3.5 pe-5 text-[14px] font-semibold text-ink-muted transition-all duration-150 ease-out hover:border-edge hover:bg-elevated hover:text-ink active:scale-[0.97]"
+          className="group inline-flex h-11 items-center gap-2 self-start rounded-lg border border-edge-soft bg-elevated/60 ps-3.5 pe-5 text-[14px] font-semibold text-ink-muted transition-all duration-150 ease-out hover:border-edge hover:bg-elevated hover:text-ink active:scale-[0.97]"
         >
           <ArrowLeft
             size={16}
@@ -216,8 +140,7 @@ function Form({
         </button>
         <header className="flex flex-col gap-3">
           <h2
-            className="font-display text-[38px] font-medium leading-[1.05] tracking-tight text-ink"
-            style={{ fontFamily: '"Fraunces", "Iowan Old Style", "Georgia", serif' }}
+            className="font-display text-[32px] font-semibold leading-tight tracking-tight text-ink"
           >
             {t("Connect your provider.")}
           </h2>
@@ -233,8 +156,9 @@ function Form({
               <button
                 key={k.id}
                 type="button"
+                aria-pressed={selected}
                 onClick={() => setKind(k.id)}
-                className={`group flex items-center gap-4 rounded-2xl border px-5 py-4 text-start transition-all duration-150 ${
+                className={`group flex items-center gap-4 rounded-lg border px-5 py-4 text-start transition-all duration-150 ${
                   selected
                     ? "border-ink/40 bg-elevated"
                     : "border-edge-soft/60 bg-elevated/30 hover:border-edge hover:bg-elevated/55"
@@ -367,14 +291,14 @@ function Form({
           <div className="flex items-center justify-end gap-3 pt-2">
             <button
               onClick={onBack}
-              className="h-12 rounded-full px-5 text-[13.5px] font-medium text-ink-muted transition-colors hover:text-ink"
+              className="h-12 rounded-lg px-5 text-[13.5px] font-medium text-ink-muted transition-colors hover:text-ink"
             >
               {t("Cancel")}
             </button>
             <button
               disabled={!canSave}
               onClick={submit}
-              className="flex h-12 items-center gap-2 rounded-full bg-ink px-6 text-[14px] font-semibold text-canvas transition-all duration-150 ease-out hover:opacity-90 active:scale-[0.97] disabled:cursor-not-allowed disabled:opacity-30"
+              className="flex h-12 items-center gap-2 rounded-lg bg-ink px-6 text-[14px] font-semibold text-canvas transition-all duration-150 ease-out hover:opacity-90 active:scale-[0.97] disabled:cursor-not-allowed disabled:opacity-30"
             >
               {t("Save and continue")}
               <ArrowRight size={15} strokeWidth={2.4} className="dir-icon" />

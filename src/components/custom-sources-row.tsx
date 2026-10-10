@@ -20,7 +20,6 @@ export function CustomSourcesRow({
       title={sourceRow.title}
       min={isPoster ? 160 : 320}
       shape={isPoster ? "portrait" : "landscape"}
-      arrowsAlways
       scrollKey={`home:source:${sourceRow.id}`}
     >
       {sourceRow.folders.map((folder, index) => (

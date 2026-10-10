@@ -1,0 +1,48 @@
+.games-cross-media-probe { height:1px; margin-block-end:-1px; pointer-events:none; }
+.games-detail-flow-block:has(>.games-cross-media) { clear:both; }
+.games-cross-media { margin-block:40px 0; padding-block:0 12px; }
+.games-cross-media-heading { display:flex; flex-wrap:wrap; align-items:center; justify-content:space-between; gap:16px 24px; margin-bottom:22px; }
+.games-cross-media-heading h2 { margin:0; font-size:26px; letter-spacing:-.6px; line-height:1.2; font-weight:600; }
+.games-media-filters { display:flex; gap:4px; flex-wrap:wrap; }
+.games-media-filters button { padding:8px 12px; border-radius:6px; font-size:12px; color:var(--color-ink-muted); background:transparent; transition:background 160ms ease-out,color 160ms ease-out,transform 160ms ease-out; }
+.games-media-filters button:hover { background:var(--color-elevated); color:var(--color-ink); }
+.games-media-filters button[aria-pressed=true] { background:var(--color-raised); color:var(--color-ink); }
+.games-media-filters button:active { transform:scale(.97); }
+.games-cross-media :is(button,a):focus-visible { outline:2px solid var(--color-ink); outline-offset:4px; border-radius:6px; }
+.games-media-grid { display:grid; grid-template-columns:repeat(auto-fill,minmax(min(160px,100%),1fr)); gap:26px 20px; }
+.games-media-card { min-width:0; animation:games-media-enter 240ms ease-out var(--story-delay,0ms) both; }
+.games-media-open { width:100%; display:block; text-align:start; }
+.games-media-art { aspect-ratio:2/3; position:relative; isolation:isolate; overflow:hidden; border-radius:8px; background:var(--color-elevated); }
+.games-media-art-fallback { position:absolute; inset:0; display:grid; place-items:center; color:var(--color-ink-subtle); }
+.games-media-art-skeleton { position:absolute; inset:0; background:var(--color-elevated); animation:games-media-loading 1.6s ease-in-out infinite; }
+.games-media-image { position:absolute; inset:0; width:100%; height:100%; object-fit:cover; opacity:0; transform:scale(1.025); transition:opacity 220ms ease-out,transform 300ms ease-out; }
+.games-media-image[data-loaded=true] { opacity:1; transform:scale(1); }
+.games-media-open:is(:hover,:focus-visible) .games-media-image[data-loaded=true] { transform:scale(1.025); }
+.games-media-scores { position:absolute; inset:0; pointer-events:none; }
+.games-media-scores>div { animation:games-media-score-enter 180ms ease-out both; }
+.games-media-caption { margin-top:11px; }
+.games-media-caption h3 { margin:0; min-height:2.8em; font-size:14px; line-height:1.4; font-weight:550; overflow:hidden; display:-webkit-box; -webkit-box-orient:vertical; -webkit-line-clamp:2; overflow-wrap:anywhere; color:var(--color-ink); transition:color 160ms ease-out; }
+.games-media-meta { display:flex; align-items:center; flex-wrap:wrap; gap:6px; margin-top:5px; font-size:11px; line-height:1.5; color:var(--color-ink-muted); }
+.games-media-kind { display:inline-flex; align-items:center; gap:5px; }
+.games-media-meta svg { flex-shrink:0; }
+.games-media-external { margin-inline-start:auto; }
+.games-media-relation { display:flex; align-items:baseline; gap:5px; min-width:0; font-size:11px; line-height:1.55; color:var(--color-ink-muted); margin-top:7px; text-decoration:none; text-underline-offset:3px; transition:color 150ms ease-out; }
+.games-media-relation>span { overflow:hidden; display:-webkit-box; -webkit-box-orient:vertical; -webkit-line-clamp:2; }
+.games-media-relation:hover { text-decoration:underline; color:var(--color-ink); }
+.games-media-relation svg { flex-shrink:0; opacity:0; transition:opacity 150ms ease-out; }
+.games-media-card:is(:hover,:focus-within) .games-media-relation svg { opacity:1; }
+.games-media-footer { display:flex; justify-content:flex-end; margin-top:24px; }
+.games-media-error { display:flex; align-items:center; gap:16px; margin-bottom:20px; color:var(--color-ink-muted); font-size:13px; }
+@keyframes games-media-enter { from { opacity:0; transform:translateY(6px); } to { opacity:1; transform:translateY(0); } }
+@keyframes games-media-score-enter { from { opacity:0; } to { opacity:1; } }
+@keyframes games-media-loading { 0%,100% { background:var(--color-elevated); } 50% { background:var(--color-raised); } }
+@container(max-width:600px) {
+  .games-cross-media-heading h2 { font-size:23px; }
+  .games-media-grid { grid-template-columns:repeat(auto-fill,minmax(min(125px,100%),1fr)); gap:24px 16px; }
+  .games-media-error { align-items:flex-start; flex-wrap:wrap; }
+}
+@media(prefers-reduced-motion:reduce) {
+  .games-media-card,.games-media-art-skeleton,.games-media-scores>div { animation:none; }
+  .games-media-image,.games-media-filters button,.games-media-caption h3,.games-media-relation,.games-media-relation svg { transition:none; }
+  .games-media-open:is(:hover,:focus-visible) .games-media-image[data-loaded=true],.games-media-filters button:active { transform:none; }
+}

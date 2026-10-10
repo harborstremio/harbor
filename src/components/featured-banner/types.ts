@@ -8,5 +8,5 @@ export type LightboxState = {
 
 export function upsizeTmdb(url?: string): string | undefined {
   if (!url) return url;
-  return url.replace("/t/p/w780/", "/t/p/w1280/");
+  return url.replace(/\/t\/p\/(w\d+|original)\//, "/t/p/w1280/");
 }

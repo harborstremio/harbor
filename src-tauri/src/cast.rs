@@ -1,7 +1,7 @@
 use mdns_sd::{ServiceDaemon, ServiceEvent};
 use rust_cast::{
     channels::{
-        media::{Media, Metadata, MovieMediaMetadata, StreamType},
+        media::{Media, Metadata, MovieMediaMetadata, MusicTrackMediaMetadata, StreamType},
         receiver::CastDeviceApp,
     },
     CastDevice, ChannelMessage,
@@ -10,15 +10,15 @@ use serde::Serialize;
 use std::collections::HashMap;
 use std::net::IpAddr;
 use std::str::FromStr;
-use std::sync::atomic::{AtomicU64, Ordering};
 use std::sync::Mutex;
+use std::sync::atomic::{AtomicU64, Ordering};
 use std::time::Duration;
 
 use crate::airplay;
 use crate::cast_subs::{self, CastSub, CastSubStyle};
 use crate::dlna;
 use crate::roku;
-use crate::stream_proxy::{ProxyState, RegisterArgs};
+use crate::stream_proxy::{AudioCastFormat, AudioCastInput, ProxyState, RegisterArgs};
 use crate::transcode::TranscodeProfile;
 
 const CAST_SERVICE_TYPE: &str = "_googlecast._tcp.local.";
@@ -37,7 +37,15 @@ pub struct CastDeviceInfo {
     pub audio_only: bool,
 }
 
-fn needs_auto_remux(kind: &str, url: &str) -> bool {
+fn is_audio_content_type(content_type: Option<&str>) -> bool {
+    content_type.is_some_and(|mime| mime.trim().to_ascii_lowercase().starts_with("audio/"))
+}
+
+fn needs_auto_remux(kind: &str, url: &str, content_type: Option<&str>) -> bool {
+    // Music streams keep their actual codec/container; the video HLS emitter is not an audio converter.
+    if is_audio_content_type(content_type) {
+        return false;
+    }
     if kind != "chromecast" && kind != "dlna" && kind != "roku" {
         return false;
     }
@@ -50,6 +58,43 @@ fn needs_auto_remux(kind: &str, url: &str) -> bool {
         return false;
     }
     true
+}
+
+fn chromecast_content_type(url: &str, supplied: Option<&str>) -> String {
+    if is_audio_content_type(supplied) {
+        return supplied.unwrap_or_default().trim().to_string();
+    }
+    let lower = url.to_lowercase();
+    if lower.contains(".m3u8") {
+        "application/x-mpegURL".into()
+    } else if lower.contains(".ts") {
+        "video/mp2t".into()
+    } else {
+        "video/mp4".into()
+    }
+}
+
+fn cast_media_metadata(
+    title: Option<String>,
+    poster: Option<String>,
+    content_type: Option<&str>,
+) -> Metadata {
+    let images = poster
+        .map(|url| vec![rust_cast::channels::media::Image::new(url)])
+        .unwrap_or_default();
+    if is_audio_content_type(content_type) {
+        Metadata::MusicTrack(MusicTrackMediaMetadata {
+            title,
+            images,
+            ..Default::default()
+        })
+    } else {
+        Metadata::Movie(MovieMediaMetadata {
+            title,
+            images,
+            ..Default::default()
+        })
+    }
 }
 
 fn required_control_url(kind: &str, control_url: Option<String>) -> Result<Option<String>, String> {
@@ -102,7 +147,6 @@ fn detect_audio_only(name: &str, model: &Option<String>, kind: &str) -> bool {
     false
 }
 
-#[derive(Debug)]
 enum ActiveSession {
     Chromecast {
         host: String,
@@ -129,127 +173,9 @@ enum ActiveSession {
 }
 
 static ACTIVE: Mutex<Option<ActiveSession>> = Mutex::new(None);
-static CAST_LOAD_GATE: tokio::sync::Mutex<()> = tokio::sync::Mutex::const_new(());
-static PENDING_PREPARE: Mutex<
-    Option<(
-        u64,
-        tokio_util::sync::CancellationToken,
-        std::sync::Arc<tokio::sync::Notify>,
-    )>,
-> = Mutex::new(None);
-static NEXT_PREPARE_ID: AtomicU64 = AtomicU64::new(1);
-
-struct PendingLoad {
-    id: u64,
-    cancellation: tokio_util::sync::CancellationToken,
-    finished: std::sync::Arc<tokio::sync::Notify>,
-}
-
-impl Drop for PendingLoad {
-    fn drop(&mut self) {
-        finish_pending_prepare(self.id, &self.finished);
-    }
-}
-
-fn begin_pending_prepare() -> Result<
-    (
-        u64,
-        tokio_util::sync::CancellationToken,
-        std::sync::Arc<tokio::sync::Notify>,
-    ),
-    String,
-> {
-    let id = NEXT_PREPARE_ID.fetch_add(1, Ordering::Relaxed);
-    let token = tokio_util::sync::CancellationToken::new();
-    let finished = std::sync::Arc::new(tokio::sync::Notify::new());
-    let previous = PENDING_PREPARE
-        .lock()
-        .map_err(|error| format!("subtitle preparation lock: {error}"))?
-        .replace((id, token.clone(), finished.clone()));
-    if let Some((_, previous_token, _)) = previous {
-        previous_token.cancel();
-    }
-    Ok((id, token, finished))
-}
-
-fn begin_pending_load() -> Result<PendingLoad, String> {
-    let (id, cancellation, finished) = begin_pending_prepare()?;
-    Ok(PendingLoad {
-        id,
-        cancellation,
-        finished,
-    })
-}
-
-fn finish_pending_prepare(id: u64, finished: &tokio::sync::Notify) {
-    if let Ok(mut pending) = PENDING_PREPARE.lock() {
-        if pending
-            .as_ref()
-            .is_some_and(|(current, _, _)| *current == id)
-        {
-            pending.take();
-        }
-    }
-    finished.notify_one();
-}
-
-async fn cancel_pending_prepare() -> Result<(), String> {
-    let pending = PENDING_PREPARE
-        .lock()
-        .map_err(|error| format!("subtitle preparation lock: {error}"))?
-        .take();
-    if let Some((_, token, finished)) = pending {
-        token.cancel();
-        // Device protocols may be inside an uninterruptible socket operation.
-        // Cancellation remains authoritative, but stop must never wait forever.
-        let _ = tokio::time::timeout(Duration::from_secs(2), finished.notified()).await;
-    }
-    Ok(())
-}
-
-#[cfg(test)]
-mod pending_prepare_tests {
-    use super::*;
-
-    #[tokio::test]
-    async fn stop_aborts_pending_subtitle_preparation() {
-        let (id, token, finished) = begin_pending_prepare().expect("register pending preparation");
-        let observer = token.clone();
-        let worker = tokio::spawn(async move {
-            observer.cancelled().await;
-            finish_pending_prepare(id, &finished);
-        });
-        cancel_pending_prepare()
-            .await
-            .expect("cancel pending preparation");
-        assert!(token.is_cancelled());
-        worker.await.expect("preparation worker exits");
-    }
-
-    #[tokio::test]
-    async fn every_new_load_cancels_the_previous_generation() {
-        let old = begin_pending_load().expect("register old load");
-        let old_token = old.cancellation.clone();
-        let _new = begin_pending_load().expect("register new load without subtitle");
-        assert!(old_token.is_cancelled());
-    }
-
-    #[tokio::test]
-    async fn superseded_generation_cannot_commit_active_session() {
-        let old = begin_pending_load().expect("register old load");
-        let _new = begin_pending_load().expect("supersede old load");
-        let result = replace_active_session_if_current(
-            old.id,
-            ActiveSession::Dlna {
-                control_url: "test".to_string(),
-                hls_session_id: None,
-            },
-            |_| async {},
-        )
-        .await;
-        assert!(matches!(result, Err((ref error, _)) if error == "cast load superseded"));
-    }
-}
+// Keep asynchronous receiver mutations in order; status polling never holds this lock.
+static TRANSPORT_OPS: tokio::sync::Mutex<()> = tokio::sync::Mutex::const_new(());
+static ACTIVE_EPOCH: AtomicU64 = AtomicU64::new(0);
 
 impl ActiveSession {
     fn hls_session_id(&self) -> Option<String> {
@@ -262,7 +188,6 @@ impl ActiveSession {
     }
 }
 
-#[cfg(test)]
 async fn replace_active_session<Stop, StopFuture>(
     next: ActiveSession,
     stop_hls: Stop,
@@ -273,6 +198,7 @@ where
 {
     let previous_hls = {
         let mut active = ACTIVE.lock().map_err(|e| format!("lock: {e}"))?;
+        ACTIVE_EPOCH.fetch_add(1, Ordering::Relaxed);
         active
             .replace(next)
             .and_then(|session| session.hls_session_id())
@@ -283,88 +209,21 @@ where
     Ok(())
 }
 
-async fn replace_active_session_if_current<Stop, StopFuture>(
-    load_id: u64,
-    next: ActiveSession,
-    stop_hls: Stop,
-) -> Result<(), (String, ActiveSession)>
-where
-    Stop: FnOnce(String) -> StopFuture,
-    StopFuture: std::future::Future<Output = ()>,
-{
-    let previous_hls = {
-        // Keep the generation check and active-session commit atomic with
-        // respect to begin_pending_prepare(), which owns this mutex.
-        let pending = match PENDING_PREPARE.lock() {
-            Ok(pending) => pending,
-            Err(error) => return Err((format!("cast load lock: {error}"), next)),
-        };
-        if !pending
-            .as_ref()
-            .is_some_and(|(current, _, _)| *current == load_id)
-        {
-            return Err(("cast load superseded".to_string(), next));
-        }
-        let mut active = match ACTIVE.lock() {
-            Ok(active) => active,
-            Err(error) => return Err((format!("lock: {error}"), next)),
-        };
-        active
-            .replace(next)
-            .and_then(|session| session.hls_session_id())
-    };
-    if let Some(id) = previous_hls {
-        stop_hls(id).await;
-    }
+fn restore_failed_stop(session: Option<ActiveSession>, epoch: u64) -> Result<(), String> {
+    let mut active = ACTIVE.lock().map_err(|e| format!("lock: {e}"))?;
+    restore_failed_stop_if_current(&mut active, session, epoch, ACTIVE_EPOCH.load(Ordering::Relaxed));
     Ok(())
 }
 
-async fn cleanup_uncommitted_session(session: ActiveSession, proxy_state: &ProxyState) {
-    let hls_session_id = session.hls_session_id();
-    match session {
-        ActiveSession::Dlna { control_url, .. } => {
-            let _ = dlna::stop(control_url).await;
-        }
-        ActiveSession::Roku { ecp_base, .. } => {
-            let _ = roku::stop(ecp_base).await;
-        }
-        ActiveSession::AirPlay { host, port, .. } => {
-            let _ = airplay::stop(host, port).await;
-        }
-        ActiveSession::Chromecast {
-            host,
-            port,
-            session_id,
-            ..
-        } => {
-            let _ = tokio::task::spawn_blocking(move || {
-                if let Ok(device) = connect_device(&host, port) {
-                    let _ = device.receiver.stop_app(&session_id);
-                }
-            })
-            .await;
-        }
-    }
-    if let Some(id) = hls_session_id {
-        proxy_state.stop_hls_session(&id).await;
-    }
-}
-
-async fn commit_active_session(
-    load_id: u64,
-    next: ActiveSession,
-    proxy_state: &ProxyState,
-) -> Result<(), String> {
-    match replace_active_session_if_current(load_id, next, |id| async move {
-        proxy_state.stop_hls_session(&id).await;
-    })
-    .await
-    {
-        Ok(()) => Ok(()),
-        Err((error, stale)) => {
-            cleanup_uncommitted_session(stale, proxy_state).await;
-            Err(error)
-        }
+fn restore_failed_stop_if_current(
+    active: &mut Option<ActiveSession>,
+    session: Option<ActiveSession>,
+    epoch: u64,
+    current_epoch: u64,
+) {
+    // A new LOAD may have replaced (and subsequently stopped) the session while STOP awaited the network.
+    if active.is_none() && current_epoch == epoch {
+        *active = session;
     }
 }
 
@@ -662,35 +521,36 @@ pub async fn cast_load(
     profile: Option<TranscodeProfile>,
     subtitle: Option<CastSub>,
     sub_style: Option<CastSubStyle>,
+    audio_only: Option<bool>,
+    audio_track_ordinal: Option<u32>,
+    audio_start_paused: Option<bool>,
 ) -> Result<(), String> {
-    // Register every load before waiting for the serialization gate. This makes
-    // the newest request authoritative even when an older request is preparing
-    // subtitles or proxy resources.
-    let pending_load = begin_pending_load()?;
-    let _load_gate = CAST_LOAD_GATE.lock().await;
-    if pending_load.cancellation.is_cancelled() {
-        return Err("cast load superseded".to_string());
-    }
     let kind_str = kind.unwrap_or_else(|| "chromecast".into());
+    let _operation = TRANSPORT_OPS.lock().await;
     let control_url = required_control_url(&kind_str, control_url)?;
     let req_headers = headers.unwrap_or_default();
+    let direct_audio = kind_str == "dlna" && !audio_start_paused.unwrap_or(false)
+        && audio_track_ordinal.unwrap_or(0) == 0
+        && dlna::supports_direct_audio(control_url.as_deref().unwrap_or(""), content_type.as_deref()).await;
+    if kind_str == "dlna" && !direct_audio && (audio_only.unwrap_or(false) || is_audio_content_type(content_type.as_deref())) {
+        let cu = control_url.ok_or("DLNA device missing control_url")?;
+        let input = AudioCastInput {
+            url, headers: req_headers, audio_ordinal: audio_track_ordinal.unwrap_or(0),
+            start_seconds: start_time_sec.unwrap_or(0.0),
+            // Live FLAC decoded on Sonos but failed real pause/resume tests. MP3 passed all controls.
+            format: AudioCastFormat::Mp3,
+            title, target_host: host,
+        };
+        return load_dlna_audio(&proxy_state, cu, input, audio_start_paused.unwrap_or(false), None).await;
+    }
+    if audio_only.unwrap_or(false) && !is_audio_content_type(content_type.as_deref()) {
+        return Err("Audio-only routing is currently supported by DLNA speakers".into());
+    }
     let burn_sub = match subtitle {
         Some(ref s) if !s.off => {
             let style = sub_style.unwrap_or_default();
             let seek = start_time_sec.unwrap_or(0.0).max(0.0);
-            let result = cast_subs::prepare(
-                s,
-                &style,
-                &url,
-                &req_headers,
-                seek,
-                &pending_load.cancellation,
-            )
-            .await;
-            if pending_load.cancellation.is_cancelled() {
-                return Err("cast subtitle preparation cancelled".to_string());
-            }
-            result
+            cast_subs::prepare(s, &style, &url, &req_headers, seek).await
         }
         _ => None,
     };
@@ -704,14 +564,17 @@ pub async fn cast_load(
     // ONLY way to reliably stream non-faststart MP4s and MKV through these
     // receivers — same approach Plex/Jellyfin/Stremio use. ffmpeg copy mode
     // is line-rate (no re-encoding) and produces a streaming-friendly container.
-    let url_needs_remux = needs_auto_remux(&kind_str, &url);
+    let url_needs_remux = needs_auto_remux(&kind_str, &url, content_type.as_deref());
     let ffmpeg_available = crate::transcode::ffmpeg_present();
     let ffmpeg_path = crate::transcode::locate_ffmpeg();
     let url_path_lc = url.split('?').next().unwrap_or(&url).to_lowercase();
     let already_streaming = url_path_lc.ends_with(".m3u8")
         || url_path_lc.ends_with(".mpd")
         || url_path_lc.ends_with(".ts");
-    let roku_force_transcode = kind_str == "roku" && ffmpeg_available && !already_streaming;
+    let roku_force_transcode = kind_str == "roku"
+        && ffmpeg_available
+        && !already_streaming
+        && !is_audio_content_type(content_type.as_deref());
     eprintln!(
         "[harbor::cast] remux probe v3: kind={} url_match={} ffmpeg_present={} ffmpeg_path={:?} roku_force={} already_streaming={}",
         kind_str, url_needs_remux, ffmpeg_available, ffmpeg_path, roku_force_transcode, already_streaming,
@@ -749,6 +612,7 @@ pub async fn cast_load(
             url: url.clone(),
             headers: req_headers,
             transcode: do_transcode,
+            prebuffer_bytes: None,
             profile: effective_profile,
             target_host: Some(host.clone()),
             start_time_sec,
@@ -756,12 +620,6 @@ pub async fn cast_load(
             burn_sub_style,
         })
         .await;
-    if pending_load.cancellation.is_cancelled() {
-        if proxied.url.contains("/cast/hls/") {
-            proxy_state.stop_hls_session(&proxied.session_id).await;
-        }
-        return Err("cast load superseded".to_string());
-    }
     eprintln!("[harbor::cast] proxied stream ready");
     let hls_session_id = proxied
         .url
@@ -790,20 +648,14 @@ pub async fn cast_load(
             }
             return Err(error);
         }
-        if pending_load.cancellation.is_cancelled() {
-            let _ = dlna::stop(cu.clone()).await;
-            if let Some(id) = hls_session_id.as_deref() {
-                proxy_state.stop_hls_session(id).await;
-            }
-            return Err("cast load superseded".to_string());
-        }
-        commit_active_session(
-            pending_load.id,
+        replace_active_session(
             ActiveSession::Dlna {
                 control_url: cu,
                 hls_session_id,
             },
-            &proxy_state,
+            |id| async move {
+                proxy_state.stop_hls_session(&id).await;
+            },
         )
         .await?;
         return Ok(());
@@ -821,20 +673,14 @@ pub async fn cast_load(
             }
             return Err(error);
         }
-        if pending_load.cancellation.is_cancelled() {
-            let _ = roku::stop(ecp.clone()).await;
-            if let Some(id) = hls_session_id.as_deref() {
-                proxy_state.stop_hls_session(id).await;
-            }
-            return Err("cast load superseded".to_string());
-        }
-        commit_active_session(
-            pending_load.id,
+        replace_active_session(
             ActiveSession::Roku {
                 ecp_base: ecp,
                 hls_session_id,
             },
-            &proxy_state,
+            |id| async move {
+                proxy_state.stop_hls_session(&id).await;
+            },
         )
         .await?;
         return Ok(());
@@ -846,21 +692,15 @@ pub async fn cast_load(
             }
             return Err(error);
         }
-        if pending_load.cancellation.is_cancelled() {
-            let _ = airplay::stop(host.clone(), port).await;
-            if let Some(id) = hls_session_id.as_deref() {
-                proxy_state.stop_hls_session(id).await;
-            }
-            return Err("cast load superseded".to_string());
-        }
-        commit_active_session(
-            pending_load.id,
+        replace_active_session(
             ActiveSession::AirPlay {
                 host,
                 port,
                 hls_session_id,
             },
-            &proxy_state,
+            |id| async move {
+                proxy_state.stop_hls_session(&id).await;
+            },
         )
         .await?;
         return Ok(());
@@ -871,36 +711,17 @@ pub async fn cast_load(
         cast_url,
         title,
         poster,
+        if do_transcode { None } else { content_type },
         start_time_sec,
         hls_session_id.clone(),
     )
     .await;
     match result {
         Ok(session) => {
-            if pending_load.cancellation.is_cancelled() {
-                if let ActiveSession::Chromecast {
-                    host,
-                    port,
-                    session_id,
-                    ..
-                } = &session
-                {
-                    let host = host.clone();
-                    let port = *port;
-                    let session_id = session_id.clone();
-                    let _ = tokio::task::spawn_blocking(move || {
-                        if let Ok(device) = connect_device(&host, port) {
-                            let _ = device.receiver.stop_app(&session_id);
-                        }
-                    })
-                    .await;
-                }
-                if let Some(id) = hls_session_id.as_deref() {
-                    proxy_state.stop_hls_session(id).await;
-                }
-                return Err("cast load superseded".to_string());
-            }
-            commit_active_session(pending_load.id, session, &proxy_state).await
+            replace_active_session(session, |id| async move {
+                proxy_state.stop_hls_session(&id).await;
+            })
+            .await
         }
         Err(error) => {
             if let Some(id) = hls_session_id.as_deref() {
@@ -911,12 +732,46 @@ pub async fn cast_load(
     }
 }
 
+async fn load_dlna_audio(proxy: &ProxyState, control_url: String, input: AudioCastInput, paused: bool, expected_previous: Option<&str>) -> Result<(), String> {
+    let title = input.title.clone();
+    let mime = input.format.mime().to_string();
+    let route = proxy.register_audio_cast(input).await?;
+    if let Some(previous) = expected_previous {
+        let still_owned = dlna::current_uri(&control_url).await.map(|uri| dlna::uri_has_audio_session(&uri, previous));
+        if !matches!(still_owned, Ok(true)) {
+            proxy.stop_hls_session(&route.session_id).await;
+            return Err("The speaker source changed during seeking".into());
+        }
+    }
+    let result = dlna::load_audio_route(&control_url, route.url, &route.session_id, title, mime, paused).await;
+    if let Err(error) = result {
+        let cleanup = dlna::stop_audio_if_owned(&control_url, &route.session_id).await;
+        if let Err(uncertain) = cleanup {
+            // Retain an addressable session so a subsequent Stop can be acknowledged.
+            replace_active_session(ActiveSession::Dlna { control_url, hls_session_id: Some(route.session_id) }, |id| async move { proxy.stop_hls_session(&id).await; }).await?;
+            return Err(uncertain);
+        }
+        proxy.stop_hls_session(&route.session_id).await;
+        return Err(error);
+    }
+    replace_active_session(ActiveSession::Dlna { control_url, hls_session_id: Some(route.session_id) }, |id| async move { proxy.stop_hls_session(&id).await; }).await
+}
+
+fn snapshot_dlna_audio() -> Option<(String, String)> {
+    let active = ACTIVE.lock().ok()?;
+    match active.as_ref()? {
+        ActiveSession::Dlna { control_url, hls_session_id: Some(id) } if id.starts_with("audio-") => Some((control_url.clone(), id.clone())),
+        _ => None,
+    }
+}
+
 async fn cast_load_chromecast(
     host: String,
     port: u16,
     stream_url: String,
     title: Option<String>,
     poster: Option<String>,
+    content_type: Option<String>,
     start_time_sec: Option<f64>,
     hls_session_id: Option<String>,
 ) -> Result<ActiveSession, String> {
@@ -962,7 +817,13 @@ async fn cast_load_chromecast(
             }
         };
         eprintln!("[harbor::cast] connected to {}:{}", host_clone, port);
-        let (transport_id, session_id) = match launch_harbor_receiver(&device) {
+        // Google's default receiver supports audio without requiring the video receiver's registration.
+        let launched = if is_audio_content_type(content_type.as_deref()) {
+            launch_receiver_app(&device, "default")
+        } else {
+            launch_harbor_receiver(&device)
+        };
+        let (transport_id, session_id) = match launched {
             Ok(t) => t,
             Err(e) => {
                 let _ = result_tx.send(Err(e));
@@ -970,36 +831,21 @@ async fn cast_load_chromecast(
             }
         };
         eprintln!(
-            "[harbor::cast] Harbor receiver launched (transport={}, session={})",
+            "[harbor::cast] receiver launched (transport={}, session={})",
             transport_id, session_id,
         );
-        let metadata = MovieMediaMetadata {
-            title: title_clone.clone(),
-            subtitle: None,
-            studio: None,
-            release_date: None,
-            images: poster_clone
-                .as_ref()
-                .map(|p| vec![rust_cast::channels::media::Image::new(p.clone())])
-                .unwrap_or_default(),
-        };
-        let content_type = if stream_url_clone.to_lowercase().contains(".m3u8") {
-            "application/x-mpegURL"
-        } else if stream_url_clone.to_lowercase().contains(".ts") {
-            "video/mp2t"
-        } else {
-            "video/mp4"
-        };
+        let metadata = cast_media_metadata(title_clone, poster_clone, content_type.as_deref());
+        let content_type = chromecast_content_type(&stream_url_clone, content_type.as_deref());
         eprintln!(
             "[harbor::cast] sending LOAD: ct={} time={:.1}",
             content_type, start,
         );
         let media = Media {
             content_id: stream_url_clone.clone(),
-            content_type: content_type.to_string(),
+            content_type,
             stream_type: StreamType::Buffered,
             duration: None,
-            metadata: Some(Metadata::Movie(metadata)),
+            metadata: Some(metadata),
         };
         let is_hls = stream_url_clone.to_lowercase().contains("/cast/hls/")
             || stream_url_clone.to_lowercase().contains(".m3u8");
@@ -1128,6 +974,12 @@ fn snapshot_airplay() -> Option<(String, u16)> {
 
 #[tauri::command]
 pub async fn cast_play() -> Result<(), String> {
+    let _operation = TRANSPORT_OPS.lock().await;
+    if let Some((cu, id)) = snapshot_dlna_audio() {
+        if !dlna::uri_has_audio_session(&dlna::current_uri(&cu).await?, &id) { return Err("The speaker source changed".into()); }
+        dlna::play(cu.clone()).await?;
+        return dlna::wait_audio_state(&cu, &id, false, false).await.map(|_| ());
+    }
     if let Some(cu) = snapshot_dlna() {
         return dlna::play(cu).await;
     }
@@ -1157,6 +1009,12 @@ pub async fn cast_play() -> Result<(), String> {
 
 #[tauri::command]
 pub async fn cast_pause() -> Result<(), String> {
+    let _operation = TRANSPORT_OPS.lock().await;
+    if let Some((cu, id)) = snapshot_dlna_audio() {
+        if !dlna::uri_has_audio_session(&dlna::current_uri(&cu).await?, &id) { return Err("The speaker source changed".into()); }
+        dlna::pause(cu.clone()).await?;
+        return dlna::wait_audio_state(&cu, &id, true, false).await.map(|_| ());
+    }
     if let Some(cu) = snapshot_dlna() {
         return dlna::pause(cu).await;
     }
@@ -1185,7 +1043,15 @@ pub async fn cast_pause() -> Result<(), String> {
 }
 
 #[tauri::command]
-pub async fn cast_seek(sec: f64) -> Result<(), String> {
+pub async fn cast_seek(proxy_state: tauri::State<'_, ProxyState>, sec: f64) -> Result<(), String> {
+    let _operation = TRANSPORT_OPS.lock().await;
+    if let Some((cu, id)) = snapshot_dlna_audio() {
+        if !dlna::uri_has_audio_session(&dlna::current_uri(&cu).await?, &id) { return Err("The speaker source changed".into()); }
+        let paused = normalize_player_state(&dlna::status(cu.clone()).await?.player_state) == "PAUSED";
+        let mut input = proxy_state.audio_cast_input(&id).await.ok_or("Speaker audio route ended")?;
+        input.start_seconds = sec;
+        return load_dlna_audio(&proxy_state, cu, input, paused, Some(&id)).await;
+    }
     if let Some(cu) = snapshot_dlna() {
         return dlna::seek(cu, sec).await;
     }
@@ -1216,12 +1082,11 @@ pub async fn cast_seek(sec: f64) -> Result<(), String> {
 
 #[tauri::command]
 pub async fn cast_stop(proxy_state: tauri::State<'_, ProxyState>) -> Result<(), String> {
-    cancel_pending_prepare().await?;
-    let session = {
+    let _operation = TRANSPORT_OPS.lock().await;
+    let (session, epoch) = {
         let mut active = ACTIVE.lock().map_err(|e| format!("lock: {e}"))?;
-        active.take()
+        (active.take(), ACTIVE_EPOCH.load(Ordering::Relaxed))
     };
-    cast_subs::cleanup();
     let hls_session_id = match session.as_ref() {
         Some(ActiveSession::Chromecast { hls_session_id, .. })
         | Some(ActiveSession::Dlna { hls_session_id, .. })
@@ -1229,39 +1094,55 @@ pub async fn cast_stop(proxy_state: tauri::State<'_, ProxyState>) -> Result<(), 
         | Some(ActiveSession::AirPlay { hls_session_id, .. }) => hls_session_id.clone(),
         None => None,
     };
-    let result = match session {
-        Some(ActiveSession::Dlna { control_url, .. }) => dlna::stop(control_url).await,
-        Some(ActiveSession::Roku { ecp_base, .. }) => roku::stop(ecp_base).await,
-        Some(ActiveSession::AirPlay { host, port, .. }) => airplay::stop(host, port).await,
+    let result = match session.as_ref() {
+        Some(ActiveSession::Dlna { control_url, hls_session_id: Some(id) }) if id.starts_with("audio-") => dlna::stop_audio_if_owned(control_url, id).await,
+        Some(ActiveSession::Dlna { control_url, .. }) => dlna::stop(control_url.clone()).await,
+        Some(ActiveSession::Roku { ecp_base, .. }) => roku::stop(ecp_base.clone()).await,
+        Some(ActiveSession::AirPlay { host, port, .. }) => airplay::stop(host.clone(), *port).await,
         Some(ActiveSession::Chromecast {
             host,
             port,
             session_id,
             ..
-        }) => tokio::task::spawn_blocking(move || -> Result<(), String> {
-            if let Ok(device) = connect_device(&host, port) {
-                let _ = device.receiver.stop_app(&session_id);
-            }
-            Ok(())
-        })
-        .await
-        .map_err(|e| format!("join: {e}"))?,
+        }) => {
+            let (host, port, session_id) = (host.clone(), *port, session_id.clone());
+            tokio::task::spawn_blocking(move || -> Result<(), String> {
+                let device = connect_device(&host, port)?;
+                device.receiver.stop_app(&session_id).map_err(|error| format!("stop: {error}"))?;
+                Ok(())
+            })
+            .await
+            .map_err(|e| format!("join: {e}"))
+            .and_then(|result| result)
+        }
         None => Ok(()),
     };
+    if let Err(error) = result {
+        restore_failed_stop(session, epoch)?;
+        return Err(error);
+    }
+    cast_subs::cleanup();
     if let Some(id) = hls_session_id {
         proxy_state.stop_hls_session(&id).await;
     }
-    result
+    Ok(())
 }
 
 #[tauri::command]
-pub async fn cast_status() -> Result<Option<CastStatus>, String> {
+pub async fn cast_status(proxy_state: tauri::State<'_, ProxyState>) -> Result<Option<CastStatus>, String> {
+    if let Some((cu, id)) = snapshot_dlna_audio() {
+        if !dlna::uri_has_audio_session(&dlna::current_uri(&cu).await?, &id) { return Ok(None); }
+        let input = proxy_state.audio_cast_input(&id).await.ok_or("Speaker audio route ended")?;
+        let state = dlna::status(cu).await?;
+        return Ok(Some(CastStatus { position_sec: input.start_seconds + state.position_sec, player_state: normalize_player_state(&state.player_state), connected: true, transport_codec: Some("mp3".into()) }));
+    }
     if let Some(cu) = snapshot_dlna() {
         let s = dlna::status(cu).await.ok();
         return Ok(s.map(|x| CastStatus {
             position_sec: x.position_sec,
             player_state: normalize_player_state(&x.player_state),
             connected: true,
+            transport_codec: None,
         }));
     }
     if let Some(ecp) = snapshot_roku() {
@@ -1269,6 +1150,7 @@ pub async fn cast_status() -> Result<Option<CastStatus>, String> {
             position_sec: s.position_sec,
             player_state: normalize_player_state(&s.player_state),
             connected: !s.error,
+            transport_codec: None,
         }));
     }
     if let Some((h, p)) = snapshot_airplay() {
@@ -1277,6 +1159,7 @@ pub async fn cast_status() -> Result<Option<CastStatus>, String> {
             position_sec: pos,
             player_state: normalize_player_state(&state),
             connected: true,
+            transport_codec: None,
         }));
     }
     let snap = match snapshot_chromecast() {
@@ -1291,22 +1174,25 @@ pub async fn cast_status() -> Result<Option<CastStatus>, String> {
             .connect(transport_id.clone())
             .map_err(|e| format!("{e}"))?;
         if let Some(msid) = msid {
-            if let Ok(status) = device.media.get_status(&transport_id, Some(msid)) {
-                if let Some(entry) = status.entries.first() {
-                    let raw_state = format!("{:?}", entry.player_state);
-                    let cast_pos = entry.current_time.map(|v| v as f64).unwrap_or(0.0);
-                    return Ok(Some(CastStatus {
-                        position_sec: cast_pos + seek_start,
-                        player_state: normalize_player_state(&raw_state),
-                        connected: true,
-                    }));
-                }
+            let status = device.media.get_status(&transport_id, Some(msid))
+                .map_err(|error| format!("status: {error}"))?;
+            if let Some(entry) = status.entries.first() {
+                let raw_state = format!("{:?}", entry.player_state);
+                let cast_pos = entry.current_time.map(|v| v as f64).unwrap_or(0.0);
+                return Ok(Some(CastStatus {
+                    position_sec: cast_pos + seek_start,
+                    player_state: normalize_player_state(&raw_state),
+                    connected: true,
+                    transport_codec: None,
+                }));
             }
+            return Ok(None);
         }
         Ok(Some(CastStatus {
             position_sec: 0.0,
             player_state: "UNKNOWN".to_string(),
             connected: true,
+            transport_codec: None,
         }))
     })
     .await
@@ -1318,6 +1204,8 @@ pub struct CastStatus {
     pub position_sec: f64,
     pub player_state: String,
     pub connected: bool,
+    #[serde(skip_serializing_if = "Option::is_none")]
+    pub transport_codec: Option<String>,
 }
 
 fn normalize_player_state(raw: &str) -> String {
@@ -1351,6 +1239,35 @@ fn drain_briefly(device: &CastDevice<'_>, ms: u64) {
 mod cast_validation_tests {
     use super::{replace_active_session, required_control_url, ActiveSession, ACTIVE};
     use std::sync::{Arc, Mutex};
+
+    #[test]
+    fn failed_stop_restores_only_same_session_epoch() {
+        let old = || Some(ActiveSession::Dlna { control_url: "old".into(), hls_session_id: None });
+        let mut active = None;
+        super::restore_failed_stop_if_current(&mut active, old(), 7, 7);
+        assert!(matches!(&active, Some(ActiveSession::Dlna { control_url, .. }) if control_url == "old"));
+        active = None;
+        super::restore_failed_stop_if_current(&mut active, old(), 7, 8);
+        assert!(active.is_none(), "do not revive a session after a newer LOAD/STOP");
+        active = Some(ActiveSession::Dlna { control_url: "new".into(), hls_session_id: None });
+        super::restore_failed_stop_if_current(&mut active, old(), 7, 8);
+        assert!(matches!(&active, Some(ActiveSession::Dlna { control_url, .. }) if control_url == "new"));
+    }
+
+    #[test]
+    fn audio_cast_preserves_mime_metadata_and_skips_video_remux() {
+        for kind in ["chromecast", "dlna"] {
+            for mime in ["audio/mpeg", "audio/flac", "audio/mp4", "audio/webm; codecs=opus"] {
+                assert!(!super::needs_auto_remux(kind, "https://example.test/song", Some(mime)));
+                assert_eq!(super::chromecast_content_type("http://192.0.2.1/s/id", Some(mime)), mime);
+                assert!(matches!(super::cast_media_metadata(Some("Song".into()), None, Some(mime)), super::Metadata::MusicTrack(_)));
+            }
+        }
+        assert!(super::needs_auto_remux("chromecast", "https://example.test/movie.mp4", Some("video/mp4")));
+        assert!(!super::needs_auto_remux("dlna", "https://example.test/live.m3u8", None));
+        assert_eq!(super::chromecast_content_type("http://192.0.2.1/s/id", Some("video/mkv")), "video/mp4");
+        assert!(matches!(super::cast_media_metadata(None, None, Some("video/mp4")), super::Metadata::Movie(_)));
+    }
 
     #[test]
     fn control_url_is_required_before_starting_dlna_or_roku() {

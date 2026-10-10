@@ -1,7 +1,7 @@
 import { MonitorUp } from "lucide-react";
 import { useT } from "@/lib/i18n";
 import { isWindowsDesktop } from "@/lib/platform";
-import { isRtxHdrBlocked } from "@/lib/player/rtx-hdr-policy";
+import { isRtxHdrBlocked } from "@/lib/player/rtx-video-policy";
 import { isSvpActiveForMedia } from "@/lib/player/svp-policy";
 import { useSettings } from "@/lib/settings";
 import type { Meta } from "@/lib/cinemeta";
@@ -34,7 +34,7 @@ export function RtxHdrToggleStremioBtn({ meta }: { meta?: Meta }) {
   );
 }
 
-export function RtxHdrToggleBigBtn({ meta }: { meta?: Meta }) {
+export function RtxHdrToggleBigBtn({ meta, iconUrl }: { meta?: Meta; iconUrl?: string }) {
   const t = useT();
   const { active, disabled, toggle } = useRtxHdr(meta);
   if (!isWindowsDesktop()) return null;
@@ -45,6 +45,7 @@ export function RtxHdrToggleBigBtn({ meta }: { meta?: Meta }) {
       tooltip={t("RTX Video HDR")}
       active={active}
       disabled={disabled}
+      iconUrl={iconUrl}
     >
       <MonitorUp size={22} strokeWidth={2} />
     </BigButton>

@@ -75,9 +75,26 @@ export function parseMagnet(value: string): ParsedMagnet | null {
   const name = params.get("dn");
   return {
     infoHash,
-    name: name ? decodeURIComponent(name.replace(/\+/g, " ")) : null,
+    // URLSearchParams already decoded this value, including literal + and %.
+    name: name || null,
     trackers: params.getAll("tr").filter(Boolean),
   };
+}
+
+export function serializeMagnet(magnet: ParsedMagnet): string {
+  const params = new URLSearchParams();
+
+  params.append("xt", `urn:btih:${magnet.infoHash}`);
+
+  if (magnet.name) {
+    params.append("dn", magnet.name);
+  }
+
+  for (const tracker of magnet.trackers) {
+    params.append("tr", tracker);
+  }
+
+  return `magnet:?${params.toString()}`;
 }
 
 export function infoHashFromUrl(url: string): { infoHash: string; fileIdx?: number } | null {
@@ -110,7 +127,9 @@ function base32ToHex(input: string): string | null {
   }
   let hex = "";
   for (let i = 0; i + 8 <= bits.length; i += 8) {
-    hex += parseInt(bits.slice(i, i + 8), 2).toString(16).padStart(2, "0");
+    hex += parseInt(bits.slice(i, i + 8), 2)
+      .toString(16)
+      .padStart(2, "0");
   }
   return hex.length === 40 ? hex : null;
 }

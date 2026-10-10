@@ -133,6 +133,8 @@ function buildNameIndex(people: PersonRef[]): { rx: RegExp | null; nameToId: Map
   return { rx, nameToId };
 }
 
+const QUOTE_SPLIT = /("[^"]*"|“[^”]*”)/;
+
 function renderText(
   text: string,
   rx: RegExp | null,
@@ -141,18 +143,24 @@ function renderText(
   keyBase: string,
 ): ReactNode {
   if (!rx) return text;
-  const parts = text.split(rx);
-  return parts.map((part, i) => {
-    const id = nameToId.get(part);
-    if (id == null) return <Fragment key={`${keyBase}-${i}`}>{part}</Fragment>;
+  return text.split(QUOTE_SPLIT).map((seg, si) => {
+    if (si % 2 === 1) return <Fragment key={`${keyBase}-q${si}`}>{seg}</Fragment>;
     return (
-      <PersonLink
-        key={`${keyBase}-${i}`}
-        id={id}
-        name={part}
-        onClick={onPersonClick}
-        className="font-medium not-italic text-accent underline decoration-accent/40 underline-offset-2 transition-colors hover:decoration-accent"
-      />
+      <Fragment key={`${keyBase}-s${si}`}>
+        {seg.split(rx).map((part, i) => {
+          const id = nameToId.get(part);
+          if (id == null) return <Fragment key={`${keyBase}-${si}-${i}`}>{part}</Fragment>;
+          return (
+            <PersonLink
+              key={`${keyBase}-${si}-${i}`}
+              id={id}
+              name={part}
+              onClick={onPersonClick}
+              className="font-medium not-italic text-accent underline decoration-accent/40 underline-offset-2 transition-colors hover:decoration-accent"
+            />
+          );
+        })}
+      </Fragment>
     );
   });
 }

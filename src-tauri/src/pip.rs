@@ -1,8 +1,11 @@
 use std::sync::atomic::{AtomicBool, Ordering};
-use std::sync::Arc;
+use std::sync::{Arc, Mutex as StdMutex};
 
 use serde::{Deserialize, Serialize};
-use tauri::{AppHandle, Emitter, LogicalPosition, LogicalSize, Manager, State, WebviewUrl, WebviewWindowBuilder};
+use tauri::{
+    AppHandle, Emitter, LogicalPosition, LogicalSize, Manager, State, WebviewUrl,
+    WebviewWindowBuilder,
+};
 use tokio::sync::Mutex;
 
 const PIP_LABEL: &str = "harbor-pip";
@@ -46,7 +49,7 @@ pub struct PipExitState {
 }
 
 pub struct PipState {
-    session: Arc<Mutex<Option<PipSession>>>,
+    session: Arc<StdMutex<Option<PipSession>>>,
     snapshot: Arc<Mutex<Option<WindowSnapshot>>>,
     window_pip_active: Arc<AtomicBool>,
 }
@@ -54,11 +57,17 @@ pub struct PipState {
 impl PipState {
     pub fn new() -> Self {
         Self {
-            session: Arc::new(Mutex::new(None)),
+            session: Arc::new(StdMutex::new(None)),
             snapshot: Arc::new(Mutex::new(None)),
             window_pip_active: Arc::new(AtomicBool::new(false)),
         }
     }
+}
+
+pub fn window_pip_is_active(app: &AppHandle) -> bool {
+    app.try_state::<PipState>()
+        .map(|s| s.window_pip_active.load(Ordering::SeqCst))
+        .unwrap_or(false)
 }
 
 #[tauri::command]
@@ -68,7 +77,7 @@ pub async fn pip_open(
     session: PipSession,
 ) -> Result<(), String> {
     {
-        let mut g = state.session.lock().await;
+        let mut g = state.session.lock().map_err(|e| e.to_string())?;
         *g = Some(session);
     }
 
@@ -78,62 +87,58 @@ pub async fn pip_open(
         return Ok(());
     }
 
-    let app_for_main = app.clone();
-    let (tx, rx) = std::sync::mpsc::channel::<Result<(), String>>();
-    app.run_on_main_thread(move || {
-        eprintln!("[pip] >>> building window on main thread");
-        let url = WebviewUrl::App("index.html".into());
-        let result = WebviewWindowBuilder::new(&app_for_main, PIP_LABEL, url)
-            .title("Harbor PiP")
+    let app_for_window = app.clone();
+    // WebView2 creation must run outside the UI event loop, as for the mpv PiP window.
+    let result = tauri::async_runtime::spawn_blocking(move || -> Result<(), String> {
+        let url = WebviewUrl::App("index.html?pip=1".into());
+        let builder = WebviewWindowBuilder::new(&app_for_window, PIP_LABEL, url)
+            .title(concat!(crate::product_name!(), " PiP"))
             .inner_size(560.0, 360.0)
             .position(200.0, 200.0)
             .resizable(true)
             .always_on_top(true)
-            .decorations(true)
+            .decorations(false)
             .skip_taskbar(false)
             .visible(true)
-            .focused(true)
-            .build();
-        match result {
-            Ok(window) => {
-                eprintln!("[pip] window built on main thread, label={}", window.label());
-                let _ = window.show();
-                let _ = window.set_focus();
-                #[cfg(debug_assertions)]
-                {
-                    window.open_devtools();
-                    eprintln!("[pip] devtools opened (debug build)");
+            .focused(true);
+        let window = crate::browser_args::match_main(&app_for_window, builder)
+            .build()
+            .map_err(|e| format!("build: {e}"))?;
+        window.on_window_event(move |event| {
+            if matches!(event, tauri::WindowEvent::Destroyed) {
+                let state = app_for_window.state::<PipState>();
+                let had_session = state
+                    .session
+                    .lock()
+                    .map(|mut session| session.take().is_some())
+                    .unwrap_or(false);
+                // pip_close takes the session first; OS close also releases it exactly once.
+                if had_session {
+                    let _ = app_for_window.emit_to(
+                        "main",
+                        "pip://closed",
+                        PipExitState {
+                            position_sec: 0.0,
+                            playing: false,
+                        },
+                    );
                 }
-                window.on_window_event(|event| {
-                    eprintln!("[pip] window event: {:?}", event);
-                });
-                eprintln!("[pip] show + focus dispatched");
-                let _ = tx.send(Ok(()));
             }
-            Err(e) => {
-                eprintln!("[pip] BUILD FAILED on main thread: {}", e);
-                let _ = tx.send(Err(format!("build: {}", e)));
-            }
-        }
+        });
+        Ok(())
     })
-    .map_err(|e| format!("run_on_main_thread: {}", e))?;
-
-    match rx.recv() {
-        Ok(Ok(())) => {
-            eprintln!("[pip] open complete");
-            Ok(())
-        }
-        Ok(Err(e)) => Err(e),
-        Err(e) => {
-            eprintln!("[pip] channel recv error: {}", e);
-            Err(format!("channel: {}", e))
-        }
+    .await
+    .map_err(|e| format!("pip window worker: {e}"))
+    .and_then(|result| result);
+    if result.is_err() {
+        state.session.lock().map_err(|e| e.to_string())?.take();
     }
+    result
 }
 
 #[tauri::command]
 pub async fn pip_get_session(state: State<'_, PipState>) -> Result<Option<PipSession>, String> {
-    let g = state.session.lock().await;
+    let g = state.session.lock().map_err(|e| e.to_string())?;
     Ok(g.clone())
 }
 
@@ -143,12 +148,12 @@ pub async fn pip_close(
     state: State<'_, PipState>,
     exit: Option<PipExitState>,
 ) -> Result<(), String> {
-    if let Some(w) = app.get_webview_window(PIP_LABEL) {
-        let _ = w.close();
-    }
     {
-        let mut g = state.session.lock().await;
+        let mut g = state.session.lock().map_err(|e| e.to_string())?;
         *g = None;
+    }
+    if let Some(w) = app.get_webview_window(PIP_LABEL) {
+        w.close().map_err(|e| e.to_string())?;
     }
     if let Some(e) = exit {
         let _ = app.emit_to("main", "pip://closed", e);
@@ -172,10 +177,7 @@ pub async fn pip_publish_state(app: AppHandle, exit: PipExitState) -> Result<(),
 }
 
 #[tauri::command]
-pub async fn window_pip_enter(
-    app: AppHandle,
-    state: State<'_, PipState>,
-) -> Result<(), String> {
+pub async fn window_pip_enter(app: AppHandle, state: State<'_, PipState>) -> Result<(), String> {
     let main = app
         .get_webview_window("main")
         .ok_or_else(|| "main window missing".to_string())?;
@@ -269,10 +271,7 @@ pub async fn window_pip_enter(
 }
 
 #[tauri::command]
-pub async fn window_pip_exit(
-    app: AppHandle,
-    state: State<'_, PipState>,
-) -> Result<(), String> {
+pub async fn window_pip_exit(app: AppHandle, state: State<'_, PipState>) -> Result<(), String> {
     let main = app
         .get_webview_window("main")
         .ok_or_else(|| "main window missing".to_string())?;
@@ -284,7 +283,7 @@ pub async fn window_pip_exit(
     state.window_pip_active.store(false, Ordering::SeqCst);
 
     if let Some(s) = saved {
-        let _ = main.set_always_on_top(s.always_on_top);
+        let _ = main.set_always_on_top(s.always_on_top || crate::tray::always_on_top_pref());
         if s.maximized {
             let _ = main.set_min_size(Some(LogicalSize::new(960.0, 600.0)));
             let _ = main.maximize();
@@ -294,7 +293,7 @@ pub async fn window_pip_exit(
             let _ = main.set_min_size(Some(LogicalSize::new(960.0, 600.0)));
         }
     } else {
-        let _ = main.set_always_on_top(false);
+        let _ = main.set_always_on_top(crate::tray::always_on_top_pref());
         let _ = main.set_size(LogicalSize::new(1280.0, 800.0));
         let _ = main.set_min_size(Some(LogicalSize::new(960.0, 600.0)));
         let _ = main.center();

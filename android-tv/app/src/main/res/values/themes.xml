@@ -1,0 +1,10 @@
+<?xml version="1.0" encoding="utf-8"?>
+<resources>
+    <style name="Theme.JL" parent="Theme.AppCompat.NoActionBar">
+        <item name="android:windowBackground">@color/jl_background</item>
+        <item name="android:statusBarColor">@color/jl_background</item>
+        <item name="android:navigationBarColor">@color/jl_background</item>
+        <item name="colorPrimary">@color/jl_blue</item>
+        <item name="colorAccent">@color/jl_orange</item>
+    </style>
+</resources>

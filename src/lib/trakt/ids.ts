@@ -10,6 +10,7 @@ export type TraktEpisodeRef = {
   imdbId?: string;
   imdbSeason?: number;
   imdbEpisode?: number;
+  tvdbEpisodeId?: number;
 };
 
 export function stremioIdToTraktTarget(
@@ -19,18 +20,27 @@ export function stremioIdToTraktTarget(
   if (!metaId) return { ok: false, reason: "unrecognized" };
 
   if (metaId.startsWith("kitsu:") || metaId.startsWith("mal:")) {
-    const imdb = episode?.imdbId;
-    if (
-      imdb &&
-      /^tt\d+$/.test(imdb) &&
-      episode.imdbSeason != null &&
-      episode.imdbEpisode != null
-    ) {
+    if (!episode) return { ok: false, reason: "anime" };
+    const imdb = episode.imdbId;
+    const showImdb = imdb && /^tt\d+$/.test(imdb) ? imdb : undefined;
+    if (episode.tvdbEpisodeId != null && episode.tvdbEpisodeId > 0) {
       return {
         ok: true,
         target: {
           kind: "episode",
-          show: { ids: { imdb } },
+          show: { ids: showImdb ? { imdb: showImdb } : {} },
+          season: episode.imdbSeason ?? episode.season,
+          number: episode.imdbEpisode ?? episode.episode,
+          episodeIds: { tvdb: episode.tvdbEpisodeId },
+        },
+      };
+    }
+    if (showImdb && episode.imdbSeason != null && episode.imdbEpisode != null) {
+      return {
+        ok: true,
+        target: {
+          kind: "episode",
+          show: { ids: { imdb: showImdb } },
           season: episode.imdbSeason,
           number: episode.imdbEpisode,
         },

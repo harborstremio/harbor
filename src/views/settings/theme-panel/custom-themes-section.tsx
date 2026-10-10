@@ -1,5 +1,5 @@
-import { AlertCircle } from "lucide-react";
-import { useEffect, useMemo, useState } from "react";
+import { AlertCircle } from "../icons";
+import { useCallback, useEffect, useMemo, useState } from "react";
 import { ActiveBanner } from "./custom-themes-section/active-banner";
 import { ExportBlock } from "./custom-themes-section/export-block";
 import { HeroCards } from "./custom-themes-section/hero-cards";
@@ -15,6 +15,13 @@ import {
   type CustomTheme,
 } from "@/lib/custom-themes";
 import { downloadText } from "@/lib/download-text";
+import { nextBackgroundImage } from "@/lib/theme-background";
+import {
+  consumeThemeLibraryRequest,
+  setThemeLibraryOpen,
+  subscribeThemeLibraryRequest,
+} from "./library-open-store";
+import type { StoreTab } from "./custom-themes-section/community-store/store-tabs";
 import { importForeignTheme } from "@/lib/theme-import";
 import { isHarborStyleName, parseHarborStyle, serializeHarborStyle } from "@/lib/harborstyle";
 import { useSettings } from "@/lib/settings";
@@ -27,40 +34,128 @@ import {
   type ActiveThemeId,
   type ThemePreset,
 } from "@/lib/theme";
+import { useT } from "@/lib/i18n";
 
-export function CustomThemesSection() {
+export function CustomThemesSection({
+  startOpenTab,
+}: {
+  startOpenTab?: "library" | "community" | "mine";
+} = {}) {
+  const t = useT();
   const { settings, update } = useSettings();
   const [themes, setThemes] = useState<CustomTheme[]>(() => getCustomThemes());
   const [error, setError] = useState<string | null>(null);
   const [exportText, setExportText] = useState("");
   const [studioOpen, setStudioOpen] = useState(false);
-  const [libraryOpen, setLibraryOpen] = useState(false);
+  const [libraryOpen, setLibraryOpen] = useState(!!startOpenTab);
+  const [libraryTab, setLibraryTab] = useState<"library" | "community" | "mine">(
+    startOpenTab ?? "library",
+  );
+  const [libraryStoreTab, setLibraryStoreTab] = useState<StoreTab | undefined>(undefined);
   const [importedNotice, setImportedNotice] = useState<string | null>(null);
+  const browsingActivity = t("Browsing the theme library");
+  const localizeImportError = (message: string): string => {
+    const missingColor = /^This theme is missing a color \((.+)\)\.$/.exec(message);
+    if (missingColor) {
+      return t("This theme is missing a color ({color}).", { color: missingColor[1] });
+    }
+    switch (message) {
+      case "This file isn't a readable theme.":
+        return t("This file isn't a readable theme.");
+      case "This file isn't a Harbor theme.":
+        return t("This file isn't a Harbor theme.");
+      case "Theme is missing a name.":
+        return t("Theme is missing a name.");
+      case "This theme's preview colors look invalid.":
+        return t("This theme's preview colors look invalid.");
+      case "This theme is missing its colors.":
+        return t("This theme is missing its colors.");
+      case "This theme file is missing a name.":
+        return t("This theme file is missing a name.");
+      case "This theme file is missing its colors.":
+        return t("This theme file is missing its colors.");
+      default:
+        return message;
+    }
+  };
 
   useEffect(() => subscribeCustomThemes(() => setThemes(getCustomThemes())), []);
 
   useEffect(() => {
+    setThemeLibraryOpen(libraryOpen);
+  }, [libraryOpen]);
+  useEffect(() => () => setThemeLibraryOpen(false), []);
+
+  const openLibrary = useCallback((tab: "library" | "community" | "mine", storeTab?: StoreTab) => {
+    setLibraryTab(tab);
+    setLibraryStoreTab(storeTab);
+    setImportedNotice(null);
+    setLibraryOpen(true);
+  }, []);
+
+  useEffect(() => {
+    const onOpen = (e: Event) => {
+      const detail = (
+        e as CustomEvent<{ tab?: "library" | "community" | "mine"; storeTab?: StoreTab }>
+      ).detail;
+      openLibrary(detail?.tab ?? "library", detail?.storeTab);
+    };
+    window.addEventListener("harbor:open-theme-library", onOpen);
+    return () => window.removeEventListener("harbor:open-theme-library", onOpen);
+  }, [openLibrary]);
+
+  useEffect(() => {
+    const apply = () => {
+      const req = consumeThemeLibraryRequest();
+      if (req) openLibrary(req.tab, req.storeTab);
+    };
+    apply();
+    return subscribeThemeLibraryRequest(apply);
+  }, [openLibrary]);
+
+  useEffect(() => {
     if (!libraryOpen || studioOpen) return;
-    return pushActivityHint({ details: "Browsing the theme library" });
-  }, [libraryOpen, studioOpen]);
+    return pushActivityHint({ details: browsingActivity });
+  }, [libraryOpen, studioOpen, browsingActivity]);
 
   const activeId = settings.theme.preset;
   const activeTheme = activeId === "custom" ? null : getThemeById(activeId);
 
   const entries = useMemo(() => buildEntries(themes), [themes]);
 
-  const activateTheme = (id: string, nav?: ThemePreset["navCustomization"]) =>
+  const activateTheme = (id: string, nav?: ThemePreset["navCustomization"]) => {
+    const next = getThemeById(id);
+    const bg = next?.background;
+    const held = settings.navCustomizationOwn;
+    const navPatch = nav
+      ? {
+          navCustomization: {
+            order: nav.order ?? [],
+            hidden: nav.hidden ?? [],
+            renamed: nav.renamed ?? {},
+          },
+          navCustomizationOwn: held ?? settings.navCustomization,
+        }
+      : held
+        ? { navCustomization: held, navCustomizationOwn: null }
+        : {};
     update({
-      theme: { ...settings.theme, preset: id as ActiveThemeId },
-      ...(nav ? { navCustomization: nav } : {}),
+      theme: {
+        ...settings.theme,
+        preset: id as ActiveThemeId,
+        backgroundImage: nextBackgroundImage(settings.theme.backgroundImage, activeTheme, next),
+        ...(bg ? { backgroundDim: bg.dim ?? settings.theme.backgroundDim } : {}),
+      },
+      ...navPatch,
     });
+  };
 
   const importFile = async (file: File) => {
     setError(null);
     try {
       const name = file.name.toLowerCase();
       if (name.endsWith(".zip") || file.type === "application/zip") {
-        setError("Zipped themes aren't supported yet. Drop the theme file directly.");
+        setError(t("Zipped themes aren't supported yet. Drop the theme file directly."));
         return;
       }
       const text = await file.text();
@@ -75,20 +170,24 @@ export function CustomThemesSection() {
           const first = foreign.themes[0];
           setImportedNotice(
             foreign.themes.length > 1
-              ? `${first.name} +${foreign.themes.length - 1} more (${foreign.format})`
-              : `${first.name} (${foreign.format})`,
+              ? t("{name} +{count} more ({format})", {
+                  name: first.name,
+                  count: foreign.themes.length - 1,
+                  format: foreign.format,
+                })
+              : t("{name} ({format})", { name: first.name, format: foreign.format }),
           );
           activateTheme(first.id, first.navCustomization);
           return;
         }
-        setError(result.error);
+        setError(localizeImportError(result.error));
         return;
       }
       saveCustomTheme(result.theme);
       setImportedNotice(result.theme.name);
       activateTheme(result.theme.id, result.theme.navCustomization);
     } catch {
-      setError("Could not read file");
+      setError(t("Could not read file"));
     }
   };
 
@@ -104,13 +203,20 @@ export function CustomThemesSection() {
     input.click();
   };
 
-  const activate = (id: string) =>
-    activateTheme(id, getThemeById(id)?.navCustomization);
+  const activate = (id: string) => activateTheme(id, getThemeById(id)?.navCustomization);
 
   const remove = (id: string) => {
+    const wasActive = settings.theme.preset === id;
+    const image = wasActive
+      ? nextBackgroundImage(
+          settings.theme.backgroundImage,
+          getThemeById(id),
+          getThemeById("cool-grey"),
+        )
+      : null;
     removeCustomTheme(id);
-    if (settings.theme.preset === id) {
-      update({ theme: { ...settings.theme, preset: "cool-grey" } });
+    if (wasActive) {
+      update({ theme: { ...settings.theme, preset: "cool-grey", backgroundImage: image } });
     }
   };
 
@@ -129,12 +235,7 @@ export function CustomThemesSection() {
   };
 
   if (studioOpen) {
-    return (
-      <ThemeStudio
-        seed={activeTheme ?? undefined}
-        onClose={() => setStudioOpen(false)}
-      />
-    );
+    return <ThemeStudio seed={activeTheme ?? undefined} onClose={() => setStudioOpen(false)} />;
   }
 
   if (libraryOpen) {
@@ -148,6 +249,8 @@ export function CustomThemesSection() {
           onDownload={downloadThemeFile}
           onRemove={remove}
           onClose={() => setLibraryOpen(false)}
+          initialTab={libraryTab}
+          initialStoreTab={libraryStoreTab}
         />
         {exportText && <ExportBlock text={exportText} onClose={() => setExportText("")} />}
       </div>
@@ -159,32 +262,32 @@ export function CustomThemesSection() {
       <ActiveBanner
         theme={activeTheme}
         onExport={() => activeTheme && showExport(activeTheme.id)}
-        onCustomize={() =>
-          window.dispatchEvent(new CustomEvent("harbor:open-theme-editor"))
-        }
+        onCustomize={() => window.dispatchEvent(new CustomEvent("harbor:open-theme-editor"))}
       />
 
       <HeroCards
         onOpenLibrary={() => {
           setImportedNotice(null);
+          setLibraryTab("library");
           setLibraryOpen(true);
         }}
         onOpenStudio={() => setStudioOpen(true)}
         onImport={pickImportFile}
         libraryCount={entries.length}
+        previewThemes={entries.slice(0, 10).map((e) => e.theme)}
         importedNotice={importedNotice}
       />
 
       {error && (
-        <div className="flex items-center gap-2 rounded-xl border border-danger/40 bg-danger/10 px-3.5 py-2.5 text-[12.5px] text-danger">
-          <AlertCircle size={14} strokeWidth={2.2} />
-          <span>{error}</span>
+        <div className="flex flex-wrap items-start gap-2.5 rounded-[10px] border border-danger/40 bg-elevated px-4 py-3 text-[15.5px] leading-[22px] text-danger">
+          <AlertCircle size={18} strokeWidth={2.2} className="mt-[2px] shrink-0" />
+          <span className="max-w-[66ch] flex-1">{error}</span>
           <button
             type="button"
             onClick={() => setError(null)}
-            className="ms-auto rounded px-2 text-[11px] font-semibold uppercase tracking-wider opacity-70 hover:opacity-100"
+            className="-my-1 flex h-11 shrink-0 items-center rounded-[8px] px-3 text-[15.5px] font-semibold opacity-80 transition-opacity hover:opacity-100"
           >
-            Dismiss
+            {t("Dismiss")}
           </button>
         </div>
       )}

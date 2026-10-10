@@ -1,0 +1,195 @@
+.ebook-sources-shell {
+  width: 100%;
+  max-width: 1080px;
+  margin-inline: auto;
+  color: var(--color-ink);
+}
+
+.ebook-sources-header {
+  padding-block: 28px 30px;
+  border-bottom: 1px solid var(--color-edge-soft);
+}
+
+.ebook-sources-heading {
+  display: flex;
+  flex-direction: column;
+  align-items: flex-start;
+  gap: 12px;
+}
+
+.ebook-sources-stats {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 24px;
+  margin-top: 4px;
+}
+
+.ebook-sources-stats > span {
+  display: inline-flex;
+  align-items: baseline;
+  gap: 6px;
+}
+
+.ebook-sources-stats strong {
+  font-size: 14px;
+  font-weight: 600;
+  font-variant-numeric: tabular-nums;
+}
+
+.ebook-sources-stats small { color: var(--color-ink-muted); font-size: 13px; }
+
+.ebook-sources-workspace {
+  display: grid;
+  grid-template-columns: 196px minmax(0, 1fr);
+  align-items: start;
+  gap: 36px;
+  padding-top: 28px;
+}
+
+.ebook-sources-contents { position: sticky; top: 20px; }
+
+.ebook-sources-content-link {
+  display: flex;
+  width: 100%;
+  min-height: 44px;
+  align-items: center;
+  padding: 11px 12px;
+  border-radius: 8px;
+  color: var(--color-ink-muted);
+  transition: color 150ms ease, background-color 150ms ease;
+}
+
+.ebook-sources-content-link:hover { color: var(--color-ink); }
+.ebook-sources-content-link.is-active { color: var(--color-ink); background: var(--color-elevated); }
+
+.ebook-sources-content-link strong { display: block; font-size: 14px; font-weight: 500; line-height: 1.4; }
+.ebook-sources-content-link.is-active strong { font-weight: 600; }
+.ebook-sources-content-link small { display: block; margin-top: 3px; color: var(--color-ink-muted); font-size: 12px; }
+
+.ebook-sources-privacy-note {
+  display: flex;
+  align-items: flex-start;
+  gap: 8px;
+  margin-top: 20px;
+  padding: 16px 12px;
+  border-top: 1px solid var(--color-edge-soft);
+  color: var(--color-ink-muted);
+  font-size: 12px;
+  line-height: 1.6;
+}
+
+.ebook-sources-privacy-note svg { flex: none; margin-top: 2px; }
+.ebook-sources-sections { display: flex; min-width: 0; flex-direction: column; gap: 40px; }
+.ebook-source-workspace-section { min-width: 0; scroll-margin-top: 24px; }
+.ebook-source-workspace-section + .ebook-source-workspace-section { padding-top: 32px; border-top: 1px solid var(--color-edge-soft); }
+.ebook-source-workspace-heading { margin-bottom: 24px; }
+.ebook-source-card { min-width: 0; border-bottom: 1px solid var(--color-edge-soft); background: transparent; }
+.ebook-source-add-row { border-radius: 8px; transition: background-color 150ms ease; }
+.ebook-source-add-row:hover:not(:disabled) { background: var(--color-elevated); }
+
+.ebook-source-input {
+  height: 40px;
+  width: 100%;
+  border: 1px solid transparent;
+  border-radius: 8px;
+  background: var(--color-elevated);
+  padding-inline: 12px;
+  color: var(--color-ink);
+  font-size: 14px;
+  outline: none;
+  transition: border-color 150ms ease;
+}
+
+.ebook-source-input::placeholder { color: var(--color-ink-subtle); }
+.ebook-source-input:focus,
+.ebook-source-input.is-open { border-color: var(--color-ink-muted); }
+
+.ebook-source-button,
+.ebook-source-back,
+.ebook-source-icon-button {
+  display: inline-flex;
+  flex-shrink: 0;
+  height: 40px;
+  align-items: center;
+  justify-content: center;
+  gap: 8px;
+  border-radius: 8px;
+  background: var(--color-elevated);
+  padding-inline: 16px;
+  color: var(--color-ink);
+  font-size: 14px;
+  font-weight: 500;
+  transition: background-color 150ms ease, color 150ms ease;
+}
+
+.ebook-source-button:hover:not(:disabled) { background: var(--color-raised); }
+.ebook-source-button-primary { background: var(--color-ink); color: var(--color-canvas); font-weight: 600; }
+.ebook-source-button-primary:hover:not(:disabled) { background: var(--color-ink-muted); }
+.ebook-source-button:disabled { opacity: 0.5; cursor: default; }
+.ebook-source-back { background: transparent; padding-inline: 0 12px; color: var(--color-ink-muted); }
+.ebook-source-back:hover { color: var(--color-ink); }
+.ebook-source-icon-button { width: 36px; height: 36px; padding: 0; background: transparent; color: var(--color-ink-muted); }
+.ebook-source-icon-button:hover { background: var(--color-elevated); }
+.ebook-source-icon-button:disabled { opacity: 0.5; }
+
+.ebook-source-icon {
+  display: grid;
+  width: 44px;
+  height: 44px;
+  flex-shrink: 0;
+  place-items: center;
+  overflow: hidden;
+  border-radius: 8px;
+  color: var(--color-ink-muted);
+}
+
+.ebook-source-switch {
+  position: relative;
+  width: 44px;
+  height: 26px;
+  flex-shrink: 0;
+  border-radius: 999px;
+  background: var(--color-raised);
+  transition: background-color 150ms ease;
+}
+
+.ebook-source-switch[aria-checked="true"] { background: var(--color-ink); }
+.ebook-source-switch-knob {
+  position: absolute;
+  inset-block-start: 3px;
+  inset-inline-start: 3px;
+  width: 20px;
+  height: 20px;
+  border-radius: 50%;
+  background: var(--color-canvas);
+  transition: inset-inline-start 150ms ease;
+}
+.ebook-source-switch[aria-checked="true"] .ebook-source-switch-knob { inset-inline-start: 21px; }
+
+.ebook-source-legal {
+  display: flex;
+  align-items: flex-start;
+  gap: 12px;
+  padding: 18px;
+  border-radius: 8px;
+  background: var(--color-elevated);
+  color: var(--color-ink-muted);
+  font-size: 13px;
+  line-height: 1.65;
+}
+.ebook-source-legal > svg { flex-shrink: 0; margin-top: 2px; }
+.ebook-source-legal h3 { margin-bottom: 8px; color: var(--color-ink); font-size: 14px; font-weight: 600; }
+.ebook-source-legal p + p { margin-top: 8px; }
+.ebook-sources-shell button:focus-visible,
+.ebook-sources-shell a:focus-visible { outline: 2px solid var(--color-ink-muted); outline-offset: 3px; }
+
+@media (max-width: 900px) {
+  .ebook-sources-workspace { grid-template-columns: 160px minmax(0, 1fr); gap: 24px; }
+}
+@media (max-width: 640px) {
+  .ebook-sources-workspace { grid-template-columns: minmax(0, 1fr); }
+  .ebook-sources-contents { position: static; }
+}
+@media (prefers-reduced-motion: reduce) {
+  .ebook-sources-shell *, .ebook-sources-shell *::before, .ebook-sources-shell *::after { transition: none; }
+}

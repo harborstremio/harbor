@@ -32,7 +32,7 @@ export type RoomEvent =
   | { kind: "cursor"; from: string; name: string; x: number; y: number; visible: boolean; path: string }
   | { kind: "draw"; from: string; name: string; strokeId: string; phase: "start" | "point" | "end" | "clear"; x?: number; y?: number; color?: string; path: string }
   | { kind: "presence"; from: string; activeAt: number; location?: ParticipantLocation }
-  | { kind: "participant-left"; clientId: string; name: string }
+  | { kind: "participant-left"; clientId: string; name: string; avatar?: string | null; color?: string | null }
   | { kind: "started"; started: boolean };
 
 export async function diagnoseRelayFailure(httpBase: string): Promise<string> {

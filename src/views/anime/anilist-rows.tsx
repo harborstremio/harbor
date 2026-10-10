@@ -2,14 +2,15 @@ import { PickCard } from "@/components/pick-card";
 import { PinHomeButton } from "@/components/pin-home-button";
 import { Row } from "@/components/row";
 import { useT } from "@/lib/i18n";
-import { useAnilistAnimeRails } from "@/lib/use-anilist-anime-rails";
+import { useAnilistAnimeRailsState } from "@/lib/use-anilist-anime-rails";
+import { AnimeRowStatus } from "./anime-row-status";
 
 export function AnilistRows() {
   const t = useT();
-  const rails = useAnilistAnimeRails();
-  if (rails.length === 0) return null;
+  const { rails, loading, error, retry } = useAnilistAnimeRailsState();
   return (
     <>
+      {(error || (loading && rails.length === 0)) && <AnimeRowStatus title={t("Your AniList")} loading={loading} onRetry={retry} />}
       {rails.map((rail) => {
         const label =
           rail.key === "recommended"

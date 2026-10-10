@@ -1,0 +1,71 @@
+.music-surprise-prompt {
+  position: fixed;
+  inset-inline-start: 24px;
+  bottom: calc(var(--harbor-music-dock, 0px) + 18px);
+  z-index: 140;
+  width: min(392px, calc(100vw - 48px));
+  padding: 14px 16px;
+  border-radius: 16px;
+  background: var(--color-surface);
+  border: 1px solid var(--color-edge-soft);
+  box-shadow: 0 18px 44px rgba(0, 0, 0, .34);
+  opacity: 0;
+  translate: 0 12px;
+  transition: opacity 220ms ease-out, translate 260ms cubic-bezier(.22, .61, .36, 1);
+}
+.music-surprise-prompt.is-open { opacity: 1; translate: 0 0; }
+.music-surprise-prompt-close {
+  position: absolute; inset-block-start: -12px; inset-inline-end: -12px;
+  display: grid; place-items: center; width: 26px; height: 26px;
+  border-radius: 7px; color: var(--color-ink-subtle); background: var(--color-surface);
+}
+.music-surprise-prompt-close:is(:hover, :focus-visible) { background: var(--color-elevated); color: var(--color-ink); }
+
+/* Both steps live in the flow; one collapses as the other opens, so the card morphs. */
+.music-surprise-prompt-step {
+  display: grid;
+  grid-template-rows: 0fr;
+  opacity: 0;
+  transition: grid-template-rows 280ms cubic-bezier(.22, .61, .36, 1), opacity 180ms ease-in-out;
+}
+.music-surprise-prompt-step[data-open="true"] { grid-template-rows: 1fr; opacity: 1; }
+.music-surprise-prompt-step > div { min-height: 0; overflow: hidden; }
+
+.music-surprise-prompt-rate { display: flex; align-items: center; gap: 13px; }
+.music-surprise-prompt-covers { display: flex; flex-shrink: 0; }
+.music-surprise-prompt-covers img {
+  width: 38px; height: 38px; object-fit: cover; border-radius: 7px;
+  border: 2px solid var(--color-surface); margin-inline-start: -13px;
+}
+.music-surprise-prompt-covers img:first-child { margin-inline-start: 0; }
+.music-surprise-prompt-copy { display: grid; gap: 2px; min-width: 0; flex: 1; }
+.music-surprise-prompt-copy strong { display: flex; align-items: center; gap: 7px; font-size: 14.5px; font-weight: 600; }
+.music-surprise-prompt-copy small { font-size: 12.5px; color: var(--color-ink-subtle); }
+.music-surprise-prompt-copy strong > button {
+  display: grid; place-items: center; width: 24px; height: 24px; margin-inline-start: -4px;
+  border-radius: 6px; color: var(--color-ink-subtle);
+}
+.music-surprise-prompt-copy strong > button:is(:hover, :focus-visible) { background: var(--color-elevated); color: var(--color-ink); }
+
+.music-surprise-prompt-actions { display: flex; gap: 7px; flex-shrink: 0; }
+.music-surprise-prompt-actions button {
+  display: grid; place-items: center; width: 40px; height: 40px;
+  border-radius: 999px; color: var(--color-ink-muted); background: var(--color-elevated);
+  transition: background 160ms ease-in-out, color 160ms ease-in-out, scale 160ms ease-out;
+}
+.music-surprise-prompt-actions button:is(:hover, :focus-visible) { color: var(--color-ink); scale: 1.05; }
+.music-surprise-prompt-actions button[data-primary] { background: var(--color-ink); color: var(--color-canvas); }
+.music-surprise-prompt-actions button[data-primary]:is(:hover, :focus-visible) { color: var(--color-canvas); }
+
+.music-surprise-prompt-redirect { display: grid; gap: 12px; padding-top: 2px; }
+.music-surprise-prompt-genres { display: flex; flex-wrap: wrap; gap: 7px; }
+.music-surprise-prompt-genres button {
+  min-height: 34px; padding: 0 13px; border-radius: 999px;
+  background: var(--color-elevated); color: var(--color-ink-muted); font-size: 13px; font-weight: 550;
+  transition: background 160ms ease-in-out, color 160ms ease-in-out;
+}
+.music-surprise-prompt-genres button:is(:hover, :focus-visible) { background: var(--color-ink); color: var(--color-canvas); }
+
+@media (prefers-reduced-motion: reduce) {
+  .music-surprise-prompt, .music-surprise-prompt-step, .music-surprise-prompt-actions button, .music-surprise-prompt-genres button { transition: none; }
+}

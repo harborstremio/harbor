@@ -1,0 +1,52 @@
+{
+  "$schema": "https://openapi.vercel.sh/vercel.json",
+  "installCommand": "pnpm install --frozen-lockfile",
+  "buildCommand": "pnpm run build",
+  "outputDirectory": "dist",
+  "redirects": [
+    {
+      "source": "/",
+      "has": [{ "type": "host", "value": "mediavision.jl-stream.com" }],
+      "destination": "/site",
+      "permanent": false
+    },
+    {
+      "source": "/tv",
+      "has": [{ "type": "host", "value": "mediavision.jl-stream.com" }],
+      "destination": "https://github.com/jafar-pixel/harbor/releases/latest/download/JL-Media-Vision-TV.apk",
+      "permanent": false
+    },
+    {
+      "source": "/app",
+      "has": [{ "type": "host", "value": "mediavision.jl-stream.com" }],
+      "destination": "https://jl-media-vision.vercel.app/",
+      "permanent": false
+    },
+    {
+      "source": "/windows",
+      "has": [{ "type": "host", "value": "mediavision.jl-stream.com" }],
+      "destination": "https://github.com/jafar-pixel/harbor/releases/latest/download/JL-Media-Vision-Setup-x64.exe",
+      "permanent": false
+    }
+  ],
+  "rewrites": [
+    { "source": "/api-proxy/:target*", "destination": "/api/proxy?__target=:target*" },
+    {
+      "source": "/((?!site/|avatars/|favicon).*)",
+      "has": [{ "type": "host", "value": "mediavision.jl-stream.com" }],
+      "destination": "/site/index.html"
+    },
+    { "source": "/site", "destination": "/site/index.html" },
+    { "source": "/((?!api/).*)", "destination": "/index.html" }
+  ],
+  "headers": [
+    {
+      "source": "/(.*)",
+      "headers": [
+        { "key": "X-Content-Type-Options", "value": "nosniff" },
+        { "key": "X-Frame-Options", "value": "DENY" },
+        { "key": "Referrer-Policy", "value": "no-referrer" }
+      ]
+    }
+  ]
+}

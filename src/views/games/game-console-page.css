@@ -1,0 +1,52 @@
+.games-view .games-console-page{position:relative;padding:0 0 54px;margin:calc(-1 * var(--games-chrome-inset)) 0 0;min-width:0}
+.games-console-hero{position:relative;isolation:isolate;min-height:calc(600px + var(--games-chrome-inset));display:flex;align-items:flex-end;overflow:hidden;background:var(--color-canvas);color:#fff}
+.games-console-hero-art{position:absolute;inset:0;width:100%;height:100%;object-fit:cover;object-position:70% 35%;z-index:-2}
+.games-console-hero-shade{position:absolute;inset:0;z-index:-1;background:linear-gradient(0deg,var(--color-canvas),transparent 72px),linear-gradient(90deg,#080b11e8,#080b1180 52%,#080b1120),linear-gradient(180deg,#080b1160,transparent 40%)}
+.games-console-hero-content{width:100%;padding-block:calc(var(--games-chrome-inset) + var(--games-navigation-height,146px) + 44px) 80px}
+.games-console-back{color:#fff;min-height:36px;margin-bottom:22px}
+.games-console-hero .games-section-kicker{color:#ffffffb8;margin-bottom:8px}
+.games-console-hero h1{font-size:clamp(30px,4cqw,48px);line-height:1.1;font-weight:650;letter-spacing:-.035em;outline:none;margin:0}
+.games-console-feature{max-width:550px;min-height:235px;padding-top:38px;display:flex;flex-direction:column;align-items:flex-start;justify-content:flex-end;gap:12px}
+.games-console-feature>span:not(.games-skeleton){font-size:11px;color:#ffffffad}
+.games-console-feature h2{font-size:clamp(23px,2.8cqw,32px);line-height:1.15;letter-spacing:-.025em;font-weight:600;text-wrap:balance}
+.games-console-feature p{font-size:14px;line-height:1.65;max-width:50ch;color:#ffffffca;display:-webkit-box;-webkit-line-clamp:2;-webkit-box-orient:vertical;overflow:hidden}
+.games-console-feature .games-actions{margin-top:8px;gap:20px;flex-wrap:wrap}
+.games-console-feature .games-button-primary{background:#f5f6f7;color:#161a1c}
+.games-console-feature .games-text-action{color:#fff}
+.games-console-jumps{display:flex;align-items:center;flex-wrap:wrap;gap:12px 26px;padding-block:12px 24px;border-bottom:1px solid var(--color-edge-soft)}
+.games-console-jumps .games-text-action{min-height:38px}
+.games-console-body>.games-section,.games-console-body>div>.games-section{margin-top:42px}
+.games-console-body .games-section-heading{margin-bottom:24px;gap:20px}
+.games-console-body .games-section-heading h2{font-size:clamp(23px,2.5cqw,30px);letter-spacing:-.025em;font-weight:650;outline:none}
+.games-console-body .games-section-heading p{font-size:13px;line-height:1.6;color:var(--color-ink-muted);margin-top:6px}
+.games-console-catalog{scroll-margin-top:58px}
+.games-console-filters{display:flex;align-items:center;flex-wrap:wrap;gap:12px 20px;margin-bottom:24px}
+.games-console-filters>.games-search{flex:1 1 100%;width:100%;max-width:none;margin:0}
+.games-console-count{font-size:12px;color:var(--color-ink-muted);margin-bottom:22px}
+.games-console-continuation{height:2px;margin-top:22px;overflow-anchor:none}
+.games-console-catalog .games-rom-card{content-visibility:auto;contain-intrinsic-size:auto 330px}
+.games-console-page .games-rom-catalog-grid{grid-template-columns:repeat(auto-fill,minmax(144px,1fr));gap:30px 20px}
+.games-console-page .games-skeleton-poster{width:100%;aspect-ratio:2/3;height:auto;display:block}
+@container(max-width:600px){.games-console-hero{min-height:calc(560px + var(--games-chrome-inset))}.games-console-hero-content{padding-bottom:80px}.games-console-feature{padding-top:25px}.games-console-jumps{gap:4px 18px}.games-console-body .games-section-heading{align-items:flex-start}.games-console-page .games-rom-catalog-grid{grid-template-columns:repeat(2,minmax(0,1fr));gap:24px 14px}.games-console-filters{gap:8px}}
+:dir(rtl) .games-console-hero-shade{background:linear-gradient(0deg,var(--color-canvas),transparent 72px),linear-gradient(270deg,#080b11e8,#080b1180 52%,#080b1120)}
+.games-console-page>.games-mast{position:absolute;inset-inline:0;top:var(--games-chrome-inset);color:#fff}
+.games-console-page .games-mast-title>strong{font-size:24px;font-weight:650;letter-spacing:-.6px}
+.games-console-page:not(.is-searching)>.games-mast .games-navigation-button{color:#ffffffb8}
+.games-console-page:not(.is-searching)>.games-mast .games-navigation-button:is([aria-current],[aria-expanded=true]){color:var(--color-ink)}
+.games-console-page:not(.is-searching)>.games-mast .games-search{background:#121918bf;color:#fff9;backdrop-filter:blur(16px)}
+.games-console-page:not(.is-searching)>.games-mast .games-search input{color:#fff}
+.games-console-game-identity{width:100%;min-height:100px;display:flex;align-items:center}
+.games-console-game-logo{display:block;max-width:350px;width:100%;height:120px;object-fit:contain}
+.games-console-game-logo.games-art-empty{display:none}
+.games-console-game-identity:has([data-loaded=true]) h2{position:absolute;width:1px;height:1px;overflow:hidden;clip-path:inset(50%)}
+.games-view .games-console-page.is-searching{padding-top:var(--games-chrome-inset)}
+.games-console-page.is-searching>.games-mast{position:relative;top:auto;color:var(--color-ink)}
+.games-console-page.is-searching .games-console-hero,.games-console-page.is-searching .games-console-jumps{display:none}
+
+.games-console-page.is-searching .games-console-filters>.games-search{display:none}
+
+.games-console-brand-logo{display:block;width:220px;height:36px;filter:grayscale(1) brightness(0) invert(1)}
+/* GBA lettering sits inside a colored outline; flattening both fills erases the name. */
+.games-console-brand-logo:has(image[href="/games/platforms/gba-logo.svg"]){filter:grayscale(1)}
+.games-console-brand-logo.games-art-empty{display:none}
+.games-console-brand:has([data-loaded=true])>span{position:absolute;width:1px;height:1px;overflow:hidden;clip-path:inset(50%)}

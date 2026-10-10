@@ -1,54 +1,173 @@
-mod anime4k;
+#[cfg(desktop)]
+mod ytmusic;
+// Modules that build on every target, desktop and Android alike. Nothing in
+// here may reach a `#[cfg(desktop)]` tauri API: every Window setter (show,
+// hide, close, set_size, set_position, set_focus, set_always_on_top,
+// start_dragging, set_icon) is desktop-only in tauri 2, and so are
+// `tauri::menu` and `tauri::tray`. The getters are not, which is why
+// display geometry reads are fine and display geometry writes are not.
 mod binary_lookup;
-mod browser;
-mod cast;
+mod brand;
 mod cast_hls;
-mod cast_server;
 mod cast_subs;
 mod crash_report;
-mod cf_relay;
-mod discord_rp;
-mod dlna;
+mod diagnostics;
 mod download;
-mod dvr;
+mod ebook_tts;
 mod fonts;
-mod fullscreen;
-mod hdr_overlay;
+mod gamepad;
 mod http_fetch;
+mod http_redirect;
+mod playback_redirect;
 mod local_lib;
-mod modal_overlay;
-mod mpv;
-mod multiview;
-mod proc_mem;
-mod roku;
-#[cfg(target_os = "macos")]
-mod mpv_render_mac;
-#[cfg(target_os = "linux")]
-mod mpv_render_linux;
-mod pip;
-#[cfg(target_os = "macos")]
-mod pip_mac;
+mod media_server;
 mod power;
-mod process;
-mod airplay;
+mod privacy;
+mod proc_guard;
+mod proc_mem;
 mod settings_store;
-mod song_id;
 mod stream_proxy;
 mod streams;
-mod stremio_auth;
-mod sub_extract;
-mod subsync;
-mod svp;
-mod thumbs;
+mod subtitle_credentials;
+mod temp_prune;
+mod thumb_cache;
 mod torrent_engine;
-mod trailer;
+pub(crate) mod transfer_files;
 mod transcode;
-mod tray;
 mod web_server;
-mod webview_helpers;
 
+// Desktop-only. Each of these either drives a window, drives a tray or menu,
+// links libmpv, or exists purely to serve one of those. `desktop` is a cfg
+// alias emitted by tauri-build, so on Windows, macOS and Linux the predicate
+// is a compile-time true and the compiler sees exactly the tree it saw before.
+#[cfg(desktop)]
+mod airplay;
+#[cfg(desktop)]
+mod anime4k;
+#[cfg(desktop)]
+mod app_icon;
+#[cfg(desktop)]
+mod asr_model;
+#[cfg(desktop)]
+mod browser;
+mod browser_args;
+#[cfg(desktop)]
+mod capstan;
+#[cfg(desktop)]
+mod captions;
+#[cfg(desktop)]
+mod cast;
+#[cfg(desktop)]
+mod cast_server;
+#[cfg(desktop)]
+mod cf_relay;
+#[cfg(desktop)]
+mod cf_solver;
+#[cfg(desktop)]
+mod desktop_notify;
+#[cfg(desktop)]
+mod discord_rp;
+#[cfg(desktop)]
+mod display_fit;
+#[cfg(desktop)]
+mod dj_deck;
+#[cfg(desktop)]
+mod dlna;
+#[cfg(desktop)]
+mod dvr;
+#[cfg(desktop)]
+mod fullscreen;
+#[cfg(desktop)]
+mod games;
+#[cfg(desktop)]
+mod monitors;
+#[cfg(desktop)]
+mod harbor_lan;
+#[cfg(desktop)]
+mod hdr_overlay;
+#[cfg(desktop)]
+mod installer_handoff;
+#[cfg(desktop)]
+mod media_controls;
+#[cfg(target_os = "windows")]
+mod taskbar;
+mod modal_overlay;
+#[cfg(desktop)]
+mod mpv;
+#[cfg(desktop)]
+mod playback_cache;
+#[cfg(target_os = "linux")]
+mod mpv_render_linux;
+#[cfg(target_os = "macos")]
+mod mpv_render_mac;
+#[cfg(desktop)]
+mod multiview;
+#[cfg(desktop)]
+mod music;
+#[cfg(desktop)]
+mod pip;
+mod pip_window;
+#[cfg(target_os = "macos")]
+mod pip_mac;
+#[cfg(desktop)]
+mod roku;
+#[cfg(desktop)]
+mod shaders;
+#[cfg(desktop)]
+mod song_id;
+#[cfg(desktop)]
+mod song_id_gemini;
+#[cfg(desktop)]
+mod sub_extract;
+#[cfg(desktop)]
+mod subsync;
+#[cfg(desktop)]
+mod svp;
+#[cfg(desktop)]
+mod thumbs;
+#[cfg(desktop)]
+mod trailer;
+#[cfg(desktop)]
+mod tray;
+#[cfg(desktop)]
+mod webview_helpers;
+#[cfg(windows)]
+mod win_graphics;
+
+// http_fetch calls crate::cf_solver on the challenge path, and the real solver
+// needs a hidden webview window that Android does not have. Rather than edit
+// http_fetch, mobile binds the same module name to a stub that reports the
+// capability as absent instead of pretending it succeeded.
+#[cfg(mobile)]
+#[path = "cf_solver_mobile.rs"]
+mod cf_solver;
+#[cfg(mobile)]
+mod mobile;
+// Android P2P policy. torrent_engine picks up engine_dir, new_session and the
+// DHT rate from here behind the same cfg, so leaving this undeclared silently
+// reverts Android to the desktop tuning: payloads into a cacheDir the OS
+// reclaims mid-stream, and 400 DHT qps that fills a home router's NAT table.
+#[cfg(target_os = "android")]
+mod p2p_android;
+
+#[cfg(desktop)]
+pub(crate) fn release_stremio_scheme(app: &tauri::AppHandle) {
+    use std::io::Write;
+    use tauri_plugin_deep_link::DeepLinkExt;
+    let msg = match app.deep_link().unregister("stremio") {
+        Ok(()) => "[harbor::deeplink] released stremio:// on shutdown".to_string(),
+        Err(e) => format!("[harbor::deeplink] could not release stremio://: {}", e),
+    };
+    let _ = writeln!(std::io::stderr(), "{}", msg);
+}
+
+#[cfg(desktop)]
 pub(crate) fn shutdown_services(app: &tauri::AppHandle) {
+    release_stremio_scheme(app);
     thumbs::shutdown(app);
+    multiview::shutdown(app);
+    dvr::shutdown(app);
+    music::shutdown(app);
     stream_proxy::shutdown(app);
     cast_server::stop();
     torrent_engine::stop();
@@ -56,17 +175,29 @@ pub(crate) fn shutdown_services(app: &tauri::AppHandle) {
     crash_report::mark_clean_exit();
 }
 
-pub static CLOSE_FLUSH_DONE: std::sync::atomic::AtomicBool = std::sync::atomic::AtomicBool::new(false);
+#[cfg(desktop)]
+pub static CLOSE_FLUSH_DONE: std::sync::atomic::AtomicBool =
+    std::sync::atomic::AtomicBool::new(false);
+#[cfg(desktop)]
 static CLOSE_IN_PROGRESS: std::sync::atomic::AtomicBool = std::sync::atomic::AtomicBool::new(false);
-/// Tracks WebView2 TrySuspend / SetIsVisible(false) so we can recover on focus.
-#[cfg(windows)]
-static WEBVIEW_SUSPENDED: std::sync::atomic::AtomicBool = std::sync::atomic::AtomicBool::new(false);
+// Maximised windows are clamped to the work area so they never cover the taskbar.
+// Fullscreen must cover it, so the clamp is lifted while fullscreen is active.
+#[cfg(desktop)]
+static MAXGUARD_CLAMP: std::sync::atomic::AtomicBool = std::sync::atomic::AtomicBool::new(true);
 
+#[cfg(desktop)]
+#[tauri::command]
+fn set_maximize_clamp(enabled: bool) {
+    MAXGUARD_CLAMP.store(enabled, std::sync::atomic::Ordering::Relaxed);
+}
+
+#[cfg(desktop)]
 #[tauri::command]
 fn harbor_flush_done() {
     CLOSE_FLUSH_DONE.store(true, std::sync::atomic::Ordering::SeqCst);
 }
 
+#[cfg(desktop)]
 #[tauri::command]
 fn harbor_startup_ready(window: tauri::WebviewWindow) {
     if window.label() == "main" {
@@ -74,6 +205,7 @@ fn harbor_startup_ready(window: tauri::WebviewWindow) {
     }
 }
 
+#[cfg(desktop)]
 #[tauri::command]
 fn close_aux_windows(app: tauri::AppHandle) {
     use tauri::Manager;
@@ -84,6 +216,7 @@ fn close_aux_windows(app: tauri::AppHandle) {
     }
 }
 
+#[cfg(desktop)]
 #[tauri::command]
 async fn deeplink_set_stremio(app: tauri::AppHandle, enabled: bool) -> Result<(), String> {
     use tauri_plugin_deep_link::DeepLinkExt;
@@ -97,6 +230,7 @@ async fn deeplink_set_stremio(app: tauri::AppHandle, enabled: bool) -> Result<()
     Ok(())
 }
 
+#[cfg(desktop)]
 #[tauri::command]
 async fn deeplink_is_stremio_registered(app: tauri::AppHandle) -> Result<bool, String> {
     use tauri_plugin_deep_link::DeepLinkExt;
@@ -116,35 +250,44 @@ async fn save_text_file(path: String, contents: String) -> Result<(), String> {
     std::fs::write(&target, contents.as_bytes()).map_err(|e| format!("write file: {}", e))
 }
 
-/// Resume WebView2 after TrySuspend / SetIsVisible(false). Safe no-op if not suspended.
 #[cfg(windows)]
-fn resume_webview_if_needed(app: &tauri::AppHandle) {
+fn make_main_transparent(app: &tauri::AppHandle) {
     use tauri::Manager;
-    if !WEBVIEW_SUSPENDED.load(std::sync::atomic::Ordering::SeqCst) {
-        return;
-    }
     let Some(window) = app.get_webview_window("main") else {
+        eprintln!("[harbor::transparent] main window missing");
         return;
     };
     let res = window.with_webview(|webview| unsafe {
-        use webview2_com::Microsoft::Web::WebView2::Win32::ICoreWebView2_3;
+        use webview2_com::Microsoft::Web::WebView2::Win32::{
+            ICoreWebView2Controller2, COREWEBVIEW2_COLOR,
+        };
         use windows::core::Interface;
         let controller = webview.controller();
-        if let Ok(core) = controller.CoreWebView2() {
-            if let Ok(c3) = core.cast::<ICoreWebView2_3>() {
-                let _ = c3.Resume();
+        match controller.cast::<ICoreWebView2Controller2>() {
+            Ok(controller2) => {
+                let color = COREWEBVIEW2_COLOR {
+                    A: 0,
+                    R: 0,
+                    G: 0,
+                    B: 0,
+                };
+                match controller2.SetDefaultBackgroundColor(color) {
+                    Ok(()) => {
+                        eprintln!("[harbor::transparent] SetDefaultBackgroundColor OK (alpha=0)")
+                    }
+                    Err(e) => eprintln!(
+                        "[harbor::transparent] SetDefaultBackgroundColor FAILED: {:?}",
+                        e
+                    ),
+                }
             }
+            Err(e) => eprintln!("[harbor::transparent] cast to Controller2 FAILED: {:?}", e),
         }
-        let _ = controller.SetIsVisible(true);
     });
-    if res.is_ok() {
-        WEBVIEW_SUSPENDED.store(false, std::sync::atomic::Ordering::SeqCst);
-        eprintln!("[harbor::webview] auto-resumed after suspend");
+    if let Err(e) = res {
+        eprintln!("[harbor::transparent] with_webview FAILED: {:?}", e);
     }
 }
-
-#[cfg(not(windows))]
-fn resume_webview_if_needed(_app: &tauri::AppHandle) {}
 
 #[cfg(windows)]
 pub(crate) fn force_show_foreground(window: &tauri::WebviewWindow) {
@@ -168,6 +311,9 @@ pub(crate) fn force_show_foreground(window: &tauri::WebviewWindow) {
 const HARBOR_MAXGUARD_SUBCLASS_ID: usize = 0x4842_4D47;
 
 #[cfg(windows)]
+static MAIN_IN_SIZE_MOVE: std::sync::atomic::AtomicBool = std::sync::atomic::AtomicBool::new(false);
+
+#[cfg(windows)]
 unsafe extern "system" fn maxguard_subclass_proc(
     hwnd: windows::Win32::Foundation::HWND,
     msg: u32,
@@ -180,9 +326,23 @@ unsafe extern "system" fn maxguard_subclass_proc(
         GetMonitorInfoW, MonitorFromWindow, MONITORINFO, MONITOR_DEFAULTTONEAREST,
     };
     use windows::Win32::UI::Shell::DefSubclassProc;
-    use windows::Win32::UI::WindowsAndMessaging::{MINMAXINFO, WM_GETMINMAXINFO};
+    use windows::Win32::UI::WindowsAndMessaging::{
+        MINMAXINFO, WM_ENTERSIZEMOVE, WM_ERASEBKGND, WM_EXITSIZEMOVE, WM_GETMINMAXINFO,
+        WM_NCDESTROY,
+    };
+    if msg == WM_ENTERSIZEMOVE {
+        MAIN_IN_SIZE_MOVE.store(true, std::sync::atomic::Ordering::Relaxed);
+    } else if msg == WM_EXITSIZEMOVE || msg == WM_NCDESTROY {
+        MAIN_IN_SIZE_MOVE.store(false, std::sync::atomic::Ordering::Relaxed);
+    }
+    // Suppress repeated erases only during an interactive move/resize, where
+    // the WebView and mpv repaint asynchronously. Outside that loop, let Tao
+    // paint the configured black background before transparent content appears.
+    if msg == WM_ERASEBKGND && MAIN_IN_SIZE_MOVE.load(std::sync::atomic::Ordering::Relaxed) {
+        return windows::Win32::Foundation::LRESULT(1);
+    }
     let res = DefSubclassProc(hwnd, msg, wparam, lparam);
-    if msg == WM_GETMINMAXINFO {
+    if msg == WM_GETMINMAXINFO && MAXGUARD_CLAMP.load(std::sync::atomic::Ordering::Relaxed) {
         let monitor = MonitorFromWindow(hwnd, MONITOR_DEFAULTTONEAREST);
         let mut mi = MONITORINFO {
             cbSize: std::mem::size_of::<MONITORINFO>() as u32,
@@ -196,7 +356,74 @@ unsafe extern "system" fn maxguard_subclass_proc(
             mmi.ptMaxSize.y = mi.rcWork.bottom - mi.rcWork.top;
         }
     }
+    if matches!(
+        msg,
+        windows::Win32::UI::WindowsAndMessaging::WM_NCPAINT
+            | windows::Win32::UI::WindowsAndMessaging::WM_NCACTIVATE
+    ) && MAXGUARD_CLAMP.load(std::sync::atomic::Ordering::Relaxed)
+    {
+        paint_main_taskbar_gap(hwnd);
+    }
     res
+}
+
+#[cfg(windows)]
+unsafe fn paint_main_taskbar_gap(hwnd: windows::Win32::Foundation::HWND) {
+    use windows::Win32::Foundation::{POINT, RECT};
+    use windows::Win32::Graphics::Gdi::{
+        ClientToScreen, FillRect, GetMonitorInfoW, GetStockObject, GetWindowDC, MonitorFromWindow,
+        ReleaseDC, BLACK_BRUSH, HBRUSH, MONITORINFO, MONITOR_DEFAULTTONEAREST,
+    };
+    use windows::Win32::UI::WindowsAndMessaging::{GetClientRect, GetWindowRect, IsZoomed};
+    if !IsZoomed(hwnd).as_bool() {
+        return;
+    }
+    let mut client = RECT::default();
+    let mut outer = RECT::default();
+    let mut origin = POINT::default();
+    let mut monitor = MONITORINFO {
+        cbSize: std::mem::size_of::<MONITORINFO>() as u32,
+        ..Default::default()
+    };
+    if GetClientRect(hwnd, &mut client).is_err()
+        || GetWindowRect(hwnd, &mut outer).is_err()
+        || !ClientToScreen(hwnd, &mut origin).as_bool()
+        || !GetMonitorInfoW(
+            MonitorFromWindow(hwnd, MONITOR_DEFAULTTONEAREST),
+            &mut monitor,
+        )
+        .as_bool()
+    {
+        return;
+    }
+    let work = monitor.rcWork;
+    // Tao reserves one nonclient pixel for an auto-hidden taskbar. The WebView
+    // cannot paint it. Own that strip's paint without changing its hit testing,
+    // the client bounds, or the normal restored-window frame.
+    if origin.x != work.left
+        || origin.y != work.top
+        || origin.x + client.right != work.right
+        || origin.y + client.bottom != work.bottom - 1
+        || outer.left > work.left
+        || outer.right < work.right
+        || outer.top > work.bottom - 1
+        || outer.bottom < work.bottom
+    {
+        return;
+    }
+    let dc = GetWindowDC(Some(hwnd));
+    if dc.0.is_null() {
+        return;
+    }
+    let strip = RECT {
+        left: work.left - outer.left,
+        right: work.right - outer.left,
+        top: work.bottom - 1 - outer.top,
+        bottom: work.bottom - outer.top,
+    };
+    let brush = HBRUSH(GetStockObject(BLACK_BRUSH).0);
+    let _ = FillRect(dc, &strip, brush);
+    let _ = ReleaseDC(Some(hwnd), dc);
 }
 
 #[cfg(windows)]
@@ -212,9 +439,45 @@ fn install_maximize_guard(app: &tauri::AppHandle) {
         return;
     };
     unsafe {
-        let _ = SetWindowSubclass(hwnd, Some(maxguard_subclass_proc), HARBOR_MAXGUARD_SUBCLASS_ID, 0);
+        let _ = SetWindowSubclass(
+            hwnd,
+            Some(maxguard_subclass_proc),
+            HARBOR_MAXGUARD_SUBCLASS_ID,
+            0,
+        );
     }
     eprintln!("[harbor::maxguard] WM_GETMINMAXINFO work-area guard installed");
+}
+
+// Opt-in geometry-only diagnostics: never log player URLs or account data.
+#[cfg(windows)]
+fn log_main_geometry(app: &tauri::AppHandle, reason: &'static str) {
+    use tauri::Manager;
+    static ENABLED: std::sync::OnceLock<bool> = std::sync::OnceLock::new();
+    if !*ENABLED.get_or_init(|| std::env::var_os("HARBOR_WINDOW_DIAGNOSTICS").is_some()) {
+        return;
+    }
+    let Some(window) = app.get_webview_window("main") else {
+        return;
+    };
+    let native_window = window.clone();
+    let _ = window.with_webview(move |webview| unsafe {
+        let Ok(hwnd) = native_window.hwnd() else { return };
+        use windows::Win32::Foundation::{POINT, RECT};
+        use windows::Win32::Graphics::Gdi::{ClientToScreen, GetMonitorInfoW, MonitorFromWindow, MONITORINFO, MONITOR_DEFAULTTONEAREST};
+        use windows::Win32::UI::WindowsAndMessaging::{GetClientRect, GetWindowRect, IsZoomed};
+        let mut outer = RECT::default();
+        let mut client = RECT::default();
+        let mut origin = POINT::default();
+        let mut bounds = RECT::default();
+        let mut monitor = MONITORINFO { cbSize: std::mem::size_of::<MONITORINFO>() as u32, ..Default::default() };
+        let outer_ok = GetWindowRect(hwnd, &mut outer).is_ok();
+        let client_ok = GetClientRect(hwnd, &mut client).is_ok();
+        let origin_ok = ClientToScreen(hwnd, &mut origin).as_bool();
+        let monitor_ok = GetMonitorInfoW(MonitorFromWindow(hwnd, MONITOR_DEFAULTTONEAREST), &mut monitor).as_bool();
+        let bounds_ok = webview.controller().Bounds(&mut bounds).is_ok();
+        eprintln!("[harbor::window-geometry] {reason} zoomed={} outer={outer:?}/{outer_ok} client={client:?}/{client_ok} origin={origin:?}/{origin_ok} webview={bounds:?}/{bounds_ok} monitor={:?} work={:?}/{monitor_ok}", IsZoomed(hwnd).as_bool(), monitor.rcMonitor, monitor.rcWork);
+    });
 }
 
 #[tauri::command]
@@ -258,22 +521,36 @@ fn harbor_set_webview_visible(app: tauri::AppHandle, visible: bool) {
         let Some(window) = app.get_webview_window("main") else {
             return;
         };
-        if visible {
-            // Visibility true must always recover from a prior suspend.
-            resume_webview_if_needed(&app);
-        }
         let _ = window.with_webview(move |webview| unsafe {
             let _ = webview.controller().SetIsVisible(visible);
         });
-        if !visible {
-            WEBVIEW_SUSPENDED.store(true, std::sync::atomic::Ordering::SeqCst);
-        } else {
-            WEBVIEW_SUSPENDED.store(false, std::sync::atomic::Ordering::SeqCst);
-        }
     }
     #[cfg(not(windows))]
     {
         let _ = (&app, visible);
+    }
+}
+
+#[tauri::command]
+fn harbor_set_context_menu(app: tauri::AppHandle, enabled: bool) {
+    #[cfg(windows)]
+    {
+        use tauri::Manager;
+        let Some(window) = app.get_webview_window("main") else {
+            return;
+        };
+        let _ = window.with_webview(move |webview| unsafe {
+            let controller = webview.controller();
+            if let Ok(core) = controller.CoreWebView2() {
+                if let Ok(settings) = core.Settings() {
+                    let _ = settings.SetAreDefaultContextMenusEnabled(enabled);
+                }
+            }
+        });
+    }
+    #[cfg(not(windows))]
+    {
+        let _ = (&app, enabled);
     }
 }
 
@@ -298,7 +575,6 @@ fn harbor_try_suspend_webview(app: tauri::AppHandle) {
                 }
             }
         });
-        WEBVIEW_SUSPENDED.store(true, std::sync::atomic::Ordering::SeqCst);
     }
     #[cfg(not(windows))]
     {
@@ -325,7 +601,6 @@ fn harbor_resume_webview(app: tauri::AppHandle) {
             }
             let _ = controller.SetIsVisible(true);
         });
-        WEBVIEW_SUSPENDED.store(false, std::sync::atomic::Ordering::SeqCst);
     }
     #[cfg(not(windows))]
     {
@@ -333,6 +608,31 @@ fn harbor_resume_webview(app: tauri::AppHandle) {
     }
 }
 
+#[cfg(desktop)]
+const REVEAL_FAILSAFE_MS: u64 = 12_000;
+
+#[cfg(desktop)]
+fn install_reveal_failsafe(app: &tauri::AppHandle) {
+    use tauri::Manager;
+    let handle = app.clone();
+    std::thread::spawn(move || {
+        std::thread::sleep(std::time::Duration::from_millis(REVEAL_FAILSAFE_MS));
+        let Some(window) = handle.get_webview_window("main") else {
+            return;
+        };
+        if matches!(window.is_visible(), Ok(true)) {
+            return;
+        }
+        eprintln!(
+            "[harbor::reveal] page load did not finish in {REVEAL_FAILSAFE_MS}ms, showing window anyway"
+        );
+        let _ = window.show();
+        let _ = window.unminimize();
+        let _ = window.set_focus();
+    });
+}
+
+#[cfg(desktop)]
 fn ensure_window_on_screen(app: &tauri::AppHandle) {
     use tauri::Manager;
     let Some(window) = app.get_webview_window("main") else {
@@ -372,13 +672,19 @@ fn ensure_window_on_screen(app: &tauri::AppHandle) {
     let cx = mp.x + (ms.width as i32 - ww).max(0) / 2;
     let cy = mp.y + (ms.height as i32 - wh).max(0) / 2;
     let _ = window.set_position(tauri::PhysicalPosition::new(cx, cy));
-    eprintln!("[harbor::window] launched off-screen; recentered to {},{}", cx, cy);
+    eprintln!(
+        "[harbor::window] launched off-screen; recentered to {},{}",
+        cx, cy
+    );
 }
 
+#[cfg(desktop)]
 const MEDIA_EXTS: &[&str] = &[
-    "mkv", "mp4", "avi", "mov", "webm", "m4v", "ts", "m2ts", "mpg", "mpeg", "wmv", "flv", "ogv", "3gp",
+    "mkv", "mp4", "avi", "mov", "webm", "m4v", "ts", "m2ts", "mpg", "mpeg", "wmv", "flv", "ogv",
+    "3gp",
 ];
 
+#[cfg(desktop)]
 fn media_file_from_args(args: &[String]) -> Option<String> {
     for a in args {
         let lower = a.to_lowercase();
@@ -403,8 +709,21 @@ fn harbor_take_pending_file() -> Option<String> {
     pending_open_file().lock().ok().and_then(|mut g| g.take())
 }
 
-#[cfg_attr(mobile, tauri::mobile_entry_point)]
+// Android runs an entirely separate builder in `mobile.rs`. Desktop keeps this
+// one verbatim: the `cfg_attr(mobile, ...)` that used to sit here expanded to
+// nothing on desktop, so the emitted code is unchanged.
+#[cfg(mobile)]
+#[tauri::mobile_entry_point]
 pub fn run() {
+    mobile::run();
+}
+
+#[cfg(desktop)]
+pub fn run() {
+    if music::try_run_connector_worker() { return; }
+    if games::try_run_achievement_worker() { return; }
+    if games::try_run_archive_worker() { return; }
+    if games::try_run_hydra_import_worker() { return; }
     {
         let args: Vec<String> = std::env::args().skip(1).collect();
         if let Some(p) = media_file_from_args(&args) {
@@ -416,9 +735,14 @@ pub fn run() {
     #[cfg(any(windows, target_os = "linux"))]
     svp::prime_svp_env();
     #[cfg(target_os = "linux")]
-    mpv_render_linux::configure_nvidia_graphics();
+    mpv_render_linux::configure_linux_graphics();
+    #[cfg(windows)]
+    win_graphics::configure_windows_graphics();
     let _ = rustls::crypto::ring::default_provider().install_default();
     trailer::sweep_cache();
+    std::thread::spawn(trailer::sweep_ytdlp_extractions);
+    std::thread::spawn(temp_prune::sweep_temp);
+
     let proxy_state = tauri::async_runtime::block_on(stream_proxy::ProxyState::start())
         .unwrap_or_else(|e| {
             eprintln!("[stream-proxy] failed to start: {}", e);
@@ -426,16 +750,13 @@ pub fn run() {
         });
     let mpv_state = mpv::MpvState::new();
     let pip_state = pip::PipState::new();
+    let pip_window_state = pip_window::PipWindowState::default();
     let fullscreen_state = fullscreen::FullscreenState::new();
     let thumbs_state = thumbs::ThumbsState::new();
     let dvr_state = dvr::DvrState::new();
     let multiview_state = multiview::MultiviewState::new();
     let modal_overlay_state = modal_overlay::ModalOverlayState::new();
-    let app_builder = tauri::Builder::default();
-    // Let a Linux development build run alongside the installed Harbor app.
-    // Packaged builds keep the normal single-instance behavior.
-    #[cfg(not(all(target_os = "linux", debug_assertions)))]
-    let app_builder = app_builder
+    let app_builder = tauri::Builder::default()
         .plugin(tauri_plugin_single_instance::init(|app, args, _cwd| {
             use tauri::{Emitter, Manager};
             if let Some(w) = app.get_webview_window("main") {
@@ -444,6 +765,10 @@ pub fn run() {
                 let _ = w.set_focus();
                 #[cfg(windows)]
                 force_show_foreground(&w);
+            } else {
+                eprintln!("[harbor::single-instance] no main window to focus, releasing the lock");
+                app.exit(0);
+                return;
             }
             if let Some(url) = args.iter().find(|a| a.starts_with("harbor://")) {
                 let _ = app.emit("harbor:stremio-deeplink", url.clone());
@@ -451,30 +776,36 @@ pub fn run() {
             if let Some(path) = media_file_from_args(&args) {
                 let _ = app.emit("harbor:open-file", path);
             }
-        }));
-    let app_builder = app_builder
-        .plugin(tauri_plugin_opener::init())
+        }))
+        // tauri-plugin-opener injects a page script that itself opens target="_blank" anchors, duplicating Harbor's own openUrl.
+        .plugin(tauri_plugin_opener::Builder::new().open_js_links_on_click(false).build())
         .plugin(tauri_plugin_os::init())
         .plugin(tauri_plugin_shell::init())
         .plugin(tauri_plugin_http::init())
+        .plugin(tauri_plugin_clipboard_manager::init())
         .plugin(tauri_plugin_dialog::init())
         .plugin(tauri_plugin_fs::init())
         .plugin(tauri_plugin_deep_link::init())
+        .plugin(tauri_plugin_notification::init())
         .plugin(tauri_plugin_updater::Builder::new().build())
         .plugin(tauri_plugin_process::init())
-        .plugin(
-            tauri_plugin_window_state::Builder::default()
-                .with_state_flags(
-                    tauri_plugin_window_state::StateFlags::SIZE
-                        | tauri_plugin_window_state::StateFlags::POSITION
-                        | tauri_plugin_window_state::StateFlags::MAXIMIZED
-                        | tauri_plugin_window_state::StateFlags::FULLSCREEN,
-                )
-                .build(),
-        )
+        .plugin({
+            let builder = tauri_plugin_window_state::Builder::default().with_denylist(&["harbor-ytmusic-embed"]).with_state_flags(
+                tauri_plugin_window_state::StateFlags::SIZE
+                    | tauri_plugin_window_state::StateFlags::POSITION
+                    | tauri_plugin_window_state::StateFlags::MAXIMIZED,
+            );
+            // Restore the Windows main window only after its maximize guard is
+            // installed, so startup uses the same work-area rules as user maximize.
+            #[cfg(windows)]
+            let builder = builder.skip_initial_state("main");
+            builder.build()
+        })
         .manage(proxy_state)
         .manage(mpv_state)
+        .manage(music::MusicState::new())
         .manage(pip_state)
+        .manage(pip_window_state)
         .manage(fullscreen_state)
         .manage(thumbs_state)
         .manage(dvr_state)
@@ -491,25 +822,33 @@ pub fn run() {
         tauri::http::Response::builder()
             .status(200)
             .header("content-type", "text/html; charset=utf-8")
-            .body(b"<!doctype html><meta charset=\"utf-8\"><title>Harbor</title>".to_vec())
+            .body(
+                format!(
+                    "<!doctype html><meta charset=\"utf-8\"><title>{}</title>",
+                    crate::brand::PRODUCT_NAME
+                )
+                .into_bytes(),
+            )
             .unwrap()
     });
 
     app_builder
+        .plugin(privacy::init())
         .on_page_load(|webview, payload| {
             if webview.label() == "main"
                 && matches!(payload.event(), tauri::webview::PageLoadEvent::Finished)
             {
-                use tauri::Manager;
                 let _ = webview.window().show();
-                // Recover if a prior suspend left the controller invisible.
-                resume_webview_if_needed(webview.window().app_handle());
             }
         })
         .setup(move |app| {
             if let Err(error) = crash_report::initialize(app.handle()) {
                 eprintln!("[harbor::crash-report] initialization failed: {error}");
             }
+            proc_guard::init();
+            proc_guard::reap_orphans();
+            games::initialize_download_preparation(app.handle());
+            music::initialize(app.handle()).map_err(std::io::Error::other)?;
             #[cfg(windows)]
             {
                 use tauri_plugin_deep_link::DeepLinkExt;
@@ -519,9 +858,6 @@ pub fn run() {
             }
             #[cfg(target_os = "linux")]
             {
-                // Flatpak registers the URI handlers from the exported desktop
-                // entry. Runtime registration attempts to write host integration
-                // files and is not permitted inside the sandbox.
                 if std::env::var_os("FLATPAK_ID").is_none() {
                     use tauri_plugin_deep_link::DeepLinkExt;
                     if let Err(e) = app.deep_link().register_all() {
@@ -529,37 +865,25 @@ pub fn run() {
                     }
                 }
             }
-            // Browse with an opaque WebView2 background. Transparent (alpha=0)
-            // is applied only while embedded mpv is active (see use-mpv-embed /
-            // webview_reapply_transparency). Always-on transparency + black HWND
-            // can present as a stuck black window when composition fails.
             #[cfg(windows)]
-            webview_helpers::apply_opaque(&app.handle(), "main");
-            // Recover from WebView2 render-process death by reloading in place,
-            // instead of leaving a blank window until app restart.
-            webview_helpers::install_process_failure_watchdog(&app.handle(), "main");
+            make_main_transparent(&app.handle());
             #[cfg(windows)]
             install_maximize_guard(&app.handle());
-            ensure_window_on_screen(&app.handle());
-            // Fail-open: if PageLoadEvent::Finished never arrives (WebView hang),
-            // still show the main window so the user is not stuck on a blank frame.
+            #[cfg(windows)]
             {
                 use tauri::Manager;
-                let handle = app.handle().clone();
-                std::thread::spawn(move || {
-                    std::thread::sleep(std::time::Duration::from_millis(2500));
-                    if let Some(window) = handle.get_webview_window("main") {
-                        let visible = window.is_visible().unwrap_or(false);
-                        if !visible {
-                            eprintln!(
-                                "[harbor::window] fail-open: showing main after page-load timeout"
-                            );
-                            let _ = window.show();
-                        }
-                        resume_webview_if_needed(&handle);
+                use tauri_plugin_window_state::{StateFlags, WindowExt};
+                if let Some(window) = app.get_webview_window("main") {
+                    if let Err(error) = window.restore_state(
+                        StateFlags::SIZE | StateFlags::POSITION | StateFlags::MAXIMIZED,
+                    ) {
+                        eprintln!("[harbor::window] startup restore failed: {error}");
                     }
-                });
+                }
             }
+            display_fit::install(app.handle());
+            install_reveal_failsafe(app.handle());
+            ensure_window_on_screen(&app.handle());
             #[cfg(target_os = "macos")]
             {
                 use tauri::Manager;
@@ -579,8 +903,21 @@ pub fn run() {
             torrent_engine::ensure_started_on_setup(&app.handle());
             {
                 let handle = app.handle().clone();
+                std::thread::spawn(move || {
+                    use tauri::Manager;
+                    if let Ok(base) = handle.path().app_cache_dir() {
+                        let _ = temp_prune::sweep_mpv_cache(base.join("mpv-cache"));
+                    }
+                });
+            }
+            media_controls::ensure_started_on_setup(&app.handle());
+            #[cfg(target_os = "windows")]
+            taskbar::init(&app.handle());
+            {
+                let handle = app.handle().clone();
                 std::thread::spawn(move || discord_rp::run_loop(handle));
             }
+            gamepad::spawn(app.handle().clone());
             #[cfg(desktop)]
             if let Err(e) = tray::build(&app.handle()) {
                 eprintln!("[harbor::tray] build failed: {:?}", e);
@@ -592,6 +929,31 @@ pub fn run() {
                 return;
             }
             use tauri::Manager;
+            #[cfg(windows)]
+            if matches!(
+                event,
+                tauri::WindowEvent::Moved(_)
+                    | tauri::WindowEvent::Resized(_)
+                    | tauri::WindowEvent::ScaleFactorChanged { .. }
+            ) && window
+                .app_handle()
+                .get_webview_window(hdr_overlay::HDR_OVERLAY_LABEL)
+                .is_some()
+            {
+                let app = window.app_handle().clone();
+                tauri::async_runtime::spawn(async move {
+                    let _ = hdr_overlay::hdr_overlay_sync(app).await;
+                });
+            }
+            #[cfg(windows)]
+            match event {
+                tauri::WindowEvent::Resized(_) => log_main_geometry(window.app_handle(), "resized"),
+                tauri::WindowEvent::Moved(_) => log_main_geometry(window.app_handle(), "moved"),
+                tauri::WindowEvent::Focused(true) => {
+                    log_main_geometry(window.app_handle(), "focused")
+                }
+                _ => {}
+            }
             match event {
                 tauri::WindowEvent::CloseRequested { api, .. } => {
                     if tray::close_to_tray() {
@@ -616,10 +978,12 @@ pub fn run() {
                 }
                 tauri::WindowEvent::Focused(focused) => {
                     use tauri::Emitter;
-                    if *focused {
-                        // Recover stuck-black after TrySuspend / SetIsVisible(false)
-                        // if the frontend never called resume.
-                        resume_webview_if_needed(window.app_handle());
+                    gamepad::set_window_focused(*focused);
+                    if *focused
+                        && (pip::window_pip_is_active(window.app_handle())
+                            || tray::always_on_top_pref())
+                    {
+                        let _ = window.set_always_on_top(true);
                     }
                     let minimized = if *focused {
                         false
@@ -639,19 +1003,245 @@ pub fn run() {
             }
         })
         .invoke_handler(tauri::generate_handler![
+            games::games_pokemon,
+            games::games_scan_steam,
+            games::steam_shortcut_commands::games_scan_steam_shortcuts,
+            games::steam_shortcut_commands::games_launch_steam_shortcut,
+            games::steam_shortcut_commands::games_steam_shortcut_icons,
+            games::steam_shortcut_commands::games_launch_steam_shortcut_direct,
+            games::steam_shortcut_commands::games_steam_shortcut_running,
+            games::games_scan_launchers,
+            games::games_wow_addons,
+            games::games_sims_folders,
+            games::games_sims_workspace,
+            games::games_sims_inspect,
+            games::games_sims_metadata,
+            games::games_sims_packs,
+            games::games_sims_duplicates,
+            games::games_sims_dependencies,
+            games::games_sims_tray_preview,
+            games::games_sims_tray_content,
+            games::games_sims_kept_folder,
+            games::games_sims_catalog,
+            games::games_sims_lot51_catalog,
+            games::stardew_commands::games_stardew_folders,
+            games::stardew_commands::games_stardew_inspect,
+            games::stardew_commands::games_stardew_updates,
+            games::stardew_commands::games_stardew_cancel,
+            games::stardew_commands::games_stardew_workspace,
+            games::stardew_commands::games_stardew_review,
+            games::stardew_commands::games_stardew_apply,
+            games::stardew_commands::games_stardew_recover,
+            games::stardew_commands::games_stardew_discard,
+            games::stardew_commands::games_stardew_catalog,
+            games::stardew_commands::games_stardew_creator_review,
+            games::games_sims_mts_detail,
+            games::games_sims_mts_browse,
+            games::games_sims_mts_review,
+            games::games_sims_lot51_detail,
+            games::games_sims_lot51_review,
+            games::games_sims_creator_review,
+            games::games_sims_review,
+            games::games_sims_apply,
+            games::games_sims_cancel,
+            games::games_sims_sets,
+            games::games_sims_set_save,
+            games::games_sims_set_remove,
+            games::games_sims_discard,
+            games::games_sims_recover,
+            games::games_sims_save_context,
+            games::games_sims_save_recover,
+            games::games_save_recovery_status,
+            games::games_recover_save_restore,
+            games::games_sims_save_list,
+            games::games_sims_save_snapshot,
+            games::games_sims_save_review,
+            games::games_wow_addon_package,
+            games::games_wow_addon_workspace,
+            games::games_wow_addon_review,
+            games::games_wow_addon_apply,
+            games::games_wow_addon_discard,
+            games::games_wow_addon_cancel,
+            games::games_wow_addon_recover,
+            games::games_launch_launcher_game,
+            games::games_launcher_sessions,
+            games::games_inspect_archive,
+            games::games_inspect_setup,
+            games::games_setup_icon,
+            games::games_start_setup,
+            games::games_setup_jobs,
+            games::games_recover_setup,
+            games::games_reveal_setup,
+            games::games_observe_setup,
+            games::games_archive_space,
+            games::games_extract_archive,
+            games::games_cancel_archive,
+            games::games_discard_archive,
+            games::games_archive_jobs,
+            games::games_review_archive_cleanup,
+            games::games_discard_archive_cleanup,
+            games::games_recycle_archive_sources,
+            games::games_archive_cleanup_records,
+            games::games_archive_cleanup_action,
+            games::games_start_archive,
+            games::games_prepare_archive,
+            games::games_preparation_choices,
+            games::games_preparation_version,
+            games::games_preparation_candidates,
+            games::games_set_preparation,
+            games::games_disable_preparation,
+            games::games_remove_archive_job,
+            games::games_steam_account_status,
+            games::games_battlenet_account,
+            games::games_battlenet_import,
+            games::games_battlenet_cancel,
+            games::games_battlenet_preferences,
+            games::games_battlenet_disconnect,
+            games::games_minecraft_status,
+            games::games_minecraft_begin,
+            games::games_minecraft_poll,
+            games::games_minecraft_cancel,
+            games::games_minecraft_refresh,
+            games::games_minecraft_disconnect,
+            games::games_minecraft_apply_skin,
+            games::games_minecraft_apply_cape,
+            games::games_minecraft_texture,
+            games::games_minecraft_catalog,
+            games::games_minecraft_instances,
+            games::games_minecraft_instance_create,
+            games::games_minecraft_instance_rename,
+            games::games_minecraft_instance_folder,
+            games::games_minecraft_content,
+            games::games_minecraft_fabric_versions,
+            games::games_minecraft_loader_versions,
+            games::games_minecraft_pack_update_state,
+            games::games_minecraft_pack_update_review,
+            games::games_minecraft_pack_update_select,
+            games::games_minecraft_pack_update_apply,
+            games::games_minecraft_pack_update_discard,
+            games::games_minecraft_pack_update_cancel,
+            games::games_minecraft_instance_export_review,
+            games::games_minecraft_instance_export_apply,
+            games::games_minecraft_instance_storage,
+            games::games_minecraft_instance_remove_review,
+            games::games_minecraft_instance_remove_apply,
+            games::games_minecraft_lifecycle_discard,
+            games::games_minecraft_pack_review,
+            games::games_minecraft_pack_install,
+            games::games_minecraft_pack_cancel,
+            games::games_minecraft_pack_discard,
+            games::games_minecraft_runtime_state,
+            games::games_minecraft_runtime_review,
+            games::games_minecraft_runtime_install,
+            games::games_minecraft_runtime_cancel,
+            games::games_minecraft_runtime_discard,
+            games::games_minecraft_java_state,
+            games::games_minecraft_java_review,
+            games::games_minecraft_java_select,
+            games::games_minecraft_java_memory,
+            games::games_minecraft_java_install,
+            games::games_minecraft_java_discard,
+            games::games_minecraft_launch_state,
+            games::games_minecraft_launch,
+            games::games_connect_steam_account,
+            games::games_refresh_steam_account,
+            games::games_disconnect_steam_account,
+            games::games_steam_achievements,
+            games::games_read_local_achievements,
+            games::games_apply_local_achievements,
+            games::games_discard_local_achievements,
+            games::games_install_steam,
+            games::games_list_transfers,
+            games::games_transfer_settings,
+            games::games_transfer_storage,
+            games::games_download_locations,
+            games::games_set_transfer_bandwidth,
+            games::games_source_public_review,games::games_source_public_prepare,games::games_source_public_prepare_batch,games::games_source_public_cancel_batch,games::games_hydra_import_review,games::games_hydra_import_cancel,games::games_cloud_list,games::games_cloud_download,games::games_cloud_resolve_link,games::games_cloud_host_check,games::games_cloud_ad_prepare,games::games_cloud_ad_status,games::games_cloud_web_create,games::games_cloud_web_list,games::games_cloud_web_status,games::games_cloud_web_download,games::games_cloud_web_find,games::games_cloud_pm_create,games::games_cloud_pm_list,games::games_cloud_pm_status,games::games_cloud_pm_download,games::games_cloud_pm_retry,games::games_modrinth,games::games_mod_workspace,games::games_review_mods,games::games_install_mods,games::games_mod_action,games::games_cancel_mods,games::games_discard_mods,games::games_list_torrents,
+            games::games_inspect_torrent,
+            games::games_cancel_torrent_inspection,
+            games::games_discard_torrent,
+            games::games_start_torrent,
+            games::games_torrent_action,
+            games::games_seed_torrent,
+            games::games_list_save_snapshots,
+            games::games_validate_custom_launch,
+            games::games_game_shortcuts,
+            games::games_allow_game_execution,
+            games::games_custom_running,
+            games::games_custom_history,
+            games::games_validate_custom_artwork,
+            games::games_launch_custom,
+            games::games_create_save_snapshot,
+            games::games_prepare_save_restore,
+            games::games_restore_save_snapshot,
+            games::games_cancel_save_operation,
+            games::games_discard_save_restore,
+            games::games_source_browser_choose, games::games_source_browser_close,
+            games::games_source_verify, games::games_source_verify_cancel, games::games_source_verified_fetch,
+            games::games_source_http_fetch, games::games_source_http_cancel,
+            games::games_add_transfer,
+            games::games_add_transfer_batch,
+            games::games_transfer_action,
+            games::games_relink_transfer,
+            games::games_download_patch,
+            games::games_cancel_patch_download,
+            games::games_match_patch_sources,
+            games::games_prepare_patch,
+            games::games_write_patch,
+            games::games_discard_patch,
+            games::games_scan_roms,
+            games::games_find_emulators,
+            games::games_validate_emulator,
+            games::games_emulation_running,
+            games::games_launch_emulated,
+            games::games_retro_status,
+            games::games_retro_start,
+            games::games_retro_close,
+            games::games_launch_steam,
+            games::library_management::games_manage_steam,
+            games::library_management::games_manage_launcher,
+            games::library_management::games_open_installed_apps,
+            privacy::privacy_status,
+            privacy::privacy_set_enabled,
+            set_maximize_clamp,
+            monitors::list_monitors,
+            monitors::move_main_to_monitor,
             crash_report::take_startup_crash_report,
+            fonts::install_sub_font,
+            fonts::remove_sub_font,
+            fonts::list_sub_fonts,
+            ebook_tts::ebook_tts_synthesize,
+            ebook_tts::ebook_tts_cancel,
+            ebook_tts::ebook_tts_voices,
             harbor_flush_done,
             harbor_startup_ready,
             close_aux_windows,
+            desktop_notify::send_clickable_notification,
+            installer_handoff::handoff_probe,
+            installer_handoff::handoff_stage,
+            installer_handoff::handoff_launch,
+            installer_handoff::handoff_confirm,
+            installer_handoff::handoff_save_backup,
             power::power_inhibit,
             harbor_set_webview_memory_low,
             harbor_set_webview_visible,
+            harbor_set_context_menu,
             harbor_try_suspend_webview,
             harbor_resume_webview,
             save_text_file,
             subsync::moviehash::compute_moviehash,
             subsync::sync_subtitle,
+            subsync::scorer::subsync_score_transform,
+            subsync::scorer::subsync_preflight_candidates,
+            subsync::torrent_sync::torrent_sync_availability,
+            subsync::torrent_sync::torrent_sync_subtitle,
+            subsync::torrent_sync::torrent_score_transform,
+            subsync::audio_tracks::audio_probe_tracks,
+            subsync::fingerprint::compute_chromaprint,
+            subsync::asr::asr_transcribe_windows,
+            subsync::asr::asr_verify,
             sub_extract::subtitle_extract,
+            sub_extract::subtitle_extract_ass,
             cast_server::stop_stremio_sidecar,
             cast_server::cast_server_stop,
             web_server::web_serve_start,
@@ -661,17 +1251,125 @@ pub fn run() {
             web_server::remote_ws_client_count,
             anime4k::anime4k_download,
             anime4k::anime4k_dir,
+            asr_model::asr_ensure_model,
+            asr_model::asr_model_path,
+            shaders::shader_download,
+            shaders::shader_dir,
             svp::svp_status,
             svp::svp_launch,
             svp::svp_ensure_running,
             svp::svp_apply,
             settings_store::settings_read,
             settings_store::settings_write,
+            settings_store::secrets_read,
+            settings_store::secrets_write,
+            media_server::media_server_request,
             proc_mem::harbor_process_memory,
+            diagnostics::diagnostics_collect,
+            diagnostics::diagnostics_cleanup,
             trailer::fetch_trailer,
+            music::music_health,
+            music::music_source_candidates,
+            music::music_spotify_status,
+            music::music_spotify_connect,
+            music::music_spotify_disconnect,
+            music::music_spotify_devices,
+            music::music_spotify_set_device,
+            music::music_spotify_device,
+            music::music_spotify_library_page,
+            music::music_spotify_create_playlist,
+            music::music_spotify_add_to_playlist,
+            music::music_lastfm_auth,
+            music::music_lastfm_complete_auth,
+            music::music_lastfm_status,
+            music::run_connector_worker,
+            music::music_search,
+            music::music_resolve_stream,
+            music::music_db_init,
+            music::music_track_upsert,
+            music::music_track_get,
+            music::music_resolve_cached,
+            music::music_get_liked,
+            music::music_set_liked,
+            music::music_get_recents,
+            music::music_add_recent,
+            music::music_get_queue,
+            music::music_set_queue,
+            music::music_list_albums,
+            music::music_list_artists,
+            music::music_list_playlists,
+            music::music_create_playlist,
+            music::music_add_to_playlist,
+            music::music_add_tracks_to_playlist,
+            music::music_rename_playlist,
+            music::music_delete_playlist,
+            music::music_reorder_playlist,
+            music::music_remove_from_playlist,
+            music::music_import_m3u,
+            music::music_export_m3u,
+            music::music_play_track,
+            music::music_engine_pause,
+            music::music_paused_for_video,
+            music::music_resume_after_video,
+            music::music_engine_seek,
+            music::music_deck_loop,
+            music::music_deck_scratch,
+            music::music_prewarm_track,
+            music::music_scratch_window,
+            music::music_scratch_hold,
+            music::music_cable_status,
+            music::music_cable_create,
+            music::music_cable_destroy,
+            music::music_deck_play,
+            music::music_deck_pause,
+            music::music_deck_seek,
+            music::music_deck_volume,
+            music::music_deck_stop,
+            music::music_deck_states,
+            music::music_deck_primary,
+            music::music_deck_crossfade,
+            music::music_deck_crossfade_get,
+            music::music_fx_set,
+            music::music_fx_clear,
+            music::music_fx_get,
+            music::music_engine_set_volume,
+            music::music_audio_devices,
+            music::music_audio_settings_get,
+            music::music_audio_meter_set_enabled,
+            music::music_audio_meter_snapshot,
+            music::music_audio_settings_set,
+            music::music_export_filtered,
+            music::music_broadcast_targets,
+            music::music_broadcast_start,
+            music::music_broadcast_stop,
+            music::music_broadcast_status,
+            dj_deck::dj_deck_open,
+            dj_deck::dj_deck_close,
+            music::music_engine_stop,
+            music::music_home_rows,
+            music::music_browse_connector,
+            music::music_album_tracks,
+            music::music_artist_top,
+            music::music_artist_catalog,
+            music::music_artist_rows,
+            music::music_catalog_playlist_tracks,
+            music::music_station_tracks,
+            music::music_search_typed,
+            music::music_video_stream,
+            music::music_search_videos,
+            music::music_search_video_page,
+            music::music_connections,
+            music::music_connect,
+            music::music_disconnect,
+            music::music_local_scan,
+            music::music_local_collection,
+            temp_prune::temp_usage_bytes,
+            temp_prune::temp_clear,
             download::download_start,
             download::download_cancel,
+            download::download_verify,
             stream_proxy::proxy_register,
+            streams::resolve_playback_redirect,
             stream_proxy::proxy_unregister,
             stream_proxy::proxy_gc_idle,
             cf_relay::cf_list_accounts,
@@ -690,7 +1388,6 @@ pub fn run() {
             mpv::mpv_set_hdr_stage,
             mpv::display_hdr_active,
             webview_helpers::webview_reapply_transparency,
-            webview_helpers::webview_set_opaque,
             mpv::mpv_on_pip_changed,
             mpv::mpv_screenshot_data_url,
             mpv::mpv_save_screenshot,
@@ -698,31 +1395,57 @@ pub fn run() {
             mpv::mpv_gif_stop,
             mpv::mpv_gif_abort,
             mpv::mpv_clip_save,
+            captions::captions_open,
+            captions::captions_close,
+            captions::captions_push,
+            captions::captions_window_is_open,
+            captions::captions_request_state,
             modal_overlay::modal_overlay_open,
             modal_overlay::modal_overlay_close,
+            modal_overlay::modal_overlay_emit_result,
             modal_overlay::modal_overlay_emit_state,
             modal_overlay::modal_overlay_emit_action,
             modal_overlay::modal_overlay_sync,
             modal_overlay::modal_overlay_get_pending,
             hdr_overlay::hdr_overlay_open,
+            hdr_overlay::hdr_overlay_show,
             hdr_overlay::hdr_overlay_close,
             hdr_overlay::hdr_overlay_hide,
             hdr_overlay::hdr_overlay_sync,
             hdr_overlay::hdr_overlay_emit_props,
             hdr_overlay::hdr_overlay_emit_action,
             mpv::mpv_sub_add,
+            mpv::mpv_sub_remove,
             mpv::sub_download,
             mpv::mpv_stop,
+            mpv::mpv_release_media,
+            mpv::mpv_restore_media_surface,
             pip::pip_open,
             pip::pip_get_session,
             pip::pip_close,
             pip::pip_publish_state,
             pip::window_pip_enter,
             pip::window_pip_exit,
+            pip_window::pip_window_enter,
+            pip_window::pip_window_exit,
+            pip_window::pip_window_restore,
+            pip_window::pip_window_fit,
+            pip_window::pip_window_active,
             fullscreen::window_fullscreen_enter,
             fullscreen::window_fullscreen_exit,
             browser::browser_open,
             browser::browser_close,
+            ytmusic::ytmusic_open,
+            ytmusic::ytmusic_close,
+            ytmusic::ytmusic_is_open,
+            #[cfg(windows)]
+            ytmusic::ytmusic_embed,
+            #[cfg(windows)]
+            ytmusic::ytmusic_set_geometry,
+            #[cfg(windows)]
+            ytmusic::ytmusic_unembed,
+            #[cfg(windows)]
+            ytmusic::ytmusic_set_visible,
             thumbs::thumbs_set_url,
             thumbs::thumbs_spawn_eager,
             thumbs::thumbs_get,
@@ -740,11 +1463,38 @@ pub fn run() {
             multiview::multiview_visibility,
             multiview::multiview_stop_all,
             http_fetch::harbor_fetch,
-            http_fetch::harbor_fetch_cancel,
+            http_fetch::harbor_upload,
+            http_fetch::clear_thumb_cache,
+            http_fetch::thumb_cache_size,
+            subtitle_credentials::subtitle_credential_bind,
+            subtitle_credentials::subtitle_credentials_clear,
+            cf_solver::cf_report,
+            capstan::capstan_ping,
+            capstan::capstan_install,
+            capstan::capstan_uninstall,
+            capstan::capstan_extensions,
+            capstan::capstan_providers,
+            capstan::capstan_search,
+            capstan::capstan_load,
+            capstan::capstan_load_links,
+            capstan::capstan_catalogue,
+            capstan::capstan_catalogue_page,
             discord_rp::discord_set_presence,
             discord_rp::discord_clear,
+            media_controls::media_controls_update,
+            media_controls::media_controls_music_state,
+            media_controls::media_controls_music_art,
+            media_controls::media_controls_seeked,
+            media_controls::media_controls_clear,
+            gamepad::gamepad_list,
+            gamepad::gamepad_set_enabled,
+            gamepad::gamepad_set_background_input,
             discord_rp::discord_set_enabled,
             cast::cast_discover,
+            harbor_lan::harbor_lan_identity,
+            harbor_lan::harbor_lan_advertise,
+            harbor_lan::harbor_lan_stop_advertise,
+            harbor_lan::harbor_lan_discover,
             dlna::lan_ip,
             cast::cast_load,
             cast::cast_play,
@@ -755,9 +1505,14 @@ pub fn run() {
             cast_server::cast_server_status,
             cast_server::cast_server_restart,
             torrent_engine::torrent_engine_status,
+            torrent_engine::torrent_engine_set_enabled,
             torrent_engine::torrent_engine_add,
             torrent_engine::torrent_engine_select,
+            torrent_engine::torrent_engine_select_set,
             torrent_engine::torrent_engine_stats,
+            torrent_engine::torrent_engine_list,
+            torrent_engine::torrent_engine_pause,
+            torrent_engine::torrent_engine_resume,
             torrent_engine::torrent_engine_remove,
             torrent_engine::torrent_engine_selftest,
             torrent_engine::torrent_engine_restart,
@@ -770,12 +1525,18 @@ pub fn run() {
             local_lib::harbor_scan_folder,
             tray::tray_set_prefs,
             tray::tray_set_custom_themes,
-            stremio_auth::stremio_auth_start,
             song_id::recognize_now_playing,
+            song_id::recognize_now_playing_ai,
+            app_icon::set_app_icon,
             deeplink_set_stremio,
             deeplink_is_stremio_registered,
             harbor_take_pending_file,
         ])
-        .run(tauri::generate_context!())
-        .expect("error while running tauri application");
+        .build(tauri::generate_context!())
+        .expect("error while building tauri application")
+        .run(|app_handle, event| {
+            if matches!(event, tauri::RunEvent::Exit) {
+                shutdown_services(app_handle);
+            }
+        });
 }

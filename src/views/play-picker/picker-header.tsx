@@ -1,67 +1,85 @@
 import { ChevronDown, ChevronLeft, RefreshCw } from "lucide-react";
 import { useEffect, useRef, useState } from "react";
 import type { Meta } from "@/lib/cinemeta";
+import { parseKitsuId } from "@/lib/providers/kitsu";
+import { splitFranchiseDisplaySeason } from "@/lib/streams/anime-identity-core";
 import { useT } from "@/lib/i18n";
 import { useSettings } from "@/lib/settings";
 import type { PlayEpisode } from "@/lib/view";
 
-export function PickerHeader({
-  meta,
-  episode,
+export function PickerNav({
   onBack,
   onRefresh,
   refreshing = false,
 }: {
-  meta: Meta;
-  episode?: PlayEpisode;
   onBack: () => void;
   onRefresh?: () => void;
   refreshing?: boolean;
 }) {
   const t = useT();
   const { settings } = useSettings();
+  const groupLeft = settings.pickerRefreshNextToBack;
   return (
-    <header className="flex flex-col gap-3">
-      <div className="sticky top-4 z-20 mb-2">
-        <div
-          className={`relative flex items-center gap-3 ${
-            settings.pickerRefreshNextToBack ? "justify-start" : "justify-between"
-          }`}
+    <div className="-mb-9">
+      <div className={`flex items-center gap-3 ${groupLeft ? "justify-start" : "justify-between"}`}>
+        <button
+          type="button"
+          onClick={onBack}
+          className="group/back -ms-2 flex w-fit items-center gap-3 rounded-full py-1.5 pe-6 ps-1.5 text-[17px] font-semibold text-ink-muted transition-colors hover:text-ink"
         >
+          <span className="flex h-12 w-12 shrink-0 items-center justify-center rounded-full bg-elevated/70 ring-1 ring-edge-soft transition-colors group-hover/back:bg-elevated">
+            <ChevronLeft size={26} strokeWidth={2.4} className="dir-icon" />
+          </span>
+          Back
+        </button>
+        {onRefresh && (
           <button
             type="button"
-            onClick={onBack}
-            data-tv-modal-close
-            aria-label={t("common.back")}
-            className="group/back -ms-1 flex w-fit items-center gap-3 rounded-full py-1.5 pe-6 ps-1.5 text-[17px] font-semibold text-ink-muted transition-colors hover:text-ink"
+            onClick={onRefresh}
+            disabled={refreshing}
+            aria-label={t("Refresh sources")}
+            className="group/refresh flex w-fit shrink-0 items-center gap-3 rounded-full py-1.5 pe-6 ps-1.5 text-[17px] font-semibold text-ink-muted transition-colors hover:text-ink disabled:cursor-not-allowed disabled:opacity-60"
           >
-            <span className="flex h-12 w-12 items-center justify-center rounded-full bg-elevated/70 ring-1 ring-edge-soft transition-colors group-hover/back:bg-elevated">
-              <ChevronLeft size={26} strokeWidth={2.4} className="dir-icon" />
+            <span className="flex h-12 w-12 shrink-0 items-center justify-center rounded-full bg-elevated/70 ring-1 ring-edge-soft transition-colors group-hover/refresh:bg-elevated">
+              <RefreshCw size={20} strokeWidth={2.4} className={refreshing ? "animate-spin" : ""} />
             </span>
-            Back
+            {t("Refresh")}
           </button>
-          {onRefresh && (
-            <button
-              type="button"
-              onClick={onRefresh}
-              disabled={refreshing}
-              title={t("Refresh sources")}
-              aria-label={t("Refresh sources")}
-              className="flex h-11 shrink-0 items-center gap-2 rounded-full border border-edge-soft bg-elevated/70 ps-4 pe-5 text-[14px] font-semibold text-ink-muted transition-colors hover:bg-elevated hover:text-ink disabled:cursor-not-allowed disabled:opacity-60"
-            >
-              <RefreshCw size={17} strokeWidth={2.4} className={refreshing ? "animate-spin" : ""} />
-              {t("Refresh")}
-            </button>
-          )}
-        </div>
+        )}
       </div>
+    </div>
+  );
+}
+
+export function PickerHeader({
+  meta,
+  episode,
+  absoluteEpisode,
+}: {
+  meta: Meta;
+  episode?: PlayEpisode;
+  absoluteEpisode?: number | null;
+}) {
+  const partSeason = episode
+    ? splitFranchiseDisplaySeason(
+        parseKitsuId(episode.kitsuStreamId ?? "") ?? parseKitsuId(meta.id),
+      )
+    : null;
+  return (
+    <header className="flex flex-col gap-3">
       {episode ? (
         <>
           <p className="text-[11px] font-semibold uppercase tracking-[0.32em] text-ink-subtle">
-            {meta.name} · Season {episode.imdbSeason ?? episode.season} · Episode {String(episode.imdbEpisode ?? episode.episode).padStart(2, "0")}
+            {absoluteEpisode != null
+              ? `${meta.name} · Episode ${absoluteEpisode}`
+              : partSeason != null
+                ? `${meta.name} · Season ${partSeason} · Episode ${String(episode.episode).padStart(2, "0")}`
+                : `${meta.name} · Season ${episode.imdbSeason ?? episode.season} · Episode ${String(episode.imdbEpisode ?? episode.episode).padStart(2, "0")}`}
           </p>
           <h1 className="font-display text-[64px] font-medium leading-[0.96] tracking-tight text-ink">
-            {episode.name || `Episode ${episode.episode}`}
+            {episode.name ||
+              metaEpisodeName(meta, episode) ||
+              `Episode ${absoluteEpisode ?? episode.episode}`}
           </h1>
           {episode.overview && <CollapsibleOverview text={episode.overview} />}
         </>
@@ -119,4 +137,11 @@ function CollapsibleOverview({ text }: { text: string }) {
       )}
     </div>
   );
+}
+
+function metaEpisodeName(meta: Meta, episode: PlayEpisode): string | undefined {
+  const match = meta.videos?.find(
+    (v) => (v.season ?? 1) === episode.season && (v.episode ?? v.number) === episode.episode,
+  );
+  return match?.name || match?.title || undefined;
 }

@@ -15,7 +15,13 @@ export function isLiveChannel(ch: IptvChannel): boolean {
 }
 
 export function classifyChannel(ch: IptvChannel): VodKind {
-  const url = ch.url || "";
+  // Query strings may carry signatures or nested URLs; they are not this file's path.
+  let url = (ch.url || "").split(/[?#]/)[0];
+  try {
+    url = new URL(ch.url).pathname;
+  } catch {
+    /* Local/relative playlist path. */
+  }
   const group = ch.group || "";
   const name = ch.name || "";
   const declared = (ch.attrs["tvg-type"] || ch.attrs["type"] || "").toLowerCase();
@@ -29,9 +35,7 @@ export function classifyChannel(ch: IptvChannel): VodKind {
 
   const vodExt = VOD_EXT_RE.test(url);
   const liveExt = LIVE_EXT_RE.test(url);
-  const movieFile = vodExt && !liveExt && !SERIES_GROUP_RE.test(group);
-
-  if (!movieFile && parseSeriesEpisode(name)) return "series";
+  if (!liveExt && parseSeriesEpisode(name)) return "series";
 
   if (SERIES_GROUP_RE.test(group) && !liveExt) return "series";
   if (MOVIE_GROUP_RE.test(group) && !liveExt) return "movie";

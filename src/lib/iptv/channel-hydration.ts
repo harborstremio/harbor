@@ -131,10 +131,22 @@ async function fetchFullMeta(
   }
 }
 
+const BRAND_WORDS = new Set([
+  "discovery", "paramount", "legend", "history", "national", "geographic",
+  "cinema", "cinemax", "showtime", "starz", "bravo", "syfy", "universal",
+  "disney", "nickelodeon", "cartoon", "comedy", "drama", "action", "family",
+  "kids", "movies", "movie", "series", "hits", "classics", "westerns",
+  "horror", "thriller", "romance", "documentary", "entertainment", "max",
+  "epic", "pluto", "peacock", "crackle", "tubi", "roku", "fandango",
+]);
+
 function pickBestMatch(list: Meta[], query: string): Meta | null {
   if (list.length === 0) return null;
   const q = query.toLowerCase().trim();
   if (q.length < 4) return null;
+  const words = q.split(/\s+/).filter(Boolean);
+  if (words.length === 1 && (q.length < 8 || BRAND_WORDS.has(q))) return null;
+  if (words.every((w) => BRAND_WORDS.has(w))) return null;
   for (const m of list) {
     if (m.name?.toLowerCase().trim() === q) return m;
   }

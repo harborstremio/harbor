@@ -1,96 +1,282 @@
-import { Ghost, Heart, Info, MessageSquareWarning, ShieldAlert, Swords, Wine } from "lucide-react";
-import { useEffect, useMemo, useRef, useState } from "react";
+import { EyeOff, Ghost, Heart, Info, MessageSquareWarning, Swords, Wine, X } from "lucide-react";
+import { type FocusEvent, useEffect, useMemo, useRef, useState } from "react";
 import { useT } from "@/lib/i18n";
+import { ignoreAdvisory } from "@/lib/player/content-advisory-ignore";
+import { usePlaybackPositionGated } from "@/lib/player/playback-clock";
+import { useSettings } from "@/lib/settings";
 
 export type Advisory = { category: string; severity: string };
+export type ContentAdvisoryPosition = "top-start" | "top-end" | "top-center";
 
-const SEV_RANK: Record<string, number> = { Mild: 1, Moderate: 2, Severe: 3 };
+const SEV_RANK: Record<string, number> = { None: 0, Mild: 1, Moderate: 2, Severe: 3 };
 
-const SEV_STYLE: Record<string, { text: string; bar: string }> = {
-  Severe: { text: "text-red-300", bar: "bg-red-400" },
-  Moderate: { text: "text-amber-300", bar: "bg-amber-400" },
-  Mild: { text: "text-ink-subtle", bar: "bg-ink-subtle/70" },
+type SeverityStyle = { text: string };
+
+const SEV_STYLE_COLORED: Record<string, SeverityStyle> = {
+  Severe: { text: "text-danger" },
+  Moderate: { text: "text-accent" },
+  Mild: { text: "text-white/60" },
+  None: { text: "text-white/50" },
+};
+
+const SEV_STYLE_MONO: Record<string, SeverityStyle> = {
+  Severe: { text: "text-white/85" },
+  Moderate: { text: "text-white/70" },
+  Mild: { text: "text-white/60" },
+  None: { text: "text-white/50" },
 };
 
 function metaFor(category: string): { Icon: typeof Info; label: string } {
-  const c = category.toLowerCase();
-  if (c.includes("sex") || c.includes("nudity")) return { Icon: Heart, label: "Sex & Nudity" };
-  if (c.includes("violence") || c.includes("gore")) return { Icon: Swords, label: "Violence" };
-  if (c.includes("profanity")) return { Icon: MessageSquareWarning, label: "Profanity" };
-  if (c.includes("alcohol") || c.includes("drug") || c.includes("smoking"))
-    return { Icon: Wine, label: "Alcohol & Drugs" };
-  if (c.includes("frighten") || c.includes("intense")) return { Icon: Ghost, label: "Frightening" };
+  const normalized = category.toLowerCase();
+  if (normalized.includes("sex") || normalized.includes("nudity")) {
+    return { Icon: Heart, label: "Sex & Nudity" };
+  }
+  if (normalized.includes("violence") || normalized.includes("gore")) {
+    return { Icon: Swords, label: "Violence & Gore" };
+  }
+  if (normalized.includes("profanity") || normalized.includes("language")) {
+    return { Icon: MessageSquareWarning, label: "Profanity" };
+  }
+  if (
+    normalized.includes("alcohol") ||
+    normalized.includes("drug") ||
+    normalized.includes("smoking")
+  ) {
+    return { Icon: Wine, label: "Alcohol, Drugs & Smoking" };
+  }
+  if (normalized.includes("frighten") || normalized.includes("intense")) {
+    return { Icon: Ghost, label: "Frightening & Intense Scenes" };
+  }
   return { Icon: Info, label: category };
 }
 
-const HOLD_MS = 10000;
-const HOVER_TAIL_MS = 2500;
+const HOLD_MS = 8_000;
+const HOVER_TAIL_MS = 2_500;
+const EXIT_MS = 160;
+const CARD_CLASS = "w-[280px] max-w-[calc(100vw-3rem)] rounded-[4px] bg-black/70 px-3 py-2.5";
 
-export function ContentAdvisoryToast({ categories, playKey }: { categories: Advisory[]; playKey: string }) {
+type Phase = "idle" | "holding" | "collapsing" | "done";
+
+export function ContentAdvisoryToast({
+  categories,
+  playKey,
+  titleId,
+  mpaRating,
+  position = "top-start",
+  preview = false,
+}: {
+  categories: Advisory[];
+  playKey: string;
+  titleId?: string | null;
+  mpaRating?: string | null;
+  position?: ContentAdvisoryPosition;
+  preview?: boolean;
+}) {
   const t = useT();
+  const { settings } = useSettings();
+  const enabled = preview || settings.contentAdvisoryToast === true;
+  const severityStyles =
+    settings.contentAdvisoryTheme === "monochrome" ? SEV_STYLE_MONO : SEV_STYLE_COLORED;
+  const positionSec = usePlaybackPositionGated(enabled);
+  const hasPlaybackStarted = preview || positionSec > 0.3;
   const rated = useMemo(
     () =>
-      categories
-        .filter((c) => SEV_RANK[c.severity])
+      (categories ?? [])
+        .filter(
+          (category) => SEV_RANK[category.severity] !== undefined && category.severity !== "None",
+        )
         .sort((a, b) => (SEV_RANK[b.severity] ?? 0) - (SEV_RANK[a.severity] ?? 0)),
     [categories],
   );
-  const [visible, setVisible] = useState(false);
-  const timerRef = useRef(0);
+  const hasContent = rated.length > 0 || !!mpaRating;
+  const [active, setActive] = useState(preview);
+  const [phase, setPhase] = useState<Phase>(preview ? "holding" : "idle");
+  const [paused, setPaused] = useState(false);
+  const [hasTriggered, setHasTriggered] = useState(preview);
+  const durationRef = useRef(HOLD_MS);
 
   useEffect(() => {
-    if (rated.length === 0 || !playKey) return;
-    setVisible(true);
-    window.clearTimeout(timerRef.current);
-    timerRef.current = window.setTimeout(() => setVisible(false), HOLD_MS);
-    return () => window.clearTimeout(timerRef.current);
-  }, [playKey, rated.length]);
+    if (preview) {
+      setActive(true);
+      setPhase("holding");
+      setHasTriggered(true);
+      return;
+    }
 
-  if (rated.length === 0) return null;
+    setActive(false);
+    setPhase("idle");
+    setPaused(false);
+    setHasTriggered(false);
+    durationRef.current = HOLD_MS;
+  }, [playKey, preview, enabled]);
+
+  useEffect(() => {
+    if (!enabled || preview || !playKey || !hasPlaybackStarted || !hasContent || hasTriggered)
+      return;
+    setHasTriggered(true);
+    setActive(true);
+    setPhase("holding");
+    durationRef.current = HOLD_MS;
+  }, [enabled, hasPlaybackStarted, hasContent, hasTriggered, playKey, preview]);
+
+  useEffect(() => {
+    if (preview || phase !== "holding" || paused) return;
+    const timer = window.setTimeout(() => setPhase("collapsing"), durationRef.current);
+    return () => window.clearTimeout(timer);
+  }, [paused, phase, preview]);
+
+  useEffect(() => {
+    if (preview || phase !== "collapsing") return;
+    const timer = window.setTimeout(() => {
+      setPhase("done");
+      setActive(false);
+    }, EXIT_MS);
+    return () => window.clearTimeout(timer);
+  }, [phase, preview]);
+
+  if (!enabled || !hasContent || !active || !hasPlaybackStarted || phase === "done") return null;
+
+  const isCardExiting = phase === "collapsing";
+  const handleInteractionEnd = (stillInteracting = false) => {
+    setPaused(stillInteracting);
+    if (phase === "holding") {
+      durationRef.current = HOVER_TAIL_MS;
+    }
+  };
+  const handleBlur = (event: FocusEvent<HTMLDivElement>) => {
+    if (event.currentTarget.contains(event.relatedTarget)) return;
+    handleInteractionEnd(event.currentTarget.matches(":hover"));
+  };
+  const canIgnore = !preview && !!titleId && settings.contentAdvisoryShowIgnore !== false;
+  const handleIgnore = () => {
+    if (titleId) ignoreAdvisory(titleId);
+    setPhase("collapsing");
+  };
+  const positionClass =
+    position === "top-end"
+      ? "end-6 top-20"
+      : position === "top-center"
+        ? "start-1/2 top-20 -translate-x-1/2 rtl:translate-x-1/2"
+        : "start-6 top-20";
 
   return (
-    <div
-      onMouseEnter={() => window.clearTimeout(timerRef.current)}
-      onMouseLeave={() => {
-        window.clearTimeout(timerRef.current);
-        timerRef.current = window.setTimeout(() => setVisible(false), HOVER_TAIL_MS);
-      }}
-      className={`pointer-events-auto absolute start-6 top-20 z-30 w-[266px] rounded-2xl border border-edge-soft/70 bg-canvas/85 px-4 py-3.5 shadow-[0_18px_50px_-16px_rgba(0,0,0,0.72)] backdrop-blur-xl transition-[opacity,transform] duration-500 ease-[cubic-bezier(0.22,1,0.36,1)] ${
-        visible ? "translate-y-0 opacity-100" : "-translate-y-1.5 opacity-0"
-      }`}
-    >
-      <div className="mb-2.5 flex items-center gap-1.5 text-ink-subtle">
-        <ShieldAlert size={12} strokeWidth={2.2} />
-        <span className="text-[10px] font-semibold uppercase tracking-[0.16em]">
-          {t("Content advisory")}
-        </span>
-      </div>
-      <ul className="flex flex-col gap-2">
-        {rated.map((c) => {
-          const { Icon, label } = metaFor(c.category);
-          const style = SEV_STYLE[c.severity] ?? SEV_STYLE.Mild;
-          const rank = SEV_RANK[c.severity] ?? 1;
-          return (
-            <li key={c.category} className="flex items-center justify-between gap-3">
-              <span className="flex items-center gap-2">
-                <Icon size={14} strokeWidth={2} className={style.text} />
-                <span className="text-[12.5px] text-ink">{t(label)}</span>
+    <>
+      {!preview && (
+        <style>{`
+          @keyframes harborAdvisoryIn {
+            from { opacity: 0; transform: translateY(-4px); }
+            to { opacity: 1; transform: translateY(0); }
+          }
+          @keyframes harborAdvisoryOut {
+            from { opacity: 1; transform: translateY(0); }
+            to { opacity: 0; transform: translateY(-2px); }
+          }
+          @media (prefers-reduced-motion: reduce) {
+            .harbor-content-advisory { animation-duration: 1ms !important; }
+          }
+        `}</style>
+      )}
+      <div
+        role={preview ? undefined : "status"}
+        aria-label={preview ? undefined : t("Content advisory")}
+        onMouseEnter={preview ? undefined : () => setPaused(true)}
+        onMouseLeave={
+          preview
+            ? undefined
+            : (event) => handleInteractionEnd(event.currentTarget.contains(document.activeElement))
+        }
+        onFocusCapture={preview ? undefined : () => setPaused(true)}
+        onBlurCapture={preview ? undefined : handleBlur}
+        className={`${
+          preview
+            ? "relative"
+            : `${isCardExiting ? "pointer-events-none" : "pointer-events-auto"} absolute ${positionClass} z-30`
+        } harbor-content-advisory ${CARD_CLASS}`}
+        style={
+          preview
+            ? undefined
+            : {
+                animation: isCardExiting
+                  ? `harborAdvisoryOut ${EXIT_MS}ms var(--ease-out) forwards`
+                  : "harborAdvisoryIn 200ms var(--ease-out) both",
+              }
+        }
+      >
+        <div
+          className={`flex min-h-5 items-center justify-between gap-2 ${
+            rated.length > 0 ? "mb-2" : ""
+          }`}
+        >
+          <span className="min-w-0 text-white/60">
+            <span className="text-[11px] font-medium">{t("Content advisory")}</span>
+          </span>
+          <span className="flex shrink-0 items-center gap-1">
+            {mpaRating && (
+              <span className="text-[11px] font-medium tabular-nums text-white/75">
+                {mpaRating}
               </span>
-              <span className="flex items-center gap-1.5">
-                <span className="flex gap-[3px]">
-                  {[1, 2, 3].map((i) => (
-                    <span
-                      key={i}
-                      className={`h-2.5 w-1 rounded-full ${i <= rank ? style.bar : "bg-ink-subtle/25"}`}
+            )}
+            {!preview && (
+              <button
+                type="button"
+                onClick={(event) => {
+                  event.currentTarget.blur();
+                  setPhase("collapsing");
+                }}
+                aria-label={t("Dismiss")}
+                className="flex h-5 w-5 items-center justify-center rounded text-white/45 transition-[color,background-color,transform] duration-150 hover:bg-white/10 hover:text-white active:scale-[0.96] focus-visible:outline focus-visible:outline-2 focus-visible:outline-offset-1 focus-visible:outline-white/60"
+              >
+                <X size={12} strokeWidth={2} />
+              </button>
+            )}
+          </span>
+        </div>
+
+        {rated.length > 0 && (
+          <ul className="flex flex-col gap-1.5">
+            {rated.map((category) => {
+              const { Icon, label } = metaFor(category.category);
+              const style = severityStyles[category.severity] ?? severityStyles.Mild;
+              return (
+                <li
+                  key={category.category}
+                  className="grid grid-cols-[minmax(0,1fr)_auto] items-start gap-3"
+                >
+                  <span className="flex min-w-0 items-start gap-2">
+                    <Icon
+                      size={13}
+                      strokeWidth={1.8}
+                      aria-hidden="true"
+                      className="mt-0.5 shrink-0 text-white/55"
                     />
-                  ))}
-                </span>
-                <span className={`w-[54px] text-[11px] font-semibold ${style.text}`}>{t(c.severity)}</span>
-              </span>
-            </li>
-          );
-        })}
-      </ul>
-    </div>
+                    <span className="text-[12px] leading-[18px] text-white/85">{t(label)}</span>
+                  </span>
+                  <span className={`text-end text-[11px] leading-[18px] ${style.text}`}>
+                    {t(category.severity)}
+                  </span>
+                </li>
+              );
+            })}
+          </ul>
+        )}
+
+        {canIgnore && (
+          <div className="mt-2 text-start">
+            <button
+              type="button"
+              onClick={(event) => {
+                event.currentTarget.blur();
+                handleIgnore();
+              }}
+              title={t("Never show the content advisory for this title again")}
+              className="inline-flex min-h-6 items-center gap-1.5 rounded-sm bg-transparent text-[11px] text-white/60 transition-colors duration-150 hover:text-white focus-visible:outline focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-white/70"
+            >
+              <EyeOff size={11} strokeWidth={2.2} aria-hidden="true" className="shrink-0" />
+              <span>{t("Ignore this title")}</span>
+            </button>
+          </div>
+        )}
+      </div>
+    </>
   );
 }

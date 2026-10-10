@@ -1,7 +1,7 @@
 import { useEffect } from "react";
-import { isMacDesktop } from "@/lib/platform";
+import { isLinuxDesktop, isMacDesktop } from "@/lib/platform";
 import { applyMotionInterp } from "@/lib/player/motion-interp";
-import { applyRtxHdr, resetRtxHdrState } from "@/lib/player/rtx-hdr";
+import { applyRtxVideo, resetRtxVideoState } from "@/lib/player/rtx-video";
 import { applySubStyle } from "@/lib/player/sub-style";
 import type { useSettings } from "@/lib/settings";
 
@@ -15,6 +15,9 @@ export function useSubStyleApply(params: {
   sourceGamma: string;
   bridgeKey: string | number;
   svpActive: boolean;
+  assScale?: number;
+  subTrackId?: string;
+  sdhFilterAllowed: boolean;
 }) {
   const {
     engine,
@@ -26,13 +29,21 @@ export function useSubStyleApply(params: {
     sourceGamma,
     bridgeKey,
     svpActive,
+    assScale,
+    subTrackId,
+    sdhFilterAllowed,
   } = params;
 
   useEffect(() => {
     if (engine !== "mpv") return;
     if (!bridgeReady) return;
     if (!mediaReady) return;
-    void applySubStyle(settings, { assNativeActive, imageNativeActive });
+    void applySubStyle(settings, {
+      assNativeActive,
+      imageNativeActive,
+      assScale,
+      sdhFilterAllowed,
+    });
   }, [
     engine,
     bridgeReady,
@@ -40,6 +51,11 @@ export function useSubStyleApply(params: {
     bridgeKey,
     assNativeActive,
     imageNativeActive,
+    assScale,
+    subTrackId,
+    sdhFilterAllowed,
+    settings.subHideSdh,
+    settings.subAssNormalizeSize,
     settings.subFontSize,
     settings.subFontColor,
     settings.subBorderColor,
@@ -56,22 +72,29 @@ export function useSubStyleApply(params: {
     settings.subBold,
   ]);
 
-  useEffect(() => () => resetRtxHdrState(), [bridgeKey]);
+  useEffect(() => () => resetRtxVideoState(), [bridgeKey]);
 
   useEffect(() => {
     if (engine !== "mpv") return;
-    if (isMacDesktop() && settings.playerMpvEmbed) return;
+    if ((isMacDesktop() || isLinuxDesktop()) && settings.playerMpvEmbed) return;
     if (!bridgeReady) return;
-    if (!mediaReady) {
-      void applyRtxHdr(false, svpActive, settings.playerHdrToSdr, bridgeKey);
+    if (!mediaReady || !sourceGamma) {
+      void applyRtxVideo(
+        { hdr: false, vsr: false, svpActive, hdrToSdr: settings.playerHdrToSdr },
+        bridgeKey,
+      );
       return;
     }
     void applyMotionInterp(settings.playerMotionInterp && !svpActive);
-    if (!sourceGamma) {
-      void applyRtxHdr(false, svpActive, settings.playerHdrToSdr, bridgeKey);
-      return;
-    }
-    void applyRtxHdr(settings.playerRtxHdr, svpActive, settings.playerHdrToSdr, bridgeKey);
+    void applyRtxVideo(
+      {
+        hdr: settings.playerRtxHdr,
+        vsr: settings.playerRtxVsr,
+        svpActive,
+        hdrToSdr: settings.playerHdrToSdr,
+      },
+      bridgeKey,
+    );
   }, [
     engine,
     bridgeReady,
@@ -83,5 +106,6 @@ export function useSubStyleApply(params: {
     settings.playerMotionInterp,
     settings.playerHdrToSdr,
     settings.playerRtxHdr,
+    settings.playerRtxVsr,
   ]);
 }

@@ -43,10 +43,7 @@ export function WaitingForRoom(props: {
   const t = useT();
   const stillLoading = notReady.length;
   return (
-    <div
-      data-tv-focus-scope
-      className="pointer-events-auto absolute inset-0 z-30 flex items-center justify-center bg-black/72 backdrop-blur-md"
-    >
+    <div className="pointer-events-auto absolute inset-0 z-30 flex items-center justify-center bg-black/72 backdrop-blur-md">
       <div className="flex max-w-sm flex-col items-center gap-5 px-8 text-center">
         <LottiePlayer data={waitingAnim} className="h-28 w-28" />
         <div className="flex flex-col gap-1.5">
@@ -70,10 +67,7 @@ export function WaitingForRoom(props: {
                   key={p.id}
                   className={`flex items-center gap-1.5 rounded-full px-2.5 py-1 text-[11.5px] ${readyPillClass(p.ready, stale)}`}
                 >
-                  <span
-                    aria-hidden
-                    className={`h-1.5 w-1.5 rounded-full ${readyDotClass(p.ready, stale)}`}
-                  />
+                  <span aria-hidden className={`h-1.5 w-1.5 rounded-full ${readyDotClass(p.ready, stale)}`} />
                   {p.name}
                   {p.id === clientId && t(" (you)")}
                   {!p.ready && stale && t(" · still loading")}
@@ -106,7 +100,6 @@ export function WaitingForRoom(props: {
           <button
             type="button"
             onClick={onLeave}
-            data-tv-modal-close
             className="inline-flex h-10 items-center rounded-full border border-white/25 px-5 text-[13px] font-semibold text-white/80 transition-colors hover:border-white/45 hover:text-white"
           >
             {t("Leave")}

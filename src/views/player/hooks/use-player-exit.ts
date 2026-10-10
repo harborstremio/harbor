@@ -1,9 +1,15 @@
 import { useCallback, type RefObject } from "react";
 import { clearOnePickerCache } from "@/lib/picker-cache";
-import { clearPlayback, readPlayback, savePlayback, streamMatchesEntry } from "@/lib/playback-history";
+import {
+  clearPlayback,
+  readPlayback,
+  savePlayback,
+  streamMatchesEntry,
+} from "@/lib/playback-history";
 import type { PlayerBridge } from "@/lib/player/bridge";
 import { getPlaybackPosition } from "@/lib/player/playback-clock";
 import { saveResumeMs } from "@/lib/resume";
+import { useProfiles } from "@/lib/profiles";
 import { exitWindowFullscreenOnPlayerClose } from "@/lib/fullscreen-state";
 import type { PartialSyncState } from "@/lib/together/provider";
 import { useView, type PlayerSrc, type PlayerStreamRef } from "@/lib/view";
@@ -52,15 +58,21 @@ export function usePlayerExit(params: {
     openPicker,
   } = params;
 
+  const { activeProfile } = useProfiles();
+
   const closePlayer = useCallback(async () => {
     await captureExitSnapshot();
     const pos = getPlaybackPosition();
     if (Number.isFinite(pos) && pos > 0) {
-      saveResumeMs(src.meta.id, pos * 1000, season, episode);
+      saveResumeMs(
+        src.meta.id, pos * 1000, season, episode,
+        undefined, undefined, undefined, activeProfile?.id,
+      );
       if (liveStreamRef && pos >= REMEMBER_MIN_SEC) {
+        const rememberedUrl = (src.historyUrl ?? liveUrl) || src.url;
         savePlayback(
           src.meta.id,
-          { ...liveStreamRef, url: liveUrl || src.url, title: src.meta.name },
+          { ...liveStreamRef, url: rememberedUrl, title: src.meta.name },
           season,
           episode,
         );
@@ -82,7 +94,27 @@ export function usePlayerExit(params: {
       clearInvite();
     }
     exitPlayback();
-  }, [captureExitSnapshot, exitPlayback, src.meta.id, src.meta.name, season, episode, inRoom, isHost, notifyHostLeaving, clearInvite, publishState, exitPip, liveStreamRef, liveUrl, src.url, stopCast, castActiveRef]);
+  }, [
+    captureExitSnapshot,
+    exitPlayback,
+    src.meta.id,
+    src.meta.name,
+    src.historyUrl,
+    season,
+    episode,
+    inRoom,
+    isHost,
+    notifyHostLeaving,
+    clearInvite,
+    publishState,
+    exitPip,
+    liveStreamRef,
+    liveUrl,
+    src.url,
+    stopCast,
+    castActiveRef,
+    activeProfile?.id,
+  ]);
 
   const onStubEject = useCallback(() => {
     const nextAttempt = (src.attempt ?? 0) + 1;
@@ -106,7 +138,19 @@ export function usePlayerExit(params: {
       src.episode,
       instantPlay || inRoom ? { autoPlay: true, attempt: nextAttempt } : { autoPlay: false },
     );
-  }, [src.attempt, src.meta, src.episode, src.streamRef, season, episode, openPicker, instantPlay, inRoom, closePlayer, bridgeRef]);
+  }, [
+    src.attempt,
+    src.meta,
+    src.episode,
+    src.streamRef,
+    season,
+    episode,
+    openPicker,
+    instantPlay,
+    inRoom,
+    closePlayer,
+    bridgeRef,
+  ]);
 
   return { closePlayer, onStubEject };
 }

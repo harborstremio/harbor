@@ -1,0 +1,7 @@
+.spooktober-native-view { position:relative;display:flex;flex:1;flex-direction:column;min-width:0;min-height:0; }
+.spooktober-world { flex:1;min-height:0;min-width:0;overflow:auto;overscroll-behavior:contain;scrollbar-gutter:auto;background:var(--color-canvas);outline:none; }
+.spooktober-world[hidden] { display:none; }
+.spooktober-runtime-status { position:absolute;inset:0;display:flex;gap:18px;flex-direction:column;align-items:center;justify-content:center;background:var(--color-canvas);color:var(--color-ink-muted);font-size:14px; }
+.spooktober-runtime-status button { padding:12px 20px;border-radius:8px;background:var(--color-elevated);color:var(--color-ink); }
+.spooktober-notice { position:absolute;bottom:20px;align-self:center;display:flex;align-items:center;gap:24px;padding:12px 18px;border-radius:8px;background:var(--color-raised);color:var(--color-ink);font-size:13px; }
+.spooktober-notice button { text-decoration:underline; }

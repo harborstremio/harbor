@@ -1,16 +1,32 @@
-import { ChevronDown, ChevronUp, Grid2x2, Info, Square, StopCircle, X } from "lucide-react";
+import {
+  ChevronDown,
+  ChevronUp,
+  Grid2x2,
+  Info,
+  Maximize,
+  Minimize,
+  Rows2,
+  Square,
+  StopCircle,
+  X,
+} from "lucide-react";
 import { useEffect, useState } from "react";
 import { useMultiviewStore, type Layout } from "@/lib/multiview/store";
 import type { EpgIndex, IptvChannel, IptvPlaylist, IptvPlaylistSource } from "@/lib/iptv/types";
+import { useT } from "@/lib/i18n";
+import { WindowControls } from "@/chrome/window-controls";
+import { exitWindowFullscreen, toggleWindowFullscreen } from "@/lib/fullscreen-state";
+import { useWindowFullscreen } from "@/lib/use-window-fullscreen";
 import { Grid } from "./multiview/grid";
 import { ChannelPicker } from "./multiview/channel-picker";
 import { pushActivityHint } from "@/lib/discord/activity-hint";
 
-const LAYOUTS: { id: Layout; label: string }[] = [
-  { id: "1", label: "Single" },
-  { id: "2", label: "Side by side" },
-  { id: "3", label: "Triple" },
-  { id: "2x2", label: "Quad" },
+const LAYOUTS: { id: Layout }[] = [
+  { id: "1" },
+  { id: "2" },
+  { id: "2v" },
+  { id: "3" },
+  { id: "2x2" },
 ];
 
 export function MultiviewView({
@@ -28,9 +44,12 @@ export function MultiviewView({
   playlists: Map<string, IptvPlaylist>;
   loading: boolean;
 }) {
+  const t = useT();
   const store = useMultiviewStore();
   const [pickerSlot, setPickerSlot] = useState<number | null>(null);
   const [collapsed, setCollapsed] = useState(false);
+  const windowFullscreen = useWindowFullscreen();
+  const hideControls = collapsed || windowFullscreen;
   const [bannerHidden, setBannerHidden] = useState(() => {
     try {
       return localStorage.getItem("harbor.multiview.banner-dismissed") === "1";
@@ -48,31 +67,39 @@ export function MultiviewView({
   };
 
   useEffect(() => {
-    window.dispatchEvent(new CustomEvent("harbor:immersive", { detail: collapsed }));
-  }, [collapsed]);
+    window.dispatchEvent(new CustomEvent("harbor:immersive", { detail: hideControls }));
+  }, [hideControls]);
 
   useEffect(() => {
     if (!active) return;
     const n = store.slots.filter(Boolean).length;
-    const label = n > 0 ? `Watching ${n} stream${n === 1 ? "" : "s"} at once` : "Setting up Multiview";
-    return pushActivityHint({ details: label, state: "Multiview" });
-  }, [active, store.slots]);
+    const label =
+      n > 0
+        ? n === 1
+          ? t("Watching 1 stream at once")
+          : t("Watching {n} streams at once", { n })
+        : t("Setting up Multiview");
+    return pushActivityHint({ details: label, state: t("Multiview") });
+  }, [active, store.slots, t]);
 
   useEffect(
     () => () => {
       window.dispatchEvent(new CustomEvent("harbor:immersive", { detail: false }));
+      void exitWindowFullscreen();
     },
     [],
   );
 
   useEffect(() => {
-    if (!collapsed) return;
+    if (!hideControls) return;
     const onKey = (e: KeyboardEvent) => {
-      if (e.key === "Escape") setCollapsed(false);
+      if (e.key !== "Escape") return;
+      if (windowFullscreen) void exitWindowFullscreen();
+      else setCollapsed(false);
     };
     window.addEventListener("keydown", onKey);
     return () => window.removeEventListener("keydown", onKey);
-  }, [collapsed]);
+  }, [hideControls, windowFullscreen]);
 
   useEffect(() => {
     if (active) return;
@@ -88,24 +115,45 @@ export function MultiviewView({
   };
 
   return (
-    <div className="flex h-full min-h-0 flex-col">
-      <div className={`flex shrink-0 items-center gap-2 px-6 ${collapsed ? "py-1" : "pb-3 pt-1"}`}>
-        {!collapsed && (
+    <div
+      data-harbor-multiview-active={active ? "true" : undefined}
+      className="flex h-full min-h-0 flex-col"
+    >
+      <div
+        className={`flex shrink-0 items-center gap-2 px-6 ${hideControls ? "py-1" : "pb-3 pt-1"}`}
+      >
+        {!hideControls && (
           <>
             <div className="flex items-center gap-1 rounded-xl border border-edge-soft/55 bg-elevated p-1">
               {LAYOUTS.map((l) => {
                 const isActive = store.layout === l.id;
+                const label =
+                  l.id === "1"
+                    ? t("Single")
+                    : l.id === "2"
+                      ? t("Side by side")
+                      : l.id === "2v"
+                        ? t("Stacked")
+                        : l.id === "3"
+                          ? t("Triple")
+                          : t("Quad");
                 return (
                   <button
                     key={l.id}
                     onClick={() => store.setLayout(l.id)}
-                    title={l.label}
+                    title={label}
                     className={`flex h-9 items-center gap-1.5 rounded-lg px-3 text-[12.5px] font-semibold transition-colors ${
                       isActive ? "bg-ink text-canvas" : "text-ink-muted hover:text-ink"
                     }`}
                   >
-                    {l.id === "2x2" ? <Grid2x2 size={13} /> : <Square size={12} />}
-                    {l.id === "2x2" ? "2x2" : l.id}
+                    {l.id === "2x2" ? (
+                      <Grid2x2 size={13} />
+                    ) : l.id === "2v" ? (
+                      <Rows2 size={13} />
+                    ) : (
+                      <Square size={12} />
+                    )}
+                    {l.id === "2x2" ? "2x2" : l.id === "2v" ? label : l.id}
                   </button>
                 );
               })}
@@ -115,32 +163,43 @@ export function MultiviewView({
               className="flex h-9 items-center gap-2 rounded-xl border border-edge-soft/55 px-4 text-[12.5px] font-semibold text-ink-muted transition-colors hover:border-danger/40 hover:text-danger"
             >
               <StopCircle size={15} />
-              Clear all
+              {t("Clear all")}
             </button>
           </>
         )}
-        <button
-          onClick={() => setCollapsed((c) => !c)}
-          title={collapsed ? "Show controls" : "Hide controls, full grid"}
-          aria-label={collapsed ? "Show controls" : "Hide controls"}
-          className="ms-auto flex h-8 w-8 items-center justify-center rounded-lg text-ink-subtle transition-colors hover:bg-elevated hover:text-ink"
-        >
-          {collapsed ? <ChevronDown size={16} /> : <ChevronUp size={16} />}
-        </button>
+        <div className="ms-auto flex items-center gap-1">
+          <button
+            onClick={() => void toggleWindowFullscreen()}
+            title={windowFullscreen ? t("Exit fullscreen") : t("Fullscreen split view")}
+            aria-label={windowFullscreen ? t("Exit fullscreen") : t("Enter fullscreen")}
+            className="flex h-8 w-8 items-center justify-center rounded-lg text-ink-subtle transition-colors hover:bg-elevated hover:text-ink"
+          >
+            {windowFullscreen ? <Minimize size={16} /> : <Maximize size={16} />}
+          </button>
+          <button
+            onClick={() => setCollapsed((c) => !c)}
+            title={collapsed ? t("Show controls") : t("Hide controls, full grid")}
+            aria-label={collapsed ? t("Show controls") : t("Hide controls")}
+            className="flex h-8 w-8 items-center justify-center rounded-lg text-ink-subtle transition-colors hover:bg-elevated hover:text-ink"
+          >
+            {collapsed ? <ChevronDown size={16} /> : <ChevronUp size={16} />}
+          </button>
+          {hideControls && <WindowControls />}
+        </div>
       </div>
 
-      {!collapsed && !bannerHidden && (
+      {!hideControls && !bannerHidden && (
         <div className="mx-6 mb-3 flex items-start gap-2.5 rounded-xl border border-edge-soft/60 bg-elevated/30 px-3.5 py-2.5">
           <Info size={13} strokeWidth={2.2} className="mt-0.5 shrink-0 text-ink-subtle" />
           <p className="flex-1 text-[11.5px] leading-relaxed text-ink-muted">
-            Most IPTV providers cap simultaneous streams per account (commonly 1–2). If a tile
-            drops to "Stream offline" while others play, your provider may be throttling. Try
-            closing a stream and retrying.
+            {t(
+              'Most IPTV providers cap simultaneous streams per account (commonly 1–2). If a tile drops to "Stream offline" while others play, your provider may be throttling. Try closing a stream and retrying.',
+            )}
           </p>
           <button
             type="button"
             onClick={dismissBanner}
-            aria-label="Dismiss"
+            aria-label={t("Dismiss")}
             className="flex h-6 w-6 shrink-0 items-center justify-center rounded-full text-ink-subtle transition-colors hover:bg-elevated hover:text-ink"
           >
             <X size={12} strokeWidth={2.4} />
@@ -148,15 +207,25 @@ export function MultiviewView({
         </div>
       )}
 
-      <div className={`min-h-0 flex-1 px-6 ${collapsed ? "pb-3" : "pb-6"}`}>
+      <div className={`min-h-0 flex-1 px-6 ${hideControls ? "pb-3" : "pb-6"}`}>
         <Grid
           layout={store.layout}
           slots={store.slots}
           focusIndex={store.audioFocus}
+          split={store.split}
+          splitRow={store.splitRow}
+          splitRow2={store.splitRow2}
+          split3a={store.split3a}
+          split3b={store.split3b}
           onPick={(s) => setPickerSlot(s)}
           onClose={closeSlot}
           onFocus={(s) => store.setAudioFocus(s)}
           onMute={() => store.setAudioFocus(-1)}
+          onSplitChange={(pct) => store.setSplit(pct)}
+          onSplitRowChange={(pct) => store.setSplitRow(pct)}
+          onSplitRow2Change={(pct) => store.setSplitRow2(pct)}
+          onSplit3aChange={(pct) => store.setSplit3a(pct)}
+          onSplit3bChange={(pct) => store.setSplit3b(pct)}
         />
       </div>
 

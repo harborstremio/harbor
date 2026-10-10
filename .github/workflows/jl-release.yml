@@ -1,0 +1,338 @@
+# Build both installers independently and retain them even while publication is blocked.
+# Pushes are build-only. Publication is an explicit dispatch after release authorization is resolved.
+# The website's stable asset names stay unchanged and publishing requires both verified files.
+name: JL Release
+
+on:
+  workflow_dispatch:
+    inputs:
+      publish:
+        description: Publish after both builds (requires authorized release access)
+        type: boolean
+        default: false
+      windows_only:
+        description: Verify and retain Windows only; never publish this run
+        type: boolean
+        default: false
+  push:
+    tags: ["jl-v*"]
+    branches: ["claude/determined-planck-b1p158", "codex/jl-release-026"]
+    paths: [".github/jl-release"]
+
+permissions:
+  contents: read
+
+concurrency:
+  group: jl-release
+  cancel-in-progress: false
+
+# JL Media Vision accounts. Set in GitHub → Settings → Secrets and variables → Actions →
+# Variables; nothing is written into the code. Without them the app builds, and its sign-in
+# screen says accounts aren't set up.
+env:
+  VITE_JL_SUPABASE_URL: ${{ vars.JL_SUPABASE_URL }}
+  VITE_JL_SUPABASE_ANON_KEY: ${{ vars.JL_SUPABASE_ANON_KEY }}
+
+jobs:
+  # Stops the release before anything is built or published when a GitHub setting is missing or
+  # pasted into the wrong field.
+  settings:
+    name: Check release settings
+    runs-on: ubuntu-latest
+    steps:
+      - name: Check variables and secrets
+        env:
+          KEYSTORE_B64: ${{ secrets.JL_KEYSTORE_B64 }}
+          KEYSTORE_PASSWORD: ${{ secrets.JL_KEYSTORE_PASSWORD }}
+          KEY_ALIAS: ${{ secrets.JL_KEY_ALIAS }}
+          KEY_PASSWORD: ${{ secrets.JL_KEY_PASSWORD }}
+        run: |
+          ok=1
+          if ! [[ "$VITE_JL_SUPABASE_URL" =~ ^https://[a-z0-9-]+\.supabase\.co/?$ ]]; then
+            echo "::error::Variable JL_SUPABASE_URL must be the accounts project address (https://<project>.supabase.co)."
+            ok=0
+          fi
+          if [ -z "$VITE_JL_SUPABASE_ANON_KEY" ] || [[ "$VITE_JL_SUPABASE_ANON_KEY" == https://* ]]; then
+            echo "::error::Variable JL_SUPABASE_ANON_KEY must be the project's public (anon/publishable) key."
+            ok=0
+          fi
+          for name in KEYSTORE_B64 KEYSTORE_PASSWORD KEY_ALIAS KEY_PASSWORD; do
+            if [ -z "${!name}" ]; then
+              echo "::error::Secret JL_${name} is empty."
+              ok=0
+            fi
+          done
+          if [ -n "$KEYSTORE_B64" ] && ! echo "$KEYSTORE_B64" | base64 -d > /dev/null 2>&1; then
+            echo "::error::Secret JL_KEYSTORE_B64 is not valid base64 text."
+            ok=0
+          fi
+          [ "$ok" = 1 ]
+
+  windows:
+    name: Windows x64
+    needs: settings
+    runs-on: windows-latest
+    timeout-minutes: 90
+    outputs:
+      tag: jl-v${{ steps.tauri.outputs.appVersion }}
+    env:
+      TARGET: x86_64-pc-windows-msvc
+      HARBOR_CHANNEL: stable
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v6
+
+      - name: Setup Rust
+        uses: dtolnay/rust-toolchain@stable
+        with:
+          targets: x86_64-pc-windows-msvc
+
+      - name: Cache Rust build
+        uses: Swatinem/rust-cache@v2
+        with:
+          workspaces: |
+            harbor-core
+            src-tauri
+
+      - name: Setup pnpm
+        uses: pnpm/action-setup@v5
+
+      - name: Setup Node.js
+        uses: actions/setup-node@v6
+        with:
+          node-version: 24
+          cache: pnpm
+
+      - name: Install JavaScript dependencies
+        run: pnpm install --frozen-lockfile
+
+      - name: Setup Pokémon engine SDK
+        uses: actions/setup-dotnet@v4
+        with:
+          dotnet-version: "10.0.401"
+
+      - name: Build Pokémon engine and corresponding source bundle
+        run: node tools/pokemon-engine/build.mjs --fetch-source "${{ runner.temp }}/harbor-pokemon-source" --output src-tauri/resources/pokemon-engine --artifacts "${{ runner.temp }}/harbor-pokemon-build" --rid win-x64
+
+      - name: Prepare Capstan extension dependencies
+        shell: bash
+        run: sh android-extension-compat/tools/deps.sh
+
+      - name: Build and verify Capstan extension runtime
+        shell: bash
+        run: pnpm run setup:capstan
+
+      - name: Fetch libmpv
+        run: pnpm run setup:libmpv
+
+      - name: Fetch mpv
+        run: pnpm run setup:mpv
+
+      - name: Fetch bundled fonts
+        run: pnpm run setup:fonts
+
+      - name: Fetch external binaries
+        shell: bash
+        run: |
+          mkdir -p src-tauri/binaries
+          cd src-tauri/binaries
+          curl --fail --location --retry 3 --retry-all-errors "https://github.com/yt-dlp/yt-dlp/releases/latest/download/yt-dlp.exe" -o "yt-dlp-${TARGET}.exe"
+          curl --fail --location --retry 3 --retry-all-errors "https://github.com/BtbN/FFmpeg-Builds/releases/download/latest/ffmpeg-master-latest-win64-gpl.zip" -o ffmpeg.zip
+          unzip -j ffmpeg.zip "*/bin/ffmpeg.exe" "*/bin/ffprobe.exe"
+          mv ffmpeg.exe "ffmpeg-${TARGET}.exe"
+          mv ffprobe.exe "ffprobe-${TARGET}.exe"
+          rm ffmpeg.zip
+
+      - name: Verify Windows bundle resources
+        run: node scripts/check-jl-bundle.mjs
+
+      - name: Test native offline downloads and stream transport
+        shell: pwsh
+        env:
+          TAURI_CONFIG: '{"bundle":{"externalBin":[],"resources":[]}}'
+        run: |
+          $env:PATH = "$env:GITHUB_WORKSPACE\src-tauri\libmpv;$env:PATH"
+          cargo test --manifest-path src-tauri/Cargo.toml --locked --release --target x86_64-pc-windows-msvc --lib download::tests -- --test-threads=2
+          if ($LASTEXITCODE -ne 0) { exit $LASTEXITCODE }
+          cargo test --manifest-path src-tauri/Cargo.toml --locked --release --target x86_64-pc-windows-msvc --lib stream_proxy::tests -- --test-threads=2
+          if ($LASTEXITCODE -ne 0) { exit $LASTEXITCODE }
+
+      - name: Build Windows installer
+        id: tauri
+        uses: tauri-apps/tauri-action@v0
+        with:
+          tauriScript: pnpm tauri
+          args: --target x86_64-pc-windows-msvc --config src-tauri/tauri.jl-dev.conf.json --bundles nsis
+
+      - name: Prepare stable Windows artifact
+        shell: bash
+        run: |
+          installers=(src-tauri/target/${TARGET}/release/bundle/nsis/*-setup.exe)
+          if [ "${#installers[@]}" != 1 ] || [ ! -s "${installers[0]}" ]; then
+            echo "::error::Expected exactly one nonempty Windows installer."
+            exit 1
+          fi
+          cp "${installers[0]}" JL-Media-Vision-Setup-x64.exe
+          sha256sum JL-Media-Vision-Setup-x64.exe > JL-Media-Vision-Setup-x64.exe.sha256
+          printf '%s\n' "${{ github.sha }}" > windows-build-commit.txt
+
+      - name: Retain Windows installer
+        uses: actions/upload-artifact@v7
+        with:
+          name: jl-installers-windows-x64
+          path: |
+            JL-Media-Vision-Setup-x64.exe
+            JL-Media-Vision-Setup-x64.exe.sha256
+            windows-build-commit.txt
+          retention-days: 14
+          if-no-files-found: error
+          compression-level: 0
+
+  android-tv:
+    name: Android TV
+    needs: settings
+    # Desktop feature integration must not rebuild or publish the paused Android release.
+    if: github.ref != 'refs/heads/codex/jl-release-026' && !(github.event_name == 'workflow_dispatch' && inputs.windows_only)
+    runs-on: ubuntu-latest
+    timeout-minutes: 30
+    steps:
+      - uses: actions/checkout@v6
+      - uses: actions/setup-java@v4
+        with:
+          distribution: temurin
+          java-version: "17"
+      - uses: android-actions/setup-android@v3
+        with:
+          packages: "platform-tools platforms;android-35 build-tools;34.0.0"
+      - uses: gradle/actions/setup-gradle@v4
+        with:
+          gradle-version: "8.11.1"
+
+      # The signing key comes only from repository secrets, never from the repository. Keep the
+      # same key for every release so each APK installs over the last one.
+      - name: Signing key
+        env:
+          KEYSTORE_B64: ${{ secrets.JL_KEYSTORE_B64 }}
+          KEYSTORE_PASSWORD: ${{ secrets.JL_KEYSTORE_PASSWORD }}
+          KEY_ALIAS: ${{ secrets.JL_KEY_ALIAS }}
+          KEY_PASSWORD: ${{ secrets.JL_KEY_PASSWORD }}
+        run: |
+          if [ -z "$KEYSTORE_B64" ] || [ -z "$KEYSTORE_PASSWORD" ] || [ -z "$KEY_ALIAS" ] || [ -z "$KEY_PASSWORD" ]; then
+            echo "::error::Add the JL_KEYSTORE_B64, JL_KEYSTORE_PASSWORD, JL_KEY_ALIAS and JL_KEY_PASSWORD repository secrets to sign the APK."
+            exit 1
+          fi
+          echo "$KEYSTORE_B64" | base64 -d > "$RUNNER_TEMP/jl.keystore"
+          { echo "JL_KEYSTORE_FILE=$RUNNER_TEMP/jl.keystore"; echo "JL_KEYSTORE_PASSWORD=$KEYSTORE_PASSWORD"; echo "JL_KEY_ALIAS=$KEY_ALIAS"; echo "JL_KEY_PASSWORD=$KEY_PASSWORD"; } >> "$GITHUB_ENV"
+
+      - name: Build APK
+        run: gradle -p android-tv assembleRelease --no-daemon
+
+      - name: Verify and prepare stable APK artifact
+        run: |
+          cp android-tv/app/build/outputs/apk/release/app-release.apk JL-Media-Vision-TV.apk
+          test -s JL-Media-Vision-TV.apk
+          "$ANDROID_HOME/build-tools/34.0.0/apksigner" verify --verbose JL-Media-Vision-TV.apk
+          "$ANDROID_HOME/build-tools/34.0.0/aapt" dump badging JL-Media-Vision-TV.apk | grep '^package:'
+          sha256sum JL-Media-Vision-TV.apk > JL-Media-Vision-TV.apk.sha256
+          printf '%s\n' "${{ github.sha }}" > android-tv-build-commit.txt
+
+      - name: Retain Android TV APK
+        uses: actions/upload-artifact@v7
+        with:
+          name: jl-installers-android-tv
+          path: |
+            JL-Media-Vision-TV.apk
+            JL-Media-Vision-TV.apk.sha256
+            android-tv-build-commit.txt
+          retention-days: 14
+          if-no-files-found: error
+          compression-level: 0
+
+  publish:
+    name: Publish verified installers
+    needs: [windows, android-tv]
+    if: github.event_name == 'workflow_dispatch' && inputs.publish && !inputs.windows_only && github.ref != 'refs/heads/codex/jl-release-026'
+    runs-on: ubuntu-latest
+    permissions:
+      contents: write
+    steps:
+      - uses: actions/checkout@v6
+      - name: Download installers from this run
+        uses: actions/download-artifact@v8
+        with:
+          pattern: jl-installers-*
+          merge-multiple: true
+
+      - name: Verify retained installers
+        run: |
+          for platform in windows android-tv; do
+            if [ "$(cat "$platform-build-commit.txt")" != "${{ github.sha }}" ]; then
+              echo "::error::Retained installer was built from a different commit."
+              exit 1
+            fi
+          done
+          for required in JL-Media-Vision-Setup-x64.exe JL-Media-Vision-TV.apk; do
+            test -s "$required"
+            sha256sum -c "$required.sha256"
+          done
+
+      - name: Check release destination
+        shell: bash
+        env:
+          GH_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+        run: |
+          tag="jl-v$(node -p "require('./src-tauri/tauri.jl-dev.conf.json').version")"
+          draft=$(gh api --paginate "repos/${{ github.repository }}/releases" --jq ".[] | select(.tag_name == \"$tag\") | .draft")
+          if [ -n "$draft" ] && [ "$draft" != true ]; then
+            echo "::error::Refusing to overwrite an already published release."
+            exit 1
+          fi
+          ref=$(gh api "repos/${{ github.repository }}/git/matching-refs/tags/$tag" --jq ".[] | select(.ref == \"refs/tags/$tag\") | .ref")
+          if [ -n "$ref" ]; then
+            tag_commit=$(gh api "repos/${{ github.repository }}/commits/$tag" --jq '.sha')
+            if [ "$tag_commit" != "${{ github.sha }}" ]; then
+              echo "::error::Existing release tag points to a different commit."
+              exit 1
+            fi
+          fi
+
+      # GitHub rejects workflow-changing targets with GITHUB_TOKEN. Keep publishing opt-in
+      # until an authorized maintainer has resolved that release-access requirement.
+      - name: Prepare draft and upload both installers
+        env:
+          GH_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+        run: |
+          tag="${{ needs.windows.outputs.tag }}"
+          draft=$(gh api --paginate "repos/${{ github.repository }}/releases" --jq ".[] | select(.tag_name == \"$tag\") | .draft")
+          if [ "$draft" = true ]; then
+            gh release edit "$tag" --target "${{ github.sha }}" --repo "${{ github.repository }}"
+          else
+            gh release create "$tag" --target "${{ github.sha }}" --draft --title "JL Media Vision ${tag#jl-}" --notes "Download JL-Media-Vision-Setup-x64.exe for Windows or JL-Media-Vision-TV.apk for Android TV." --repo "${{ github.repository }}"
+          fi
+          gh release upload "$tag" JL-Media-Vision-Setup-x64.exe JL-Media-Vision-TV.apk --clobber --repo "${{ github.repository }}"
+
+      # Keep the previous release as releases/latest until both stable website targets exist.
+      - name: Verify assets and publish release
+        env:
+          GH_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+        run: |
+          tag="${{ needs.windows.outputs.tag }}"
+          # GitHub creates a new draft's tag only when the draft is published.
+          release_commit=$(gh release view "$tag" --repo "${{ github.repository }}" --json targetCommitish --jq '.targetCommitish')
+          if [ "$release_commit" != "${{ github.sha }}" ]; then
+            echo "::error::Draft target does not match the commit built by this workflow."
+            exit 1
+          fi
+          assets=$(gh release view "$tag" --repo "${{ github.repository }}" --json assets --jq '.assets[].name')
+          for required in JL-Media-Vision-Setup-x64.exe JL-Media-Vision-TV.apk; do
+            if ! grep -Fxq "$required" <<<"$assets"; then
+              echo "::error::$required is missing from the draft release."
+              exit 1
+            fi
+          done
+          gh release edit "$tag" --repo "${{ github.repository }}" --draft=false --latest
+          tag_commit=$(gh api "repos/${{ github.repository }}/commits/$tag" --jq '.sha')
+          if [ "$tag_commit" != "${{ github.sha }}" ]; then
+            echo "::error::Published release tag does not match the workflow commit."
+            exit 1
+          fi

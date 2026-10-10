@@ -1,0 +1,22 @@
+export default {
+  "games.mods.browse": "मॉड खोजें",
+  "games.mods.installed": "आपके मॉड",
+  "games.mods.enabled": "सक्रिय",
+  "games.mods.disabled": "निष्क्रिय",
+  "games.mods.remove": "हटाएँ",
+  "games.mods.removeConfirm": "यह प्रबंधित फ़ाइल हटाएँ?",
+  "games.mods.noMatches": "इस खोज से कोई इंस्टॉल किया गया मॉड मेल नहीं खाता।",
+  "games.mods.options": "{name} के विकल्प",
+  "games.mods.versions": "संस्करण",
+  "games.mods.restore": "पिछला बहाल करें",
+  "games.mods.restored": "पिछला संस्करण बहाल कर दिया गया।",
+  "games.mods.changeTitle": "बदली जाने वाली फ़ाइलें",
+  "games.mods.backupNote": "बदले गए संस्करण स्थानीय बैकअप में रहते हैं। वापस जाने के लिए अपने सेटअप में पिछला बहाल करें चुनें; निर्भरताएँ फिर जाँची जाएँगी।",
+  "games.mods.currentVersion": "इंस्टॉल है: {version}",
+  "games.mods.current": "इंस्टॉल है",
+  "games.mods.versionNote": "संगत संस्करण चुनें। Harbor बदलावों की जाँच करता है और पिछला संस्करण स्थानीय रूप से रखता है। बदलाव लागू करने से पहले Minecraft बंद करें।",
+  "games.mods.applyChanges": "बदलाव लागू करें",
+  "games.mods.reviewChanges": "बदलावों की समीक्षा",
+  "games.mods.previousVersion": "पिछला: {version}",
+  "games.mods.restoreConfirm": "संस्करण {version} बहाल करें? पहले Minecraft बंद करें।"
+} satisfies Record<string, string>;

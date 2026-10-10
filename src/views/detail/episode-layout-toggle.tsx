@@ -17,7 +17,7 @@ export function EpisodeLayoutToggle({
     { key: "grid", label: t("Grid view"), icon: LayoutGrid },
   ];
   return (
-    <div className="flex h-10 items-center gap-0.5 rounded-full border border-edge-soft bg-canvas/90 p-1">
+    <div className="flex h-10 items-center gap-0.5 rounded-full bg-canvas/90 p-1">
       {options.map(({ key, label, icon: Icon }) => (
         <button
           key={key}

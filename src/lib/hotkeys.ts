@@ -1,10 +1,12 @@
-export type HotkeyScope = "Player" | "Global";
+export type HotkeyScope = "Player" | "Global" | "Manga";
 
 export type HotkeyId =
   | "playerClose"
   | "playerPlayPause"
   | "playerSeekBack10"
   | "playerSeekForward10"
+  | "playerSeekBackShort"
+  | "playerSeekForwardShort"
   | "playerSeekBack30"
   | "playerSeekForward30"
   | "playerFrameBack"
@@ -26,6 +28,7 @@ export type HotkeyId =
   | "playerAnime4kOn"
   | "playerAnime4kOff"
   | "playerRtxHdrToggle"
+  | "playerRtxVsrToggle"
   | "playerCrop"
   | "playerPanscanUp"
   | "playerPanscanDown"
@@ -41,10 +44,15 @@ export type HotkeyId =
   | "playerTvGuide"
   | "playerDvr"
   | "playerSleep"
+  | "playerScreenLock"
+  | "playerReloadSource"
+  | "playerRestartServer"
   | "globalUiScaleUp"
   | "globalUiScaleDown"
   | "globalUiScaleReset"
-  | "globalSearchFocus";
+  | "globalSearchFocus"
+  | "globalSettingsOpen"
+  | "mangaMatch";
 
 export type HotkeyDef = {
   id: HotkeyId;
@@ -55,7 +63,6 @@ export type HotkeyDef = {
   group?: string;
 };
 
-// oxfmt-ignore
 export const HOTKEYS: HotkeyDef[] = [
   {
     id: "globalSearchFocus",
@@ -66,11 +73,19 @@ export const HOTKEYS: HotkeyDef[] = [
     defaultBinding: "/",
   },
   {
+    id: "globalSettingsOpen",
+    scope: "Global",
+    group: "Navigation",
+    label: "Open settings",
+    description: "Open Harbor's settings outside playback.",
+    defaultBinding: "ctrl+s",
+  },
+  {
     id: "globalUiScaleUp",
     scope: "Global",
     group: "Interface",
     label: "Increase interface scale",
-    description: "Make Harbor's interface larger.",
+    description: "Make JL Media Vision's interface larger.",
     defaultBinding: "ctrl+=",
   },
   {
@@ -78,7 +93,7 @@ export const HOTKEYS: HotkeyDef[] = [
     scope: "Global",
     group: "Interface",
     label: "Decrease interface scale",
-    description: "Make Harbor's interface smaller.",
+    description: "Make JL Media Vision's interface smaller.",
     defaultBinding: "ctrl+-",
   },
   {
@@ -86,7 +101,7 @@ export const HOTKEYS: HotkeyDef[] = [
     scope: "Global",
     group: "Interface",
     label: "Reset interface scale",
-    description: "Restore Harbor's interface scale to 100%.",
+    description: "Restore JL Media Vision's interface scale to 100%.",
     defaultBinding: "ctrl+0",
   },
 
@@ -121,6 +136,14 @@ export const HOTKEYS: HotkeyDef[] = [
     label: "Picture-in-picture",
     description: "Pop the video into a small always-on-top window, or restore it.",
     defaultBinding: "u",
+  },
+  {
+    id: "playerScreenLock",
+    scope: "Player",
+    group: "Playback",
+    label: "Lock player controls",
+    description: "Block mouse and keyboard input until you unlock the player.",
+    defaultBinding: "ctrl+l",
   },
   {
     id: "playerStats",
@@ -213,6 +236,15 @@ export const HOTKEYS: HotkeyDef[] = [
       "Toggle RTX Video HDR during mpv playback. Unavailable while HDR-to-SDR tonemapping or SVP is active.",
     defaultBinding: "ctrl+h",
   },
+  {
+    id: "playerRtxVsrToggle",
+    scope: "Player",
+    group: "Playback",
+    label: "Toggle RTX Super Resolution",
+    description:
+      "Toggle RTX Video Super Resolution during mpv playback. Unavailable while SVP is active.",
+    defaultBinding: "ctrl+u",
+  },
 
   {
     id: "playerSeekBack10",
@@ -229,6 +261,22 @@ export const HOTKEYS: HotkeyDef[] = [
     label: "Seek forward",
     description: "Jump forward by the Forward seek step set under Behavior.",
     defaultBinding: "ArrowRight",
+  },
+  {
+    id: "playerSeekBackShort",
+    scope: "Player",
+    group: "Seeking",
+    label: "Short seek back",
+    description: "Jump back by the shorter Short seek step set under Behavior.",
+    defaultBinding: "shift+ArrowLeft",
+  },
+  {
+    id: "playerSeekForwardShort",
+    scope: "Player",
+    group: "Seeking",
+    label: "Short seek forward",
+    description: "Jump forward by the shorter Short seek step set under Behavior.",
+    defaultBinding: "shift+ArrowRight",
   },
   {
     id: "playerSeekBack30",
@@ -418,6 +466,33 @@ export const HOTKEYS: HotkeyDef[] = [
     label: "Sleep at end of episode",
     description: "Toggle a sleep timer that pauses when this episode ends.",
     defaultBinding: "l",
+  },
+
+  {
+    id: "playerReloadSource",
+    scope: "Player",
+    group: "Recovery",
+    label: "Reload source",
+    description: "Re-open the stream you are watching and pick it back up where you left off.",
+    defaultBinding: "ctrl+alt+r",
+  },
+  {
+    id: "playerRestartServer",
+    scope: "Player",
+    group: "Recovery",
+    label: "Restart streaming server",
+    description:
+      "Restart Harbor's own streaming server, then reload the stream once it is back. Desktop only.",
+    defaultBinding: "ctrl+alt+s",
+  },
+
+  {
+    id: "mangaMatch",
+    scope: "Manga",
+    group: "Reader",
+    label: "Manga match",
+    description: "Open the match picker to map the current manga to AniList or MyAnimeList.",
+    defaultBinding: "c",
   },
 ];
 

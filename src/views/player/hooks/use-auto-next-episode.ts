@@ -1,6 +1,7 @@
 import { useEffect, useRef, type RefObject } from "react";
 import type { PlayerSnapshot } from "@/lib/player/bridge";
 import { getPlaybackPosition } from "@/lib/player/playback-clock";
+import { isNaturalEnd } from "@/lib/player/playback-end";
 import type { PlayEpisode, PlayerSrc } from "@/lib/view";
 
 const STUB_MAX_SEC = 150;
@@ -25,7 +26,7 @@ export function useAutoNextEpisode(params: {
     if (snap.durationSec < STUB_MAX_SEC) return;
     if (startedNearEndRef.current) return;
     const pos = getPlaybackPosition();
-    const naturalEnd = snap.status === "ended";
+    const naturalEnd = isNaturalEnd(snap, getPlaybackPosition());
     const errorAtEnd =
       snap.errorCode != null && pos >= snap.durationSec - 2;
     const reachedEnd =

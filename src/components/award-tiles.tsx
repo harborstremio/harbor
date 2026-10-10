@@ -12,15 +12,24 @@ const AWARDS: Array<{ type: AwardType; name: string; sub: string }> = [
   { type: "emmy", name: "Emmys", sub: "Television's finest" },
   { type: "sag", name: "SAG Awards", sub: "Chosen by actors" },
   { type: "critics_choice", name: "Critics' Choice", sub: "The critics' cut" },
+  { type: "bafta_tv", name: "BAFTA Television", sub: "British TV's biggest night" },
+  { type: "annie", name: "Annie Awards", sub: "Animation's finest" },
+  { type: "spirit", name: "Spirit Awards", sub: "Independent film" },
+  { type: "saturn", name: "Saturn Awards", sub: "Sci-fi, fantasy & horror" },
   { type: "cannes", name: "Cannes", sub: "Palme d'Or" },
   { type: "venice", name: "Venice", sub: "Golden Lion" },
   { type: "berlin", name: "Berlinale", sub: "Golden Bear" },
+  { type: "cesar", name: "César Awards", sub: "French cinema" },
+  { type: "goya", name: "Goya Awards", sub: "Spanish cinema" },
+  { type: "blue_dragon", name: "Blue Dragon", sub: "Korean cinema" },
+  { type: "baeksang", name: "Baeksang", sub: "Korean film & drama" },
+  { type: "bifa", name: "BIFA", sub: "British independent film" },
 ];
 
-export function AwardTiles() {
+export function AwardTiles({ title }: { title?: string }) {
   const t = useT();
   return (
-    <Row title={t("Browse by Award")} min={210} shape="tile" alwaysActive>
+    <Row title={title ?? t("Browse by Award")} min={210} shape="tile" alwaysActive>
       {AWARDS.map((a) => (
         <AwardTile key={a.type} type={a.type} name={a.name} sub={a.sub} />
       ))}
@@ -60,7 +69,7 @@ function AwardTile({ type, name, sub }: { type: AwardType; name: string; sub: st
       </div>
       <div className="absolute inset-x-5 bottom-4 flex items-end justify-between gap-2">
         <div className="flex min-w-0 flex-col">
-          <h3 className="truncate font-display text-[21px] font-medium leading-tight tracking-tight text-white drop-shadow-[0_2px_14px_rgba(0,0,0,0.5)]">
+          <h3 className="truncate font-display text-[21px] font-medium leading-tight tracking-tight text-white [text-shadow:0_2px_14px_rgba(0,0,0,0.5)]">
             {t(name)}
           </h3>
           <span className="truncate text-[11.5px] font-medium text-white/65">{t(sub)}</span>

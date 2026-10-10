@@ -7,6 +7,7 @@ import {
   todayLocalISO,
   type CalendarItem,
   type LastFiredState,
+  type WebhookKind,
 } from "./calendar";
 import {
   fetchAnticipatedCalendar,
@@ -16,6 +17,7 @@ import {
 import { getCachedPlaylist } from "./iptv/store";
 import { fetchAndParseXmltv, indexProgramsByChannel } from "./iptv/xmltv";
 import { computeTvgIdCounts, epgProgramsForChannel } from "./iptv/epg-resolver";
+import { readPlaylists } from "./iptv/playlists-store";
 import type { Settings, WebhookTrigger } from "./settings";
 import { getSession as getTraktSession } from "./trakt/session";
 
@@ -145,7 +147,12 @@ function loadIptvFavorites(): Set<string> {
     const parsed = JSON.parse(raw) as Record<string, { id?: string } | unknown>;
     const ids = new Set<string>();
     for (const v of Object.values(parsed)) {
-      if (v && typeof v === "object" && "id" in v && typeof (v as { id?: string }).id === "string") {
+      if (
+        v &&
+        typeof v === "object" &&
+        "id" in v &&
+        typeof (v as { id?: string }).id === "string"
+      ) {
         ids.add((v as { id: string }).id);
       }
     }
@@ -156,12 +163,11 @@ function loadIptvFavorites(): Set<string> {
 }
 
 async function fetchLiveTvEvents(
-  settings: Settings,
   leadMinutes: number,
   favoritesOnly: boolean,
   channelIds: string[] | null,
 ): Promise<CalendarItem[]> {
-  const playlists = settings.iptvPlaylists.filter((p) => (p.kind ?? "m3u") !== "epg");
+  const playlists = readPlaylists().filter((p) => (p.kind ?? "m3u") !== "epg");
   if (playlists.length === 0) return [];
   const now = Date.now();
   const cutoff = now + leadMinutes * 60_000;
@@ -231,11 +237,11 @@ function ruleKey(ruleId: string, item: CalendarItem): string {
   return `rule:${ruleId}:${item.id}`;
 }
 
-function legacyKey(source: SourceKey, kind: "discord" | "telegram", item: CalendarItem): string {
+function legacyKey(source: SourceKey, kind: WebhookKind, item: CalendarItem): string {
   return `${source}:${kind}:${item.id}`;
 }
 
-function legacyBaselineKey(source: SourceKey, kind: "discord" | "telegram"): string {
+function legacyBaselineKey(source: SourceKey, kind: WebhookKind): string {
   return `__baseline__:${source}:${kind}`;
 }
 
@@ -245,7 +251,12 @@ function ruleBaselineKey(ruleId: string): string {
 
 type ChannelResult = { kind: string; ok: boolean; status: number; error: string | null };
 
-function commit(state: LastFiredState, abortReason: string, results: ChannelResult[], totalFired: number) {
+function commit(
+  state: LastFiredState,
+  abortReason: string,
+  results: ChannelResult[],
+  totalFired: number,
+) {
   if (saveLastFiredState(state)) return null;
   console.warn(`[webhook] state persist failed, aborting ${abortReason} to prevent spam`);
   return { fired: totalFired, channels: results };
@@ -255,8 +266,8 @@ export async function runWebhookTick(
   settings: Settings,
   authKey: string | null,
 ): Promise<{ fired: number; channels: ChannelResult[] }> {
-  const { discordUrl, telegramUrl, sources } = settings.webhooks;
-  if (!discordUrl && !telegramUrl) return { fired: 0, channels: [] };
+  const { discordUrl, telegramUrl, desktopEnabled, sources } = settings.webhooks;
+  if (!discordUrl && !telegramUrl && !desktopEnabled) return { fired: 0, channels: [] };
   const todayISO = todayLocalISO();
   const fireEnd = fireWindowEnd();
   const state: LastFiredState = loadLastFiredState();
@@ -280,9 +291,15 @@ export async function runWebhookTick(
     const rows = await sourceFor(source);
     const typed = applyContentTypeFilter(rows, settings.webhooks);
     const fireable = typed.filter((i) => inFutureWindow(i, todayISO, fireEnd));
-    for (const channel of (["discord", "telegram"] as const)) {
-      const url = channel === "discord" ? discordUrl : telegramUrl;
-      if (!url) continue;
+    for (const channel of ["discord", "telegram", "desktop"] as const) {
+      const enabled =
+        channel === "discord"
+          ? !!discordUrl
+          : channel === "telegram"
+            ? !!telegramUrl
+            : desktopEnabled;
+      if (!enabled) continue;
+      const url = channel === "discord" ? discordUrl : channel === "telegram" ? telegramUrl : "";
 
       if (!state[legacyBaselineKey(source, channel)]) {
         if (typed.length === 0) continue;
@@ -308,11 +325,10 @@ export async function runWebhookTick(
   const trackedPersonIds = settings.customCalendar.trackedPeople.map((p) => p.id);
   for (const rule of settings.webhookRules) {
     if (!rule.enabled) continue;
-    if (!rule.channels.discord && !rule.channels.telegram) continue;
+    if (!rule.channels.discord && !rule.channels.telegram && !rule.channels.desktop) continue;
     let candidates: CalendarItem[] = [];
     if (rule.trigger.event === "liveTvEvent") {
       candidates = await fetchLiveTvEvents(
-        settings,
         rule.trigger.leadMinutes ?? 15,
         rule.trigger.favoritesOnly !== false,
         rule.trigger.channelIds ?? null,
@@ -344,15 +360,18 @@ export async function runWebhookTick(
 
     const newMatched = matched.filter((i) => !state[ruleKey(rule.id, i)]);
     if (newMatched.length === 0) continue;
-    const targets = (["discord", "telegram"] as const)
-      .filter((c) => rule.channels[c] && (c === "discord" ? discordUrl : telegramUrl));
+    const targets = (["discord", "telegram", "desktop"] as const).filter(
+      (c) =>
+        rule.channels[c] &&
+        (c === "discord" ? !!discordUrl : c === "telegram" ? !!telegramUrl : desktopEnabled),
+    );
     if (targets.length === 0) continue;
     for (const item of newMatched) state[ruleKey(rule.id, item)] = todayISO;
     const aborted = commit(state, "rule fire", channelResults, totalFired);
     if (aborted) return aborted;
     for (const channel of targets) {
-      const url = channel === "discord" ? discordUrl! : telegramUrl!;
-      const text = `Harbor rule "${rule.name}": ${newMatched.length} new ${newMatched.length === 1 ? "release" : "releases"}`;
+      const url = channel === "discord" ? discordUrl! : channel === "telegram" ? telegramUrl! : "";
+      const text = `JL Media Vision rule "${rule.name}": ${newMatched.length} new ${newMatched.length === 1 ? "release" : "releases"}`;
       const result = await fireWebhook(channel, url, { text, items: newMatched });
       channelResults.push({ kind: `rule:${rule.id}/${channel}`, ...result });
       if (result.ok) totalFired += newMatched.length;
@@ -367,15 +386,15 @@ function headlineForSource(source: SourceKey, count: number): string {
   const noun = count === 1 ? "release" : "releases";
   switch (source) {
     case "library":
-      return `Harbor: ${count} upcoming ${noun} from your library`;
+      return `JL Media Vision: ${count} upcoming ${noun} from your library`;
     case "all":
-      return `Harbor: ${count} new upcoming ${noun}`;
+      return `JL Media Vision: ${count} new upcoming ${noun}`;
     case "trakt":
-      return `Harbor: ${count} upcoming ${noun} from your Trakt watchlist`;
+      return `JL Media Vision: ${count} upcoming ${noun} from your Trakt watchlist`;
     case "anticipated":
-      return `Harbor: ${count} new entries on Trakt Anticipated`;
+      return `JL Media Vision: ${count} new entries on Trakt Anticipated`;
     case "custom":
-      return `Harbor: ${count} new ${noun} in your custom feed`;
+      return `JL Media Vision: ${count} new ${noun} in your custom feed`;
   }
 }
 

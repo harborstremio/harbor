@@ -6,6 +6,7 @@ import {
   pruneItem,
   saveLocalCache,
   type RawIds,
+  type SimklCache,
   type SimklCacheItem,
 } from "./store";
 
@@ -23,6 +24,22 @@ function targetType(target: SimklTarget): "movie" | "show" | "anime" {
   if (target.kind === "movie") return "movie";
   if (target.kind === "anime" || target.kind === "anime-episode") return "anime";
   return "show";
+}
+
+function cachedTargetId(cache: SimklCache, target: SimklTarget): number | undefined {
+  const ids = targetIds(target);
+  if (!ids) return undefined;
+  if (ids.simkl != null) return ids.simkl;
+  // Detail pages normally carry provider IDs, while cached items use SIMKL IDs.
+  // Keep movie and TV namespaces separate when resolving the same TMDB number.
+  return (
+    (ids.imdb ? cache.imdbToSimkl[ids.imdb] : undefined) ??
+    (ids.tmdb != null
+      ? cache.tmdbToSimkl[`${targetType(target) === "movie" ? "movie" : "tv"}:${ids.tmdb}`]
+      : undefined) ??
+    (ids.mal != null ? cache.malToSimkl[String(ids.mal)] : undefined) ??
+    (ids.kitsu != null ? cache.kitsuToSimkl[String(ids.kitsu)] : undefined)
+  );
 }
 
 export function updateCachedStatus(
@@ -72,15 +89,16 @@ export function updateCachedRatingByTarget(target: SimklTarget, rating: number |
   if (!cache) return;
 
   const ids = targetIds(target);
-  if (!ids?.simkl) return;
+  const simklId = cachedTargetId(cache, target);
+  if (simklId == null) return;
 
-  const simklIdStr = String(ids.simkl);
+  const simklIdStr = String(simklId);
   const existing = cache.items[simklIdStr];
   if (existing) {
     existing.userRating = rating;
   } else {
     const item: SimklCacheItem = {
-      simklId: ids.simkl,
+      simklId,
       type: targetType(target),
       title: "",
       year: null,
@@ -98,7 +116,7 @@ export function updateCachedRatingByTarget(target: SimklTarget, rating: number |
 export function getCachedRatingByTarget(target: SimklTarget): number | null {
   const cache = getLocalCache();
   if (!cache) return null;
-  const ids = targetIds(target);
-  if (!ids?.simkl) return null;
-  return cache.items[String(ids.simkl)]?.userRating ?? null;
+  const simklId = cachedTargetId(cache, target);
+  if (simklId == null) return null;
+  return cache.items[String(simklId)]?.userRating ?? null;
 }

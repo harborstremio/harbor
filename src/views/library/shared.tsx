@@ -1,17 +1,37 @@
-import { Bookmark } from "lucide-react";
+import { Bookmark, RefreshCw } from "lucide-react";
+import type { RefObject } from "react";
 import { type Meta } from "@/lib/cinemeta";
 import { useSettings } from "@/lib/settings";
 import { useT } from "@/lib/i18n";
+import { VirtualGrid } from "@/components/virtual-grid";
 import { WatchlistCard } from "./watchlist-card";
 
 export { WatchlistCard } from "./watchlist-card";
 export { hydrateLibraryMeta, loadLocalIds } from "./hydrate-meta";
 
-export type Tab = "watchlist" | "history" | "local" | "lists" | "trakt" | "anilist" | "simkl" | "letterboxd" | "mal";
+export type Tab =
+  | "library"
+  | "watchlist"
+  | "history"
+  | "local"
+  | "media-servers"
+  | "lists"
+  | "favorites"
+  | "trakt"
+  | "anilist"
+  | "simkl"
+  | "letterboxd"
+  | "mal";
 
 export type TypeKey = "all" | "movie" | "series";
 
-export type WatchlistMerged = { key: string; meta: Meta; date: number | null; stremioId?: string };
+export type WatchlistMerged = {
+  key: string;
+  meta: Meta;
+  date: number | null;
+  stremioId?: string;
+  localId?: string;
+};
 
 export function TabBtn({
   active,
@@ -99,9 +119,7 @@ export function FilterPill({
       type="button"
       onClick={onClick}
       className={`rounded-full px-3.5 py-1.5 text-[12.5px] font-semibold transition-colors ${
-        active
-          ? "bg-ink text-canvas"
-          : "text-ink-muted hover:bg-raised hover:text-ink"
+        active ? "bg-ink text-canvas" : "text-ink-muted hover:bg-raised hover:text-ink"
       }`}
     >
       {children}
@@ -109,7 +127,11 @@ export function FilterPill({
   );
 }
 
-export function applyFilter<T extends { meta: Meta }>(items: T[], type: TypeKey, query: string): T[] {
+export function applyFilter<T extends { meta: Meta }>(
+  items: T[],
+  type: TypeKey,
+  query: string,
+): T[] {
   const q = query.trim().toLowerCase();
   return items.filter((it) => {
     if (type !== "all" && it.meta.type !== type) return false;
@@ -206,14 +228,34 @@ export function SortControl() {
   );
 }
 
+export function RefreshButton({ onClick, spinning }: { onClick: () => void; spinning?: boolean }) {
+  const t = useT();
+  return (
+    <button
+      type="button"
+      onClick={onClick}
+      disabled={spinning}
+      aria-label={t("Refresh")}
+      title={t("Refresh")}
+      className="flex h-8 w-8 items-center justify-center rounded-full bg-elevated/40 text-ink-muted ring-1 ring-edge-soft/60 transition-colors hover:bg-raised hover:text-ink disabled:opacity-60"
+    >
+      <RefreshCw size={15} strokeWidth={2.2} className={spinning ? "animate-spin" : ""} />
+    </button>
+  );
+}
+
 export function GroupedGrid<
-  T extends { meta: Meta; date: number | null; key: string; stremioId?: string },
+  T extends { meta: Meta; date: number | null; key: string; stremioId?: string; localId?: string },
 >({
   groups,
   onRemove,
+  onRemoveLocal,
+  scrollRef,
 }: {
   groups: Array<{ label: string; items: T[] }>;
   onRemove?: (stremioId: string) => void;
+  onRemoveLocal?: (localId: string) => void;
+  scrollRef?: RefObject<HTMLElement | null>;
 }) {
   const t = useT();
   return (
@@ -223,15 +265,45 @@ export function GroupedGrid<
           <h3 className="text-[11px] font-bold uppercase tracking-[0.24em] text-ink-subtle">
             {t(g.label)} <span className="ms-1 text-ink-subtle/70">{g.items.length}</span>
           </h3>
-          <Grid>
-            {g.items.map((it) => (
-              <WatchlistCard
-                key={it.key}
-                meta={it.meta}
-                onRemove={onRemove && it.stremioId ? () => onRemove(it.stremioId as string) : undefined}
-              />
-            ))}
-          </Grid>
+          {scrollRef ? (
+            <VirtualGrid
+              items={g.items}
+              scrollRef={scrollRef}
+              minColumnWidth={150}
+              gapX={16}
+              gapY={28}
+              estimateRowHeight={300}
+              getKey={(it) => it.key}
+              renderItem={(it) => (
+                <WatchlistCard
+                  meta={it.meta}
+                  onRemove={
+                    onRemove && it.stremioId
+                      ? () => onRemove(it.stremioId as string)
+                      : onRemoveLocal && it.localId
+                        ? () => onRemoveLocal(it.localId as string)
+                        : undefined
+                  }
+                />
+              )}
+            />
+          ) : (
+            <Grid>
+              {g.items.map((it) => (
+                <WatchlistCard
+                  key={it.key}
+                  meta={it.meta}
+                  onRemove={
+                    onRemove && it.stremioId
+                      ? () => onRemove(it.stremioId as string)
+                      : onRemoveLocal && it.localId
+                        ? () => onRemoveLocal(it.localId as string)
+                        : undefined
+                  }
+                />
+              ))}
+            </Grid>
+          )}
         </div>
       ))}
     </div>
@@ -245,7 +317,9 @@ export function EmptyWatchlist({ connected }: { connected: boolean }) {
       <Bookmark size={28} strokeWidth={1.6} className="text-ink-subtle" />
       <h2 className="text-[16px] font-semibold text-ink">{t("Your watchlist is empty")}</h2>
       <p className="max-w-md text-[13px] leading-relaxed text-ink-muted">
-        {t("Right-click any title in Harbor or hit \"Add to Watchlist\" on its detail page to save it here.")}
+        {t(
+          'Right-click any title in Harbor or hit "Add to Watchlist" on its detail page to save it here.',
+        )}
         {connected
           ? t(" Anything you save also syncs to your Trakt account.")
           : t(" Connect Trakt in Settings to sync this list across devices.")}

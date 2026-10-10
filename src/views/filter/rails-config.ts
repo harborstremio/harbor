@@ -226,6 +226,18 @@ export function railsForFilter(f: MetaFilter): AnyRail[] {
       },
       {
         kind: "standard",
+        id: "classics",
+        title: "All-time classics",
+        kicker: "The shows that made the network",
+        params: {
+          with_networks: id,
+          "first_air_date.lte": "2012-12-31",
+          sort_by: "vote_average.desc",
+          "vote_count.gte": "300",
+        },
+      },
+      {
+        kind: "standard",
         id: "recent",
         title: "Currently airing",
         kicker: "What's new on the network",

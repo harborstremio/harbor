@@ -1,9 +1,6 @@
 import { parse } from "parse-torrent-title";
-import type { DebridSlug, DebridStore, LibraryEntry } from "@/lib/debrid/types";
-import { withTimeout } from "@/lib/progressive-rows";
+import type { DebridResult, DebridSlug, DebridStore, LibraryEntry } from "@/lib/debrid/types";
 import type { Stream } from "./types";
-
-const LIBRARY_SEARCH_TIMEOUT_MS = 15_000;
 
 export type LibraryQuery = {
   type: "movie" | "series";
@@ -14,15 +11,20 @@ export type LibraryQuery = {
   episode?: number;
 };
 
+/** One `listLibrary` sweep per provider, shared between the library-stream matcher
+ *  and the cache cross-check so the provider is only asked once. */
+export type LibraryListings = Promise<Array<PromiseSettledResult<DebridResult<LibraryEntry[]>>>>;
+
 export async function fetchLibraryStreams(
   clients: DebridStore[],
   query: LibraryQuery,
   signal: AbortSignal,
+  sharedListings?: LibraryListings,
 ): Promise<Stream[]> {
   if (clients.length === 0) return [];
-  const settled = await Promise.allSettled(
-    clients.map((client) => withTimeout(client.listLibrary(signal), LIBRARY_SEARCH_TIMEOUT_MS)),
-  );
+  const settled = sharedListings
+    ? await sharedListings
+    : await Promise.allSettled(clients.map((c) => c.listLibrary(signal)));
   const out: Stream[] = [];
   for (let i = 0; i < clients.length; i++) {
     const r = settled[i];
@@ -46,7 +48,39 @@ function matchEntry(entry: LibraryEntry, query: LibraryQuery): MatchInfo | null 
       if (m) return m;
     }
   }
-  return checkText(entry.name, query, undefined);
+  const nameMatch = checkText(entry.name, query, undefined);
+  if (nameMatch) return nameMatch;
+  return positionalMatch(entry, query);
+}
+
+const VIDEO_EXT_RE = /\.(mkv|mp4|avi|mov|m4v|webm|ts|flv|wmv|m2ts|mpg|mpeg|ogv|3gp)(\?|#|$)/i;
+const NON_EPISODE_RE =
+  /(?:^|[^a-z0-9])(?:ncop|nced|creditless|opening|ending|preview|trailer|extra|special|sample|menu|bonus|interview|making|scan|booklet|ost)(?:[^a-z0-9]|$)/i;
+
+function titleMatchesEntry(entry: LibraryEntry, query: LibraryQuery): boolean {
+  const a = normalize(query.title);
+  if (a.length < 2) return false;
+  const texts = [entry.name, ...(entry.files ?? []).map((f) => f.name)];
+  return texts.some((t) => {
+    const b = normalize(parse(t).title ?? t);
+    return b.length >= 2 && (b.includes(a) || a.includes(b));
+  });
+}
+
+function positionalMatch(entry: LibraryEntry, query: LibraryQuery): MatchInfo | null {
+  if (query.type !== "series" || query.episode == null) return null;
+  if (!entry.files || entry.files.length < 2) return null;
+  if (!titleMatchesEntry(entry, query)) return null;
+  const vids = entry.files
+    .map((f, idx) => ({ name: f.name, idx }))
+    .filter((f) => VIDEO_EXT_RE.test(f.name) && !NON_EPISODE_RE.test(f.name));
+  if (vids.length < 2) return null;
+  vids.sort((a, b) => a.name.localeCompare(b.name, undefined, { numeric: true, sensitivity: "base" }));
+  const pos = query.episode - 1;
+  if (pos < 0 || pos >= vids.length) return null;
+  const chosen = vids[pos];
+  const p = parse(chosen.name);
+  return { fileIdx: chosen.idx, parsedTitle: p.title ?? chosen.name, resolution: p.resolution, codec: p.codec };
 }
 
 function checkText(
@@ -84,7 +118,7 @@ function normalize(s: string): string {
   return s
     .toLowerCase()
     .normalize("NFKD")
-    .replace(/[\s.\-_(\)[\]:;,!?'"‘’“”–—]+/g, "");
+    .replace(/[\s\.\-_\(\)\[\]:;,!?'"‘’“”–—]+/g, "");
 }
 
 function buildLibraryStream(slug: DebridSlug, entry: LibraryEntry, m: MatchInfo): Stream {

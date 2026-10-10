@@ -12,8 +12,12 @@ type CropMode = {
   stretch?: boolean;
 };
 
-const ZOOM_MIN = 0;
+// mpv reads video-zoom as a power of two, so these are stops, not percentages:
+// -0.5 shrinks to 0.71x, 1 doubles. A step of 0.1 moved 7% at a time, which
+// overshot the crop an ultrawide needs; 0.025 lands within 2%.
+const ZOOM_MIN = -0.5;
 const ZOOM_MAX = 1;
+export const ZOOM_STEP = 0.025;
 
 const MODES: CropMode[] = [
   { id: "fit", label: "Fit", panscan: 0, aspect: "-1", zoom: 0 },
@@ -26,6 +30,11 @@ const MODES: CropMode[] = [
   { id: "1.85:1", label: "1.85:1", panscan: 0, aspect: "1.85:1", zoom: 0 },
   { id: "original", label: "2.39:1", panscan: 0, aspect: "2.39:1", zoom: 0 },
 ];
+
+export function cropTransform(modeId: string, zoomLevel = 0): { panscan: number; zoom: number; stretch: boolean } {
+  const m = MODES[modeIndex(modeId)];
+  return { panscan: m.panscan, zoom: m.id === "zoom" ? zoomLevel : 0, stretch: m.stretch === true };
+}
 
 export const CROP_PRESETS: ReadonlyArray<{ id: string; label: string }> = MODES.filter(
   (m) => m.id !== "zoom",
@@ -60,7 +69,7 @@ export function useVideoFill(bridgeRef: RefObject<PlayerBridge | null>, srcKey: 
       bridge.setStretch(mode.stretch === true);
     }
     if (!showPill) return;
-    if (mode.id === "zoom" && zoomLevel > 0) {
+    if (mode.id === "zoom" && zoomLevel !== 0) {
       flash(t("Zoom {pct}%", { pct: Math.round(Math.pow(2, zoomLevel) * 100) }));
     } else {
       flash(t(mode.label));
@@ -103,7 +112,9 @@ export function useVideoFill(bridgeRef: RefObject<PlayerBridge | null>, srcKey: 
       index.current = zoomIdx;
       update({ cropMode: "zoom" });
     }
-    zoom.current = Math.max(ZOOM_MIN, Math.min(ZOOM_MAX, Math.round((zoom.current + delta) * 100) / 100));
+    // Three places, or a 0.025 step rounds itself away.
+    const next = Math.round((zoom.current + delta) * 1000) / 1000;
+    zoom.current = Math.max(ZOOM_MIN, Math.min(ZOOM_MAX, next));
     apply(zoomIdx, zoom.current, true);
   };
 
@@ -115,5 +126,5 @@ export function useVideoFill(bridgeRef: RefObject<PlayerBridge | null>, srcKey: 
     update({ cropMode: MODES[i].id });
   };
 
-  return { cycle, step, setMode, mode: settings.cropMode, pill };
+  return { cycle, step, setMode, mode: settings.cropMode, zoom: zoom.current, pill };
 }

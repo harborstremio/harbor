@@ -1,4 +1,5 @@
 import { useEffect, useRef, useState } from "react";
+import { Spinner } from "@/components/spinner";
 import { createPortal } from "react-dom";
 import { useT } from "@/lib/i18n";
 import type { SportsGame, SportsMatchDetail } from "@/lib/sports/espn";
@@ -114,7 +115,7 @@ function PreviewPortal({
 
       {loading && (
         <div className="flex h-12 items-center justify-center">
-          <span className="h-4 w-4 animate-spin rounded-full border-2 border-ink-subtle border-t-transparent" />
+          <Spinner size={16} className="text-ink-subtle" />
         </div>
       )}
 

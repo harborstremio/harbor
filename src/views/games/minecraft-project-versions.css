@@ -1,0 +1,41 @@
+.mc-release-filters {display:flex;gap:12px;margin-bottom:20px;flex-wrap:wrap}
+.mc-release-filters label {display:grid;gap:8px;min-width:0;flex:1;font-size:11px;color:var(--color-ink-muted)}
+.mc-release-filters select {min-width:0;max-width:100%;min-height:40px;padding:8px 10px;background:var(--color-canvas);color:var(--color-ink);border:0;border-radius:6px;font-size:12px}
+.mc-release-status {font-size:12px;line-height:1.65;color:var(--color-ink-muted);margin-block:16px}
+.mc-release-list[aria-busy=true] {opacity:.45}
+.mc-project-versions.mc-release-list>article {display:block;border:0;padding:0;margin-bottom:8px;background:var(--color-canvas);border-radius:7px;overflow:hidden}
+.mc-release-list>article.is-selected {background:var(--color-elevated)}
+.mc-release-choice {display:flex;align-items:start;gap:12px;width:100%;padding:16px;text-align:start;color:var(--color-ink)}
+.mc-release-choice:hover {background:var(--color-elevated)}
+.mc-release-choice:focus-visible {outline-offset:-3px!important}
+.mc-release-choice .mc-release-radio {width:19px;height:19px;flex:none;display:grid;place-items:center;border:1px solid var(--color-edge);border-radius:50%;color:var(--color-accent);margin-top:1px}
+.mc-release-choice .mc-release-identity {display:grid;gap:6px;min-width:0;flex:1}
+.mc-release-identity strong {color:var(--color-ink)}
+.mc-release-identity span {display:block;line-height:1.6;overflow-wrap:anywhere}
+.mc-release-choice .mc-release-channel {font-size:10px;line-height:1.5;background:var(--color-surface);padding:3px 7px;border-radius:4px;flex:none;max-width:90px;overflow-wrap:normal}
+.mc-project-versions.mc-release-list>article>.mc-release-info {display:block;text-align:start;padding:2px 16px 16px 47px}
+.mc-release-file {display:flex;align-items:center;gap:10px;margin-bottom:14px;color:var(--color-ink-muted)}
+.mc-release-file>svg {flex:none}
+.mc-release-file>div {min-width:0;flex:1;display:grid;gap:4px}
+.mc-release-file>div>strong {font-weight:500;font-size:11px;overflow-wrap:anywhere;color:var(--color-ink)}
+.mc-release-file>span {flex:none}
+.mc-release-info>.mc-release-dependency-toggle {display:flex;align-items:center;gap:9px;width:100%;margin-top:17px;padding-top:15px;border-top:1px solid var(--color-edge-soft);font-size:12px;color:var(--color-ink);text-align:start}
+.mc-release-dependency-toggle>svg {margin-inline-start:auto;transition:transform 150ms ease}
+.mc-release-dependency-toggle[aria-expanded=true]>svg {transform:rotate(180deg)}
+.mc-release-dependencies {margin-top:12px}
+.mc-release-dependency {display:flex;align-items:center;gap:10px;padding:10px 0;border-top:1px solid var(--color-edge-soft)}
+.mc-release-dependency>:is(img,.games-art-empty) {width:30px;height:30px;object-fit:contain;border-radius:5px;flex:none}
+.mc-release-dependency>div {display:grid;gap:4px;min-width:0;flex:1}
+.mc-release-dependency>div a {overflow-wrap:anywhere}
+.mc-release-dependency>div strong {font-size:12px;font-weight:500;color:var(--color-ink-muted)}
+.mc-release-dependency>span {flex:none;font-size:10px;max-width:85px}
+.mc-release-dependencies>.games-button {margin-top:12px}
+.mc-release-dependencies>p {margin-top:12px}
+.mc-project-dialog>footer .mc-release-summary {display:grid;gap:5px;min-width:0;flex:1}
+.mc-release-summary>strong {font-size:13px;color:var(--color-ink);overflow:hidden;text-overflow:ellipsis;white-space:nowrap}
+.mc-release-summary>span {font-size:11px;line-height:1.55;color:var(--color-ink-muted);display:-webkit-box;-webkit-line-clamp:2;-webkit-box-orient:vertical;overflow:hidden;overflow-wrap:anywhere}
+.mc-release-summary>button {font-size:11px;color:var(--color-ink);text-align:start;justify-self:start;text-decoration:underline;text-underline-offset:3px;margin-top:3px}
+.mc-project-dialog>footer .mc-release-review {display:grid;gap:7px;justify-items:end;flex:none}
+.mc-release-review>small {font-size:10px;max-width:220px;color:var(--color-ink-muted);line-height:1.5;text-align:end}
+@media(max-width:700px) {.mc-project-dialog>footer.mc-release-footer {flex-direction:row;align-items:center;flex-wrap:wrap;gap:12px}.mc-release-footer .mc-release-summary {min-width:160px}.mc-release-footer .mc-release-review {margin-inline-start:auto}.mc-release-choice {padding:13px;gap:9px}.mc-project-versions.mc-release-list>article>.mc-release-info {padding-inline:13px}.mc-release-dependency {gap:8px}.mc-release-dependency>span {max-width:72px}}
+@media(prefers-reduced-motion:reduce) {.mc-release-dependency-toggle>svg {transition:none}}

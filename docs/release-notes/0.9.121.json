@@ -1,0 +1,104 @@
+{
+  "notes": {
+    "0.9.121": {
+      "title": "Harbor Beta 0.9.121",
+      "intro": "A major beta with a complete eBook experience, Plex/Jellyfin/Emby playback, a new Windows installer, full interface localization, and substantial subtitle and playback reliability work.",
+      "sections": [
+        {
+          "heading": "Installer and updates",
+          "items": [
+            "Added Harbor's new Windows installer and updater handoff, with a verified embedded app payload, per-user installation, automatic relaunch, and an installation marker for future updates — J",
+            "Kept the existing NSIS updater path available so installations made with older Harbor installers continue receiving updates — J",
+            "Added a dedicated Harbor uninstaller and a localized installer experience in English, Arabic, Portuguese, and Russian — J",
+            "Added release safeguards that reject missing, oversized, stale, or mismatched installer payloads before a manifest entry can be generated — J"
+          ]
+        },
+        {
+          "heading": "eBooks",
+          "items": [
+            "Added a complete eBook home and discovery experience with featured books, popular and genre shelves, recommendations, collections, awards, search, filters, and incremental loading — @capex122",
+            "Added rich book details with authors, ratings, publication data, series relationships, chapter lists, and Manga, anime, or live-action adaptation links — @capex122",
+            "Added Harbor reading mode and an optional animated book mode with chapter navigation, progress, bookmarks, annotations, search, line tracking, themes, typography, direction, and custom fonts — @capex122",
+            "Added local EPUB and folder support, Harbor eBook plugins, source matching, chapter caching, offline export, and Downloads integration — @capex122",
+            "Added opt-in DeepSeek chapter translation with cached translations and original-text restoration — @capex122",
+            "Added Edge TTS narration with language-grouped voices, samples, generation progress, cancellation, seeking, and synchronized line tracking — @capex122",
+            "Added optional New York Times bestseller lists to the eBook home when an NYT Books API key is configured — J"
+          ]
+        },
+        {
+          "heading": "Plex, Jellyfin, Emby, and local media",
+          "items": [
+            "Added first-class Plex, Jellyfin, and Emby connections with discovery, health checks, library synchronization, playback, and progress updates — @Jazzmedo",
+            "Added a unified version picker for local files, home-server copies, and online streams, including source preference controls and Continue Watching integration — @Jazzmedo",
+            "Added support for consecutive dual-episode files such as S01E01E02 and S01E01-02, with shared availability, resume, completion, and next-episode behavior — @Jazzmedo",
+            "Expanded local-library folder management, scanning, identification, availability details, backup restoration, and logical episode counting — @Jazzmedo",
+            "Local subtitle sidecars now attach after playback loads, including sidecars whose filename is not an exact match for the video — @Jazzmedo",
+            "Added local and home-server versions throughout Big Picture, mobile, remote-control, detail, library, and playback surfaces — @Jazzmedo"
+          ]
+        },
+        {
+          "heading": "Subtitles and Live Sync",
+          "items": [
+            "Subtitle discovery now returns results progressively, responds faster, and can populate up to 15 valid candidates from configured sources — @Talal1011",
+            "Removed the unrelated-language fallback from automatic subtitle selection so Harbor waits for the user's preferred language instead of silently choosing the wrong one — @Talal1011",
+            "Improved Arabic subtitle decoding, normalization, quality scoring, and ranking across mixed encodings and provider metadata — @Talal1011",
+            "Improved release matching with episode, cut, source, resolution, release-group, hearing-impaired, foreign-only, and machine-translation evidence — @Talal1011",
+            "SubDL and SubSource can participate in advanced matching through credentials stored in Harbor settings without exposing provider secrets to web content — @Talal1011",
+            "Provider subtitle downloads now enforce public HTTP(S) addresses and keep trusted local or generated subtitle paths separate from provider-derived URLs — @Talal1011",
+            "The latest manually selected external subtitle is cached by content and release, then restored immediately when the same movie or episode is reopened — @Talal1011",
+            "Saved Live Sync corrections now remain attached to the selected release, restore without a second provider request, and avoid applying the baked timing offset twice — @Talal1011",
+            "Added conservative experimental cross-language subtitle matching with independent evidence, held-out validation, monotonic alignment, and offer-only safety gates when confidence is incomplete — @Talal1011",
+            "Restored the subtitle menu resize control and preserved the Find more subtitles, FPS, style, and timing controls across desktop and Big Picture — @Talal1011 and @3laa-NA"
+          ]
+        },
+        {
+          "heading": "Playback and source reliability",
+          "items": [
+            "Holding the primary left mouse button over a playing video now temporarily uses 2× speed, restores the previous rate on release, and does not accidentally pause playback — @theabdull5h",
+            "Harbor TMDB search results now query both bare and type-scoped TMDB IDs so compatible stream and metadata addons return their sources — @Thunderhawkk",
+            "The player now starts from the saved volume and mute preference instead of briefly exposing the default volume before the playback engine responds — @Thunderhawkk",
+            "Fixed direct HTTPS addon links being mistaken for playable direct streams and hiding P2P results while source mode was set to Addons — @Talal1011",
+            "Source mode now consistently supports Both, Direct/debrid, and P2P preferences across the picker, player switcher, filters, and Big Picture — @Talal1011",
+            "Downloaded local files now show as fully Cached immediately instead of displaying a growing network-buffer bar — @uddx7",
+            "Improved native trailer playback by preferring progressive files at lower qualities, retrying adaptive video/audio merges, and finding bundled ffmpeg on Intel and Apple Silicon Macs — @pengunnn",
+            "Normalized parsed audio channel counts and bit depth when addon metadata supplies arrays, strings, or malformed values — J",
+            "Returned content advisory to Harbor's restrained player design while retaining the current guidance, settings, and reliability fixes — @Talal1011 and @O1Abdulrahman"
+          ]
+        },
+        {
+          "heading": "Continue Watching, Simkl, and addons",
+          "items": [
+            "Continue Watching artwork now honors the configured metadata addon and safely falls back when that addon has no artwork — @Thunderhawkk",
+            "Rewatching a completed movie while signed out of Stremio now returns it to Continue Watching after meaningful playback — @Thunderhawkk",
+            "Simkl completion and source-switch scrobbles now use a teardown-safe path with watched-history recovery so finished titles do not remain stuck as currently watching — @Thunderhawkk",
+            "Updating an addon now replaces it in place, removes duplicates, and preserves its position in both Harbor and the synchronized Stremio collection — @Thunderhawkk"
+          ]
+        },
+        {
+          "heading": "Profiles, themes, calendar, and controls",
+          "items": [
+            "Primary-profile imports now show Merge or Replace choices for overlapping watchlist, favorites, and selected addon data, with non-destructive Merge as the default — @Thunderhawkk",
+            "Theme creator names are clickable and keyboard-accessible across Community Store surfaces, open the current creator profile, and no longer trigger the theme card underneath — @uddx7",
+            "Added behavior-based Community Store theme filters with viewport-aware, scrollable menus — @pengunnn",
+            "Friend presence now stays consistent between the friends panel and profile hover card — @pengunnn",
+            "Added the Kawaii beta theme and refined its profile picker, hero artwork fallback, and navigation presentation — J",
+            "Calendar items now show local release times and live countdowns, with an optional larger-poster layout and sharper portrait artwork — @uddx7",
+            "Fixed the macOS window opening beneath the menu bar, camera notch, or Dock by fitting it to the visible screen area — @3-pr",
+            "Custom theme app icons now update the Harbor icon shown in the macOS Dock — @3-pr",
+            "Fixed Home hero actions remaining unresponsive after a drag and fixed the right-click Add to my list submenu being clipped — @uddx7",
+            "Expanded controller navigation, glyphs, cursor behavior, device presentation, and player-control handling — J",
+            "Refined Live TV guide navigation, EPG matching, lazy rendering, program presentation, and drag panning — J"
+          ]
+        },
+        {
+          "heading": "Languages and accessibility",
+          "items": [
+            "Added complete interface localization for Arabic, Chinese, French, German, Hindi, Indonesian, Italian, Japanese, Korean, Polish, Portuguese, Russian, Spanish, Turkish, and Vietnamese — @xjl9",
+            "Language changes now apply at runtime with RTL layout, regional defaults, locale-aware plurals, and localized product, player, settings, eBook, Manga, profile, search, and error text — @xjl9",
+            "Completed translations for the new profile-import, stream-mode, subtitle-classification, cross-language matching, and New York Times eBook controls — @xjl9 and @Talal1011"
+          ]
+        }
+      ]
+    }
+  }
+}

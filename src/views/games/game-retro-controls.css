@@ -1,0 +1,30 @@
+.retro-controls-backdrop { position:absolute;inset:0;z-index:10;display:flex;justify-content:flex-end;background:#0008; }
+.retro-controls { position:relative;display:flex;flex-direction:column;width:min(460px,100%);background:var(--color-surface);padding:24px;animation:retro-controls-enter .22s cubic-bezier(.2,.8,.2,1); }
+.retro-controls-heading { display:flex;align-items:flex-start;justify-content:space-between;gap:18px; }
+.retro-controls h2 { font-size:24px;font-weight:650;letter-spacing:-.03em; }
+.retro-controls p { color:var(--color-ink-muted);font-size:13px;line-height:1.5; }
+.retro-controls-heading p { margin-block:7px 20px; }
+.retro-controls .retro-control-ports { display:flex;gap:4px; }
+.retro-control-ports button { flex:1;min-height:40px; }
+.retro-control-ports button[aria-pressed=true] { background:var(--color-ink);color:var(--color-canvas); }
+.retro-control-device { overflow:hidden;text-overflow:ellipsis;white-space:nowrap;margin-block:12px 18px;min-height:44px;background:var(--color-elevated);padding:8px;border-radius:6px;color:var(--color-ink);font-size:12px; }
+.retro-control-device:focus-visible { outline:2px solid var(--color-accent);outline-offset:2px; }
+.retro-controls-table { overflow:auto;min-height:0;padding:4px; }
+.retro-control-columns,.retro-control-row { display:grid;grid-template-columns:1fr 1.15fr 1.15fr;align-items:center;gap:8px; }
+.retro-control-columns { margin-block-end:9px;color:var(--color-ink-muted);font-size:12px; }
+.retro-control-columns span { display:flex;gap:6px;justify-content:center; }
+.retro-control-row { margin-block:6px; }
+.retro-control-row strong { font-size:14px;font-weight:600; }
+.retro-control-row button { min-height:42px; }
+.retro-control-row kbd { font-family:inherit; }
+.retro-control-glyph { width:22px;height:22px; }
+.retro-controls-footer { display:flex;gap:14px;align-items:center;padding-block-start:20px; }
+.retro-controls-footer small { max-width:180px;line-height:1.5; }
+.retro-bind-prompt { position:absolute;inset:0;background:var(--color-surface);display:flex;align-items:center;justify-content:center;flex-direction:column;gap:18px;padding:32px;text-align:center; }
+.retro-bind-prompt strong { font-size:44px; }
+.retro-player-hints { display:flex;align-items:center;justify-content:center;gap:18px;min-height:35px;font-size:12px;color:var(--color-ink-muted);background:var(--color-canvas); }
+.retro-player-hints span { display:flex;align-items:center;gap:6px; }
+.retro-player-hints kbd { font-family:inherit;color:var(--color-ink); }
+@keyframes retro-controls-enter { from { opacity:0;transform:translateX(18px) } to { opacity:1;transform:none } }
+@media(prefers-reduced-motion:reduce) { .retro-controls { animation:none; } }
+@media(max-width:600px) { .retro-controls { padding:16px; }.retro-player-hints { gap:12px;font-size:11px; }.games-retro-player-actions { flex-wrap:wrap; } }

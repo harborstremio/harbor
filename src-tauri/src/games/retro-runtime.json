@@ -1,0 +1,82 @@
+[
+  {
+    "path": "loader.js",
+    "sha256": "69e0903bf1e2f62ced78895e7e511fa26e11316f7eb734925c35e919ba1287b2",
+    "bytes": 7594
+  },
+  {
+    "path": "emulator.min.js",
+    "sha256": "6aec3fd7bb2721255801b0a6af02e47e78b05e28a1822b1f213aacbd348abaee",
+    "bytes": 426343
+  },
+  {
+    "path": "emulator.min.css",
+    "sha256": "16406c60b2dc3b04ae9b115e308613e6f567a0cc7068e21d9d0c1e5030fb395e",
+    "bytes": 25630
+  },
+  {
+    "path": "compression/extract7z.js",
+    "sha256": "4ac9933b995a516cb6b3ca4027db860278372a20c21c405d93ceb1998498853a",
+    "bytes": 280155
+  },
+  {
+    "path": "cores/reports/mgba.json",
+    "sha256": "08219f6c855a9d996f04ed21169bb0c5ac64d469a8a536468b9876205b5c268d",
+    "bytes": 118
+  },
+  {
+    "path": "cores/mgba-legacy-wasm.data",
+    "sha256": "e300d2f368c82bf61d77c972c36e367cf16408ec3d50beede080337519a3d696",
+    "bytes": 1054993
+  },
+  {
+    "path": "cores/reports/gambatte.json",
+    "sha256": "a240a47bd6b2a38a6c46ee63c80bdcd24befbd50474453df4898d49282bd5f57",
+    "bytes": 122
+  },
+  {
+    "path": "cores/gambatte-legacy-wasm.data",
+    "sha256": "940a7381d51223c0be0c0f98d1a988d42cc98d03c27b392cbd29cb9f357b5f62",
+    "bytes": 967022
+  },
+  {
+    "path": "cores/reports/fceumm.json",
+    "sha256": "13dbbfba0ea1bea087c97c38f47dd49c3fb8f16c3f5ed5678dd75d352b737132",
+    "bytes": 120
+  },
+  {
+    "path": "cores/fceumm-legacy-wasm.data",
+    "sha256": "f1054b094e7149fd6278485bc1b2e51ff75c5259048ddb1134171e53d651f239",
+    "bytes": 1053006
+  },
+  {
+    "path": "cores/reports/snes9x.json",
+    "sha256": "dc7ac963eb7935a7ac78956235ac0b8912ec785c57026336825aa2ed8031b3ad",
+    "bytes": 120
+  },
+  {
+    "path": "cores/snes9x-legacy-wasm.data",
+    "sha256": "7d427a575cefad98ff400493fa1d7e892da63fe7bab68979babd9cea0bfaaf3b",
+    "bytes": 1092437
+  },
+  {
+    "path": "cores/reports/genesis_plus_gx.json",
+    "sha256": "5936a8ce8d7f010d5bfdd8c3bba2b2414f103b3a703121e56f2724b24dbe7ff3",
+    "bytes": 129
+  },
+  {
+    "path": "cores/genesis_plus_gx-legacy-wasm.data",
+    "sha256": "2a1edeb68d7ec882149ed3cd5d3aa95a6ac231ebabaf82cdb56175a8b62967cc",
+    "bytes": 1204803
+  },
+  {
+    "path": "cores/reports/mupen64plus_next.json",
+    "sha256": "270105553cec57fd1058c50e0541b8b89dbd30b2323fd70682036f6919b805cc",
+    "bytes": 153
+  },
+  {
+    "path": "cores/mupen64plus_next-legacy-wasm.data",
+    "sha256": "425072f4bf94eec02633cbe9b84f47d6803dc0ec1b3c3b8de3ebbd2eb5617c3f",
+    "bytes": 1451870
+  }
+]

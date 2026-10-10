@@ -86,7 +86,11 @@ pub async fn run(session: &Arc<Session>, steps: &mut Vec<SelfTestStep>) {
     steps.push(step(
         "metadata",
         true,
-        format!("{} file(s) in {:.1}s", lengths.len(), meta_started.elapsed().as_secs_f64()),
+        format!(
+            "{} file(s) in {:.1}s",
+            lengths.len(),
+            meta_started.elapsed().as_secs_f64()
+        ),
     ));
     let idx = lengths
         .iter()
@@ -193,7 +197,10 @@ async fn first_byte(steps: &mut Vec<SelfTestStep>, port: u16, hash: &str, idx: u
                 steps.push(step(
                     "first byte",
                     true,
-                    format!("HTTP 206, {read} B, {:.1}s", byte_started.elapsed().as_secs_f64()),
+                    format!(
+                        "HTTP 206, {read} B, {:.1}s",
+                        byte_started.elapsed().as_secs_f64()
+                    ),
                 ));
                 let detail = if content_range.is_empty() {
                     "bytes 0-65535".to_string()

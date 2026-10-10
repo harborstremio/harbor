@@ -1,0 +1,383 @@
+{
+ "checked": "2026-09-28",
+ "shelves": {
+  "new": [
+   "tt31170389",
+   "other-mommy",
+   "tt1844624",
+   "backrooms",
+   "obsession",
+   "tt35672862",
+   "tt39143902",
+   "tt8036976",
+   "tt33978029",
+   "tt31728330",
+   "tt8879928",
+   "tt32141377",
+   "tt35298123",
+   "hallow-eve"
+  ]
+ },
+ "items": [
+  {
+   "id": "tt31170389",
+   "title": "Evil Dead Burn",
+   "year": "2026",
+   "type": "Film",
+   "section": "catalog",
+   "creator": "Sébastien Vanicek",
+   "description": "After the loss of her husband, a woman seeks solace with her in-laws. As one by one they transform into deadites, she comes to discover that the vows she took in life - survive even in death.",
+   "poster": "https://images.metahub.space/poster/medium/tt31170389/img",
+   "source": "https://press.wbd.com/us/media-release/evil-dead-burn-begins-streaming-exclusively-hbo-max-october-2",
+   "genres": [
+    "Horror"
+   ],
+   "runtime": "110 min",
+   "imdbRating": "6.3",
+   "releaseChecked": "2026-09-28",
+   "releaseNote": "2026 film. HBO Max streaming begins October 2, 2026.",
+   "release": "HBO Max October 2, 2026",
+   "shelfLabel": "Oct 2 · HBO Max"
+  },
+  {
+   "id": "other-mommy",
+   "title": "Other Mommy",
+   "year": "2026",
+   "type": "Film",
+   "section": "catalog",
+   "creator": "Rob Savage",
+   "description": "Bela befriends something in her home. It looks like her mother, and it wants to come closer.",
+   "poster": "https://images.metahub.space/poster/medium/tt36586020/img",
+   "source": "https://www.imdb.com/title/tt36586020/",
+   "release": "Oct 9 · In theaters",
+   "imdbId": "tt36586020",
+   "genres": [
+    "Horror"
+   ],
+   "runtime": "93 min",
+   "imdbRating": null,
+   "background": "https://images.metahub.space/background/medium/tt36586020/img",
+   "logo": "https://images.metahub.space/logo/medium/tt36586020/img",
+   "service": "In theaters October 9",
+   "serviceUrl": "https://www.universalpictures.com/movies/other-mommy/",
+   "serviceAction": "View film site",
+   "featureTag": "Coming soon"
+  },
+  {
+   "id": "tt1844624",
+   "title": "American Horror Story",
+   "year": "2011",
+   "type": "Series",
+   "section": "series",
+   "creator": "Ryan Murphy, Brad Falchuk",
+   "description": "The anthology returns for its thirteenth installment, bringing familiar characters back into the nightmare.",
+   "poster": "https://images.metahub.space/poster/medium/tt1844624/img",
+   "source": "https://www.fxnetworks.com/shows/american-horror-story",
+   "runtime": "44 min",
+   "genres": [
+    "Drama",
+    "Horror",
+    "Sci-Fi"
+   ],
+   "imdbRating": "7.9",
+   "seasonNumber": 13,
+   "seasonYear": "2026",
+   "releaseDate": "2026-09-24",
+   "featureTag": "New episodes",
+   "background": "https://images.metahub.space/background/medium/tt1844624/img",
+   "logo": "https://images.metahub.space/logo/medium/tt1844624/img",
+   "service": "Hulu",
+   "serviceLogo": "assets/series-features/hulu.svg",
+   "serviceUrl": "https://www.hulu.com/series/a67a233c-fcfe-4e8e-b000-052603ddd616",
+   "sourceUrl": "https://www.fxnetworks.com/shows/american-horror-story",
+   "releaseSourceUrl": "https://press.hulu.com/schedule/september-2026/",
+   "statusNote": "The September 2026 Hulu schedule lists the September 24 three-episode premiere. FX and Hulu currently show Season 13 available.",
+   "artworkScope": {
+    "poster": "Season 13 official Hulu key art",
+    "background": "Season 13 official Hulu key art",
+    "logo": "Season 13 official Hulu title treatment"
+   },
+   "imdbId": "tt1844624",
+   "seasonLabel": "Season 13",
+   "releaseStatus": "streaming",
+   "statusLabel": "New episodes",
+   "checked": "2026-09-28",
+   "metadataSource": "https://v3-cinemeta.strem.io/meta/series/tt1844624.json",
+   "serviceAction": "View on Hulu"
+  },
+  {
+   "id": "backrooms",
+   "title": "Backrooms",
+   "year": "2026",
+   "type": "Film",
+   "section": "catalog",
+   "creator": "Kane Parsons",
+   "description": "A therapist follows her missing patient into an endless maze of rooms beyond reality.",
+   "poster": "https://images.metahub.space/poster/medium/tt26657236/img",
+   "source": "https://www.imdb.com/title/tt26657236/",
+   "release": "2026 · Film",
+   "imdbId": "tt26657236",
+   "genres": [
+    "Horror",
+    "Sci-Fi",
+    "Thriller"
+   ],
+   "runtime": "111 min",
+   "imdbRating": "6.8",
+   "background": "https://images.metahub.space/background/medium/tt26657236/img",
+   "logo": "https://images.metahub.space/logo/medium/tt26657236/img",
+   "service": "HBO Max",
+   "serviceUrl": "https://backroomsmovie.com/",
+   "serviceAction": "View film site",
+   "featureTag": "New to streaming",
+   "serviceLogo": "assets/services/max.svg"
+  },
+  {
+   "id": "obsession",
+   "title": "Obsession",
+   "year": "2026",
+   "type": "Film",
+   "section": "catalog",
+   "creator": "Curry Barker",
+   "description": "A wish makes his crush fall for him. What follows is nothing like the romance he imagined.",
+   "poster": "https://images.metahub.space/poster/medium/tt37287335/img",
+   "source": "https://www.imdb.com/title/tt37287335/",
+   "release": "2026 · Film",
+   "imdbId": "tt37287335",
+   "genres": [
+    "Horror",
+    "Romance",
+    "Thriller"
+   ],
+   "runtime": "108 min",
+   "imdbRating": "7.9",
+   "background": "https://images.metahub.space/background/medium/tt37287335/img",
+   "logo": "https://images.metahub.space/logo/medium/tt37287335/img",
+   "service": "Peacock",
+   "serviceUrl": "https://www.peacocktv.com/stream-movies/obsession",
+   "serviceAction": "View on Peacock",
+   "featureTag": "Popular now",
+   "serviceLogo": "assets/services/peacock.svg"
+  },
+  {
+   "id": "tt35672862",
+   "title": "Hokum",
+   "year": "2026",
+   "type": "Film",
+   "section": "catalog",
+   "creator": "Damian McCarthy",
+   "description": "A horror writer arrives at a remote Irish inn to scatter his parents’ ashes. The locals have a story about the locked room upstairs.",
+   "poster": "https://images.metahub.space/poster/medium/tt35672862/img",
+   "source": "https://www.imdb.com/title/tt35672862/",
+   "genres": [
+    "Horror",
+    "Thriller"
+   ],
+   "imdbId": "tt35672862",
+   "runtime": "108 min",
+   "imdbRating": "7.3",
+   "background": "https://images.metahub.space/background/medium/tt35672862/img",
+   "logo": "https://images.metahub.space/logo/medium/tt35672862/img",
+   "service": "NEON",
+   "serviceUrl": "https://www.neonrated.com/film/hokum",
+   "serviceAction": "View film site",
+   "featureTag": "2026 horror",
+   "serviceLogo": "assets/services/neon.svg"
+  },
+  {
+   "id": "tt39143902",
+   "title": "Leviticus",
+   "year": "2026",
+   "type": "Film",
+   "section": "catalog",
+   "creator": "Adrian Chiarella",
+   "description": "Two boys in a small town are stalked by an entity that takes the shape of the person they want most.",
+   "poster": "https://images.metahub.space/poster/medium/tt39143902/img",
+   "source": "https://www.imdb.com/title/tt39143902/",
+   "genres": [
+    "Horror",
+    "Romance",
+    "Sci-Fi"
+   ],
+   "imdbId": "tt39143902",
+   "runtime": "88 min",
+   "imdbRating": "6.4",
+   "background": "https://images.metahub.space/background/medium/tt39143902/img",
+   "logo": "https://images.metahub.space/logo/medium/tt39143902/img",
+   "service": "NEON",
+   "serviceUrl": "https://www.neonrated.com/film/leviticus",
+   "serviceAction": "View film site",
+   "featureTag": "2026 horror",
+   "serviceLogo": "assets/services/neon.svg"
+  },
+  {
+   "id": "tt8036976",
+   "title": "Send Help",
+   "year": "2026",
+   "type": "Film",
+   "section": "catalog",
+   "creator": "Sam Raimi",
+   "description": "An employee and her boss survive a plane crash. On a deserted island, their office hierarchy means very little.",
+   "poster": "https://images.metahub.space/poster/medium/tt8036976/img",
+   "source": "https://www.imdb.com/title/tt8036976/",
+   "genres": [
+    "Adventure",
+    "Horror",
+    "Thriller"
+   ],
+   "imdbId": "tt8036976",
+   "runtime": "113 min",
+   "imdbRating": "6.9",
+   "background": "https://images.metahub.space/background/medium/tt8036976/img",
+   "logo": "https://images.metahub.space/logo/medium/tt8036976/img",
+   "service": "2026 horror",
+   "serviceUrl": "https://www.imdb.com/title/tt8036976/",
+   "serviceAction": "Film details",
+   "featureTag": "Popular now"
+  },
+  {
+   "id": "tt33978029",
+   "title": "Ready or Not 2: Here I Come",
+   "year": "2026",
+   "type": "Film",
+   "section": "catalog",
+   "creator": "Matt Bettinelli-Olpin, Tyler Gillett",
+   "description": "Grace MacCaullay battles old wounds with her estranged sister Faith MacCaullay while rival occult dynasties hunt them through a deadly contest that promises power, survival, and betrayal before dawn.",
+   "poster": "https://images.metahub.space/poster/medium/tt33978029/img",
+   "source": "https://press.searchlightpictures.com/ready-or-not-2-here-i-come",
+   "genres": [
+    "Comedy",
+    "Horror",
+    "Thriller"
+   ],
+   "runtime": "108 min",
+   "imdbRating": "6.5",
+   "releaseChecked": "2026-09-28",
+   "releaseNote": "U.S. theatrical release March 20, 2026."
+  },
+  {
+   "id": "tt31728330",
+   "title": "They Will Kill You",
+   "year": "2026",
+   "type": "Film",
+   "section": "catalog",
+   "creator": "Kirill Sokolov",
+   "description": "A woman takes a job as a housekeeper in a NYC high-rise, unaware of the building's history of disappearances. She soon realizes the community is shrouded in mystery.",
+   "poster": "https://images.metahub.space/poster/medium/tt31728330/img",
+   "source": "https://www.bbfc.co.uk/release/they-will-kill-you-q29sbgvjdglvbjpwwc0xmdm0ode0",
+   "genres": [
+    "Action",
+    "Comedy",
+    "Horror"
+   ],
+   "runtime": "94 min",
+   "imdbRating": "6.5",
+   "releaseChecked": "2026-09-28",
+   "releaseNote": "2026 release; BBFC distributor Warner Bros."
+  },
+  {
+   "id": "tt8879928",
+   "title": "Cold Storage",
+   "year": "2026",
+   "type": "Film",
+   "section": "catalog",
+   "creator": "Jonny Campbell",
+   "description": "When a highly dangerous fungus escapes from a secret laboratory, a former bioterrorism agent is called back into action. Alongside two young employees, he must confront an invisible and out-of-control threat.",
+   "poster": "https://images.metahub.space/poster/medium/tt8879928/img",
+   "source": "https://www.sonypictures.com/movies/coldstorage",
+   "genres": [
+    "Comedy",
+    "Horror",
+    "Sci-Fi"
+   ],
+   "runtime": "99 min",
+   "imdbRating": "6.1",
+   "releaseChecked": "2026-09-28",
+   "releaseNote": "2026 film, available digitally."
+  },
+  {
+   "id": "tt32141377",
+   "title": "28 Years Later: The Bone Temple",
+   "year": "2026",
+   "type": "Film",
+   "section": "catalog",
+   "creator": "Nia DaCosta",
+   "description": "Spike falls in with Jimmy Crystal’s gang while Dr. Kelson discovers something that could change the infected world.",
+   "poster": "https://images.metahub.space/poster/medium/tt32141377/img",
+   "source": "https://www.imdb.com/title/tt32141377/",
+   "genres": [
+    "Horror",
+    "Sci-Fi",
+    "Thriller"
+   ],
+   "imdbId": "tt32141377",
+   "runtime": "109 min",
+   "imdbRating": "7.3",
+   "background": "https://images.metahub.space/background/medium/tt32141377/img",
+   "logo": "https://images.metahub.space/logo/medium/tt32141377/img",
+   "service": "2026 horror",
+   "serviceUrl": "https://www.imdb.com/title/tt32141377/",
+   "serviceAction": "Film details",
+   "featureTag": "Popular now"
+  },
+  {
+   "id": "tt35298123",
+   "title": "Teenage Sex and Death at Camp Miasma",
+   "year": "2026",
+   "type": "Film",
+   "section": "catalog",
+   "creator": "Jane Schoenbrun",
+   "description": "A filmmaker reviving a slasher franchise becomes obsessed with its original final girl.",
+   "poster": "https://images.metahub.space/poster/medium/tt35298123/img",
+   "source": "https://www.imdb.com/title/tt35298123/",
+   "genres": [
+    "Comedy",
+    "Horror",
+    "Romance"
+   ],
+   "imdbId": "tt35298123",
+   "runtime": "112 min",
+   "imdbRating": "7.1",
+   "background": "https://images.metahub.space/background/medium/tt35298123/img",
+   "logo": "https://images.metahub.space/logo/medium/tt35298123/img",
+   "service": "2026 horror",
+   "serviceUrl": "https://www.imdb.com/title/tt35298123/",
+   "serviceAction": "Film details",
+   "featureTag": "Popular now"
+  },
+  {
+   "id": "hallow-eve",
+   "title": "All Hallows Eve",
+   "year": "2026",
+   "type": "Book",
+   "section": "new",
+   "creator": "Edited by Ellen Datlow",
+   "description": "A gathering of Halloween tales: dark traditions, strange visitors, and things that only wake up in October.",
+   "poster": "https://covers.openlibrary.org/b/id/7445982-L.jpg",
+   "source": "https://www.penguinrandomhouse.com/books/827986/all-hallows-eve-by-ellen-datlow-christopher-golden-stephen-graham-jones-chikodili-emelumadu-lee-murray-clay-mcleod-chapman-michael-marshall-smith-linda-d-addison/",
+   "release": "Sep 8 · New anthology"
+  }
+ ],
+ "sources": [
+  {
+   "id": "tt31170389",
+   "url": "https://press.wbd.com/us/media-release/evil-dead-burn-begins-streaming-exclusively-hbo-max-october-2",
+   "note": "2026 film. HBO Max streaming begins October 2, 2026."
+  },
+  {
+   "id": "tt33978029",
+   "url": "https://press.searchlightpictures.com/ready-or-not-2-here-i-come",
+   "note": "U.S. theatrical release March 20, 2026."
+  },
+  {
+   "id": "tt31728330",
+   "url": "https://www.bbfc.co.uk/release/they-will-kill-you-q29sbgvjdglvbjpwwc0xmdm0ode0",
+   "note": "2026 release; BBFC distributor Warner Bros."
+  },
+  {
+   "id": "tt8879928",
+   "url": "https://www.sonypictures.com/movies/coldstorage",
+   "note": "2026 film, available digitally."
+  }
+ ]
+}

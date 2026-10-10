@@ -24,32 +24,73 @@ pub fn settings_write(app: tauri::AppHandle, content: String) -> Result<(), Stri
     std::fs::rename(&tmp, &path).map_err(|e| e.to_string())
 }
 
-/// Read the `torrentsDisabled` flag from the settings file without pulling in
-/// a full JSON parser. Returns false if the file is missing, unreadable, or
-/// the field is absent. This is intended to be cheap enough to call from
-/// `torrent_engine::ensure_started_on_setup` and `ensure_session`.
-pub fn read_torrents_disabled(app: &tauri::AppHandle) -> bool {
-    let path = match settings_path(app) {
-        Ok(p) => p,
-        Err(_) => return false,
+fn secrets_path(app: &tauri::AppHandle) -> Result<std::path::PathBuf, String> {
+    let dir = app.path().app_data_dir().map_err(|e| e.to_string())?;
+    std::fs::create_dir_all(&dir).map_err(|e| e.to_string())?;
+    Ok(dir.join("secrets.json"))
+}
+
+#[tauri::command]
+pub fn secrets_read(app: tauri::AppHandle) -> Result<Option<String>, String> {
+    let path = secrets_path(&app)?;
+    match std::fs::read_to_string(&path) {
+        Ok(s) => Ok(Some(s)),
+        Err(e) if e.kind() == std::io::ErrorKind::NotFound => Ok(None),
+        Err(e) => Err(e.to_string()),
+    }
+}
+
+#[tauri::command]
+pub fn secrets_write(app: tauri::AppHandle, content: String) -> Result<(), String> {
+    let path = secrets_path(&app)?;
+    let tmp = path.with_extension("json.tmp");
+    std::fs::write(&tmp, content.as_bytes()).map_err(|e| e.to_string())?;
+    std::fs::rename(&tmp, &path).map_err(|e| e.to_string())
+}
+
+pub(crate) fn secret_value(app: &tauri::AppHandle, key: &str) -> Result<Option<String>, String> {
+    let Some(content) = secrets_read(app.clone())? else {
+        return Ok(None);
     };
-    let s = match std::fs::read_to_string(&path) {
-        Ok(s) => s,
-        Err(_) => return false,
+    let value =
+        serde_json::from_str::<serde_json::Value>(&content).map_err(|error| error.to_string())?;
+    Ok(value
+        .as_object()
+        .and_then(|items| items.get(key))
+        .and_then(serde_json::Value::as_str)
+        .map(str::to_string))
+}
+
+pub fn read_torrents_disabled(app: &tauri::AppHandle) -> bool {
+    let Ok(path) = settings_path(app) else {
+        return false;
+    };
+    let Ok(s) = std::fs::read_to_string(&path) else {
+        return false;
     };
     parse_torrents_disabled(&s)
 }
 
+pub fn read_defer_torrent_engine(app: &tauri::AppHandle) -> bool {
+    let Ok(path) = settings_path(app) else {
+        return false;
+    };
+    let Ok(s) = std::fs::read_to_string(&path) else {
+        return false;
+    };
+    parse_bool_flag(&s, "deferTorrentEngine")
+}
+
 fn parse_torrents_disabled(json: &str) -> bool {
-    // Cheap field scan. We only need to know whether
-    // `"torrentsDisabled":true` appears in the file. False is the safe
-    // default if we cannot confirm it.
-    let needle = "\"torrentsDisabled\"";
-    let Some(idx) = json.find(needle) else {
+    parse_bool_flag(json, "torrentsDisabled")
+}
+
+fn parse_bool_flag(json: &str, key: &str) -> bool {
+    let needle = format!("\"{}\"", key);
+    let Some(idx) = json.find(&needle) else {
         return false;
     };
     let rest = &json[idx + needle.len()..];
-    // Skip whitespace, optional ':', and any extra whitespace.
     let mut chars = rest.chars().peekable();
     while let Some(c) = chars.peek() {
         if c.is_whitespace() || *c == ':' {

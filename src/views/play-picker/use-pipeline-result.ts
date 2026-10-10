@@ -2,12 +2,26 @@ import { useCallback, useEffect, useMemo, useState } from "react";
 import type { Addon } from "@/lib/addons";
 import type { Meta } from "@/lib/cinemeta";
 import { useDebridClients } from "@/lib/debrid/registry";
-import { buildPickerConfigHash, clearOnePickerCache, getPickerCache, setPickerCache } from "@/lib/picker-cache";
+import {
+  buildPickerConfigHash,
+  clearOnePickerCache,
+  getPickerCache,
+  setPickerCache,
+} from "@/lib/picker-cache";
 import { useSettings } from "@/lib/settings";
+import type { AddonProgress } from "@/lib/streams/addons";
+import { pluginCacheTokens } from "@/lib/streams/plugins";
+import { providerVodCacheTokens } from "@/lib/streams/provider-vod";
+import { usePlaylists } from "@/lib/iptv/playlists-store";
 import { runPipeline, type PipelineResult } from "@/lib/streams/pipeline";
 import { buildEpisodePipelineInput } from "@/lib/streams/episode-pipeline-input";
 import type { PlayEpisode } from "@/lib/view";
-import { stampAddonOrder } from "./picker-utils";
+import {
+  pickerErrorTransport,
+  pipelineError,
+  stampAddonOrder,
+  type PickerError,
+} from "./picker-utils";
 
 type Settings = ReturnType<typeof useSettings>["settings"];
 
@@ -21,6 +35,7 @@ export function usePipelineResult({
   settings,
   strictMode,
   filterDisabled,
+  animeTitles,
 }: {
   meta: Meta;
   episode: PlayEpisode | undefined;
@@ -31,24 +46,33 @@ export function usePipelineResult({
   settings: Settings;
   strictMode: boolean;
   filterDisabled: boolean;
+  animeTitles: string[] | null;
 }) {
   const [result, setResult] = useState<PipelineResult | null>(null);
   const [loading, setLoading] = useState(true);
   const [pipelineDone, setPipelineDone] = useState(false);
   const [firstResultAt, setFirstResultAt] = useState<number | null>(null);
   const [autoSettleReady, setAutoSettleReady] = useState(false);
-  const [resolveError, setResolveError] = useState<string | null>(null);
+  const [pickerError, setResolveError] = useState<PickerError | null>(null);
   const [refreshNonce, setRefreshNonce] = useState(0);
+  const [addonQuorum, setAddonQuorum] = useState<AddonProgress>({
+    settled: 0,
+    total: 0,
+    queriedAddonIds: [],
+    settledAddonIds: [],
+  });
+  const [pipelineStartedAt, setPipelineStartedAt] = useState<number | null>(null);
 
+  const playlists = usePlaylists();
   const configHash = useMemo(
     () =>
       buildPickerConfigHash({
         addonTransportUrls: (addons ?? []).map((a) => a.transportUrl),
         debridSlugs: debrids.map((d) => d.slug),
-        scraperKeys: [],
+        scraperKeys: [...pluginCacheTokens(), ...providerVodCacheTokens()],
         filterMode: filterDisabled ? "off" : strictMode ? "strict" : "balanced",
       }),
-    [addons, debrids, filterDisabled, strictMode],
+    [addons, debrids, filterDisabled, strictMode, playlists],
   );
 
   useEffect(() => {
@@ -62,6 +86,13 @@ export function usePipelineResult({
       setFirstResultAt(performance.now());
       setAutoSettleReady(true);
       setResolveError(null);
+      setAddonQuorum({
+        settled: 1,
+        total: 1,
+        queriedAddonIds: [],
+        settledAddonIds: [],
+      });
+      setPipelineStartedAt(performance.now());
       return () => ac.abort();
     }
     setLoading(true);
@@ -70,6 +101,13 @@ export function usePipelineResult({
     setPipelineDone(false);
     setFirstResultAt(null);
     setAutoSettleReady(false);
+    setAddonQuorum({
+      settled: 0,
+      total: 0,
+      queriedAddonIds: [],
+      settledAddonIds: [],
+    });
+    setPipelineStartedAt(performance.now());
     runPipeline(
       buildEpisodePipelineInput({
         meta,
@@ -81,6 +119,7 @@ export function usePipelineResult({
         settings,
         strictMode,
         filterDisabled,
+        animeTitles,
       }),
       ac.signal,
       (partial) => {
@@ -91,6 +130,10 @@ export function usePipelineResult({
         setLoading(false);
         setFirstResultAt((prev) => prev ?? performance.now());
         setPickerCache(meta, episode, partial, configHash, false);
+      },
+      (progress) => {
+        if (ac.signal.aborted) return;
+        setAddonQuorum(progress);
       },
     )
       .then((r) => {
@@ -104,7 +147,7 @@ export function usePipelineResult({
       })
       .catch((e) => {
         if (ac.signal.aborted) return;
-        setResolveError(e instanceof Error ? e.message : "Couldn't load streams. Check your addons and connection.");
+        setResolveError(pipelineError(e instanceof Error ? e.message : undefined));
         setLoading(false);
         setPipelineDone(true);
         setAutoSettleReady(true);
@@ -126,13 +169,16 @@ export function usePipelineResult({
     settings.requirePreferredLanguage,
     strictMode,
     filterDisabled,
+    (animeTitles ?? []).join("|"),
     refreshNonce,
+    configHash,
   ]);
 
   const refresh = useCallback(() => {
     clearOnePickerCache(meta, episode);
     setRefreshNonce((n) => n + 1);
   }, [meta, episode]);
+  const resolveError = pickerErrorTransport(pickerError);
 
   return {
     result,
@@ -140,7 +186,10 @@ export function usePipelineResult({
     pipelineDone,
     firstResultAt,
     autoSettleReady,
+    addonQuorum,
+    pipelineStartedAt,
     resolveError,
+    pickerError,
     refresh,
     setResult,
     setLoading,

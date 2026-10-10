@@ -2,9 +2,10 @@ import {
   awardSourceMeta,
   findAnyAwardWins,
   groupWinsBySource,
-  type AwardSourceId,
 } from "@/lib/anime-awards";
+import { resolveAwardIcon, useAwardPacks } from "@/lib/award-icons";
 import { useT } from "@/lib/i18n";
+import { scrollToDetailSection } from "@/lib/section-scroll";
 
 const MAX_LINES = 3;
 
@@ -18,11 +19,14 @@ export function CrunchyrollAwardsCorner({
   inline?: boolean;
 }) {
   const t = useT();
+  useAwardPacks();
   const wins = findAnyAwardWins(name, year);
   if (wins.length === 0) return null;
   const groups = groupWinsBySource(name, year);
   const top = groups[0];
   const topSource = awardSourceMeta(top.source);
+  const customLogo = resolveAwardIcon(`${top.source}_logo`) ?? resolveAwardIcon(top.source);
+  const iconSrc = customLogo ?? topSource.icon;
   const otherGroups = groups.slice(1);
 
   const lines: string[] = [];
@@ -39,9 +43,7 @@ export function CrunchyrollAwardsCorner({
       data-hero-awards
       onClick={(e) => {
         e.stopPropagation();
-        document
-          .getElementById("anime-awards-section")
-          ?.scrollIntoView({ behavior: "smooth", block: "start" });
+        scrollToDetailSection("animeAwards", "anime-awards-section");
       }}
       className={`group flex max-w-xs flex-col items-end gap-2 rounded-2xl px-1 py-1 text-end transition-all duration-200 hover:-translate-y-0.5 ${
         inline ? "" : "absolute bottom-14 end-12"
@@ -50,10 +52,12 @@ export function CrunchyrollAwardsCorner({
     >
       <div className="flex items-center gap-3.5 rounded-2xl px-3 py-2 transition-colors duration-200 group-hover:bg-canvas/45">
         <img
-          src={topSource.icon}
+          src={iconSrc}
           alt={topSource.name}
-          className={`h-10 shrink-0 ${needsInvert(top.source) ? "invert hue-rotate-180" : ""} ${
-            top.source === "animation_kobe" ? "w-10 brightness-0 invert" : "w-auto max-w-[120px]"
+          className={`h-10 shrink-0 ${
+            top.source === "animation_kobe"
+              ? `w-10 ${customLogo ? "" : "brightness-0 invert"}`
+              : "w-auto max-w-[120px]"
           }`}
           draggable={false}
         />
@@ -91,10 +95,6 @@ export function CrunchyrollAwardsCorner({
       )}
     </button>
   );
-}
-
-function needsInvert(source: AwardSourceId): boolean {
-  return source === "taaf" || source === "crunchyroll";
 }
 
 function formatLine(

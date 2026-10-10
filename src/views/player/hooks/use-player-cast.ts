@@ -19,7 +19,7 @@ export function usePlayerCast(params: {
   settings: Settings;
 }) {
   const { src, debrids, snapRef, bridgeRef, settings } = params;
-  const session = useCastSession(bridgeRef);
+  const session = useCastSession(bridgeRef, snapRef);
   const pick = useCastPick({
     src,
     debrids,
@@ -33,10 +33,10 @@ export function usePlayerCast(params: {
   });
 
   useEffect(() => {
-    if (session.castDevice) {
+    if (session.castDevice && !session.audioRouting) {
       setPlaybackClock(session.castPositionSec || getPlaybackPosition(), getPlaybackBuffered());
     }
-  }, [session.castDevice, session.castPositionSec]);
+  }, [session.castDevice, session.castPositionSec, session.audioRouting]);
 
   const sync = useMemo(
     () => ({
@@ -47,7 +47,14 @@ export function usePlayerCast(params: {
       getPosition: session.getCastPosition,
       isPlaying: session.isCastPlaying,
     }),
-    [session.castActiveRef, session.playCast, session.pauseCast, session.seekCast, session.getCastPosition, session.isCastPlaying],
+    [
+      session.castActiveRef,
+      session.playCast,
+      session.pauseCast,
+      session.seekCast,
+      session.getCastPosition,
+      session.isCastPlaying,
+    ],
   );
 
   return { ...session, ...pick, sync };

@@ -1,0 +1,20 @@
+const musicArtistExtras: Record<string, string> = {
+  "music.extras.merch": "공식 상품",
+  "music.extras.tour": "라이브 공연",
+  "music.extras.store": "스토어 방문",
+  "music.extras.tourLink": "투어 정보",
+  "music.extras.official": "아티스트 웹사이트",
+  "music.extras.loading": "아티스트 소식 불러오는 중…",
+  "music.extras.source": "출처: {source}",
+  "music.extras.event": "이벤트 상세 정보",
+  "music.credits.title": "크레딧",
+  "music.credits.main": "주 아티스트",
+  "music.credits.featured": "피처링 아티스트",
+  "music.credits.composer": "작곡가",
+  "music.credits.lyricist": "작사가",
+  "music.credits.producer": "프로듀서",
+  "music.credits.performer": "연주자",
+  "music.artist.readMore": "더 읽기",
+  "music.artist.readLess": "접기",
+};
+export default musicArtistExtras;

@@ -1,0 +1,14 @@
+.music-source-search-motion { position: relative; display: inline-grid; place-items: center; width: 32px; height: 32px; flex-shrink: 0; overflow: hidden; }
+.music-source-search-motion > span { position: absolute; display: grid; place-items: center; inset: 0; opacity: 0; animation: music-source-cycle 3.6s ease-in-out infinite; animation-delay: calc(var(--source-step) * 1.2s); }
+.music-source-search-motion[data-single] > span { opacity: 1; animation: music-source-breathe 1.4s ease-in-out infinite; }
+@keyframes music-source-cycle {
+  0% { opacity: 0; transform: translateY(9px) scale(.96, 1.04); }
+  5% { opacity: 1; transform: translateY(-1px) scale(1.02, .98); }
+  8%, 25% { opacity: 1; transform: translateY(0) scale(1); }
+  33%, 100% { opacity: 0; transform: translateY(-9px) scale(.98, 1.02); }
+}
+@keyframes music-source-breathe { 0%, 100% { opacity: .55; } 50% { opacity: 1; } }
+@media (prefers-reduced-motion: reduce) {
+  .music-source-search-motion > span { animation: none; transform: none; }
+  .music-source-search-motion > span:first-child { opacity: 1; }
+}

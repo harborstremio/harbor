@@ -1,0 +1,10 @@
+.games-release-history ol, .games-release-aliases ul { list-style:none; padding:0; margin:10px 0; }
+.games-release-history li { display:flex; align-items:start; justify-content:space-between; gap:14px; padding:11px 0; border-bottom:1px solid var(--color-edge-soft); }
+.games-release-history li:last-child { border:0; }
+.games-release-history li > div { min-width:0; }
+.games-release-history strong { display:block; font-size:12px; font-weight:600; line-height:1.45; overflow-wrap:anywhere; }
+.games-release-history li span { display:block; margin-top:3px; font-size:11px; color:var(--color-ink-subtle); }
+.games-release-history time { flex:none; max-width:42%; font-size:11px; line-height:1.5; text-align:end; color:var(--color-ink-muted); }
+.games-release-source { display:flex; align-items:center; justify-content:end; gap:4px; margin-top:10px; font-size:11px; color:var(--color-ink-subtle); }
+.games-release-aliases li { padding:7px 0; font-size:12px; line-height:1.5; overflow-wrap:anywhere; }
+.games-release-aliases small { display:block; font-size:10px; color:var(--color-ink-subtle); }

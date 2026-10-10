@@ -1,4 +1,6 @@
-import { Check, Download, ImagePlus, Play } from "lucide-react";
+import { Check, Download, ImagePlus, RotateCcw } from "lucide-react";
+import { Play } from "@/components/icons/play-filled";
+import { HoverTooltip } from "@/components/hover-tooltip";
 import { t } from "@/lib/i18n";
 
 export type GalleryVideo = { ytId: string; name: string; type: string };
@@ -17,24 +19,25 @@ function TileButton({
   className?: string;
 }) {
   return (
-    <button
-      type="button"
-      title={label}
-      aria-label={label}
-      onClick={(e) => {
-        e.stopPropagation();
-        onClick();
-      }}
-      className={`flex h-8 w-8 items-center justify-center rounded-full bg-canvas/80 text-ink shadow-[0_4px_14px_rgba(0,0,0,0.45)] backdrop-blur-md transition-transform hover:scale-110 active:scale-90 ${className}`}
-    >
-      {icon}
-    </button>
+    <HoverTooltip label={label} align="center" className="shrink-0">
+      <button
+        type="button"
+        aria-label={label}
+        onClick={(e) => {
+          e.stopPropagation();
+          onClick();
+        }}
+        className={`flex h-8 w-8 items-center justify-center rounded-full bg-canvas/80 text-ink shadow-[0_4px_14px_rgba(0,0,0,0.45)] backdrop-blur-md transition-transform hover:scale-110 active:scale-90 ${className}`}
+      >
+        {icon}
+      </button>
+    </HoverTooltip>
   );
 }
 
 export function VideoTile({ v, onPlay, onDownload }: { v: GalleryVideo; onPlay: () => void; onDownload: () => void }) {
   return (
-    <div className="group flex w-[300px] shrink-0 flex-col gap-2.5">
+    <div className="group flex w-full flex-col gap-2.5">
       <div className="relative">
         <button
           type="button"
@@ -71,6 +74,10 @@ export function ImageTile({
   onOpen,
   onDownload,
   onSetBackdrop,
+  onSetShowBackdrop,
+  onSetPoster,
+  posterPinned = false,
+  backdropPinned = false,
   pinnable = false,
 }: {
   src: string;
@@ -78,16 +85,22 @@ export function ImageTile({
   onOpen: () => void;
   onDownload: () => void;
   onSetBackdrop?: () => void;
+  onSetShowBackdrop?: () => void;
+  onSetPoster?: () => void;
+  posterPinned?: boolean;
+  backdropPinned?: boolean;
   pinnable?: boolean;
 }) {
-  const w = ratio === "landscape" ? "w-[300px]" : "w-[160px]";
   const aspect = ratio === "landscape" ? "aspect-video" : "aspect-[2/3]";
+  const pinnedLabel = posterPinned ? t("Show poster") : backdropPinned ? t("Show backdrop") : null;
   return (
-    <div className={`group relative ${w} shrink-0`} data-title-backdrop={pinnable ? src : undefined}>
+    <div className="group relative w-full" data-title-backdrop={pinnable ? src : undefined}>
       <button
         type="button"
         onClick={onOpen}
-        className="block w-full cursor-zoom-in overflow-hidden rounded-xl bg-elevated/40"
+        className={`block w-full cursor-zoom-in overflow-hidden rounded-xl bg-elevated/40 ${
+          posterPinned || backdropPinned ? "ring-2 ring-accent/60" : ""
+        }`}
       >
         <img
           src={src}
@@ -96,7 +109,39 @@ export function ImageTile({
           className={`${aspect} w-full object-cover transition-transform duration-300 group-hover:scale-105`}
         />
       </button>
+      {pinnedLabel && (
+        <span className="pointer-events-none absolute start-2 top-2 flex h-5 items-center gap-1 rounded-full bg-accent/15 px-1.5 text-[9.5px] font-bold uppercase tracking-[0.14em] text-accent ring-1 ring-accent/30 backdrop-blur-sm">
+          <Check size={9} strokeWidth={2.6} />
+          {pinnedLabel}
+        </span>
+      )}
       <span className="absolute end-2 top-2 flex items-center gap-1.5 opacity-0 transition-opacity group-hover:opacity-100">
+        {onSetPoster && (
+          <TileButton
+            icon={
+              posterPinned ? (
+                <RotateCcw size={15} strokeWidth={2.2} />
+              ) : (
+                <Check size={15} strokeWidth={2.4} />
+              )
+            }
+            label={posterPinned ? t("Reset to default poster") : t("Set as show poster")}
+            onClick={onSetPoster}
+          />
+        )}
+        {onSetShowBackdrop && (
+          <TileButton
+            icon={
+              backdropPinned ? (
+                <RotateCcw size={15} strokeWidth={2.2} />
+              ) : (
+                <Check size={15} strokeWidth={2.4} />
+              )
+            }
+            label={backdropPinned ? t("Reset to default backdrop") : t("Set as show backdrop")}
+            onClick={onSetShowBackdrop}
+          />
+        )}
         {onSetBackdrop && (
           <TileButton
             icon={<ImagePlus size={15} strokeWidth={2.2} />}
@@ -112,21 +157,25 @@ export function ImageTile({
 
 export function LogoTile({
   src,
+  pinned = false,
   onOpen,
   onDownload,
   onSetLogo,
 }: {
   src: string;
+  pinned?: boolean;
   onOpen: () => void;
   onDownload: () => void;
   onSetLogo?: () => void;
 }) {
   return (
-    <div className="group relative flex h-[120px] w-[220px] shrink-0">
+    <div className="group relative flex h-[120px] w-full">
       <button
         type="button"
         onClick={onOpen}
-        className="flex w-full cursor-zoom-in items-center justify-center rounded-xl border border-edge-soft bg-canvas/30 p-5"
+        className={`flex w-full cursor-zoom-in items-center justify-center rounded-xl border p-5 ${
+          pinned ? "border-accent/50 bg-canvas/40" : "border-edge-soft bg-canvas/30"
+        }`}
       >
         <img
           src={src}
@@ -135,11 +184,23 @@ export function LogoTile({
           className="max-h-full max-w-full object-contain transition-transform duration-300 group-hover:scale-105"
         />
       </button>
+      {pinned && (
+        <span className="pointer-events-none absolute start-2 top-2 flex h-5 items-center gap-1 rounded-full bg-accent/15 px-1.5 text-[9.5px] font-bold uppercase tracking-[0.14em] text-accent ring-1 ring-accent/30">
+          <Check size={9} strokeWidth={2.6} />
+          {t("Show logo")}
+        </span>
+      )}
       <span className="absolute end-2 top-2 flex items-center gap-1.5 opacity-0 transition-opacity group-hover:opacity-100">
         {onSetLogo && (
           <TileButton
-            icon={<Check size={15} strokeWidth={2.4} />}
-            label={t("Set as show logo")}
+            icon={
+              pinned ? (
+                <RotateCcw size={15} strokeWidth={2.2} />
+              ) : (
+                <Check size={15} strokeWidth={2.4} />
+              )
+            }
+            label={pinned ? t("Reset to default logo") : t("Set as show logo")}
             onClick={onSetLogo}
           />
         )}

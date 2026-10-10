@@ -1,0 +1,7 @@
+.sh-refresh svg { transform-origin: center; }
+button.sh-refresh[data-refreshing] { opacity: 1; cursor: progress; }
+.sh-refresh[data-refreshing] svg { animation: sh-refresh-turn 700ms linear infinite; }
+@keyframes sh-refresh-turn { to { transform: rotate(360deg); } }
+@media (prefers-reduced-motion: reduce) {
+  .sh-refresh[data-refreshing] svg { animation: none; opacity: .55; }
+}

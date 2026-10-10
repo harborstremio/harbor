@@ -1,0 +1,178 @@
+// JL desktop account, addon and offline wording. Keep English lookup keys exact.
+const jlDesktop026: Record<string, string> = {
+  "Sharing {name}'s addon setup": "Dùng chung cấu hình tiện ích của {name}",
+  "Local JL profile": "Hồ sơ JL cục bộ",
+  "Offline Room": "Kho ngoại tuyến",
+  "Your library and addons work locally. Sign in to use JL account features.":
+    "Thư viện và tiện ích của bạn hoạt động cục bộ. Đăng nhập để dùng các tính năng của tài khoản JL.",
+  "Continue locally": "Tiếp tục dùng cục bộ",
+  "Choose your JL profile to sync supported preferences, favorites, library and progress. Device files and configured addon URLs stay on this device.":
+    "Chọn hồ sơ JL để đồng bộ các tùy chọn được hỗ trợ, mục yêu thích, thư viện và tiến độ xem. Tệp trên thiết bị và URL tiện ích đã cấu hình vẫn ở trên thiết bị này.",
+  "Sign-out could not be saved. Free some storage and try again.":
+    "Không thể lưu trạng thái đăng xuất. Hãy giải phóng bớt dung lượng rồi thử lại.",
+  "Sign in to your JL Media Vision account, then choose the profile whose supported settings and library you want to sync.":
+    "Đăng nhập vào tài khoản JL Media Vision, rồi chọn hồ sơ có các cài đặt được hỗ trợ và thư viện mà bạn muốn đồng bộ.",
+  "Library and addon sharing": "Chia sẻ thư viện và tiện ích",
+  "Use the primary profile's saved addon setup and watchlist.":
+    "Dùng cấu hình tiện ích đã lưu và danh sách muốn xem của hồ sơ chính.",
+  "Keep this profile separate": "Giữ hồ sơ này riêng biệt",
+  "Library and addons stay separate. No additional account is needed.":
+    "Thư viện và tiện ích vẫn được tách riêng. Không cần thêm tài khoản.",
+  "Addon install link copied": "Đã sao chép liên kết cài tiện ích",
+  "Compatible addon, listed in JL Media Vision.":
+    "Tiện ích tương thích, có trong danh mục JL Media Vision.",
+  "Saving on this device": "Đang lưu trên thiết bị này",
+  "Couldn't read your local addon collection. Nothing was written.":
+    "Không thể đọc bộ tiện ích cục bộ của bạn. Chưa ghi thay đổi nào.",
+  "Local storage didn't confirm the move. Your collection may be unchanged. Reload to see the current state.":
+    "Bộ nhớ cục bộ chưa xác nhận việc chuyển. Bộ tiện ích của bạn có thể chưa thay đổi. Hãy tải lại để xem trạng thái hiện tại.",
+  "Moved 1 addon to this JL profile. It is saved on this device.":
+    "Đã chuyển 1 tiện ích sang hồ sơ JL này. Tiện ích được lưu trên thiết bị này.",
+  "Moved {n} addons to this JL profile. They are saved on this device.":
+    "Đã chuyển {n} tiện ích sang hồ sơ JL này. Các tiện ích được lưu trên thiết bị này.",
+  "Couldn't load your local addon collection. Nothing can be reordered safely without it.":
+    "Không thể tải bộ tiện ích cục bộ. Khi chưa tải được, không thể sắp xếp lại một cách an toàn.",
+  "This JL profile": "Hồ sơ JL này",
+  "This order is saved on this device for the active JL profile.":
+    "Thứ tự này được lưu trên thiết bị này cho hồ sơ JL đang dùng.",
+  "No addons are installed in this profile yet.": "Hồ sơ này chưa có tiện ích nào được cài.",
+  "Add every addon below to this JL profile": "Thêm mọi tiện ích bên dưới vào hồ sơ JL này",
+  "Choose a JL profile to organize its installed addons.":
+    "Chọn hồ sơ JL để sắp xếp các tiện ích đã cài của hồ sơ đó.",
+  "JL Media Vision reads the saved local collection back to verify the order.":
+    "JL Media Vision đọc lại bộ tiện ích đã lưu cục bộ để xác minh thứ tự.",
+  "Your addon collection changed while the editor was open. Nothing was written.":
+    "Bộ tiện ích của bạn đã thay đổi trong lúc mở trình chỉnh sửa. Chưa ghi thay đổi nào.",
+  "Local storage didn't confirm the save. Your collection may be unchanged. Retry will re-check before writing again.":
+    "Bộ nhớ cục bộ chưa xác nhận việc lưu. Bộ tiện ích của bạn có thể chưa thay đổi. Khi thử lại, ứng dụng sẽ kiểm tra lại trước khi ghi.",
+  "The local collection has a different order than was saved.":
+    "Thứ tự của bộ tiện ích cục bộ khác với thứ tự đã lưu.",
+  "Addon order saved in this JL profile": "Đã lưu thứ tự tiện ích trong hồ sơ JL này",
+  "Using a local JL profile.": "Đang dùng hồ sơ JL cục bộ.",
+  "JL account (sign in on the TV)": "Tài khoản JL (đăng nhập trên TV)",
+  "Your JL Media Vision password": "Mật khẩu JL Media Vision của bạn",
+  "Skip this and JL Media Vision still works. Your library stays local.":
+    "Bỏ qua bước này thì JL Media Vision vẫn hoạt động. Thư viện của bạn vẫn ở cục bộ.",
+  "Interrupted. Retry to resume safely; sources without a validator restart.":
+    "Đã gián đoạn. Thử lại để tiếp tục an toàn; nguồn không có mã xác minh tệp sẽ được tải lại từ đầu.",
+  "Play offline": "Phát ngoại tuyến",
+  "Choose a fresh download source": "Chọn nguồn tải xuống mới",
+  "Saved movies, episodes, music, and eBooks for offline use":
+    "Phim, tập phim, nhạc và sách điện tử đã lưu để dùng ngoại tuyến",
+  "Saved files belong to this account and profile on this device. Only completed files play offline. Direct, unencrypted files are supported; streaming playlists and protected sources are not.":
+    "Các tệp đã lưu thuộc tài khoản và hồ sơ này trên thiết bị này. Chỉ tệp đã tải xong mới phát được ngoại tuyến. Hỗ trợ tệp trực tiếp, không mã hóa; không hỗ trợ danh sách phát trực tuyến và nguồn được bảo vệ.",
+  "Older downloads have no profile owner. Add them to this local profile only if they are yours.":
+    "Các bản tải xuống cũ chưa được gán cho hồ sơ nào. Chỉ thêm vào hồ sơ cục bộ này nếu chúng là của bạn.",
+  "Add older downloads to this local profile": "Thêm các bản tải xuống cũ vào hồ sơ cục bộ này",
+  "Movies, episodes and books": "Phim, tập phim và sách",
+  "Choose Download on a movie, episode, music track, or eBook to keep an intentional offline copy. Queue progress and saved files appear here.":
+    "Chọn Tải xuống trên phim, tập phim, bản nhạc hoặc sách điện tử để chủ động giữ một bản sao ngoại tuyến. Tiến độ hàng đợi và các tệp đã lưu sẽ xuất hiện ở đây.",
+  "Your playback history appears here. You can optionally connect Trakt.":
+    "Lịch sử phát của bạn xuất hiện ở đây. Bạn có thể kết nối Trakt nếu muốn.",
+  "{n} in your JL library": "{n} trong thư viện JL của bạn",
+  "Your account or profile changed. Reopen this dialog to choose again.":
+    "Tài khoản hoặc hồ sơ đã thay đổi. Mở lại hộp thoại này để chọn lại.",
+  "The conflict backup could not be saved. Try again.":
+    "Không thể lưu bản sao lưu xung đột. Hãy thử lại.",
+  "Save conflict backup": "Lưu bản sao lưu xung đột",
+  "Your JL account stays with you": "Tài khoản JL luôn đồng hành cùng bạn",
+  "Sign in to JL Media Vision directly on your TV. This legacy phone setup step does not send account tokens. Your addons and library also work with a local profile.":
+    "Đăng nhập vào JL Media Vision ngay trên TV. Bước thiết lập cũ qua điện thoại này không gửi mã xác thực tài khoản. Tiện ích và thư viện cũng hoạt động với hồ sơ cục bộ.",
+  "Live updates are unavailable. Retrying.": "Không có cập nhật trực tiếp. Đang thử lại.",
+  Unnumbered: "Không đánh số",
+  "No episodes were returned for this season.": "Không có tập phim nào được trả về cho mùa này.",
+  "Episodes could not be loaded. Check the connection and retry.":
+    "Không thể tải các tập phim. Kiểm tra kết nối rồi thử lại.",
+  "Reset to account avatar": "Khôi phục ảnh đại diện của tài khoản",
+  "Sign in with your JL Media Vision account. Your local library and addons remain available.":
+    "Đăng nhập bằng tài khoản JL Media Vision. Thư viện cục bộ và tiện ích vẫn dùng được.",
+  "JL account ID": "ID tài khoản JL",
+  "Your stable JL account identifier.": "Mã định danh cố định của tài khoản JL.",
+  "Sign out of JL Media Vision": "Đăng xuất khỏi JL Media Vision",
+  "Stops account sync and returns to this device's local profiles.":
+    "Dừng đồng bộ tài khoản và quay về các hồ sơ cục bộ trên thiết bị này.",
+  "Choose a JL profile to manage installed addons.":
+    "Chọn hồ sơ JL để quản lý các tiện ích đã cài.",
+  "Checked {n}s ago.": "Đã kiểm tra {n} giây trước.",
+  "Installed in this JL profile.": "Đã cài trong hồ sơ JL này.",
+  "addon installed": "tiện ích đã cài",
+  "addons installed": "tiện ích đã cài",
+  "Refresh addons": "Làm mới tiện ích",
+  "JL account": "Tài khoản JL",
+  "Community account": "Tài khoản cộng đồng",
+  "Each JL profile keeps its own settings, library, and PIN.":
+    "Mỗi hồ sơ JL có cài đặt, thư viện và mã PIN riêng.",
+  "Profiles on this device": "Hồ sơ trên thiết bị này",
+  "Your local library remains available without an account.":
+    "Thư viện cục bộ vẫn dùng được khi không có tài khoản.",
+  "Your addon configurations are kept on this device. Manage each installation in Addons.":
+    "Cấu hình tiện ích được giữ trên thiết bị này. Quản lý từng bản cài trong mục Tiện ích.",
+  "Addon install links": "Liên kết cài tiện ích",
+  "JL Media Vision supports compatible manifests and stremio:// install links without an external account.":
+    "JL Media Vision hỗ trợ tệp kê khai tương thích và liên kết cài đặt stremio:// mà không cần tài khoản bên ngoài.",
+  "Open compatible addon links in JL Media Vision":
+    "Mở liên kết tiện ích tương thích trong JL Media Vision",
+  "Choose JL Media Vision when your operating system asks which app should open an addon link. You can also paste a manifest URL in Addons.":
+    "Chọn JL Media Vision khi hệ điều hành hỏi ứng dụng nào sẽ mở liên kết tiện ích. Bạn cũng có thể dán URL tệp kê khai vào mục Tiện ích.",
+  "{app} itself does not host, distribute, or index any media. All streams come from third-party addons, debrid services, or your own media sources that you configure yourself. You are responsible for what you choose to play and for complying with the laws of your jurisdiction.":
+    "Bản thân {app} không lưu trữ, phân phối hay lập chỉ mục bất kỳ nội dung nghe nhìn nào. Mọi luồng phát đều đến từ tiện ích bên thứ ba, dịch vụ debrid hoặc nguồn nội dung riêng do bạn tự cấu hình. Bạn chịu trách nhiệm về nội dung mình chọn phát và việc tuân thủ pháp luật tại nơi mình sinh sống.",
+  "Select a JL profile first. The repair scans only its local library.":
+    "Trước tiên hãy chọn hồ sơ JL. Công cụ sửa chữa chỉ quét thư viện cục bộ của hồ sơ đó.",
+  "Repairs malformed records in the active JL profile library. Existing provider IDs and playback progress are retained.":
+    "Sửa các bản ghi sai định dạng trong thư viện của hồ sơ JL đang dùng. Giữ nguyên ID nhà cung cấp và tiến độ phát hiện có.",
+  "Select a JL profile first. This scans its local library.":
+    "Trước tiên hãy chọn hồ sơ JL. Thao tác này quét thư viện cục bộ của hồ sơ đó.",
+  "Local library repair": "Sửa thư viện cục bộ",
+  "Checks the active JL profile library for malformed item records and repairs compatible fields locally.":
+    "Kiểm tra bản ghi sai định dạng trong thư viện của hồ sơ JL đang dùng và sửa các trường tương thích ngay trên thiết bị.",
+  "This browser stores your JL session and local settings. Signing in enables account sync for supported profile data and service credentials. Clearing browser data removes local copies, but does not delete data already synced to your JL account.":
+    "Trình duyệt này lưu phiên JL và cài đặt cục bộ của bạn. Đăng nhập sẽ bật đồng bộ tài khoản cho dữ liệu hồ sơ được hỗ trợ và thông tin xác thực dịch vụ. Xóa dữ liệu trình duyệt sẽ xóa các bản sao cục bộ, nhưng không xóa dữ liệu đã đồng bộ với tài khoản JL.",
+  "Choose which parts of your setup to save in one backup file. Your account sign-in is excluded.":
+    "Chọn những phần cấu hình cần lưu trong một tệp sao lưu. Không bao gồm thông tin đăng nhập tài khoản.",
+  "Choose a Harbor backup and review what it contains before restoring. Your account sign-in stays on this device.":
+    "Chọn bản sao lưu JL Media Vision và xem lại nội dung trước khi khôi phục. Thông tin đăng nhập tài khoản vẫn ở trên thiết bị này.",
+  "Choose the sections to save in one file. Your account sign-in is excluded.":
+    "Chọn các phần cần lưu trong một tệp. Không bao gồm thông tin đăng nhập tài khoản.",
+  "Saved {when} from Harbor {app}. Your account sign-in stays as is.":
+    "Đã lưu {when} từ JL Media Vision {app}. Thông tin đăng nhập tài khoản không thay đổi.",
+  "Signed in as {email} with your JL Media Vision account.":
+    "Đã đăng nhập dưới tên {email} bằng tài khoản JL Media Vision.",
+  "Your library and addons work locally. Sign in to use JL account sync.":
+    "Thư viện và tiện ích hoạt động cục bộ. Đăng nhập để dùng tính năng đồng bộ tài khoản JL.",
+  "On: only titles you bookmarked. Off: also keeps titles added when you hit play.":
+    "Bật: chỉ những tựa đã đánh dấu. Tắt: giữ cả những tựa được thêm khi bạn nhấn Phát.",
+  "Keep the Library Watchlist tab limited to titles you bookmarked. Turn this off to also include anything automatically added when you pressed play.":
+    "Chỉ hiển thị những tựa đã đánh dấu trong thẻ Danh sách muốn xem của Thư viện. Tắt tùy chọn này để đưa vào cả những mục tự động thêm khi bạn nhấn Phát.",
+  "Only show Continue Watching for the profile that's active. Each profile sees just its own progress, so what you watch stays hidden from the other profiles that share this device.":
+    "Chỉ hiển thị Tiếp tục xem cho hồ sơ đang dùng. Mỗi hồ sơ chỉ thấy tiến độ riêng, nên những gì bạn xem được ẩn khỏi các hồ sơ khác dùng chung thiết bị.",
+  "Classic rows": "Hàng kiểu cổ điển",
+  "Classic button order.": "Thứ tự nút kiểu cổ điển.",
+  "When you hit Play on something you've partly watched, show a prompt to resume from where you left off or start over. Also covers saved JL progress and connected Trakt history.":
+    "Khi nhấn Phát nội dung đã xem dở, hãy hỏi xem muốn tiếp tục từ chỗ dừng hay phát lại từ đầu. Cũng áp dụng cho tiến độ JL đã lưu và lịch sử từ tài khoản Trakt đã kết nối.",
+  "This is a compatible addon manifest. Add it from the Addons page instead.":
+    "Đây là tệp kê khai của tiện ích tương thích. Hãy thêm từ trang Tiện ích.",
+  "Condensed shows a top pick, quality tiles, and a drawer. Addon list groups sources by addon, no scoring.":
+    "Chế độ thu gọn hiển thị lựa chọn tốt nhất, các ô chất lượng và bảng trượt. Danh sách tiện ích nhóm nguồn theo tiện ích, không chấm điểm.",
+  "Show complete addon descriptions in the addon list picker, downloads, and Big Picture.":
+    "Hiển thị mô tả đầy đủ của tiện ích trong trình chọn danh sách tiện ích, mục tải xuống và chế độ Big Picture.",
+  "Addon list": "Danh sách tiện ích",
+  "Harbor ranking puts the best-scoring sources first. Addon order keeps each addon's results in the order it returned them, in a flat list. Stream priority below decides which addon leads, in both modes.":
+    "Xếp hạng JL Media Vision đưa nguồn có điểm cao nhất lên đầu. Thứ tự tiện ích giữ kết quả của mỗi tiện ích theo thứ tự được trả về, trong một danh sách phẳng. Mức ưu tiên luồng bên dưới quyết định tiện ích nào đứng đầu ở cả hai chế độ.",
+  "Show each addon's results in the order it returned them, grouped by your addon list. Keeps the original addon ordering.":
+    "Hiển thị kết quả của từng tiện ích theo thứ tự được trả về, nhóm theo danh sách tiện ích của bạn. Giữ nguyên thứ tự gốc của tiện ích.",
+  "Any compatible subtitle addons you have installed are searched here too.":
+    "Các tiện ích phụ đề tương thích đã cài cũng được tìm kiếm tại đây.",
+  "Addon compatibility": "Khả năng tương thích tiện ích",
+  "JL Media Vision uses the open addon protocol. Compatible manifests and configured addon links work without an external media account. Third-party notices are listed in Licenses.":
+    "JL Media Vision sử dụng giao thức tiện ích mở. Tệp kê khai tương thích và liên kết tiện ích đã cấu hình hoạt động mà không cần tài khoản nội dung bên ngoài. Thông báo của bên thứ ba được liệt kê trong mục Giấy phép.",
+  "If you were going to send something, send it to ElfHosted above, or to one of the charities below. They all do more good with it.":
+    "Nếu bạn định đóng góp, hãy gửi cho ElfHosted ở trên hoặc một tổ chức từ thiện bên dưới. Tất cả đều sẽ dùng khoản đóng góp của bạn vào việc có ích.",
+  "Support ElfHosted, or give to any charity below, and the badge lands on your profile.":
+    "Ủng hộ ElfHosted hoặc một tổ chức từ thiện bên dưới để nhận huy hiệu trên hồ sơ.",
+  "Choose a JL profile first so its watchlist can sync.":
+    "Trước tiên hãy chọn hồ sơ JL để có thể đồng bộ danh sách muốn xem của hồ sơ đó.",
+  "Export your entire Harbor setup to a single file, then restore it on a new computer or keep it as a backup. Everything is included except your account sign-in.":
+    "Xuất toàn bộ cấu hình JL Media Vision ra một tệp, rồi khôi phục trên máy tính mới hoặc giữ làm bản sao lưu. Bao gồm mọi thứ trừ thông tin đăng nhập tài khoản.",
+};
+
+export default jlDesktop026;

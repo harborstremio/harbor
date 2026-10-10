@@ -1,0 +1,59 @@
+.games-sale-banner { position:relative; }
+.games-sale-banner.has-art,.games-sale-skeleton { display:grid;grid-template-columns:minmax(280px,1.1fr) minmax(0,1.7fr);align-items:center;gap:24px 30px; }
+.games-sale-media { min-width:0; }
+.games-sale-card-reward>a { display:inline-flex;align-items:center;gap:7px;min-height:32px;padding:5px 10px;color:var(--color-ink-muted);background:var(--color-surface);border-radius:20px;text-decoration:none;font-size:11px;font-weight:550;line-height:1.25;transition:background 180ms,color 180ms; }
+.games-sale-card-reward>a[data-availability=included] { color:var(--color-accent); }
+.games-sale-card-reward>a:hover { background:var(--color-elevated);color:var(--color-ink); }
+.games-sale-card-reward svg { width:22px;height:22px;flex-shrink:0; }
+.games-sale-card-source { width:20px;height:20px;object-fit:contain; }
+.games-sale-art { overflow:hidden;border-radius:6px; }
+.games-sale-art>img { display:block;width:100%;height:auto; }
+.games-sale-main,.games-sale-skeleton-row { display:grid;grid-template-columns:minmax(0,1fr) auto auto;align-items:center;gap:26px;min-width:0;min-height:150px; }
+.games-sale-copy { min-width:0; }
+.games-sale-copy>.games-sale-label { display:flex;align-items:center;flex-wrap:wrap;gap:8px 12px;font-size:12px;color:var(--color-ink-muted);margin-bottom:8px; }
+.games-sale-label>img { width:67px;height:auto;opacity:.8; }
+.games-sale-copy>h2 { font-size:26px;font-weight:600;letter-spacing:-.035em;line-height:1.25; }
+.games-sale-copy>.games-sale-card-reward { display:flex;margin-top:5px; }
+.games-sale-copy .games-sale-card-reward>a { min-height:28px;padding:0;background:none; }
+.games-sale-copy .games-sale-card-reward svg { width:18px;height:18px; }
+.games-sale-dates { display:inline-block;font-size:14px;line-height:1.5;color:var(--color-ink-muted);margin-top:7px;text-decoration:none; }
+.games-sale-dates:hover { color:var(--color-ink); }
+.games-sale-countdown>span { display:block;font-size:13px;color:var(--color-ink-muted);margin-bottom:7px; }
+.games-sale-digits { display:flex;gap:16px; }
+.games-sale-digits>span { display:flex;flex-direction:column;gap:5px;min-width:34px; }
+.games-sale-digits strong { font-size:30px;line-height:1;font-weight:500;font-variant-numeric:tabular-nums;letter-spacing:-.035em; }
+.games-sale-digits small { font-size:12px;color:var(--color-ink-muted); }
+.games-sale-days { font-size:28px;font-weight:500; }
+.games-sale-actions { display:flex;flex-direction:column;align-items:flex-end;gap:12px; }
+.games-sale-actions>.games-sale-open { display:inline-block;font-size:14px;font-weight:550;padding:10px 17px;border-radius:24px;background:var(--color-surface);text-decoration:none;transition:background 180ms; }
+.games-sale-open:hover { background:var(--color-elevated); }
+.games-sale-actions>button { display:flex;align-items:center;gap:8px;font-size:13px;min-height:28px;color:var(--color-ink-muted); }
+.games-sale-actions>button:hover { color:var(--color-ink); }
+.games-sale-stale,.games-sale-refresh { grid-column:1/-1;font-size:12px;color:var(--color-ink-muted);margin:0; }
+.games-sale-refresh { display:flex;justify-content:space-between;gap:18px; }
+.games-sale-refresh>button { color:var(--color-ink); }
+.games-sale-calendar { grid-column:1/-1;display:grid;grid-template-columns:repeat(3,minmax(0,1fr));gap:14px;animation:games-sale-calendar-in 240ms var(--games-ease) both; }
+.games-sale-banner:not(.has-art)>.games-sale-calendar { margin-top:22px; }
+.games-sale-banner :is(a,button):focus-visible { outline:2px solid var(--color-ink);outline-offset:4px; }
+.games-sale-calendar-entry { padding:16px 20px;border-radius:7px;background:var(--color-surface); }
+.games-sale-calendar-entry>a { display:block;text-decoration:none; }
+.games-sale-calendar-entry>a:hover>span { text-decoration:underline;text-underline-offset:3px; }
+.games-sale-calendar-entry>a>span { display:block;font-size:15px;line-height:1.5; }
+.games-sale-calendar-entry>.games-sale-card-reward { margin-top:12px; }
+.games-sale-calendar-entry .games-sale-card-reward>a { padding:0;background:transparent; }
+.games-sale-calendar time { display:block;margin-top:7px;font-size:13px;line-height:1.5;color:var(--color-ink-muted); }
+.games-sale-unavailable { min-height:125px;display:flex;align-items:center;justify-content:space-between;gap:24px;padding:24px;border-radius:7px;background:var(--color-surface); }
+.games-sale-unavailable h2 { font-size:22px; }
+.games-sale-unavailable p { margin-top:8px;font-size:14px;color:var(--color-ink-muted); }
+.games-sale-skeleton-art { aspect-ratio:1000/150;border-radius:6px;background:var(--color-surface); }
+.games-sale-skeleton-row { grid-template-columns:minmax(0,1fr) 130px 120px; }
+.games-sale-skeleton-row i,.games-sale-skeleton-row b { display:block;height:16px;background:var(--color-surface);border-radius:4px; }
+.games-sale-skeleton-row i { height:30px; }
+.games-sale-skeleton-row b { max-width:240px; }
+.games-sale-skeleton-row b+b { height:12px;width:65%;margin-top:12px; }
+.games-sale-skeleton { animation:games-sale-breathe 1.7s ease-in-out infinite alternate; }
+@keyframes games-sale-calendar-in { from{opacity:0;transform:translateY(-4px)}to{opacity:1;transform:none} }
+@keyframes games-sale-breathe { from{opacity:.7}to{opacity:1} }
+@container(max-width:1050px){.games-sale-banner.has-art,.games-sale-skeleton{grid-template-columns:minmax(180px,.8fr) minmax(0,1.5fr);gap:22px}.games-sale-main,.games-sale-skeleton-row{grid-template-columns:minmax(0,1fr) auto;gap:18px}.games-sale-copy,.games-sale-skeleton-row>span:first-of-type{grid-column:1/-1}}
+@container(max-width:650px){.games-sale-banner.has-art,.games-sale-skeleton{grid-template-columns:minmax(0,1fr);gap:20px}.games-sale-media,.games-sale-skeleton-art{width:min(100%,340px)}.games-sale-calendar{grid-template-columns:1fr;gap:9px}.games-sale-calendar-entry{padding:15px 18px}.games-sale-unavailable{padding:22px;flex-wrap:wrap}}
+@media(prefers-reduced-motion:reduce){.games-sale-calendar,.games-sale-skeleton{animation:none}.games-sale-open,.games-sale-calendar>a{transition:none}}

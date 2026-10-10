@@ -15,7 +15,7 @@ import {
 const ARTWORK_CACHE_MAX = 300;
 const prepared = new Map<string, string>();
 const inflight = new Map<string, Promise<string | undefined>>();
-const decoded = new Map<string, number>();
+const decoded = new Set<string>();
 const decoding = new Map<string, { image: HTMLImageElement; promise: Promise<boolean> }>();
 const failed = new Set<string>();
 const urgent = new Set<string>();
@@ -48,16 +48,6 @@ function rememberPrepared(key: string, url: string): void {
     const oldest = prepared.keys().next().value;
     if (typeof oldest !== "string") break;
     prepared.delete(oldest);
-  }
-}
-
-function rememberDecoded(url: string): void {
-  decoded.delete(url);
-  decoded.set(url, Date.now());
-  while (decoded.size > ARTWORK_CACHE_MAX) {
-    const oldest = decoded.keys().next().value;
-    if (typeof oldest !== "string") break;
-    decoded.delete(oldest);
   }
 }
 
@@ -151,10 +141,7 @@ async function loadWideArtwork(
   url: string,
   priority: ExpandingCardArtworkPriority,
 ): Promise<boolean> {
-  if (decoded.has(url)) {
-    rememberDecoded(url);
-    return true;
-  }
+  if (decoded.has(url)) return true;
   const pending = decoding.get(url);
   if (pending) {
     if (priority === "high") pending.image.fetchPriority = "high";
@@ -169,7 +156,7 @@ async function loadWideArtwork(
     image.onload = () => {
       const finish = () => {
         const suitable = isSuitableWideArtworkSize(image.naturalWidth, image.naturalHeight);
-        if (suitable) rememberDecoded(url);
+        if (suitable) decoded.add(url);
         resolve(suitable);
       };
       if (typeof image.decode === "function") void image.decode().then(finish, finish);
@@ -228,8 +215,7 @@ async function artworkCandidates(meta: Meta, tmdbKey: string): Promise<string[]>
     ? fetchTvdbArtwork({ imdb: meta.id }).catch(() => null)
     : Promise.resolve(null);
   const [tmdbId, tvdbArtwork] = await Promise.all([tmdbIdPromise, tvdbPromise]);
-  const tmdbArtwork =
-    tmdbId && tmdbKey ? await tmdbMovieImages(tmdbKey, tmdbId).catch(() => []) : [];
+  const tmdbArtwork = tmdbId ? await tmdbMovieImages(tmdbKey, tmdbId).catch(() => []) : [];
 
   return uniqueAlternatives(
     [
@@ -260,12 +246,7 @@ export function prepareExpandingCardArtwork(
     if (pending) pending.image.fetchPriority = "high";
   }
   const pending = inflight.get(key);
-  if (pending) {
-    if (priority === "high") {
-      return pending.then((url) => url ?? prepareExpandingCardArtwork(meta, tmdbKey, "high"));
-    }
-    return pending;
-  }
+  if (pending) return pending;
 
   const promise = (async () => {
     const tried = new Set<string>();
@@ -285,10 +266,6 @@ export function prepareExpandingCardArtwork(
     const immediate = uniqueAlternatives(meta.background ? [meta.background] : [], [meta.poster]);
     const preparedBackground = await firstSuitable(immediate);
     if (preparedBackground) return preparedBackground;
-
-    // Passive visibility preloading must remain cheap: remote metadata lookups
-    // happen only after keyboard or remote focus signals a real intent to expand.
-    if (priority === "auto") return undefined;
 
     const candidates = await artworkCandidates(meta, tmdbKey);
     return firstSuitable(candidates.slice(0, 8));

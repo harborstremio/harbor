@@ -1,3 +1,4 @@
+import { evictLocalPrefix, idbCacheGet, idbCacheSet } from "@/lib/idb-cache";
 import { useEffect, useState } from "react";
 import { fetchCommunityAddons } from "@/lib/addons-store/community";
 import { registerEvictable } from "@/lib/maintenance";
@@ -51,27 +52,50 @@ export type ListResult = {
 };
 
 const CACHE_TTL_MS = 60 * 60 * 1000;
+const STALE_TTL_MS = 7 * 24 * 60 * 60 * 1000;
+const LS_PREFIX = "harbor.sa.v1.";
 const MAX_CACHE_ENTRIES = 48;
 const cache = new Map<string, { at: number; data: unknown }>();
 
-function readCache<T>(key: string): T | null {
-  const hit = cache.get(key);
-  if (!hit) return null;
-  if (Date.now() - hit.at > CACHE_TTL_MS) {
-    cache.delete(key);
-    return null;
-  }
-  return hit.data as T;
+evictLocalPrefix(LS_PREFIX);
+
+async function storedGet(key: string): Promise<{ at: number; data: unknown } | null> {
+  const entry = await idbCacheGet(LS_PREFIX + key);
+  if (!entry || typeof entry.at !== "number") return null;
+  if (Date.now() - entry.at > STALE_TTL_MS) return null;
+  return entry;
 }
 
 function writeCache(key: string, data: unknown): void {
+  const entry = { at: Date.now(), data };
   cache.delete(key);
-  cache.set(key, { at: Date.now(), data });
+  cache.set(key, entry);
   while (cache.size > MAX_CACHE_ENTRIES) {
     const oldest = cache.keys().next().value;
     if (oldest === undefined) break;
     cache.delete(oldest);
   }
+  void idbCacheSet(LS_PREFIX + key, entry);
+}
+
+const revalidating = new Set<string>();
+
+async function cachedFetch<T>(key: string, fetcher: () => Promise<T>): Promise<T> {
+  const entry = cache.get(key) ?? (await storedGet(key));
+  if (entry) {
+    if (!cache.has(key)) cache.set(key, entry);
+    if (Date.now() - entry.at > CACHE_TTL_MS && !revalidating.has(key)) {
+      revalidating.add(key);
+      void fetcher()
+        .then((d) => writeCache(key, d))
+        .catch(() => {})
+        .finally(() => revalidating.delete(key));
+    }
+    return entry.data as T;
+  }
+  const data = await fetcher();
+  writeCache(key, data);
+  return data;
 }
 
 function buildQuery(params: ListParams): string {
@@ -172,9 +196,21 @@ function applyListParams(all: SAAddon[], params: ListParams): ListResult {
   };
 }
 
+const ADULT_RE = /porn|onlyfans|hentai|\bxxx\b|\bnsfw\b|\badult\b|camgirl|\bsex\b/i;
+
+export function isAdultAddon(a: SAAddon): boolean {
+  const m = a.manifest as
+    | { name?: string; adult?: boolean; behaviorHints?: { adult?: boolean }; types?: string[] }
+    | undefined;
+  if (m?.behaviorHints?.adult || m?.adult) return true;
+  if (a.categories?.some((c) => ADULT_RE.test(c.slug) || ADULT_RE.test(c.name))) return true;
+  if ((m?.types ?? []).some((tt) => ADULT_RE.test(tt))) return true;
+  if (m?.name && ADULT_RE.test(m.name)) return true;
+  return false;
+}
+
 function isAdult(a: SAAddon): boolean {
-  const bh = (a.manifest as { behaviorHints?: { adult?: boolean } } | undefined)?.behaviorHints;
-  return !!bh?.adult;
+  return isAdultAddon(a);
 }
 
 function matchesSearch(a: SAAddon, q: string): boolean {
@@ -204,77 +240,62 @@ function eligibleExtra(a: SAAddon, params: ListParams): boolean {
 
 export async function listAddons(params: ListParams = {}): Promise<ListResult> {
   const qs = buildQuery(params);
-  const key = `list:${qs}`;
-  const hit = readCache<ListResult>(key);
-  if (hit) return hit;
-  const url = qs ? `${API_BASE}/addons?${qs}` : `${API_BASE}/addons`;
-  try {
-    const res = await fetch(url);
-    if (!res.ok) throw new Error(`stremio-addons list ${res.status}`);
-    const json = (await res.json()) as ListResult;
-    const community = await loadFallbackAddons();
-    const seen = new Set(
-      json.addons.map((a) => (a.manifest as { id?: string } | undefined)?.id).filter(Boolean) as string[],
-    );
-    const extras = community.filter((a) => {
-      const id = (a.manifest as { id?: string } | undefined)?.id;
-      if (!id || seen.has(id)) return false;
-      return eligibleExtra(a, params);
-    });
-    const merged: ListResult = {
-      ...json,
-      addons: [...json.addons, ...extras],
-      pagination: {
-        ...json.pagination,
-        total: json.pagination.total + extras.length,
-      },
-    };
-    writeCache(key, merged);
-    return merged;
-  } catch (e) {
-    console.warn("[stremio-addons] falling back to Stremio community catalog", e);
-    const all = await loadFallbackAddons();
-    const result = applyListParams(all, params);
-    writeCache(key, result);
-    return result;
-  }
+  return cachedFetch(`list:${qs}`, async () => {
+    const url = qs ? `${API_BASE}/addons?${qs}` : `${API_BASE}/addons`;
+    try {
+      const res = await fetch(url);
+      if (!res.ok) throw new Error(`stremio-addons list ${res.status}`);
+      const json = (await res.json()) as ListResult;
+      const community = await loadFallbackAddons();
+      const seen = new Set(
+        json.addons.map((a) => (a.manifest as { id?: string } | undefined)?.id).filter(Boolean) as string[],
+      );
+      const extras = community.filter((a) => {
+        const id = (a.manifest as { id?: string } | undefined)?.id;
+        if (!id || seen.has(id)) return false;
+        return eligibleExtra(a, params);
+      });
+      return {
+        ...json,
+        addons: [...json.addons, ...extras],
+        pagination: { ...json.pagination, total: json.pagination.total + extras.length },
+      } as ListResult;
+    } catch (e) {
+      console.warn("[stremio-addons] falling back to Stremio community catalog", e);
+      const all = await loadFallbackAddons();
+      return applyListParams(all, params);
+    }
+  });
 }
 
 export async function getAddon(uuidOrSlug: string): Promise<SAAddonDetail> {
-  const key = `addon:${uuidOrSlug}`;
-  const hit = readCache<SAAddonDetail>(key);
-  if (hit) return hit;
-  try {
-    const res = await fetch(`${API_BASE}/addons/${encodeURIComponent(uuidOrSlug)}`);
-    if (!res.ok) throw new Error(`stremio-addons get ${res.status}`);
-    const json = (await res.json()) as SAAddonDetail;
-    writeCache(key, json);
-    return json;
-  } catch (e) {
-    console.warn("[stremio-addons] addon detail falling back", e);
-    const all = await loadFallbackAddons();
-    const match = all.find((a) => a.slug === uuidOrSlug || a.uuid === uuidOrSlug);
-    if (!match) throw e instanceof Error ? e : new Error("addon not found");
-    const detail: SAAddonDetail = { ...match, instances: [] };
-    writeCache(key, detail);
-    return detail;
-  }
+  return cachedFetch(`addon:${uuidOrSlug}`, async () => {
+    try {
+      const res = await fetch(`${API_BASE}/addons/${encodeURIComponent(uuidOrSlug)}`);
+      if (!res.ok) throw new Error(`stremio-addons get ${res.status}`);
+      return (await res.json()) as SAAddonDetail;
+    } catch (e) {
+      console.warn("[stremio-addons] addon detail falling back", e);
+      const all = await loadFallbackAddons();
+      const match = all.find((a) => a.slug === uuidOrSlug || a.uuid === uuidOrSlug);
+      if (!match) throw e instanceof Error ? e : new Error("addon not found");
+      return { ...match, instances: [] } as SAAddonDetail;
+    }
+  });
 }
 
 export async function listCategories(): Promise<SACategory[]> {
-  const key = "categories";
-  const hit = readCache<SACategory[]>(key);
-  if (hit && hit.length > 0) return hit;
-  try {
-    const res = await fetch(`${API_BASE}/categories`);
-    if (!res.ok) throw new Error(`stremio-addons categories ${res.status}`);
-    const json = (await res.json()) as { categories: SACategory[] };
-    if (json.categories.length > 0) writeCache(key, json.categories);
-    return json.categories;
-  } catch (e) {
-    console.warn("[stremio-addons] categories request failed", e);
-    return [];
-  }
+  return cachedFetch("categories", async () => {
+    try {
+      const res = await fetch(`${API_BASE}/categories`);
+      if (!res.ok) throw new Error(`stremio-addons categories ${res.status}`);
+      const json = (await res.json()) as { categories: SACategory[] };
+      return json.categories;
+    } catch (e) {
+      console.warn("[stremio-addons] categories request failed", e);
+      return [];
+    }
+  });
 }
 
 const DEFAULT_SA_CATEGORIES: SACategory[] = [
@@ -329,15 +350,12 @@ export function useCategories(): SACategory[] {
 export type SARisingAddon = SAAddon & { recentStars: number };
 
 export async function listRising(): Promise<SARisingAddon[]> {
-  const key = "rising";
-  const hit = readCache<SARisingAddon[]>(key);
-  if (hit) return hit;
-  const res = await fetch(`${API_BASE}/rising`);
-  if (!res.ok) throw new Error(`stremio-addons rising ${res.status}`);
-  const json = (await res.json()) as { addons?: SARisingAddon[] };
-  const addons = (json.addons ?? []).filter((a) => a && a.manifest);
-  writeCache(key, addons);
-  return addons;
+  return cachedFetch("rising", async () => {
+    const res = await fetch(`${API_BASE}/rising`);
+    if (!res.ok) throw new Error(`stremio-addons rising ${res.status}`);
+    const json = (await res.json()) as { addons?: SARisingAddon[] };
+    return (json.addons ?? []).filter((a) => a && a.manifest);
+  });
 }
 
 let risingCache: SARisingAddon[] | null = null;

@@ -1,0 +1,8 @@
+.music-surprise-entry { position: relative; }
+.music-surprise-button[aria-pressed="true"] { color: var(--color-accent); }
+.music-surprise-die { transform-box: view-box; transform-origin: 12px 16px; transform: rotate(-9deg); transition: transform 180ms ease-in-out; }
+.music-surprise-button[data-loading] .music-surprise-die { animation: music-surprise-roll 900ms ease-in-out infinite; }
+@keyframes music-surprise-roll { 0%, 100% { transform: rotate(-9deg); } 50% { transform: rotate(9deg); } }
+.music-surprise-message { position: absolute; z-index: 10; inset-inline-end: 0; top: calc(100% + 8px); width: 240px; max-width: 75vw; padding: 12px 14px; border-radius: 8px; background: var(--color-elevated); color: var(--color-ink-muted); font-size: 13px; }
+.music-surprise-message button { min-height: 36px; margin-top: 6px; color: var(--color-ink); text-align: start; }
+@media (prefers-reduced-motion: reduce) { .music-surprise-button[data-loading] .music-surprise-die { animation: none; } .music-surprise-die { transition: none; } }

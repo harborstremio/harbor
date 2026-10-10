@@ -51,10 +51,13 @@ fn local_hash(path: &std::path::Path) -> Result<MovieHash, String> {
         return Err("file too small to hash".into());
     }
     let mut head = vec![0u8; CHUNK as usize];
-    f.read_exact(&mut head).map_err(|e| format!("read head: {}", e))?;
-    f.seek(SeekFrom::Start(size - CHUNK)).map_err(|e| format!("seek: {}", e))?;
+    f.read_exact(&mut head)
+        .map_err(|e| format!("read head: {}", e))?;
+    f.seek(SeekFrom::Start(size - CHUNK))
+        .map_err(|e| format!("seek: {}", e))?;
     let mut tail = vec![0u8; CHUNK as usize];
-    f.read_exact(&mut tail).map_err(|e| format!("read tail: {}", e))?;
+    f.read_exact(&mut tail)
+        .map_err(|e| format!("read tail: {}", e))?;
     Ok(MovieHash {
         hash: hash_from_ends(size, &head, &tail),
         size,
@@ -62,7 +65,9 @@ fn local_hash(path: &std::path::Path) -> Result<MovieHash, String> {
 }
 
 fn total_from_content_range(h: &str) -> Option<u64> {
-    h.rsplit('/').next().and_then(|s| s.trim().parse::<u64>().ok())
+    h.rsplit('/')
+        .next()
+        .and_then(|s| s.trim().parse::<u64>().ok())
 }
 
 async fn range_get(
@@ -105,7 +110,10 @@ async fn http_hash(
     if size < CHUNK * 2 {
         return Err("file too small to hash".into());
     }
-    let head = head_resp.bytes().await.map_err(|e| format!("head body: {}", e))?;
+    let head = head_resp
+        .bytes()
+        .await
+        .map_err(|e| format!("head body: {}", e))?;
     if head.len() < CHUNK as usize {
         return Err("short head".into());
     }
@@ -115,7 +123,10 @@ async fn http_hash(
     if tail_resp.status() != reqwest::StatusCode::PARTIAL_CONTENT {
         return Err(format!("range unsupported (tail): {}", tail_resp.status()));
     }
-    let tail = tail_resp.bytes().await.map_err(|e| format!("tail body: {}", e))?;
+    let tail = tail_resp
+        .bytes()
+        .await
+        .map_err(|e| format!("tail body: {}", e))?;
     if tail.len() < CHUNK as usize {
         return Err("short tail".into());
     }
@@ -157,6 +168,9 @@ mod tests {
         let n = CHUNK / 8;
         let ones = per.wrapping_mul(n);
         let expect = 200000u64.wrapping_add(ones).wrapping_add(ones);
-        assert_eq!(hash_from_ends(200000, &buf, &buf), format!("{:016x}", expect));
+        assert_eq!(
+            hash_from_ends(200000, &buf, &buf),
+            format!("{:016x}", expect)
+        );
     }
 }

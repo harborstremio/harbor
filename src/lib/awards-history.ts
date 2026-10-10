@@ -1,4 +1,3 @@
-import awardsData from "@/data/awards.json";
 import type { AwardCategory } from "./awards-catalog";
 import type { AwardEntry, AwardType } from "./providers/wikidata";
 
@@ -6,6 +5,8 @@ export type CategoryWinner = {
   year: number;
   workTitle: string;
   recipients: string[];
+  imdb?: string;
+  nominees?: Array<{ title: string; imdb?: string }>;
 };
 
 export type CategoryHistory = {
@@ -17,11 +18,62 @@ type RawEntry = {
   year: number;
   title: string | null;
   recipients: string[];
+  won?: boolean;
+  imdb?: string;
 };
 
 type RawData = Record<string, Record<string, { name: string; entries: RawEntry[] }>>;
 
-const data = awardsData as RawData;
+// data/awards.json is 4.2MB, and an `import x from "*.json"` compiles to a
+// javascript object literal, which a television parses far slower than it
+// parses the same bytes through JSON.parse. Measured on a Fire TV Stick 4K Max
+// it was the single largest thing in the Big Picture boot graph. So the file is
+// no longer wired in here; whoever boots the app decides how it arrives.
+// Desktop keeps the old timing exactly via awards-history-eager, which main.tsx
+// imports before it mounts. Television calls ensureBundledAwards after the
+// first paint and re-renders through subscribeBundledAwards when it lands.
+let data: RawData = {};
+let version = 0;
+const listeners = new Set<() => void>();
+let requested = false;
+
+/**
+ * @param warm build the title index here rather than leaving it to the first
+ * reader. Setting the table nulls the index, so on television the notification
+ * below reached 240 mounted tiles whose memo then re-ran, and the first one
+ * through built the index inside a React render on a sync lane that cannot
+ * yield. buildTitleIndex walks 16,312 titled entries, allocating an object, a
+ * template string and an NFKD normalise for each: 48 to 67ms measured in V8 on
+ * x86, so 150 to 400ms on a Cortex-A55, landing exactly when the viewer first
+ * presses a key on home. Desktop passes false and keeps the old lazy timing.
+ */
+export function setBundledAwards(raw: unknown, warm = false): void {
+  data = (raw ?? {}) as RawData;
+  titleIndex = null;
+  personIndex = null;
+  if (warm) titleIndex = buildTitleIndex();
+  version += 1;
+  for (const fn of listeners) fn();
+}
+
+export function bundledAwardsVersion(): number {
+  return version;
+}
+
+export function subscribeBundledAwards(fn: () => void): () => void {
+  listeners.add(fn);
+  return () => listeners.delete(fn);
+}
+
+export function ensureBundledAwards(): void {
+  if (requested) return;
+  requested = true;
+  void import("@/data/awards.json")
+    .then((m) => setBundledAwards(m.default, true))
+    .catch(() => {
+      requested = false;
+    });
+}
 
 export function readAwardHistory(
   awardType: AwardType,
@@ -32,12 +84,22 @@ export function readAwardHistory(
     .map((cat) => {
       const raw = bucket[cat.key];
       if (!raw) return null;
+      const nomineesByYear = new Map<number, Array<{ title: string; imdb?: string }>>();
+      for (const e of raw.entries) {
+        if (e.won !== false || !e.title) continue;
+        const list = nomineesByYear.get(e.year) ?? [];
+        list.push({ title: e.title, imdb: e.imdb });
+        nomineesByYear.set(e.year, list);
+      }
       const entries: CategoryWinner[] = raw.entries
+        .filter((e) => e.won !== false)
         .filter((e) => e.title || e.recipients.length > 0)
         .map((e) => ({
           year: e.year,
           workTitle: e.title ?? e.recipients[0] ?? "",
           recipients: e.recipients,
+          imdb: e.imdb,
+          nominees: nomineesByYear.get(e.year),
         }))
         .filter((e) => e.workTitle.length > 0);
       return { category: cat, entries };
@@ -55,6 +117,15 @@ const BUNDLED_AWARD_NAME: Partial<Record<AwardType, string>> = {
   cannes: "Cannes Film Festival",
   venice: "Venice Film Festival",
   berlin: "Berlin International Film Festival",
+  bafta_tv: "BAFTA Television Award",
+  annie: "Annie Award",
+  spirit: "Independent Spirit Award",
+  saturn: "Saturn Award",
+  cesar: "César Award",
+  goya: "Goya Award",
+  blue_dragon: "Blue Dragon Film Award",
+  baeksang: "Baeksang Arts Award",
+  bifa: "British Independent Film Award",
 };
 
 function normTitle(s: string): string {
@@ -83,8 +154,9 @@ function buildTitleIndex(): Map<string, AwardEntry[]> {
           awardName: `${prefix}: ${cat.name}`,
           category: cat.name,
           year: e.year,
-          result: "won",
+          result: e.won === false ? "nominated" : "won",
           workTitle: e.title,
+          workImdb: e.imdb,
           recipients: e.recipients.length > 0 ? e.recipients : undefined,
         });
         idx.set(key, list);
@@ -133,8 +205,9 @@ function buildPersonIndex(): Map<string, AwardEntry[]> {
             awardName: `${prefix}: ${cat.name}`,
             category: cat.name,
             year: e.year,
-            result: "won",
+            result: e.won === false ? "nominated" : "won",
             workTitle: e.title ?? undefined,
+            workImdb: e.imdb,
             recipient: r,
             recipients: [r],
           });
@@ -152,15 +225,21 @@ export function bundledAwardsForPerson(name: string | undefined): AwardEntry[] {
   return personIndex.get(normTitle(name)) ?? [];
 }
 
+const CATEGORY_STOPWORDS = new Set([
+  "outstanding", "performance", "by", "a", "an", "the", "in", "of", "for", "role",
+  "award", "awards", "best", "achievement", "motion", "picture", "television", "tv",
+  "miniseries", "series", "mini", "and", "or", "at", "as", "to",
+]);
+
 function normCategoryKey(s: string): string {
   return s
     .toLowerCase()
-    .replace(/\bmotion picture\b/g, " ")
-    .replace(/\btelevision\b/g, " ")
-    .replace(/\bmini[\s-]?series\b/g, " ")
+    .replace(/mini[\s-]?series/g, " ")
     .replace(/[^a-z0-9]+/g, " ")
-    .trim()
-    .replace(/\s+/g, " ");
+    .split(" ")
+    .filter((w) => w && !CATEGORY_STOPWORDS.has(w))
+    .join(" ")
+    .trim();
 }
 
 export function dedupePersonAwards(entries: AwardEntry[]): AwardEntry[] {

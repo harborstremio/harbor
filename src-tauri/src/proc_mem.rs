@@ -98,8 +98,6 @@ fn linux_processes() -> Vec<LinuxProcess> {
 fn descendant_pids(processes: &[LinuxProcess], root: u32) -> std::collections::HashSet<u32> {
     use std::collections::HashSet;
 
-    // WebKit helpers can sit below sandbox/launcher processes, so walk the full
-    // descendant tree instead of considering direct children only.
     let mut descendants = HashSet::from([root]);
     loop {
         let mut changed = false;
@@ -190,8 +188,6 @@ fn read_linux() -> ProcMem {
             .filter_map(|pid| read_linux_process(*pid))
             .filter(is_webkit_process)
             .collect();
-        // A helper exited or was replaced. Refresh immediately rather than
-        // reporting a stale value until the next discovery interval.
         if cached.len() != sampler.webkit_pids.len() {
             refresh_webkit_processes(&mut sampler, harbor_pid, now)
         } else {
@@ -206,6 +202,54 @@ fn read_linux() -> ProcMem {
         webview_rss,
         total: harbor_rss.saturating_add(webview_rss),
         total_phys: linux_total_phys(),
+    }
+}
+
+#[cfg(target_os = "macos")]
+fn macos_total_phys() -> u64 {
+    let mut name = [libc::CTL_HW, libc::HW_MEMSIZE];
+    let mut value: u64 = 0;
+    let mut len = std::mem::size_of::<u64>();
+    let status = unsafe {
+        libc::sysctl(
+            name.as_mut_ptr(),
+            name.len() as libc::c_uint,
+            &mut value as *mut u64 as *mut libc::c_void,
+            &mut len,
+            std::ptr::null_mut(),
+            0,
+        )
+    };
+    if status == 0 {
+        value
+    } else {
+        0
+    }
+}
+
+#[cfg(target_os = "macos")]
+fn read_macos() -> ProcMem {
+    let mut info: libc::proc_taskinfo = unsafe { std::mem::zeroed() };
+    let size = std::mem::size_of::<libc::proc_taskinfo>() as libc::c_int;
+    let written = unsafe {
+        libc::proc_pidinfo(
+            std::process::id() as libc::c_int,
+            libc::PROC_PIDTASKINFO,
+            0,
+            &mut info as *mut libc::proc_taskinfo as *mut libc::c_void,
+            size,
+        )
+    };
+    let harbor_rss = if written == size {
+        info.pti_resident_size
+    } else {
+        0
+    };
+    ProcMem {
+        harbor_rss,
+        webview_rss: 0,
+        total: harbor_rss,
+        total_phys: macos_total_phys(),
     }
 }
 
@@ -318,112 +362,6 @@ fn read() -> ProcMem {
     out
 }
 
-#[cfg(target_os = "macos")]
-extern "C" {
-    // Private libproc SPI used by Activity Monitor to attribute XPC helper
-    // processes (WKWebView helpers are parented to launchd, so a plain
-    // descendant walk cannot find them).
-    fn responsibility_get_pid_responsible_for_pid(pid: std::ffi::c_int) -> std::ffi::c_int;
-}
-
-#[cfg(target_os = "macos")]
-fn macos_rss(pid: i32) -> u64 {
-    unsafe {
-        let mut info: libc::proc_taskinfo = std::mem::zeroed();
-        let size = std::mem::size_of::<libc::proc_taskinfo>() as i32;
-        let rc = libc::proc_pidinfo(
-            pid,
-            libc::PROC_PIDTASKINFO,
-            0,
-            &mut info as *mut _ as *mut std::ffi::c_void,
-            size,
-        );
-        if rc == size {
-            info.pti_resident_size
-        } else {
-            0
-        }
-    }
-}
-
-#[cfg(target_os = "macos")]
-fn macos_total_phys() -> u64 {
-    unsafe {
-        let mut value: u64 = 0;
-        let mut len = std::mem::size_of::<u64>();
-        let rc = libc::sysctlbyname(
-            b"hw.memsize\0".as_ptr() as *const std::ffi::c_char,
-            &mut value as *mut _ as *mut std::ffi::c_void,
-            &mut len,
-            std::ptr::null_mut(),
-            0,
-        );
-        if rc == 0 {
-            value
-        } else {
-            0
-        }
-    }
-}
-
-#[cfg(target_os = "macos")]
-fn read_macos() -> ProcMem {
-    let mut out = ProcMem {
-        total_phys: macos_total_phys(),
-        ..ProcMem::default()
-    };
-    let self_pid = std::process::id() as i32;
-    out.harbor_rss = macos_rss(self_pid);
-
-    unsafe {
-        let mut count = libc::proc_listallpids(std::ptr::null_mut(), 0);
-        if count <= 0 {
-            out.total = out.harbor_rss;
-            return out;
-        }
-        let mut pids: Vec<i32> = vec![0; count as usize];
-        let buf_bytes = count * std::mem::size_of::<i32>() as i32;
-        count = libc::proc_listallpids(pids.as_mut_ptr() as *mut std::ffi::c_void, buf_bytes);
-        if count <= 0 {
-            out.total = out.harbor_rss;
-            return out;
-        }
-        pids.truncate(count as usize);
-        for pid in pids {
-            if pid == self_pid {
-                continue;
-            }
-            if responsibility_get_pid_responsible_for_pid(pid) != self_pid {
-                continue;
-            }
-            let mut info: libc::proc_bsdinfo = std::mem::zeroed();
-            let size = std::mem::size_of::<libc::proc_bsdinfo>() as i32;
-            let rc = libc::proc_pidinfo(
-                pid,
-                libc::PROC_PIDTBSDINFO,
-                0,
-                &mut info as *mut _ as *mut std::ffi::c_void,
-                size,
-            );
-            if rc != size {
-                continue;
-            }
-            let name_bytes: Vec<u8> = info
-                .pbi_name
-                .iter()
-                .take_while(|&&c| c != 0)
-                .map(|&c| c as u8)
-                .collect();
-            let name = String::from_utf8_lossy(&name_bytes).to_ascii_lowercase();
-            if name.contains("webkit") {
-                out.webview_rss += macos_rss(pid);
-            }
-        }
-    }
-    out.total = out.harbor_rss + out.webview_rss;
-    out
-}
-
 #[tauri::command]
 pub async fn harbor_process_memory() -> ProcMem {
     #[cfg(windows)]
@@ -438,24 +376,11 @@ pub async fn harbor_process_memory() -> ProcMem {
     }
     #[cfg(target_os = "macos")]
     {
-        tokio::task::spawn_blocking(read_macos)
-            .await
-            .unwrap_or_default()
+        read_macos()
     }
     #[cfg(not(any(windows, target_os = "linux", target_os = "macos")))]
     {
         ProcMem::default()
-    }
-}
-
-#[cfg(all(test, target_os = "macos"))]
-mod macos_tests {
-    #[test]
-    fn reads_own_rss_and_total_phys() {
-        let m = super::read_macos();
-        assert!(m.harbor_rss > 0, "own rss should be reported");
-        assert!(m.total_phys > 0, "physical memory should be reported");
-        assert!(m.total >= m.harbor_rss);
     }
 }
 

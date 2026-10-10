@@ -111,6 +111,22 @@ export function filterDead<T extends StreamLike>(
   return streams.filter((s) => !isStreamDead(s));
 }
 
+/** Forgets failures for these streams only, so "Try again" on one title doesn't reset others. */
+export function clearDeadStreamsFor(streams: StreamLike[]): void {
+  const m = load();
+  let changed = false;
+  for (const s of streams) {
+    const keys = [streamFingerprint(s), s.infoHash ? `h:${s.infoHash.toLowerCase()}:` : null];
+    for (const k of keys) {
+      if (k && k in m) {
+        delete m[k];
+        changed = true;
+      }
+    }
+  }
+  if (changed) save(m);
+}
+
 export function clearDeadStreams(): void {
   try {
     localStorage.removeItem(STORAGE_KEY);

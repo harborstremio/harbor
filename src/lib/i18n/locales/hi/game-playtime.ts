@@ -1,0 +1,22 @@
+export default {
+  "games.playtime.title": "खेलने का समय",
+  "games.playtime.total": "आपका कुल समय",
+  "games.playtime.tracked": "Harbor द्वारा दर्ज किया गया",
+  "games.playtime.adjusted": "आपके द्वारा बदला गया",
+  "games.playtime.changed": "{date} को बदला गया",
+  "games.playtime.edit": "खेलने का समय बदलें",
+  "games.playtime.hours": "घंटे",
+  "games.playtime.minutes": "मिनट",
+  "games.playtime.duration": "{hours} घं. {minutes} मिनट",
+  "games.playtime.card": "खेला गया: {time}",
+  "games.playtime.note": "कहीं और खेलने का समय जोड़ें या अपना कुल समय सुधारें। Harbor दर्ज किया गया खेलने का समय बनाए रखता है और आगे के खेल सत्रों का समय इस कुल समय में जोड़ता है।",
+  "games.playtime.localNote": "यह आपके Harbor प्रोफ़ाइल में गेम की इसी स्थानीय कॉपी पर लागू होता है। Steam और अन्य खातों में कोई बदलाव नहीं होता।",
+  "games.playtime.running": "खेलने का समय बदलने से पहले यह गेम बंद करें।",
+  "games.playtime.save": "खेलने का समय सहेजें",
+  "games.playtime.finishEdit": "दूसरी सेटिंग सहेजने से पहले खेलने के समय में किया गया बदलाव सहेजें या रद्द करें।",
+  "games.playtime.reset": "दर्ज किया गया समय इस्तेमाल करें",
+  "games.playtime.invalid": "घंटे 0 से 9,99,999 तक पूर्ण संख्या में और मिनट 0 से 59 तक दर्ज करें।",
+  "games.playtime.saved": "खेलने का समय सहेज दिया गया।",
+  "games.playtime.resetDone": "Harbor द्वारा दर्ज किया गया समय इस्तेमाल हो रहा है।",
+  "games.custom.launch_playtime": "खेलने का यह समय सहेजा नहीं जा सका। घंटे और मिनट जाँचें और फिर से कोशिश करें।"
+} satisfies Record<string, string>;

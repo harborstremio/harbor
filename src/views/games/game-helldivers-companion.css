@@ -1,0 +1,111 @@
+.games-detail-flow-block:has(> .games-helldivers) { clear: both; }
+.games-helldivers { --hd-yellow: #eadb79; padding-block: 40px; }
+.games-helldivers-heading { display: flex; align-items: flex-start; justify-content: space-between; gap: 24px; margin-bottom: 28px; }
+.games-helldivers-logo { display: block; width: 190px; max-height: 78px; object-fit: contain; object-position: left center; margin-bottom: 22px; }
+.games-helldivers h2 { font-size: 30px; line-height: 1.15; font-weight: 700; letter-spacing: -.035em; }
+.games-helldivers-heading p { color: var(--color-ink-muted); margin-top: 10px; }
+.games-helldivers-status { display: flex; align-items: center; flex-wrap: wrap; gap: 12px; color: var(--color-ink-muted); padding-block: 16px; }
+.games-helldivers-loading { display: grid; grid-template-columns: 1.3fr 1fr; gap: 24px; }
+.games-helldivers-loading i { height: 400px; border-radius: 10px; }
+.games-helldivers-tools { display: flex; justify-content: space-between; align-items: center; gap: 16px; flex-wrap: wrap; margin-bottom: 22px; }
+.games-helldivers-factions { display: flex; flex-wrap: wrap; gap: 6px; }
+.games-helldivers-factions button { min-height: 38px; padding: 8px 12px; display: inline-flex; align-items: center; gap: 8px; border-radius: 6px; color: var(--color-ink-muted); }
+.games-helldivers-factions button:hover { background: var(--color-raised); color: var(--color-ink); }
+.games-helldivers-factions button[aria-pressed=true] { background: var(--color-elevated); color: var(--color-ink); }
+.games-helldivers-faction { flex: none; object-fit: contain; width: 22px; height: 22px; }
+.games-helldivers-search { display: flex; align-items: center; gap: 10px; background: var(--color-elevated); border-radius: 6px; padding: 10px 12px; width: 240px; max-width: 100%; color: var(--color-ink-muted); }
+.games-helldivers-search input { min-width: 0; width: 100%; background: transparent; color: var(--color-ink); font-size: 13px; outline: none; }
+.games-helldivers-search:focus-within { outline: 2px solid var(--color-ink-muted); outline-offset: 2px; }
+.games-helldivers-war { display: grid; grid-template-columns: minmax(0, 1.25fr) minmax(280px, 1fr); gap: 28px; }
+/* Original game sector boundaries and API coordinates share one square viewport. */
+.games-helldivers-map { position: relative; overflow: hidden; border-radius: 8px; background: #101719; color: #edf1ef; direction: ltr; isolation: isolate; display: flex; flex-direction: column; }
+.games-helldivers-map-heading { position: relative; z-index: 1; display: flex; justify-content: space-between; align-items: start; padding: 16px 18px 0; pointer-events: none; }
+.games-helldivers-map-heading span { display: block; font-size: 11px; color: #abb7b6; }
+.games-helldivers-map-heading strong { display: block; margin-top: 4px; font-size: 14px; font-weight: 500; }
+.games-helldivers-map-heading button { pointer-events: auto; padding: 7px; color: #abb7b6; border-radius: 4px; }
+.games-helldivers-map-heading button:hover { color: #fff; background: #ffffff0c; }
+.games-helldivers-map-heading button:disabled { opacity: .4; }
+.games-helldivers-map-svg { display: block; width: 100%; height: auto; max-height: 480px; flex: none; aspect-ratio: 1; overflow: hidden; }
+.games-helldivers-sectors { opacity: .23; mix-blend-mode: screen; pointer-events: none; }
+.games-helldivers-supply line { stroke: #8bb7b3; stroke-width: .6; opacity: .22; }
+.games-helldivers-supply line[data-selected=true] { stroke: #f2da81; stroke-width: 1; opacity: .85; }
+.games-helldivers-map [data-faction] { --hd-faction: #9eb6b9; }
+.games-helldivers-map [data-faction=Terminids] { --hd-faction: #e6ad52; }
+.games-helldivers-map [data-faction=Automaton] { --hd-faction: #ea7069; }
+.games-helldivers-map [data-faction=Illuminate] { --hd-faction: #b999e8; }
+.games-helldivers-map [data-faction=Humans] { --hd-faction: #7cbadf; }
+.games-helldivers-map-planet { fill: var(--hd-faction); opacity: .5; }
+.games-helldivers-sector-labels { font-size: 5px; letter-spacing: .35px; fill: #d4ddd9; opacity: .65; text-anchor: middle; pointer-events: none; }
+.games-helldivers-sector-labels [data-selected=true] { fill: #fff2bb; font-weight: 600; }
+.games-helldivers-map-pin { cursor: pointer; outline: none; }
+.games-helldivers-map-hit { fill: transparent; }
+.games-helldivers-map-dot { fill: var(--hd-faction); stroke: #11191b; stroke-width: 1; pointer-events: none; }
+.games-helldivers-map-ring { fill: none; stroke: var(--hd-faction); stroke-width: 1; pointer-events: none; }
+.games-helldivers-map-pin:is(:hover,:focus-visible) .games-helldivers-map-hit { stroke: #fff; stroke-width: 1.5; }
+.games-helldivers-map-selected { fill: #fff3bf; stroke: #101719; stroke-width: 3px; paint-order: stroke; font-size: 8px; font-weight: 650; pointer-events: none; }
+.games-helldivers-map > small { padding: 6px 18px 16px; color: #abb7b6; font-size: 10px; line-height: 1.5; }
+.games-helldivers-campaigns { min-width: 0; }
+.games-helldivers-list-heading { display: flex; align-items: center; justify-content: space-between; gap: 10px; min-height: 45px; margin-bottom: 9px; }
+.games-helldivers-list-heading h3 { font-size: 16px; font-weight: 600; }
+.games-helldivers-list-heading h3 span { font-size: 12px; color: var(--color-ink-muted); margin-inline-start: 6px; }
+.games-helldivers-list-heading > :last-child { max-width: 170px; }
+.games-helldivers-list { max-height: 490px; overflow: auto; scrollbar-width: thin; scrollbar-color: var(--color-raised) transparent; overscroll-behavior: contain; padding: 3px; }
+.games-helldivers-list > button { display: flex; align-items: center; gap: 12px; width: 100%; padding: 11px 12px; text-align: start; border-radius: 6px; min-height: 58px; }
+.games-helldivers-list > button:hover { background: var(--color-raised); }
+.games-helldivers-list > button[aria-pressed=true] { background: var(--color-elevated); }
+.games-helldivers-list > button > span:nth-child(2) { flex: 1; min-width: 0; }
+.games-helldivers-list strong { font-size: 13px; font-weight: 600; display: block; overflow-wrap: anywhere; }
+.games-helldivers-list small { font-size: 11px; color: var(--color-ink-muted); }
+.games-helldivers-row-count { display: flex; align-items: center; gap: 5px; font-size: 12px; color: var(--color-ink-muted); font-variant-numeric: tabular-nums; }
+.games-helldivers-brief { margin-top: 28px; padding-top: 24px; border-top: 1px solid var(--color-edge-soft); }
+.games-helldivers-brief > header { display: flex; align-items: center; gap: 16px; margin-bottom: 28px; }
+.games-helldivers-brief > header > .games-helldivers-faction { width: 54px; height: 54px; }
+.games-helldivers-brief header p { color: var(--color-ink-muted); font-size: 12px; margin-bottom: 4px; }
+.games-helldivers-brief h3 { font-weight: 650; font-size: 25px; letter-spacing: -.025em; overflow-wrap: anywhere; }
+.games-helldivers-population { margin-inline-start: auto; text-align: end; display: grid; flex: none; }
+.games-helldivers-population strong { font-size: 25px; font-weight: 600; font-variant-numeric: tabular-nums; }
+.games-helldivers-population span { font-size: 12px; color: var(--color-ink-muted); }
+.games-helldivers-brief-columns { display: grid; grid-template-columns: minmax(0,1fr) minmax(0,1fr); gap: 40px; }
+.games-helldivers-progress { display: flex; flex-wrap: wrap; align-items: center; gap: 12px; font-size: 13px; }
+.games-helldivers-progress > strong { margin-inline-start: auto; font-size: 20px; font-variant-numeric: tabular-nums; }
+.games-helldivers-progress progress { width: 100%; height: 4px; appearance: none; border: 0; background: var(--color-elevated); border-radius: 2px; overflow: hidden; }
+.games-helldivers-progress progress::-webkit-progress-bar { background: var(--color-elevated); }
+.games-helldivers-progress progress::-webkit-progress-value { background: var(--hd-yellow); }
+.games-helldivers-progress progress::-moz-progress-bar { background: var(--hd-yellow); }
+.games-helldivers-recovery { font-size: 12px; margin-top: 12px; color: var(--color-ink-muted); }
+.games-helldivers-recovery small { display: block; margin-top: 4px; line-height: 1.5; }
+.games-helldivers h4 { font-weight: 600; font-size: 15px; margin-bottom: 16px; }
+.games-helldivers-regions, .games-helldivers-event { margin-top: 28px; }
+.games-helldivers-regions > div { display: flex; align-items: center; justify-content: space-between; gap: 14px; border-bottom: 1px solid var(--color-edge-soft); padding: 12px 0; }
+.games-helldivers-regions strong { display: block; font-size: 13px; overflow-wrap: anywhere; }
+.games-helldivers-regions div > div > span, .games-helldivers-regions small { display: block; color: var(--color-ink-muted); font-size: 11px; margin-top: 4px; }
+.games-helldivers-regions > div > span { flex: none; text-align: end; font-size: 13px; }
+.games-helldivers-regions > button { margin-top: 12px; }
+.games-helldivers-conditions > div { margin-bottom: 20px; }
+.games-helldivers-conditions strong { font-size: 13px; font-weight: 600; }
+.games-helldivers-conditions p, .games-helldivers-event { font-size: 13px; color: var(--color-ink-muted); line-height: 1.65; }
+.games-helldivers-conditions p { margin-top: 5px; }
+.games-helldivers-checked { margin-top: 20px; font-size: 11px; color: var(--color-ink-muted); }
+.games-helldivers-orders { margin-top: 28px; background: var(--color-surface); border-radius: 8px; }
+.games-helldivers-orders summary { padding: 18px 20px; display: flex; justify-content: space-between; align-items: center; gap: 16px; font-size: 15px; font-weight: 600; cursor: pointer; list-style: none; }
+.games-helldivers-orders summary::-webkit-details-marker { display: none; }
+.games-helldivers-orders[open] summary svg { transform: rotate(180deg); }
+.games-helldivers-orders > div { padding: 0 20px 20px; font-size: 13px; line-height: 1.7; color: var(--color-ink-muted); }
+.games-helldivers-orders article + article { margin-top: 24px; }
+.games-helldivers-orders h3 { color: var(--color-ink); font-weight: 600; font-size: 17px; }
+.games-helldivers-orders article p { margin-top: 10px; white-space: pre-line; }
+.games-helldivers-orders time { display: block; font-size: 12px; margin-top: 12px; }
+.games-helldivers footer { display: flex; flex-wrap: wrap; gap: 8px 18px; color: var(--color-ink-muted); font-size: 11px; line-height: 1.6; margin-top: 20px; }
+.games-helldivers footer a { display: inline-flex; align-items: center; gap: 4px; color: var(--color-ink); }
+.games-helldivers :is(button, summary, a):focus-visible { outline: 2px solid var(--color-ink); outline-offset: 3px; }
+.games-helldivers-sr { position: absolute; width: 1px; height: 1px; overflow: hidden; clip-path: inset(50%); white-space: nowrap; }
+@media (max-width: 1050px) { .games-helldivers-war { grid-template-columns: minmax(0,1fr) minmax(270px,.9fr); gap: 18px; } }
+@media (max-width: 760px) { .games-helldivers-war, .games-helldivers-brief-columns { grid-template-columns: minmax(0,1fr); } .games-helldivers-map { min-height: 340px; } .games-helldivers-list { max-height: 255px; } .games-helldivers-brief-columns { gap: 28px; } .games-helldivers-search { width: 100%; } .games-helldivers-population strong { font-size: 21px; } .games-helldivers-brief h3 { font-size: 21px; } .games-helldivers-brief > header { flex-wrap: wrap; gap: 12px; } .games-helldivers-brief > header > div:nth-child(2) { flex: 1; min-width: 120px; } .games-helldivers h2 { font-size: 27px; } }
+@media (prefers-reduced-motion: reduce) { .games-helldivers-pin i { transition: none; } }
+
+.games-helldivers-diver { width: 15px; height: 15px; object-fit: contain; flex: none; }
+.games-helldivers-population strong { display: flex; align-items: center; justify-content: flex-end; gap: 10px; }
+.games-helldivers-population .games-helldivers-diver { width: 25px; height: 25px; }
+.games-helldivers-region-art { width: 42px; height: 42px; object-fit: contain; flex: none; }
+.games-helldivers-region-name { flex: 1; min-width: 0; }
+.games-helldivers-progress > span > small { display: block; margin-top: 4px; color: var(--color-ink-muted); }

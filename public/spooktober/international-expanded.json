@@ -1,0 +1,1502 @@
+{
+ "shelves": {
+  "international": [
+   "tt0178868",
+   "tt5700672",
+   "tt1139797",
+   "tt1038988",
+   "tt5215952",
+   "tt0235198",
+   "tt0076786",
+   "tt4823434",
+   "tt10756184",
+   "tt0364385",
+   "tt0440803",
+   "tt0256009",
+   "tt0365376",
+   "tt0123948",
+   "tt4954522",
+   "tt9000302",
+   "tt18968540",
+   "tt16300962",
+   "tt0464141",
+   "tt0308379",
+   "tt0762073",
+   "tt7076834",
+   "tt0472458",
+   "tt3086442",
+   "tt10767168",
+   "tt0468492",
+   "tt0325655",
+   "tt0286751",
+   "tt13446168",
+   "tt8119752",
+   "tt0930083",
+   "tt10656188",
+   "tt7549892",
+   "tt0073582",
+   "tt1029234",
+   "tt0856288",
+   "tt4935418",
+   "tt11718516",
+   "tt10199586",
+   "tt11881160",
+   "tt7320482",
+   "tt0062453",
+   "tt0064546",
+   "tt7914416",
+   "tt10805432",
+   "tt8359848",
+   "tt0104029",
+   "tt5480782",
+   "tt10944760",
+   "tt1588170"
+  ]
+ },
+ "items": [
+  {
+   "id": "tt0178868",
+   "title": "Ringu",
+   "year": "1998",
+   "type": "Film",
+   "section": "international",
+   "creator": "Hideo Nakata",
+   "description": "When her niece is found dead along with three friends after viewing a supposedly cursed videotape, reporter Reiko sets out to investigate. She finds the tape, watches it and receives a phone call informing her that she'll die in a...",
+   "poster": "https://images.metahub.space/poster/medium/tt0178868/img",
+   "source": "https://www.imdb.com/title/tt0178868/",
+   "runtime": "96 min",
+   "genres": [
+    "Horror",
+    "Mystery"
+   ],
+   "imdbRating": "7.2",
+   "imdbId": "tt0178868",
+   "country": "Japan"
+  },
+  {
+   "id": "tt5700672",
+   "title": "Train to Busan",
+   "year": "2016",
+   "type": "Film",
+   "section": "catalog",
+   "creator": "Yeon Sang-ho",
+   "description": "While a zombie virus breaks out in South Korea, passengers struggle to survive on the train from Seoul to Busan.",
+   "poster": "https://images.metahub.space/poster/medium/tt5700672/img",
+   "source": "https://www.imdb.com/title/tt5700672/",
+   "genres": [
+    "Action",
+    "Horror",
+    "Thriller"
+   ],
+   "imdbId": "tt5700672",
+   "runtime": "118 min",
+   "imdbRating": "7.6",
+   "country": "South Korea"
+  },
+  {
+   "id": "tt1139797",
+   "title": "Let the Right One In",
+   "year": "2008",
+   "type": "Film",
+   "section": "catalog",
+   "creator": "Tomas Alfredson",
+   "description": "A bullied boy forms a unique friendship with his new neighbor, a peculiar girl with a dark secret.",
+   "poster": "https://images.metahub.space/poster/medium/tt1139797/img",
+   "source": "https://www.imdb.com/title/tt1139797/",
+   "genres": [
+    "Drama",
+    "Fantasy",
+    "Horror"
+   ],
+   "imdbId": "tt1139797",
+   "runtime": "115 min",
+   "imdbRating": "7.8",
+   "country": "Sweden, Norway, France"
+  },
+  {
+   "id": "tt1038988",
+   "title": "REC",
+   "year": "2007",
+   "type": "Film",
+   "section": "catalog",
+   "creator": "Jaume Balagueró, Paco Plaza",
+   "description": "A television reporter follows firefighters into an apartment building that is suddenly sealed off.",
+   "poster": "https://images.metahub.space/poster/medium/tt1038988/img",
+   "source": "https://www.imdb.com/title/tt1038988/",
+   "genres": [
+    "Horror",
+    "Mystery",
+    "Thriller"
+   ],
+   "imdbId": "tt1038988",
+   "runtime": "78 min",
+   "imdbRating": "7.4",
+   "country": "Spain"
+  },
+  {
+   "id": "tt5215952",
+   "title": "The Wailing",
+   "year": "2016",
+   "type": "Film",
+   "section": "catalog",
+   "creator": "Na Hong-jin",
+   "description": "A rural police officer seeks an explanation for violent illness spreading through his village.",
+   "poster": "https://images.metahub.space/poster/medium/tt5215952/img",
+   "source": "https://www.imdb.com/title/tt5215952/",
+   "runtime": "156 min",
+   "genres": [
+    "Drama",
+    "Horror"
+   ],
+   "imdbRating": "7.4",
+   "imdbId": "tt5215952",
+   "country": "South Korea"
+  },
+  {
+   "id": "tt0235198",
+   "title": "Audition",
+   "year": "1999",
+   "type": "Film",
+   "section": "catalog",
+   "creator": "Takashi Miike",
+   "description": "A widower has his film producer friend organize a fake audition as a means of helping him find a new girlfriend, but the woman he selects is not who she appears to be.",
+   "poster": "https://images.metahub.space/poster/medium/tt0235198/img",
+   "source": "https://www.imdb.com/title/tt0235198/",
+   "genres": [
+    "Drama",
+    "Horror",
+    "Mystery"
+   ],
+   "imdbId": "tt0235198",
+   "runtime": "115 min",
+   "imdbRating": "7.1",
+   "country": "Japan, South Korea"
+  },
+  {
+   "id": "tt0076786",
+   "title": "Suspiria",
+   "year": "1977",
+   "type": "Film",
+   "section": "classics",
+   "creator": "Dario Argento",
+   "description": "An American newcomer to a prestigious German ballet academy comes to realize that the school is a front for something sinister amid a series of grisly murders.",
+   "poster": "https://images.metahub.space/poster/medium/tt0076786/img",
+   "source": "https://www.imdb.com/title/tt0076786/",
+   "runtime": "99 min",
+   "genres": [
+    "Horror"
+   ],
+   "imdbRating": "7.3",
+   "imdbId": "tt0076786",
+   "country": "Italy"
+  },
+  {
+   "id": "tt4823434",
+   "imdbId": "tt4823434",
+   "title": "Tigers Are Not Afraid",
+   "year": "2017",
+   "type": "Film",
+   "section": "catalog",
+   "creator": "Issa López",
+   "source": "https://www.imdb.com/title/tt4823434/",
+   "description": "Children orphaned by cartel violence navigate a city where their wishes and the dead refuse to stay quiet.",
+   "runtime": "83 min",
+   "imdbRating": "6.9",
+   "genres": [
+    "Fantasy",
+    "Horror",
+    "Mystery"
+   ],
+   "country": "Mexico",
+   "poster": "https://images.metahub.space/poster/medium/tt4823434/img"
+  },
+  {
+   "id": "tt10756184",
+   "imdbId": "tt10756184",
+   "title": "Saloum",
+   "year": "2021",
+   "type": "Film",
+   "section": "catalog",
+   "creator": "Jean Luc Herbulot",
+   "source": "https://www.imdb.com/title/tt10756184/",
+   "description": "Mercenaries hiding in a remote Senegalese resort discover that one of them has brought a dangerous past along.",
+   "runtime": "84 min",
+   "imdbRating": "6.2",
+   "genres": [
+    "Action",
+    "Horror",
+    "Thriller"
+   ],
+   "country": "Senegal, France",
+   "poster": "https://images.metahub.space/poster/medium/tt10756184/img"
+  },
+  {
+   "id": "tt0364385",
+   "title": "Ju-on: The Grudge",
+   "year": "2002",
+   "type": "Film",
+   "section": "international",
+   "creator": "Takashi Shimizu",
+   "description": "A mysterious and vengeful spirit marks and pursues anybody who dares enter the house in which it resides.",
+   "poster": "https://images.metahub.space/poster/medium/tt0364385/img",
+   "source": "https://www.imdb.com/title/tt0364385/",
+   "runtime": "92 min",
+   "genres": [
+    "Horror"
+   ],
+   "imdbRating": "6.7",
+   "imdbId": "tt0364385",
+   "country": "Japan"
+  },
+  {
+   "id": "tt0440803",
+   "title": "Shutter",
+   "year": "2004",
+   "type": "Film",
+   "section": "catalog",
+   "creator": "Banjong Pisanthanakun, Parkpoom Wongpoom",
+   "description": "When Jane and Tun run over a girl in a car accident, they speed away immediately from the crime scene. However, Tun, a photographer, soon discovers strange shadows in his photos, which unsettles them.",
+   "poster": "https://images.metahub.space/poster/medium/tt0440803/img",
+   "source": "https://www.imdb.com/title/tt0440803/",
+   "genres": [
+    "Horror",
+    "Mystery",
+    "Thriller"
+   ],
+   "imdbId": "tt0440803",
+   "runtime": "96 min",
+   "imdbRating": "7.0",
+   "country": "Thailand"
+  },
+  {
+   "id": "tt0256009",
+   "title": "The Devil's Backbone",
+   "year": "2001",
+   "type": "Film",
+   "section": "catalog",
+   "creator": "Guillermo del Toro",
+   "description": "After Carlos - a 12-year-old whose father has died in the Spanish Civil War - arrives at an ominous boys' orphanage, he discovers the school is haunted and has many dark secrets which he must uncover.",
+   "poster": "https://images.metahub.space/poster/medium/tt0256009/img",
+   "source": "https://www.imdb.com/title/tt0256009/",
+   "genres": [
+    "Drama",
+    "Horror",
+    "Thriller"
+   ],
+   "imdbId": "tt0256009",
+   "runtime": "108 min",
+   "imdbRating": "7.4",
+   "country": "Spain, Mexico"
+  },
+  {
+   "id": "tt0365376",
+   "title": "A Tale of Two Sisters",
+   "year": "2003",
+   "type": "Film",
+   "section": "international",
+   "creator": "Kim Jee-woon",
+   "description": "After being institutionalized in a mental hospital, Su-mi reunites with her sister, Su-yeon, and they return to live at their country home. But strange events plague the house, leading to surprising revelations and a shocking conc...",
+   "poster": "https://images.metahub.space/poster/medium/tt0365376/img",
+   "source": "https://www.imdb.com/title/tt0365376/",
+   "runtime": "115 min",
+   "genres": [
+    "Drama",
+    "Horror",
+    "Mystery"
+   ],
+   "imdbRating": "7.1",
+   "imdbId": "tt0365376",
+   "country": "South Korea"
+  },
+  {
+   "id": "tt0123948",
+   "title": "Cure",
+   "year": "1997",
+   "type": "Film",
+   "section": "catalog",
+   "creator": "Kiyoshi Kurosawa",
+   "description": "A frustrated detective deals with the case of several gruesome murders committed by people who have no recollection of what they've done.",
+   "poster": "https://images.metahub.space/poster/medium/tt0123948/img",
+   "source": "https://www.imdb.com/title/tt0123948/",
+   "genres": [
+    "Crime",
+    "Horror",
+    "Mystery"
+   ],
+   "imdbId": "tt0123948",
+   "runtime": "111 min",
+   "imdbRating": "7.5",
+   "country": "Japan"
+  },
+  {
+   "id": "tt4954522",
+   "title": "Raw",
+   "year": "2016",
+   "type": "Film",
+   "section": "catalog",
+   "creator": "Julia Ducournau",
+   "description": "A vegetarian veterinary student develops an unsettling appetite after a hazing ritual.",
+   "poster": "https://images.metahub.space/poster/medium/tt4954522/img",
+   "source": "https://www.imdb.com/title/tt4954522/",
+   "genres": [
+    "Drama",
+    "Horror"
+   ],
+   "imdbId": "tt4954522",
+   "runtime": "98 min",
+   "imdbRating": "6.9",
+   "country": "France, Belgium"
+  },
+  {
+   "id": "tt9000302",
+   "imdbId": "tt9000302",
+   "title": "Impetigore",
+   "year": "2019",
+   "type": "Film",
+   "section": "catalog",
+   "creator": "Joko Anwar",
+   "source": "https://www.imdb.com/title/tt9000302/",
+   "description": "A woman returns to her ancestral village and discovers that her inheritance is tied to a deadly curse.",
+   "runtime": "106 min",
+   "imdbRating": "6.6",
+   "genres": [
+    "Horror",
+    "Mystery",
+    "Thriller"
+   ],
+   "country": "Indonesia, South Korea, United States",
+   "poster": "https://images.metahub.space/poster/medium/tt9000302/img"
+  },
+  {
+   "id": "tt18968540",
+   "title": "Incantation",
+   "year": "2022",
+   "type": "Film",
+   "section": "catalog",
+   "creator": "Kevin Ko",
+   "description": "A mother records her efforts to protect her daughter from a curse she helped unleash.",
+   "poster": "https://images.metahub.space/poster/medium/tt18968540/img",
+   "source": "https://www.imdb.com/title/tt18968540/",
+   "genres": [
+    "Horror",
+    "Mystery"
+   ],
+   "imdbId": "tt18968540",
+   "runtime": "111 min",
+   "imdbRating": "6.2",
+   "country": "Taiwan"
+  },
+  {
+   "id": "tt16300962",
+   "title": "When Evil Lurks",
+   "year": "2023",
+   "type": "Film",
+   "section": "catalog",
+   "creator": "Demián Rugna",
+   "description": "In a remote village, two brothers find a demon-infected man just about to \"give birth\" to evil itself. They decide to get rid of the body, only to end up unintentionally spreading chaos.",
+   "poster": "https://images.metahub.space/poster/medium/tt16300962/img",
+   "source": "https://www.imdb.com/title/tt16300962/",
+   "genres": [
+    "Horror"
+   ],
+   "runtime": "100 min",
+   "imdbRating": "6.9",
+   "background": "https://images.metahub.space/background/medium/tt16300962/img",
+   "logo": "https://images.metahub.space/logo/medium/tt16300962/img",
+   "service": "Shudder",
+   "serviceUrl": "https://watch.shudder.com/grid?gridviewconfigid=bf281070-deae-401d-9cfe-b56b0234dc1b",
+   "serviceLogo": "assets/services/shudder.svg",
+   "imdbId": "tt16300962",
+   "serviceAction": "Browse Shudder",
+   "country": "Argentina, United States"
+  },
+  {
+   "id": "tt0464141",
+   "title": "The Orphanage",
+   "year": "2007",
+   "type": "Film",
+   "section": "catalog",
+   "creator": "J.A. Bayona",
+   "description": "A woman brings her family back to her childhood home, which used to be an orphanage for handicapped children. Before long, her son starts to communicate with an invisible new friend.",
+   "poster": "https://images.metahub.space/poster/medium/tt0464141/img",
+   "source": "https://www.imdb.com/title/tt0464141/",
+   "genres": [
+    "Drama",
+    "Horror",
+    "Mystery"
+   ],
+   "imdbId": "tt0464141",
+   "runtime": "105 min",
+   "imdbRating": "7.4",
+   "country": "Spain, Mexico, France, Belgium"
+  },
+  {
+   "id": "tt0308379",
+   "imdbId": "tt0308379",
+   "title": "Dark Water",
+   "year": "2002",
+   "type": "Film",
+   "section": "catalog",
+   "creator": "Hideo Nakata",
+   "source": "https://www.imdb.com/title/tt0308379/",
+   "description": "A mother and daughter move into an apartment where a spreading leak conceals a haunting.",
+   "runtime": "101 min",
+   "imdbRating": "6.7",
+   "genres": [
+    "Drama",
+    "Horror",
+    "Mystery"
+   ],
+   "country": "Japan",
+   "poster": "https://images.metahub.space/poster/medium/tt0308379/img"
+  },
+  {
+   "id": "tt0762073",
+   "title": "Thirst",
+   "year": "2009",
+   "type": "Film",
+   "section": "catalog",
+   "creator": "Park Chan-wook",
+   "description": "Through a failed medical experiment, a priest is stricken with vampirism and is forced to abandon his ascetic ways.",
+   "poster": "https://images.metahub.space/poster/medium/tt0762073/img",
+   "source": "https://www.imdb.com/title/tt0762073/",
+   "genres": [
+    "Drama",
+    "Fantasy",
+    "Horror"
+   ],
+   "imdbId": "tt0762073",
+   "runtime": "134 min",
+   "imdbRating": "7.1",
+   "country": "South Korea, United States"
+  },
+  {
+   "id": "tt7076834",
+   "imdbId": "tt7076834",
+   "title": "Satan's Slaves",
+   "year": "2017",
+   "type": "Film",
+   "section": "catalog",
+   "creator": "Joko Anwar",
+   "source": "https://www.imdb.com/title/tt7076834/",
+   "description": "After their mother dies, a family begins to suspect that her presence has returned with a terrible purpose.",
+   "runtime": "106 min",
+   "imdbRating": "6.5",
+   "genres": [
+    "Drama",
+    "Horror",
+    "Mystery"
+   ],
+   "country": "Indonesia, South Korea",
+   "poster": "https://images.metahub.space/poster/medium/tt7076834/img"
+  },
+  {
+   "id": "tt0472458",
+   "imdbId": "tt0472458",
+   "title": "Dumplings",
+   "year": "2004",
+   "type": "Film",
+   "section": "catalog",
+   "creator": "Fruit Chan",
+   "source": "https://www.imdb.com/title/tt0472458/",
+   "description": "A former television star seeks rejuvenation from a cook whose secret recipe demands increasingly disturbing ingredients.",
+   "runtime": "91 min",
+   "imdbRating": "6.7",
+   "genres": [
+    "Drama",
+    "Horror"
+   ],
+   "country": "Hong Kong",
+   "poster": "https://images.metahub.space/poster/medium/tt0472458/img"
+  },
+  {
+   "id": "tt3086442",
+   "title": "Goodnight Mommy",
+   "year": "2014",
+   "type": "Film",
+   "section": "catalog",
+   "creator": "Severin Fiala, Veronika Franz",
+   "description": "Twin boys move to a new house with their mother after she has face-changing cosmetic surgery, but under the bandages is someone the boys don't recognize.",
+   "poster": "https://images.metahub.space/poster/medium/tt3086442/img",
+   "source": "https://www.imdb.com/title/tt3086442/",
+   "genres": [
+    "Horror",
+    "Mystery",
+    "Thriller"
+   ],
+   "imdbId": "tt3086442",
+   "runtime": "100 min",
+   "imdbRating": "6.7",
+   "country": "Austria"
+  },
+  {
+   "id": "tt10767168",
+   "imdbId": "tt10767168",
+   "title": "La Llorona",
+   "year": "2019",
+   "type": "Film",
+   "section": "catalog",
+   "creator": "Jayro Bustamante",
+   "description": "A disgraced Guatemalan general hears a woman crying as his household confronts the past he tried to bury.",
+   "source": "https://www.imdb.com/title/tt10767168/",
+   "genres": [
+    "Crime",
+    "Drama",
+    "Horror"
+   ],
+   "runtime": "97 min",
+   "imdbRating": "6.6",
+   "service": "Shudder",
+   "serviceLogo": "assets/services/shudder.svg",
+   "serviceUrl": "https://watch.shudder.com/grid?gridviewconfigid=bf281070-deae-401d-9cfe-b56b0234dc1b",
+   "serviceAction": "Browse Shudder",
+   "poster": "https://images.metahub.space/poster/medium/tt10767168/img",
+   "background": "https://images.metahub.space/background/medium/tt10767168/img",
+   "logo": "https://images.metahub.space/logo/medium/tt10767168/img",
+   "country": "Guatemala, France"
+  },
+  {
+   "id": "tt0468492",
+   "title": "The Host",
+   "year": "2006",
+   "type": "Film",
+   "section": "catalog",
+   "creator": "Bong Joon Ho",
+   "description": "A monster emerges from Seoul's Han River and begins attacking people. One victim's loving family does what it can to rescue her from its clutches.",
+   "poster": "https://images.metahub.space/poster/medium/tt0468492/img",
+   "source": "https://www.imdb.com/title/tt0468492/",
+   "genres": [
+    "Drama",
+    "Horror",
+    "Sci-Fi"
+   ],
+   "imdbId": "tt0468492",
+   "runtime": "120 min",
+   "imdbRating": "7.1",
+   "country": "South Korea, Japan"
+  },
+  {
+   "id": "tt0325655",
+   "imdbId": "tt0325655",
+   "title": "The Eye",
+   "year": "2002",
+   "type": "Film",
+   "section": "catalog",
+   "creator": "Danny Pang, Oxide Chun Pang",
+   "source": "https://www.imdb.com/title/tt0325655/",
+   "description": "A corneal transplant restores a woman's sight but leaves her seeing things that others cannot.",
+   "runtime": "98 min",
+   "imdbRating": "6.6",
+   "genres": [
+    "Horror",
+    "Mystery",
+    "Thriller"
+   ],
+   "country": "Hong Kong, Singapore, Thailand, United Kingdom, Netherlands",
+   "poster": "https://images.metahub.space/poster/medium/tt0325655/img"
+  },
+  {
+   "id": "tt0286751",
+   "title": "Pulse",
+   "year": "2001",
+   "type": "Film",
+   "section": "catalog",
+   "creator": "Kiyoshi Kurosawa",
+   "description": "Two groups of people discover evidence that suggests spirits may be trying to invade the human world through the Internet.",
+   "poster": "https://images.metahub.space/poster/medium/tt0286751/img",
+   "source": "https://www.imdb.com/title/tt0286751/",
+   "genres": [
+    "Horror",
+    "Mystery",
+    "Sci-Fi"
+   ],
+   "imdbId": "tt0286751",
+   "runtime": "119 min",
+   "imdbRating": "6.5",
+   "country": "Japan"
+  },
+  {
+   "id": "tt13446168",
+   "title": "The Medium",
+   "year": "2021",
+   "type": "Film",
+   "section": "catalog",
+   "creator": "Banjong Pisanthanakun",
+   "description": "A documentary crew follows a Thai shaman as her niece develops troubling symptoms.",
+   "poster": "https://images.metahub.space/poster/medium/tt13446168/img",
+   "source": "https://www.imdb.com/title/tt13446168/",
+   "runtime": "131 min",
+   "genres": [
+    "Drama",
+    "Horror",
+    "Mystery"
+   ],
+   "imdbRating": "6.5",
+   "imdbId": "tt13446168",
+   "country": "Thailand, South Korea"
+  },
+  {
+   "id": "tt8119752",
+   "title": "Gonjiam: Haunted Asylum",
+   "year": "2018",
+   "type": "Film",
+   "section": "catalog",
+   "creator": "Jung Bum-shik",
+   "description": "A livestream crew enters an abandoned psychiatric hospital in search of an audience.",
+   "poster": "https://images.metahub.space/poster/medium/tt8119752/img",
+   "source": "https://www.imdb.com/title/tt8119752/",
+   "genres": [
+    "Horror",
+    "Mystery"
+   ],
+   "imdbId": "tt8119752",
+   "runtime": "95 min",
+   "imdbRating": "6.5",
+   "country": "South Korea"
+  },
+  {
+   "id": "tt0930083",
+   "imdbId": "tt0930083",
+   "title": "Noroi: The Curse",
+   "year": "2005",
+   "type": "Film",
+   "section": "catalog",
+   "creator": "Kôji Shiraishi",
+   "description": "A filmmaker follows scattered paranormal incidents toward a disturbing common explanation.",
+   "source": "https://www.imdb.com/title/tt0930083/",
+   "runtime": "115 min",
+   "imdbRating": "6.8",
+   "genres": [
+    "Horror",
+    "Mystery",
+    "Thriller"
+   ],
+   "poster": "https://images.metahub.space/poster/medium/tt0930083/img",
+   "country": "Japan"
+  },
+  {
+   "id": "tt10656188",
+   "imdbId": "tt10656188",
+   "title": "The Queen of Black Magic",
+   "year": "2019",
+   "type": "Film",
+   "section": "catalog",
+   "creator": "Kimo Stamboel",
+   "source": "https://www.imdb.com/title/tt10656188/",
+   "description": "A return to a childhood orphanage awakens a supernatural reckoning with its buried secrets.",
+   "runtime": "99 min",
+   "imdbRating": "6.5",
+   "genres": [
+    "Drama",
+    "Horror",
+    "Mystery"
+   ],
+   "country": "Indonesia",
+   "poster": "https://images.metahub.space/poster/medium/tt10656188/img"
+  },
+  {
+   "id": "tt7549892",
+   "title": "Terrified",
+   "year": "2017",
+   "type": "Film",
+   "section": "catalog",
+   "creator": "Demián Rugna",
+   "description": "When strange events occur in a neighborhood in Buenos Aires, a doctor specializing in the paranormal, her colleague, and an ex police officer decide to investigate further.",
+   "poster": "https://images.metahub.space/poster/medium/tt7549892/img",
+   "source": "https://www.imdb.com/title/tt7549892/",
+   "genres": [
+    "Horror"
+   ],
+   "runtime": "88 min",
+   "imdbRating": "6.5",
+   "background": "https://images.metahub.space/background/medium/tt7549892/img",
+   "logo": "https://images.metahub.space/logo/medium/tt7549892/img",
+   "service": "Shudder",
+   "serviceUrl": "https://watch.shudder.com/grid?gridviewconfigid=bf281070-deae-401d-9cfe-b56b0234dc1b",
+   "serviceLogo": "assets/services/shudder.svg",
+   "imdbId": "tt7549892",
+   "serviceAction": "Browse Shudder",
+   "country": "Argentina"
+  },
+  {
+   "id": "tt0073582",
+   "imdbId": "tt0073582",
+   "title": "Deep Red",
+   "year": "1975",
+   "type": "Film",
+   "section": "catalog",
+   "creator": "Dario Argento",
+   "description": "After witnessing a murder, a musician follows a trail of clues that draws him closer to the killer.",
+   "source": "https://www.imdb.com/title/tt0073582/",
+   "genres": [
+    "Horror",
+    "Mystery",
+    "Thriller"
+   ],
+   "runtime": "127 min",
+   "imdbRating": "7.5",
+   "service": "Shudder",
+   "serviceLogo": "assets/services/shudder.svg",
+   "serviceUrl": "https://watch.shudder.com/grid?gridviewconfigid=bf281070-deae-401d-9cfe-b56b0234dc1b",
+   "serviceAction": "Browse Shudder",
+   "poster": "https://images.metahub.space/poster/medium/tt0073582/img",
+   "background": "https://images.metahub.space/background/medium/tt0073582/img",
+   "logo": "https://images.metahub.space/logo/medium/tt0073582/img",
+   "country": "Italy"
+  },
+  {
+   "id": "tt1029234",
+   "title": "Martyrs",
+   "year": "2008",
+   "type": "Film",
+   "section": "catalog",
+   "creator": "Pascal Laugier",
+   "description": "A young woman's quest for revenge against the people who kidnapped and tormented her as a child leads her and a friend, who is also a victim of child abuse, on a terrifying journey into a living hell of depravity.",
+   "poster": "https://images.metahub.space/poster/medium/tt1029234/img",
+   "source": "https://www.imdb.com/title/tt1029234/",
+   "genres": [
+    "Horror"
+   ],
+   "imdbId": "tt1029234",
+   "runtime": "99 min",
+   "imdbRating": "7.0",
+   "country": "France, Canada"
+  },
+  {
+   "id": "tt0856288",
+   "title": "Inside",
+   "year": "2007",
+   "type": "Film",
+   "section": "catalog",
+   "creator": "Alexandre Bustillo, Julien Maury",
+   "description": "Four months after the death of her husband, a woman on the brink of motherhood is tormented in her home by a strange woman who wants her unborn baby.",
+   "poster": "https://images.metahub.space/poster/medium/tt0856288/img",
+   "source": "https://www.imdb.com/title/tt0856288/",
+   "genres": [
+    "Horror"
+   ],
+   "imdbId": "tt0856288",
+   "runtime": "83 min",
+   "imdbRating": "6.7",
+   "country": "France"
+  },
+  {
+   "id": "tt4935418",
+   "imdbId": "tt4935418",
+   "title": "Baskin",
+   "year": "2015",
+   "type": "Film",
+   "section": "catalog",
+   "creator": "Can Evrenol",
+   "source": "https://www.imdb.com/title/tt4935418/",
+   "description": "Police answering a call at an abandoned building enter a nightmare beneath the ordinary world.",
+   "runtime": "97 min",
+   "imdbRating": "5.8",
+   "genres": [
+    "Horror",
+    "Thriller"
+   ],
+   "country": "Turkey, United States",
+   "poster": "https://images.metahub.space/poster/medium/tt4935418/img"
+  },
+  {
+   "id": "tt11718516",
+   "imdbId": "tt11718516",
+   "title": "Huesera: The Bone Woman",
+   "year": "2022",
+   "type": "Film",
+   "section": "catalog",
+   "creator": "Michelle Garza Cervera",
+   "source": "https://www.imdb.com/title/tt11718516/",
+   "description": "A pregnant woman encounters a threatening presence as the life she thought she wanted begins to fracture.",
+   "runtime": "97 min",
+   "imdbRating": "6.0",
+   "genres": [
+    "Drama",
+    "Horror",
+    "Mystery"
+   ],
+   "country": "Mexico, Peru",
+   "poster": "https://images.metahub.space/poster/medium/tt11718516/img"
+  },
+  {
+   "id": "tt10199586",
+   "imdbId": "tt10199586",
+   "title": "Atlantics",
+   "year": "2019",
+   "type": "Film",
+   "section": "catalog",
+   "creator": "Mati Diop",
+   "source": "https://www.imdb.com/title/tt10199586/",
+   "description": "After workers leave Dakar by sea, a young woman finds that their absence has taken an uncanny form.",
+   "runtime": "106 min",
+   "imdbRating": "6.7",
+   "genres": [
+    "Drama",
+    "Fantasy",
+    "Mystery"
+   ],
+   "country": "France, Senegal, Belgium",
+   "poster": "https://images.metahub.space/poster/medium/tt10199586/img"
+  },
+  {
+   "id": "tt11881160",
+   "imdbId": "tt11881160",
+   "title": "Gaia",
+   "year": "2021",
+   "type": "Film",
+   "section": "catalog",
+   "creator": "Jaco Bouwer",
+   "source": "https://www.imdb.com/title/tt11881160/",
+   "description": "An injured ranger takes shelter with forest dwellers whose beliefs are tied to a changing natural world.",
+   "runtime": "97 min",
+   "imdbRating": "5.6",
+   "genres": [
+    "Drama",
+    "Fantasy",
+    "Horror"
+   ],
+   "country": "South Africa",
+   "poster": "https://images.metahub.space/poster/medium/tt11881160/img"
+  },
+  {
+   "id": "tt7320482",
+   "imdbId": "tt7320482",
+   "title": "The Soul Collector",
+   "year": "2019",
+   "type": "Film",
+   "section": "catalog",
+   "creator": "Harold Holscher",
+   "source": "https://www.imdb.com/title/tt7320482/",
+   "description": "A family moving to an inherited farm takes in a stranger burdened by a supernatural debt.",
+   "runtime": "99 min",
+   "imdbRating": "5.1",
+   "genres": [
+    "Horror"
+   ],
+   "country": "South Africa",
+   "poster": "https://images.metahub.space/poster/medium/tt7320482/img"
+  },
+  {
+   "id": "tt0062453",
+   "imdbId": "tt0062453",
+   "title": "Viy",
+   "year": "1967",
+   "type": "Film",
+   "section": "catalog",
+   "creator": "Konstantin Ershov, Georgiy Kropachyov, Aleksandr Ptushko",
+   "description": "A student must spend three nights keeping vigil over a young woman's body.",
+   "source": "https://www.imdb.com/title/tt0062453/",
+   "runtime": "76 min",
+   "imdbRating": "7.2",
+   "genres": [
+    "Drama",
+    "Fantasy",
+    "Horror"
+   ],
+   "poster": "https://images.metahub.space/poster/medium/tt0062453/img",
+   "country": "Soviet Union"
+  },
+  {
+   "id": "tt0064546",
+   "imdbId": "tt0064546",
+   "title": "Witchhammer",
+   "year": "1970",
+   "type": "Film",
+   "section": "catalog",
+   "creator": "Otakar Vávra",
+   "description": "A witchcraft trial becomes a tool for ambition and persecution in seventeenth-century Moravia.",
+   "source": "https://www.imdb.com/title/tt0064546/",
+   "runtime": "107 min",
+   "imdbRating": "7.7",
+   "genres": [
+    "Drama",
+    "History",
+    "Horror"
+   ],
+   "poster": "https://images.metahub.space/poster/medium/tt0064546/img",
+   "country": "Czechoslovakia"
+  },
+  {
+   "id": "tt7914416",
+   "title": "One Cut of the Dead",
+   "year": "2017",
+   "type": "Film",
+   "section": "catalog",
+   "creator": "Shin'ichirô Ueda",
+   "description": "Things go badly for a hack director and film crew shooting a low budget zombie movie in an abandoned WWII Japanese facility, when they are attacked by real zombies.",
+   "poster": "https://images.metahub.space/poster/medium/tt7914416/img",
+   "source": "https://www.imdb.com/title/tt7914416/",
+   "genres": [
+    "Comedy",
+    "Drama",
+    "Horror"
+   ],
+   "imdbId": "tt7914416",
+   "runtime": "96 min",
+   "imdbRating": "7.6",
+   "country": "Japan"
+  },
+  {
+   "id": "tt10805432",
+   "imdbId": "tt10805432",
+   "title": "Detention",
+   "year": "2019",
+   "type": "Film",
+   "section": "catalog",
+   "creator": "John Hsu",
+   "source": "https://www.imdb.com/title/tt10805432/",
+   "description": "Students trapped in a transformed school confront ghosts shaped by repression and betrayal.",
+   "runtime": "102 min",
+   "imdbRating": "6.6",
+   "genres": [
+    "Drama",
+    "Horror",
+    "Mystery"
+   ],
+   "country": "Taiwan",
+   "poster": "https://images.metahub.space/poster/medium/tt10805432/img"
+  },
+  {
+   "id": "tt8359848",
+   "title": "Climax",
+   "year": "2018",
+   "type": "Film",
+   "section": "catalog",
+   "creator": "Gaspar Noé",
+   "description": "French dancers gather in a remote, empty school building to rehearse on a wintry night. The all-night celebration morphs into a hallucinatory nightmare when they learn their sangria is laced with LSD.",
+   "poster": "https://images.metahub.space/poster/medium/tt8359848/img",
+   "source": "https://www.imdb.com/title/tt8359848/",
+   "genres": [
+    "Drama",
+    "Horror",
+    "Music"
+   ],
+   "imdbId": "tt8359848",
+   "runtime": "97 min",
+   "imdbRating": "6.9",
+   "country": "France, Belgium"
+  },
+  {
+   "id": "tt0104029",
+   "imdbId": "tt0104029",
+   "title": "Cronos",
+   "year": "1993",
+   "type": "Film",
+   "section": "catalog",
+   "creator": "Guillermo del Toro",
+   "source": "https://www.imdb.com/title/tt0104029/",
+   "description": "An antique dealer discovers a mechanical device that restores youth while awakening a thirst for blood.",
+   "runtime": "94 min",
+   "imdbRating": "6.7",
+   "genres": [
+    "Drama",
+    "Fantasy",
+    "Horror"
+   ],
+   "country": "Mexico",
+   "poster": "https://images.metahub.space/poster/medium/tt0104029/img"
+  },
+  {
+   "id": "tt5480782",
+   "imdbId": "tt5480782",
+   "title": "Good Manners",
+   "year": "2017",
+   "type": "Film",
+   "section": "catalog",
+   "creator": "Marco Dutra, Juliana Rojas",
+   "source": "https://www.imdb.com/title/tt5480782/",
+   "description": "A caregiver's bond with her pregnant employer leads to an unexpected child and a dangerous responsibility.",
+   "runtime": "136 min",
+   "imdbRating": "6.7",
+   "genres": [
+    "Fantasy",
+    "Horror"
+   ],
+   "country": "Brazil, France, Germany",
+   "poster": "https://images.metahub.space/poster/medium/tt5480782/img"
+  },
+  {
+   "id": "tt10944760",
+   "title": "Titane",
+   "year": "2021",
+   "type": "Film",
+   "section": "catalog",
+   "creator": "Julia Ducournau",
+   "description": "A woman on the run assumes a missing person's identity as her body undergoes impossible changes.",
+   "poster": "https://images.metahub.space/poster/medium/tt10944760/img",
+   "source": "https://www.imdb.com/title/tt10944760/",
+   "genres": [
+    "Drama",
+    "Horror",
+    "Sci-Fi"
+   ],
+   "imdbId": "tt10944760",
+   "runtime": "108 min",
+   "imdbRating": "6.5",
+   "country": "France, Belgium"
+  },
+  {
+   "id": "tt1588170",
+   "title": "I Saw the Devil",
+   "year": "2010",
+   "type": "Film",
+   "section": "international",
+   "creator": "Kim Jee-woon",
+   "description": "A secret agent exacts revenge on a serial killer through a series of captures and releases.",
+   "poster": "https://images.metahub.space/poster/medium/tt1588170/img",
+   "source": "https://www.imdb.com/title/tt1588170/",
+   "runtime": "144 min",
+   "genres": [
+    "Action",
+    "Thriller"
+   ],
+   "imdbRating": "7.8",
+   "imdbId": "tt1588170",
+   "country": "South Korea"
+  }
+ ],
+ "checked": "2026-09-28",
+ "sources": [
+  {
+   "id": "bfi-japan",
+   "publisher": "BFI",
+   "title": "The best Japanese films: one per year",
+   "url": "https://www.bfi.org.uk/lists/great-japanese-film-every-year-from-1925-now",
+   "itemIds": [
+    "tt0178868",
+    "tt0123948",
+    "tt0235198"
+   ],
+   "basis": "The 1997–1999 entries identify Cure, Ring and Audition within Japanese cinema and discuss their horror traditions. Ringu is the existing catalog title for Ring.",
+   "checked": "2026-09-28"
+  },
+  {
+   "id": "bfi-korea",
+   "publisher": "BFI",
+   "title": "10 great South Korean horror films",
+   "url": "https://www.bfi.org.uk/lists/10-great-south-korean-horror-films",
+   "itemIds": [
+    "tt5700672",
+    "tt0365376",
+    "tt0762073",
+    "tt5215952",
+    "tt8119752"
+   ],
+   "basis": "BFI discusses these films as South Korean horror, including Train to Busan in the introduction.",
+   "checked": "2026-09-28"
+  },
+  {
+   "id": "bfi-supernatural",
+   "publisher": "BFI",
+   "title": "10 great supernatural horror films of the 21st century",
+   "url": "https://www.bfi.org.uk/lists/10-great-supernatural-horror-films-21st-century",
+   "itemIds": [
+    "tt0308379",
+    "tt0364385",
+    "tt0286751",
+    "tt0464141",
+    "tt4823434",
+    "tt10199586"
+   ],
+   "basis": "The article distinguishes the Japanese originals from their American remakes and selects the Spanish-language and Senegalese-set ghost stories. Atlantics is a supernatural drama rather than a conventional scare film.",
+   "checked": "2026-09-28"
+  },
+  {
+   "id": "bfi-sweden",
+   "publisher": "BFI",
+   "title": "10 great Swedish films",
+   "url": "https://www.bfi.org.uk/lists/10-great-swedish-films",
+   "itemIds": [
+    "tt1139797"
+   ],
+   "basis": "The entry identifies Tomas Alfredson's Swedish vampire film, not its American remake.",
+   "checked": "2026-09-28"
+  },
+  {
+   "id": "bfi-europe",
+   "publisher": "BFI",
+   "title": "10 great European horror films",
+   "url": "https://www.bfi.org.uk/lists/10-great-european-horror-films",
+   "itemIds": [
+    "tt0076786"
+   ],
+   "basis": "BFI places Dario Argento's 1977 original in the Italian horror tradition.",
+   "checked": "2026-09-28"
+  },
+  {
+   "id": "bfi-mexico",
+   "publisher": "BFI",
+   "title": "10 great Mexican horror films",
+   "url": "https://www.bfi.org.uk/lists/10-great-mexican-horror-films",
+   "itemIds": [
+    "tt4823434",
+    "tt11718516",
+    "tt0104029"
+   ],
+   "basis": "These selections appear in BFI's account of Mexican horror; Cronos is discussed in the introduction. Countries of co-production are separately retained in metadata.",
+   "checked": "2026-09-28"
+  },
+  {
+   "id": "ifc-saloum",
+   "publisher": "IFC Center",
+   "title": "Saloum",
+   "url": "https://www.ifccenter.com/films/saloum/",
+   "itemIds": [
+    "tt10756184"
+   ],
+   "basis": "The exhibitor lists Senegal, French and Wolof, and director Jean Luc Herbulot. This supports an African production selection rather than inferring origin from setting alone.",
+   "checked": "2026-09-28"
+  },
+  {
+   "id": "bfi-thailand",
+   "publisher": "BFI",
+   "title": "10 great modern south-east Asian films",
+   "url": "https://www.bfi.org.uk/lists/10-great-modern-south-east-asian-films",
+   "itemIds": [
+    "tt0440803"
+   ],
+   "basis": "BFI explicitly places the 2004 film in Thailand's horror cinema and names both directors.",
+   "checked": "2026-09-28"
+  },
+  {
+   "id": "criterion-backbone",
+   "publisher": "Criterion",
+   "title": "The Devil's Backbone",
+   "url": "https://www.criterion.com/films/27914-the-devil-s-backbone",
+   "itemIds": [
+    "tt0256009"
+   ],
+   "basis": "The director-approved edition lists Mexico and Spain, Spanish language, and 2001. The film is not classified from its Spanish setting alone.",
+   "checked": "2026-09-28"
+  },
+  {
+   "id": "bfi-french",
+   "publisher": "BFI",
+   "title": "10 great French horror films",
+   "url": "https://www.bfi.org.uk/lists/10-great-french-horror-films",
+   "itemIds": [
+    "tt4954522",
+    "tt0856288",
+    "tt1029234"
+   ],
+   "basis": "BFI selects these films as French horror and discusses New French Extremity. The original 2007 Inside and 2008 Martyrs are used.",
+   "checked": "2026-09-28"
+  },
+  {
+   "id": "shudder-impetigore",
+   "publisher": "Shudder",
+   "title": "Impetigore",
+   "url": "https://www.shudder.com/movies/watch/impetigore/45f9b1649a894e89?quot=",
+   "itemIds": [
+    "tt9000302"
+   ],
+   "basis": "Official distributor identifies Joko Anwar, Indonesian language and the ancestral-village curse. This legacy page supports film identity, not current availability.",
+   "checked": "2026-09-28"
+  },
+  {
+   "id": "ifc-evil",
+   "publisher": "IFC Center",
+   "title": "When Evil Lurks",
+   "url": "https://www.ifccenter.com/films/when-evil-lurks/",
+   "itemIds": [
+    "tt16300962"
+   ],
+   "basis": "The exhibitor lists Argentina and USA, Spanish language, and Argentine director Demian Rugna. The US co-production credit is preserved.",
+   "checked": "2026-09-28"
+  },
+  {
+   "id": "shudder-slaves",
+   "publisher": "Shudder",
+   "title": "Satan's Slaves",
+   "url": "https://www.shudder.com/movies/watch/satan-s-slaves/4109312",
+   "itemIds": [
+    "tt7076834"
+   ],
+   "basis": "Official distributor identifies Joko Anwar's 2017 Indonesian-language film. This is not the 1980 film or its 2022 sequel.",
+   "checked": "2026-09-28"
+  },
+  {
+   "id": "bfi-dumplings",
+   "publisher": "BFI",
+   "title": "10 great films set in Hong Kong",
+   "url": "https://www.bfi.org.uk/lists/10-great-films-set-hong-kong",
+   "itemIds": [
+    "tt0472458"
+   ],
+   "basis": "BFI identifies Fruit Chan's 2004 standalone feature, expanded from Three... Extremes, and examines its Hong Kong social context. Country is also present in saved metadata.",
+   "checked": "2026-09-28"
+  },
+  {
+   "id": "afc-goodnight",
+   "publisher": "Austrian Films / Ulrich Seidl Film",
+   "title": "Goodnight Mommy official pressbook",
+   "url": "https://www.austrianfilms.com/jart/prj3/afc-new/data/uploads/film_downloads/GoodnightMommy_pressbook.pdf",
+   "itemIds": [
+    "tt3086442"
+   ],
+   "basis": "Production pressbook lists Austria, 2014 and directors Veronika Franz and Severin Fiala, distinguishing the original from the American remake.",
+   "checked": "2026-09-28"
+  },
+  {
+   "id": "criterion-llorona",
+   "publisher": "Criterion",
+   "title": "La Llorona",
+   "url": "https://www.criterion.com/films/33103-la-llorona",
+   "itemIds": [
+    "tt10767168"
+   ],
+   "basis": "Criterion identifies Guatemala and Jayro Bustamante's 2019 political folk horror, not the unrelated US studio film.",
+   "checked": "2026-09-28"
+  },
+  {
+   "id": "bfi-host-korea",
+   "publisher": "BFI",
+   "title": "10 great modern South Korean films",
+   "url": "https://www.bfi.org.uk/lists/10-great-modern-south-korean-films",
+   "itemIds": [
+    "tt0468492"
+   ],
+   "basis": "BFI identifies Bong Joon-ho's 2006 Korean monster film.",
+   "checked": "2026-09-28"
+  },
+  {
+   "id": "arrow-eye",
+   "publisher": "Arrow Films",
+   "title": "Arrow Video Channel May new releases",
+   "url": "https://www.arrowfilms.com/blog/news/check-out-mays-new-releases-on-the-arrow-video-channel/",
+   "itemIds": [
+    "tt0325655"
+   ],
+   "basis": "The distributor identifies the Pang brothers' 2002 Hong Kong horror original and its corneal-transplant premise. The dated program is not used as a current availability claim.",
+   "checked": "2026-09-28"
+  },
+  {
+   "id": "bfi-medium",
+   "publisher": "BFI London Film Festival",
+   "title": "Lost souls: faith and the occult in the Cult strand",
+   "url": "https://www.bfi.org.uk/london-film-festival/features/faith-cult-strand",
+   "itemIds": [
+    "tt13446168"
+   ],
+   "basis": "Festival curation identifies the Thai shamanism mock documentary, directed by Banjong Pisanthanakun and produced with Na Hong-jin.",
+   "checked": "2026-09-28"
+  },
+  {
+   "id": "shudder-queen",
+   "publisher": "Shudder",
+   "title": "The Queen of Black Magic",
+   "url": "https://pre-prod.shudder.com/movies/watch/the-queen-of-black-magic/9ed29f0dc3f45ffa",
+   "itemIds": [
+    "tt10656188"
+   ],
+   "basis": "Distributor synopsis identifies Kimo Stamboel's Indonesian orphanage-revenge film. Its release label is 2020; saved movie metadata uses original 2019. No service availability is inferred.",
+   "checked": "2026-09-28"
+  },
+  {
+   "id": "shudder-terrified",
+   "publisher": "Shudder",
+   "title": "Terrified",
+   "url": "https://www.shudder.com/movies/watch/terrified/4436477?pp=1",
+   "itemIds": [
+    "tt7549892"
+   ],
+   "basis": "Distributor synopsis identifies Demian Rugna's Buenos Aires horror. Its 2018 release label differs from the saved 2017 original-release metadata.",
+   "checked": "2026-09-28"
+  },
+  {
+   "id": "bfi-baskin",
+   "publisher": "BFI",
+   "title": "Baskin (2015)",
+   "url": "https://www.bfi.org.uk/film/2f6b6c0b-b50e-5e1b-a79d-6b78084221a7/baskin",
+   "itemIds": [
+    "tt4935418"
+   ],
+   "basis": "BFI lists Turkey and USA and director Can Evrenol. Country credits vary by source: Cinemeta lists Turkey only; BFI's co-production information is preserved in this note.",
+   "checked": "2026-09-28"
+  },
+  {
+   "id": "ifc-baskin",
+   "publisher": "IFC Center",
+   "title": "Baskin",
+   "url": "https://www.ifccenter.com/films/baskin/",
+   "itemIds": [
+    "tt4935418"
+   ],
+   "basis": "The exhibitor lists Turkish language and Turkey and describes the supernatural police-raid premise.",
+   "checked": "2026-09-28"
+  },
+  {
+   "id": "tribeca-huesera",
+   "publisher": "Tribeca Festival",
+   "title": "Huesera: 2022 program",
+   "url": "https://tribecafilm.com/festival/archive/huesera-2022",
+   "itemIds": [
+    "tt11718516"
+   ],
+   "basis": "The world-premiere program explicitly lists Mexico and Peru, Spanish language and the horror category.",
+   "checked": "2026-09-28"
+  },
+  {
+   "id": "cannes-atlantics",
+   "publisher": "Festival de Cannes",
+   "title": "Atlantique by Mati Diop",
+   "url": "https://www.festival-cannes.com/en/2019/atlantique-atlantics-by-mati-diop-the-luminous-wreckage-of-senegalese-youth/",
+   "itemIds": [
+    "tt10199586"
+   ],
+   "basis": "Cannes discusses French-Senegalese filmmaker Mati Diop and her Wolof-language Dakar story. Saved metadata retains its France/Senegal/Belgium production credits.",
+   "checked": "2026-09-28"
+  },
+  {
+   "id": "sxsw-gaia",
+   "publisher": "SXSW",
+   "title": "2021 Film Festival slate",
+   "url": "https://sxsw.com/wp-content/uploads/2021/03/SXSW-2021-Full-Slate-Release-FINAL-4.pdf",
+   "itemIds": [
+    "tt11881160"
+   ],
+   "basis": "The official Midnighters slate lists Gaia as South Africa, directed by Jaco Bouwer, and describes its forest-based supernatural threat.",
+   "checked": "2026-09-28"
+  },
+  {
+   "id": "fantasia-soul",
+   "publisher": "Fantasia International Film Festival",
+   "title": "2019 schedule and film guide",
+   "url": "https://fantasiafestival.com/uploads/FT19-Schedule-Guide-04.pdf",
+   "itemIds": [
+    "tt7320482"
+   ],
+   "basis": "The world-premiere listing identifies 8 as South African folkloric horror directed by Harold Holscher. The Soul Collector is the alternate distribution title.",
+   "checked": "2026-09-28"
+  },
+  {
+   "id": "chicago-soul",
+   "publisher": "Chicago International Film Festival",
+   "title": "2019 After Dark program",
+   "url": "https://www.chicagofilmfestival.com/eeek-after-dark-program-announced-for-55th-chicago-international-film-festival/",
+   "itemIds": [
+    "tt7320482"
+   ],
+   "basis": "The festival identifies 8: A South African Horror Story and the inherited-farm/Lazarus premise, corroborating the alternate title and origin.",
+   "checked": "2026-09-28"
+  },
+  {
+   "id": "bfi-onecut",
+   "publisher": "BFI",
+   "title": "10 great films about making a horror film",
+   "url": "https://www.bfi.org.uk/lists/10-great-films-about-making-horror-film",
+   "itemIds": [
+    "tt7914416"
+   ],
+   "basis": "BFI identifies Shinichiro Ueda's 2017 zombie-film production comedy, included as a lighter horror selection.",
+   "checked": "2026-09-28"
+  },
+  {
+   "id": "dekanalog-detention",
+   "publisher": "Dekanalog",
+   "title": "Detention",
+   "url": "https://dekanalog.com/film/detention-detail",
+   "itemIds": [
+    "tt10805432"
+   ],
+   "basis": "The distributor explicitly lists Taiwan, 2019 and John Hsu's school-set White Terror ghost story.",
+   "checked": "2026-09-28"
+  },
+  {
+   "id": "bfi-climax",
+   "publisher": "BFI",
+   "title": "Climax (2018)",
+   "url": "https://www.bfi.org.uk/film/bb95ea0c-9951-5da5-9b91-ed1e117b1819/climax",
+   "itemIds": [
+    "tt8359848"
+   ],
+   "basis": "BFI lists France and Belgium and Gaspar Noe. Its inclusion follows the existing horror catalog and saved metadata genres.",
+   "checked": "2026-09-28"
+  },
+  {
+   "id": "criterion-cronos",
+   "publisher": "Criterion",
+   "title": "Cronos",
+   "url": "https://www.criterion.com/films/27534-cronos",
+   "itemIds": [
+    "tt0104029"
+   ],
+   "basis": "The director-approved edition lists Mexico, Spanish and 1993. This primary release reference is used for the displayed year; Cinemeta and BFI use 1992.",
+   "checked": "2026-09-28"
+  },
+  {
+   "id": "bfi-goodmanners",
+   "publisher": "BFI",
+   "title": "10 great Brazilian horror films",
+   "url": "https://www.bfi.org.uk/lists/10-great-brazilian-horror-films",
+   "itemIds": [
+    "tt5480782"
+   ],
+   "basis": "BFI identifies Marco Dutra and Juliana Rojas's 2017 film within Brazilian horror. Additional co-production countries are retained from metadata.",
+   "checked": "2026-09-28"
+  },
+  {
+   "id": "bfi-devil",
+   "publisher": "BFI / Sight and Sound",
+   "title": "Off the shelf: Korean Cinema Fan Club",
+   "url": "https://www.bfi.org.uk/sight-and-sound/features/off-the-shelf-korean-cinema-fan-club",
+   "itemIds": [
+    "tt1588170"
+   ],
+   "basis": "The Korean-cinema essay discusses Kim Jee-woon's 2010 revenge thriller. It is included at horror's thriller boundary.",
+   "checked": "2026-09-28"
+  },
+  {
+   "id": "paths-bfi-giallo",
+   "publisher": "BFI",
+   "title": "Where to begin with giallo",
+   "url": "https://www.bfi.org.uk/features/where-begin-giallo",
+   "itemIds": [
+    "tt0073582"
+   ],
+   "basis": "Chris Gallant traces the Italian murder-mystery tradition and identifies these films within it. Genre boundaries are treated as flexible.",
+   "checked": "2026-09-28",
+   "reusedFrom": "horror-paths-sources.json"
+  },
+  {
+   "id": "paths-severin-folk",
+   "publisher": "Severin Films",
+   "title": "All the Haunts Be Ours: A Compendium of Folk Horror, Volume One",
+   "url": "https://severinfilms.com/collections/horror/products/folk-horror-box",
+   "itemIds": [
+    "tt0062453",
+    "tt0064546"
+   ],
+   "basis": "All three appear in the distributor's folk-horror collection curated by Kier-La Janisse. This is curatorial evidence, not a current streaming claim.",
+   "checked": "2026-09-28",
+   "reusedFrom": "horror-paths-sources.json"
+  },
+  {
+   "id": "paths-bfi-body",
+   "publisher": "BFI",
+   "title": "10 great body horror films",
+   "url": "https://www.bfi.org.uk/lists/10-great-body-horror-films",
+   "itemIds": [
+    "tt10944760"
+   ],
+   "basis": "Matthew Thrift selects these films for bodily mutation and transformation. The Fly entry discusses its practical effects.",
+   "checked": "2026-09-28",
+   "reusedFrom": "horror-paths-sources.json"
+  },
+  {
+   "id": "paths-bfi-found",
+   "publisher": "BFI",
+   "title": "10 great found-footage films",
+   "url": "https://www.bfi.org.uk/lists/10-great-found-footage-films",
+   "itemIds": [
+    "tt0930083",
+    "tt1038988",
+    "tt18968540"
+   ],
+   "basis": "Billie Walker includes these examples, covering mock broadcasts, documentary forms and recovered recordings.",
+   "checked": "2026-09-28",
+   "reusedFrom": "horror-paths-sources.json"
+  }
+ ]
+}

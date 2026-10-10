@@ -1,7 +1,9 @@
 import { memo } from "react";
 import type { ComponentProps } from "react";
 import type { PlayerSnapshot } from "@/lib/player/bridge";
+import { mapErrorSourceKey } from "@/lib/player/html5/error-map";
 import type { PlayerSrc } from "@/lib/view";
+import { isLivePlaybackSrc } from "@/lib/player/live-src";
 import { CinematicPlayerLoader } from "./cinematic-player-loader";
 import { LiveChannelError } from "./live-channel-error";
 import { LocalFileError } from "./local-file-error";
@@ -11,6 +13,7 @@ export const LoaderLayer = memo(function LoaderLayer({
   snap,
   isLocalSrc,
   forceShow,
+  sourceFailed,
   onCancel,
   engineStats,
   onShowingChange,
@@ -21,13 +24,14 @@ export const LoaderLayer = memo(function LoaderLayer({
   snap: PlayerSnapshot;
   isLocalSrc: boolean;
   forceShow: boolean;
+  sourceFailed: boolean;
   onCancel: () => void;
   engineStats: ComponentProps<typeof CinematicPlayerLoader>["engineStats"];
   onShowingChange: (showing: boolean) => void;
   onRetry: () => void;
   onBrowseChannels?: () => void;
 }) {
-  const isLiveSrc = src.meta.id.startsWith("iptv:");
+  const isLiveSrc = isLivePlaybackSrc(src);
   return (
     <>
       {(isLocalSrc || isLiveSrc) && snap.errorCode != null ? null : (
@@ -35,6 +39,7 @@ export const LoaderLayer = memo(function LoaderLayer({
           src={src}
           snap={snap}
           forceShow={forceShow}
+          failed={sourceFailed && !isLocalSrc && !isLiveSrc}
           onCancel={onCancel}
           engineStats={engineStats}
           onShowingChange={onShowingChange}
@@ -44,7 +49,8 @@ export const LoaderLayer = memo(function LoaderLayer({
       {isLocalSrc && snap.errorCode != null && (
         <LocalFileError
           path={src.url}
-          errorMessage={snap.errorMessage}
+          errorSourceKey={mapErrorSourceKey(snap.errorCode)}
+          errorDetail={snap.errorMessage}
           onBack={onCancel}
           onRetry={onRetry}
         />

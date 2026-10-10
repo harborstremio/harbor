@@ -2,7 +2,9 @@ use std::sync::Arc;
 
 use serde::{Deserialize, Serialize};
 use serde_json::Value;
-use tauri::{AppHandle, Emitter, LogicalPosition, LogicalSize, Manager, WebviewUrl, WebviewWindowBuilder};
+use tauri::{
+    AppHandle, Emitter, LogicalPosition, LogicalSize, Manager, WebviewUrl, WebviewWindowBuilder,
+};
 use tokio::sync::Mutex;
 
 const OVERLAY_LABEL: &str = "harbor-modal-overlay";
@@ -71,8 +73,8 @@ pub async fn modal_overlay_open(
     let popup_size = (size.width, size.height);
     app.run_on_main_thread(move || {
         let url = WebviewUrl::App("index.html?harbor-modal=1".into());
-        let result = WebviewWindowBuilder::new(&app_clone, OVERLAY_LABEL, url)
-            .title("Harbor Modal")
+        let builder = WebviewWindowBuilder::new(&app_clone, OVERLAY_LABEL, url)
+            .title(concat!(crate::product_name!(), " Modal"))
             .inner_size(popup_size.0, popup_size.1)
             .position(pos.x, pos.y)
             .resizable(false)
@@ -81,8 +83,8 @@ pub async fn modal_overlay_open(
             .skip_taskbar(true)
             .shadow(false)
             .visible(true)
-            .focused(true)
-            .build();
+            .focused(true);
+        let result = crate::browser_args::match_main(&app_clone, builder).build();
         match result {
             Ok(window) => {
                 let _ = window.set_focus();
@@ -131,10 +133,7 @@ pub async fn modal_overlay_close(
 }
 
 #[tauri::command]
-pub async fn modal_overlay_emit_state(
-    app: AppHandle,
-    payload: ModalPayload,
-) -> Result<(), String> {
+pub async fn modal_overlay_emit_state(app: AppHandle, payload: ModalPayload) -> Result<(), String> {
     let _ = app.emit_to(OVERLAY_LABEL, "modal://state", payload);
     Ok(())
 }
@@ -146,6 +145,16 @@ pub async fn modal_overlay_emit_action(
     payload: Value,
 ) -> Result<(), String> {
     let _ = app.emit_to("main", &event, payload);
+    Ok(())
+}
+
+#[tauri::command]
+pub async fn modal_overlay_emit_result(
+    app: AppHandle,
+    event: String,
+    payload: Value,
+) -> Result<(), String> {
+    let _ = app.emit_to(OVERLAY_LABEL, &event, payload);
     Ok(())
 }
 

@@ -1,25 +1,8 @@
 import { safeFetch } from "@/lib/safe-fetch";
 import { SIMKL_APP_NAME, SIMKL_APP_VERSION, SIMKL_CLIENT_ID } from "../config";
 import type { SimklItem } from "../types";
-
-export interface SimklCdnItem {
-  title: string;
-  poster?: string;
-  date: string;
-  release_date?: string;
-  ids?: {
-    simkl_id?: number;
-    slug?: string;
-    tmdb?: string | number;
-    imdb?: string;
-    mal?: string | number;
-    kitsu?: string | number;
-  };
-  episode?: {
-    season?: number;
-    episode?: number;
-  };
-}
+import { parseSimklCalendar, type SimklCdnItem } from "../calendar-data";
+export type { SimklCdnItem } from "../calendar-data";
 
 const APP_QS = `client_id=${SIMKL_CLIENT_ID}&app-name=${SIMKL_APP_NAME}&app-version=${SIMKL_APP_VERSION}`;
 const UA = `${SIMKL_APP_NAME}/${SIMKL_APP_VERSION}`;
@@ -119,11 +102,11 @@ export async function fetchCdnCalendarCombined(): Promise<SimklCdnItem[]> {
   }
 
   const fetchCatalog = async (catalog: "tv" | "anime"): Promise<SimklCdnItem[]> => {
-    const url = `https://data.simkl.in/calendar/${catalog}.json?${APP_QS}`;
+    const url = `https://data.simkl.in/calendar/v2/${catalog}.json?${APP_QS}`;
     try {
       const res = await safeFetch(url, { headers: { "User-Agent": UA } });
       if (!res.ok) return [];
-      return (await res.json()) as SimklCdnItem[];
+      return parseSimklCalendar(await res.json());
     } catch {
       return [];
     }

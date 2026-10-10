@@ -44,8 +44,7 @@ export function LeaveConfirmModal() {
 
   return (
     <div
-      data-tv-focus-scope
-      className="absolute inset-0 z-[80] flex items-center justify-center bg-black/70 backdrop-blur-sm"
+      className="absolute inset-0 z-[110] flex items-center justify-center bg-black/70 backdrop-blur-sm"
       onClick={closeLeaveConfirm}
     >
       <div
@@ -68,7 +67,6 @@ export function LeaveConfirmModal() {
         <div className="mt-6 flex gap-3">
           <button
             onClick={closeLeaveConfirm}
-            data-tv-modal-close
             className="h-12 flex-1 rounded-xl bg-elevated text-[16px] font-semibold text-ink transition-colors hover:bg-raised"
           >
             {t("Keep watching")}

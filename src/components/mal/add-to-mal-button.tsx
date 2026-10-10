@@ -2,6 +2,7 @@ import { Check, ChevronDown, Plus, Trash2 } from "lucide-react";
 import { useEffect, useRef, useState } from "react";
 import malLogo from "@/assets/mal.png";
 import { AnchoredMenu } from "@/components/anchored-menu";
+import { HoverTooltip } from "@/components/hover-tooltip";
 import {
   deleteListEntry,
   fetchListEntry,
@@ -33,35 +34,38 @@ export function AddToMalButton({ harborId, title }: { harborId: string; title: s
   const { isConnected } = useMal();
   const [malId, setMalId] = useState<number | null>(null);
   const [status, setStatus] = useState<MalListStatus | null>(null);
-  const [ready, setReady] = useState(false);
   const [busy, setBusy] = useState(false);
   const [menuOpen, setMenuOpen] = useState(false);
+  const [attempt, setAttempt] = useState(0);
   const btnRef = useRef<HTMLButtonElement>(null);
+
+  useEffect(() => {
+    setAttempt(0);
+  }, [harborId]);
 
   useEffect(() => {
     if (!isConnected) return;
     let cancelled = false;
-    setReady(false);
+    let timer: number | undefined;
     (async () => {
-      const id = await resolveMalMediaId(harborId);
+      const id = await resolveMalMediaId(harborId).catch(() => null);
       if (cancelled) return;
       if (id == null) {
-        setMalId(null);
-        setReady(true);
+        if (attempt < 2) timer = window.setTimeout(() => setAttempt((a) => a + 1), 15000);
         return;
       }
       setMalId(id);
       const info = await fetchListEntry(id).catch(() => null);
       if (cancelled) return;
       setStatus(info?.entry?.status ?? null);
-      setReady(true);
     })();
     return () => {
       cancelled = true;
+      if (timer != null) window.clearTimeout(timer);
     };
-  }, [harborId, isConnected]);
+  }, [harborId, isConnected, attempt]);
 
-  if (!isConnected || !ready || malId == null) return null;
+  if (!isConnected || malId == null) return null;
 
   const setTo = async (next: MalListStatus) => {
     setBusy(true);
@@ -94,17 +98,18 @@ export function AddToMalButton({ harborId, title }: { harborId: string; title: s
 
   if (status == null) {
     return (
-      <button
-        type="button"
-        disabled={busy}
-        onClick={() => void setTo("plan_to_watch")}
-        title={t("Add {title} to MyAnimeList", { title })}
-        className="flex h-12 items-center gap-2.5 rounded-full border border-edge bg-canvas/80 px-6 text-[15px] font-medium text-ink shadow-[inset_0_1px_0_rgba(255,255,255,0.06)] transition-[transform,background-color,border-color] duration-200 hover:border-ink-subtle hover:bg-canvas/95 active:scale-[0.98] disabled:opacity-60"
-      >
-        <img src={malLogo} alt="" className="h-[18px] w-[18px] rounded-[4px] object-contain" />
-        <Plus size={16} strokeWidth={2.2} className="-ms-1" />
-        {t("Add to MAL")}
-      </button>
+      <HoverTooltip label={t("Add {title} to MyAnimeList", { title })} align="center" className="shrink-0">
+        <button
+          type="button"
+          disabled={busy}
+          onClick={() => void setTo("plan_to_watch")}
+          className="flex h-12 items-center gap-2.5 rounded-full border border-edge bg-canvas/80 px-6 text-[15px] font-medium text-ink shadow-[inset_0_1px_0_rgba(255,255,255,0.06)] transition-[transform,background-color,border-color] duration-200 hover:border-ink-subtle hover:bg-canvas/95 active:scale-[0.98] disabled:opacity-60"
+        >
+          <img src={malLogo} alt="" className="h-[18px] w-[18px] rounded-[4px] object-contain" />
+          <Plus size={16} strokeWidth={2.2} className="-ms-1" />
+          {t("Add to MAL")}
+        </button>
+      </HoverTooltip>
     );
   }
 

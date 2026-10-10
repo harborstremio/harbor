@@ -1,0 +1,57 @@
+{
+  "productName": "JL Media Vision",
+  "version": "0.9.28",
+  "identifier": "app.jlnetwork.dev",
+  "app": {
+    "windows": [
+      {
+        "label": "main",
+        "title": "JL Media Vision",
+        "width": 1280,
+        "height": 800,
+        "minWidth": 960,
+        "minHeight": 600,
+        "visible": false,
+        "decorations": false,
+        "transparent": false,
+        "backgroundColor": [0, 0, 0, 255],
+        "shadow": true,
+        "resizable": true,
+        "maximizable": true,
+        "minimizable": true,
+        "center": true,
+        "additionalBrowserArgs": "--disk-cache-size=104857600 --media-cache-size=52428800 --autoplay-policy=no-user-gesture-required --disable-features=HardwareMediaKeyHandling"
+      }
+    ]
+  },
+  "bundle": {
+    "fileAssociations": [
+      {
+        "ext": ["mkv", "mp4", "avi", "mov", "webm", "m4v"],
+        "name": "JLMediaVisionVideo",
+        "description": "Video file",
+        "role": "Viewer"
+      }
+    ],
+    "icon": [
+      "icons-jl/32x32.png",
+      "icons-jl/128x128.png",
+      "icons-jl/128x128@2x.png",
+      "icons-jl/icon.icns",
+      "icons-jl/icon.ico"
+    ],
+    "licenseFile": "installer-jl/eula.txt",
+    "windows": {
+      "nsis": {
+        "installerIcon": "icons-jl/icon.ico",
+        "headerImage": "installer-jl/header.bmp",
+        "sidebarImage": "installer-jl/sidebar.bmp"
+      }
+    }
+  },
+  "plugins": {
+    "updater": {
+      "endpoints": ["https://watch.jl-stream.com/updates/latest.json"]
+    }
+  }
+}

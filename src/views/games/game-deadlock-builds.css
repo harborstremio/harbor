@@ -1,0 +1,43 @@
+.games-deadlock-builds-open { margin-top: 10px; }
+.games-deadlock-builds-modal { min-height: 0; display: flex; flex-direction: column; color: var(--color-ink); }
+.games-deadlock-builds-modal > header { flex: none; display: flex; align-items: center; gap: 16px; padding: 22px 26px; border-bottom: 1px solid var(--color-edge-soft); }
+.games-deadlock-builds-modal > header > img, .games-deadlock-builds-modal > header > .games-art-empty { width: 42px; height: 54px; object-fit: cover; border-radius: 4px; }
+.games-deadlock-builds-modal > header > div { flex: 1; min-width: 0; }
+.games-deadlock-builds-modal header span { color: var(--color-ink-muted); font-size: 13px; }
+.games-deadlock-builds-modal h2 { margin: 4px 0 0; font-size: 21px; line-height: 1.35; font-weight: 600; overflow-wrap: anywhere; }
+.games-deadlock-builds-scroll { padding: 22px 26px 26px; overflow-y: auto; overscroll-behavior: contain; min-height: 0; }
+.games-deadlock-builds-note { color: var(--color-ink-muted); font-size: 14px; line-height: 1.6; margin: 0 0 18px; }
+.games-deadlock-builds-tools { display: flex; align-items: center; flex-wrap: wrap; gap: 10px; margin-bottom: 20px; }
+.games-deadlock-builds-tools form { min-width: 180px; flex: 1; display: flex; gap: 8px; align-items: center; padding-inline: 12px 3px; border-radius: 6px; background: var(--color-elevated); color: var(--color-ink-muted); }
+.games-deadlock-builds-tools form:focus-within { outline: 2px solid var(--color-ink-muted); outline-offset: 2px; }
+.games-deadlock-builds-tools input { width: 100%; min-width: 0; border: 0; background: transparent; color: var(--color-ink); padding-block: 12px; font-size: 14px; }
+.games-deadlock-builds-tools input:focus { outline: none; }
+.games-deadlock-build-list { display: grid; gap: 5px; }
+.games-deadlock-build-list > button { text-align: start; padding: 15px 14px; border-radius: 6px; min-width: 0; color: var(--color-ink); background: var(--color-elevated); }
+.games-deadlock-build-list > button:hover { background: var(--color-raised); }
+.games-deadlock-build-list strong { display: block; font-size: 16px; font-weight: 550; overflow-wrap: anywhere; }
+.games-deadlock-build-list > button > span { display: flex; flex-wrap: wrap; gap: 8px 18px; margin-top: 7px; font-size: 13px; color: var(--color-ink-muted); }
+.games-deadlock-build-list small { display: inline-flex; align-items: center; gap: 5px; font-size: inherit; }
+.games-deadlock-builds-pages { display: flex; align-items: center; justify-content: space-between; gap: 12px; padding-block: 20px; color: var(--color-ink-muted); font-size: 14px; }
+.games-deadlock-builds-pages button:disabled { opacity: .45; }
+.games-deadlock-builds-status { display: flex; flex-wrap: wrap; align-items: center; gap: 12px; padding-block: 16px; color: var(--color-ink-muted); font-size: 14px; line-height: 1.6; }
+.games-deadlock-builds-loading { display: grid; gap: 6px; }
+.games-deadlock-builds-loading i { display: block; height: 80px; border-radius: 6px; }
+.games-deadlock-build-meta { display: flex; flex-wrap: wrap; align-items: center; gap: 10px 16px; color: var(--color-ink-muted); font-size: 13px; margin-bottom: 14px; }
+.games-deadlock-build-meta button { margin-inline-start: auto; }
+.games-deadlock-build-guide code { color: var(--color-ink); user-select: text; }
+.games-deadlock-build-author-note { white-space: pre-wrap; overflow-wrap: anywhere; color: var(--color-ink); font-size: 14px; line-height: 1.65; margin: 12px 0 22px; user-select: text; }
+.games-deadlock-build-group { padding-block: 16px 22px; border-top: 1px solid var(--color-edge-soft); }
+.games-deadlock-build-group > div { display: flex; align-items: baseline; flex-wrap: wrap; gap: 10px; }
+.games-deadlock-build-group h3 { font-size: 17px; line-height: 1.5; margin: 0; font-weight: 600; overflow-wrap: anywhere; }
+.games-deadlock-build-group > div > span { font-size: 13px; color: var(--color-ink-muted); }
+.games-deadlock-build-group ol { list-style: none; padding: 0; margin: 14px 0 0; display: grid; grid-template-columns: repeat(2,minmax(0,1fr)); gap: 14px 22px; }
+.games-deadlock-build-group li { display: flex; align-items: flex-start; gap: 12px; min-width: 0; }
+.games-deadlock-build-group li > img, .games-deadlock-build-group li > .games-art-empty { width: 48px; height: 48px; object-fit: contain; flex: 0 0 48px; border-radius: 5px; background: var(--color-elevated); }
+.games-deadlock-build-group li > div { min-width: 0; }
+.games-deadlock-build-group li strong { font-size: 15px; font-weight: 550; line-height: 1.5; display: block; overflow-wrap: anywhere; }
+.games-deadlock-build-group li span { display: block; font-size: 13px; color: var(--color-ink-muted); line-height: 1.6; }
+.games-deadlock-build-group li p { margin: 5px 0 0; white-space: pre-wrap; overflow-wrap: anywhere; font-size: 14px; line-height: 1.55; }
+.games-deadlock-builds-modal button:focus-visible, .games-deadlock-builds-modal a:focus-visible { outline: 2px solid var(--color-accent); outline-offset: 2px; }
+html[dir="rtl"] .games-deadlock-builds-modal header > button:first-child svg, html[dir="rtl"] .games-deadlock-builds-pages svg { transform: scaleX(-1); }
+@media(max-width: 650px) { .games-deadlock-builds-backdrop { padding: 14px; }.games-deadlock-builds-modal > header, .games-deadlock-builds-scroll { padding: 18px; }.games-deadlock-builds-tools form { flex-basis: 100%; }.games-deadlock-build-group ol { grid-template-columns: 1fr; }.games-deadlock-build-meta button { margin-inline-start: 0; }.games-deadlock-builds-pages { gap: 8px; }.games-deadlock-builds-pages .games-button { padding-inline: 10px; } }

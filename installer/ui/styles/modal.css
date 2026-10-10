@@ -1,0 +1,171 @@
+.hb-modal-scrim {
+  position: fixed;
+  inset: 0;
+  z-index: 120;
+  display: grid;
+  place-items: center;
+  padding: 40px;
+  background: oklch(0.12 0.004 260 / 0.8);
+  animation: modal-scrim-in 200ms var(--ease) both;
+}
+
+.hb-modal-scrim.is-out {
+  animation: modal-scrim-out 180ms var(--ease) both;
+}
+
+.hb-modal {
+  position: relative;
+  width: min(592px, 100%);
+  max-height: 100%;
+  display: flex;
+  flex-direction: column;
+  min-height: 0;
+  border-radius: var(--r-sm);
+  background: var(--elevated);
+  animation: modal-panel-in 320ms var(--ease) both;
+}
+
+.hb-modal-scrim.is-out .hb-modal {
+  animation: modal-panel-out 180ms var(--ease) both;
+}
+
+.hb-modal-body {
+  flex: 1 1 auto;
+  min-height: 0;
+  overflow-y: auto;
+  overscroll-behavior: contain;
+  padding: 24px 26px 26px;
+}
+
+.hb-modal-body::-webkit-scrollbar {
+  width: 3px;
+}
+
+.hb-modal-body::-webkit-scrollbar-thumb {
+  border-radius: var(--r-pill);
+  background: var(--edge-soft);
+}
+
+.hb-modal-action {
+  position: absolute;
+  top: 10px;
+  right: 10px;
+  z-index: 1;
+  width: 38px;
+  height: 38px;
+  border-radius: var(--r-sm);
+  display: grid;
+  place-items: center;
+  background: transparent;
+  cursor: pointer;
+}
+
+[dir='rtl'] .hb-modal-action {
+  right: auto;
+  left: 10px;
+}
+
+.hb-modal-action:disabled {
+  cursor: default;
+}
+
+.hb-modal-action-icon {
+  width: 17px;
+  height: 17px;
+  background: var(--ink-subtle);
+  -webkit-mask-image: url("../assets/icon-download.svg");
+  mask-image: url("../assets/icon-download.svg");
+  -webkit-mask-repeat: no-repeat;
+  mask-repeat: no-repeat;
+  -webkit-mask-position: center;
+  mask-position: center;
+  -webkit-mask-size: contain;
+  mask-size: contain;
+  transition: background-color var(--t-hover) var(--ease);
+}
+
+.hb-modal-action:hover:not(:disabled) .hb-modal-action-icon {
+  background: var(--ink);
+}
+
+.hb-modal-action.is-done .hb-modal-action-icon {
+  background: var(--accent);
+}
+
+.hb-modal-legal {
+  margin: 0;
+  font-family: var(--font-mono);
+  font-size: 11.5px;
+  line-height: 19px;
+  color: var(--ink-muted);
+  white-space: pre-wrap;
+}
+
+.hb-modal-p {
+  margin: 0 0 12px;
+  color: var(--ink-muted);
+}
+
+.hb-license-line {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  flex-wrap: wrap;
+  color: var(--ink-subtle);
+}
+
+.hb-license-link {
+  font: inherit;
+  padding: 0;
+  background: none;
+  color: var(--accent);
+  cursor: pointer;
+  text-decoration: underline;
+  text-decoration-color: transparent;
+  text-underline-offset: 3px;
+  transition: text-decoration-color var(--t-hover) var(--ease);
+}
+
+.hb-license-link:hover {
+  text-decoration-color: var(--accent);
+}
+
+.hb-license-sep {
+  opacity: 0.5;
+}
+
+@keyframes modal-scrim-in {
+  from { opacity: 0; }
+  to { opacity: 1; }
+}
+
+@keyframes modal-scrim-out {
+  from { opacity: 1; }
+  to { opacity: 0; }
+}
+
+@keyframes modal-panel-in {
+  0% { opacity: 0; transform: translateY(14px) scale(0.97, 0.94); }
+  55% { opacity: 1; transform: translateY(-4px) scale(1.01, 1.03); }
+  78% { transform: translateY(1px) scale(0.998, 0.99); }
+  100% { opacity: 1; transform: translateY(0) scale(1, 1); }
+}
+
+@keyframes modal-panel-out {
+  from { opacity: 1; transform: translateY(0) scale(1, 1); }
+  to { opacity: 0; transform: translateY(8px) scale(0.985, 0.97); }
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .hb-modal-scrim,
+  .hb-modal,
+  .hb-modal-scrim.is-out,
+  .hb-modal-scrim.is-out .hb-modal {
+    animation: none;
+  }
+  .hb-modal-scrim.is-out { opacity: 0; }
+}
+
+.hb-modal:focus {
+  outline: none;
+}

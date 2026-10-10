@@ -1,5 +1,6 @@
 import { useEffect, useMemo, useState } from "react";
 import { isFranchiseExtra, type FranchiseEntry } from "@/lib/providers/anime-detail";
+import { useSettings } from "@/lib/settings";
 import { fetchEntryEpisodes } from "@/lib/providers/anime-franchise-episodes";
 import { parseKitsuId, type KitsuEpisode } from "@/lib/providers/kitsu";
 
@@ -9,6 +10,7 @@ export function useFranchiseEpisodes(
   currentEpisodes: KitsuEpisode[],
   enabled: boolean,
 ): KitsuEpisode[] {
+  const { settings } = useSettings();
   const otherIds = useMemo(() => {
     if (!enabled || franchise.length <= 1) return [] as number[];
     const current = franchise.find((f) => f.meta.id === currentId);
@@ -30,7 +32,7 @@ export function useFranchiseEpisodes(
       return;
     }
     let cancelled = false;
-    void Promise.all(otherIds.map((id) => fetchEntryEpisodes(id).catch(() => [] as KitsuEpisode[]))).then(
+    void Promise.all(otherIds.map((id) => fetchEntryEpisodes(id, settings).catch(() => [] as KitsuEpisode[]))).then(
       (lists) => {
         if (!cancelled) setExtra(lists.flat());
       },
@@ -42,16 +44,22 @@ export function useFranchiseEpisodes(
 
   return useMemo(() => {
     if (!enabled || otherIds.length === 0 || extra.length === 0) return currentEpisodes;
-    const seen = new Set<number>();
+    const keyOf = (ep: KitsuEpisode) =>
+      ep.imdbSeason != null && ep.imdbEpisode != null
+        ? `${ep.sourceMetaId ?? "cur"}|s${ep.imdbSeason}e${ep.imdbEpisode}`
+        : `${ep.sourceMetaId ?? "cur"}:${ep.id}`;
+    const seen = new Set<string>();
     const combined: KitsuEpisode[] = [];
     for (const ep of currentEpisodes) {
-      if (seen.has(ep.id)) continue;
-      seen.add(ep.id);
+      const k = keyOf(ep);
+      if (seen.has(k)) continue;
+      seen.add(k);
       combined.push(ep);
     }
     for (const ep of extra) {
-      if (seen.has(ep.id)) continue;
-      seen.add(ep.id);
+      const k = keyOf(ep);
+      if (seen.has(k)) continue;
+      seen.add(k);
       combined.push(ep);
     }
     combined.sort(

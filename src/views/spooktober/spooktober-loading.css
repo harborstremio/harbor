@@ -1,0 +1,14 @@
+.spooktober-loading-scene { position:relative;display:block;flex:1;width:100%;height:100%;min-height:0;overflow:hidden;isolation:isolate;container-type:size;background:var(--color-canvas);color:var(--color-ink); }
+.spooktober-loading-scenery { position:absolute;inset:0;pointer-events:none;opacity:.48;mask-image:linear-gradient(#000 0 78%,transparent 100%); }
+.spooktober-scenery-svg { display:block;width:100%;height:100%;overflow:visible; }
+.spooktober-scenery-svg .far-depth>path { fill:var(--color-elevated); }
+.spooktober-scenery-svg .far-depth>g { fill:var(--color-canvas); }
+.spooktober-scenery-svg #near-earth stop:first-child { stop-color:var(--color-surface); }
+.spooktober-scenery-svg #near-earth stop:last-child { stop-color:var(--color-canvas); }
+.spooktober-scenery-svg .sky-depth>ellipse,.spooktober-scenery-svg .middle-depth>ellipse { display:none; }
+.spooktober-scenery-svg .art-foreground-wall { display:none!important; }
+.spooktober-loading-title { position:absolute;top:80px;left:clamp(36px,5.4cqw,84px);margin:0;font:400 78px/1.05 SpooktoberNightmare,serif;letter-spacing:-.015em; }
+.spooktober-loading-boat { position:absolute;top:46%;left:50%;translate:-50% -50%;display:flex;flex-direction:column;align-items:center;gap:10px;color:var(--color-ink-muted);font:500 13px/1.5 var(--font-sans); }
+.spooktober-loading-boat p { margin:0;white-space:nowrap; }
+@container (max-width:1100px) { .spooktober-loading-title { font-size:68px; } }
+@container (max-width:750px) { .spooktober-loading-title { top:76px;left:25px;font-size:56px; } }

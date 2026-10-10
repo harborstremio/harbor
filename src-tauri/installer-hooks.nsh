@@ -1,15 +1,19 @@
 !macro NSIS_HOOK_PREINSTALL
-  ; Harbor (#419): force-close any running sidecars (mpv, ffmpeg, ffprobe, yt-dlp, stremio-server) so their
-  ; .exe files aren't locked when we overwrite them during an install / update / reinstall.
-  ; Path-scoped to $INSTDIR so a user's OWN mpv/ffmpeg/yt-dlp running elsewhere is never touched (no regressions),
-  ; and Harbor.exe itself is left out so Tauri's own running-app close handling stays in charge of the main window.
-  nsExec::Exec `powershell -NoProfile -NonInteractive -ExecutionPolicy Bypass -Command "Get-CimInstance Win32_Process | Where-Object { $$_.ExecutablePath -like '$INSTDIR\*' -and $$_.Name -ne 'Harbor.exe' } | ForEach-Object { Stop-Process -Id $$_.ProcessId -Force -ErrorAction SilentlyContinue }"`
+  ; #419/#812: free Harbor's bundled sidecars so their files aren't locked when we overwrite them during
+  ; install/update/reinstall. Native nsis_tauri_utils only (no PowerShell/WMI) so AV/EDR machines can't stall
+  ; the installer in its initial phase and silent updates always finish. CurrentUser scope matches installMode.
+  nsis_tauri_utils::KillProcessCurrentUser "mpv.exe"
   Pop $0
-  ; Fallback for the uniquely-named server sidecar in case PowerShell is unavailable on the machine.
-  ; Wildcard matches both stremio-server.exe and the triple-suffixed stremio-server-<triple>.exe; /T kills children.
+  nsis_tauri_utils::KillProcessCurrentUser "yt-dlp.exe"
+  Pop $0
+  nsis_tauri_utils::KillProcessCurrentUser "ffmpeg.exe"
+  Pop $0
+  nsis_tauri_utils::KillProcessCurrentUser "ffprobe.exe"
+  Pop $0
+  nsis_tauri_utils::KillProcessCurrentUser "stremio-server.exe"
+  Pop $0
+  ; Fallback for the triple-suffixed server sidecar. taskkill is a native tool (not a script host), safe for AV; /T kills children.
   nsExec::Exec 'taskkill /F /T /FI "IMAGENAME eq stremio-server*"'
   Pop $0
-  nsExec::Exec 'taskkill /F /T /IM stremio-server.exe'
-  Pop $0
-  Sleep 1000
+  Sleep 500
 !macroend

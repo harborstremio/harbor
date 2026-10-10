@@ -1,0 +1,49 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 280 520">
+ <title>Hockey-masked slasher in a worn work jacket</title>
+ <!-- Faceted companion illustration. Original supplied Harbor artwork is unchanged. -->
+ <!-- The hanging sleeve has its own inner edge: the space below the armpit is transparent. -->
+ <path d="M181 133 201 141 215 171 226 220 223 266 219 298 195 297 194 270 198 227 188 188 176 165Z" fill="#35453f"/>
+ <path d="m196 141 5 0 14 30 11 49-3 46-4 32-8-2 4-70-11-44Z" fill="#5c685a"/>
+ <path d="m184 155 12 21 10 48-4 43 4 28-11 2-1-27 4-43-10-39Z" fill="#263a32"/>
+ <path d="m198 223 17 4 10-7-2 14-21 3Z" fill="#46554a"/>
+ <path d="m195 289 25 1-1 12-24-2Z" fill="#202f2d"/>
+ <path d="m198 300 17 1 5 11-1 20-7 10-12-3-6-17Z" fill="#909781"/>
+ <path d="m196 305-7 10 1 12 5 3 4-7-1-9 5-9Z" fill="#77856d"/>
+ <path d="m212 305 7 7v20l-7 10-4-7 3-15Z" fill="#56694f"/>
+ <path d="m199 321 2 15m4-15 2 17m4-17 1 15" stroke="#3f5541" stroke-width="1.5" fill="none"/>
+ <!-- Trouser widths follow the tapered jacket rather than flaring into the arms. -->
+ <path d="m91 331 44 9 10 28-22 152H80Zm43 9 41-10 16 190h-48l-9-144Z" fill="#253530"/>
+ <path d="m96 361 24 15-17 144H88Zm54 12 17-18 15 165h-27Z" fill="#3d493e"/>
+ <!-- Short neck, sloping shoulder line, and a waist narrower than the chest. -->
+ <path d="M118 94h29l2 35-17 16-17-18Z" fill="#3c4c40"/>
+ <path d="m136 96 11-2 2 35-17 13-2-17Z" fill="#20342d"/>
+ <path d="M117 119 103 126 83 132 72 147 84 178 91 213 94 279 88 341 104 353 133 345 157 353 181 342 174 278 178 214 190 172 194 149 182 135 159 126 148 119 133 137Z" fill="#47534c"/>
+ <path d="m83 133 20-7 11 18-15 31-15 3-12-31Z" fill="#526050"/>
+ <path d="m159 126 23 9 12 14-4 23-12 42-4 64 7 64-24 11-9-62 3-116Z" fill="#2c3e35"/>
+ <path d="m84 178 18-8 5 49-6 53 5 55-2 26-16-12 6-62-3-66Z" fill="#38483e"/>
+ <path d="m125 140 9-3 11 191-12 17-14-17Z" fill="#172b27"/>
+ <path d="m116 118 15 20-13 23-21-27Zm33 0-15 20 11 23 23-25Z" fill="#657065"/>
+ <path d="m97 184 21 3-1 31-21-4Zm46 1 24-4 2 31-23 7Z" fill="#536050"/>
+ <path d="m97 184 21 3-10 10-12-4Zm46 1 24-4-9 12-13 5Z" fill="#71806b"/>
+ <path d="m95 261 8 7-4 15 8 18-15 10Zm75 13-6 23 8 11-5 22 11-8Z" fill="#22382f"/>
+ <path d="m116 224 3 68m27-65 5 83" fill="none" stroke="#73816e" stroke-width="1.5" opacity=".4"/>
+ <!-- The head and neck overlap under the jacket collar. -->
+ <g transform="translate(18.5 1.4) scale(.86)">
+ <path d="m92 47 8-25 26-13 24 4 21 19 6 24-5 39-16 22-30 3-25-19-9-25Z" fill="#1d302c"/>
+ <path d="m98 40 14-19 20-7 21 8 13 19-4 53-15 21-19-1-21-15-9-24Z" fill="#7d8770"/>
+ <path d="m103 42 12-19 22-7 17 8 11 21-1 27-11 31-15 8-20-9-13-26Z" fill="#c2c2a0"/>
+ <path d="m139 20 15 4 11 21-1 27-11 31-15 8-5-25 8-24Z" fill="#929f84"/>
+ <path d="m102 47 12-7 16 6-3 13-18 3-7-7Zm37 1 15-7 10 5-3 14-17 1Z" fill="#21322c"/>
+ <path d="m107 50 15-3 3 7-14 3Zm37 2 12-6 4 5-3 5-12 1Z" fill="#0e201e"/>
+ <path d="m120 28 28 0-14 13Z" fill="#935145"/>
+ <path d="m106 69 10 7 2 14-10-9Zm45 3-5 17 11-9 3-13Z" fill="#925044"/>
+ <path d="m133 52-5 19 7 6 6-5" fill="#d3d0a9"/>
+ <g fill="#34483a">
+  <circle cx="123" cy="80" r="2.6"/><circle cx="135" cy="83" r="2.6"/><circle cx="146" cy="80" r="2.6"/>
+  <circle cx="122" cy="90" r="2.5"/><circle cx="134" cy="93" r="2.5"/><circle cx="145" cy="90" r="2.5"/>
+  <circle cx="128" cy="102" r="2.1"/><circle cx="139" cy="103" r="2.1"/>
+  <circle cx="106" cy="35" r="2"/><circle cx="159" cy="34" r="2"/><circle cx="103" cy="63" r="2"/><circle cx="163" cy="63" r="2"/>
+ </g>
+ <path d="m110 30 6-7m37 73-5 6m-36-44 2 6" stroke="#d8d5b0" stroke-width="1.8" fill="none"/>
+ </g>
+</svg>

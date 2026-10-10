@@ -1,7 +1,15 @@
-import { ChevronDown, Code2, Layout as LayoutIcon, Palette } from "lucide-react";
+import { RotateCcw, Shuffle } from "../../icons";
 import { useState, type ReactNode } from "react";
 import type { CodeLang } from "@/components/code-editor";
-import type { ChromeConfig, ThemeButtonStyle, ThemeCardStyle, ThemePreset } from "@/lib/theme";
+import { useT } from "@/lib/i18n";
+import {
+  DEFAULT_CUSTOM_COLORS,
+  THEME_PRESETS,
+  type ChromeConfig,
+  type ThemeButtonStyle,
+  type ThemeCardStyle,
+  type ThemePreset,
+} from "@/lib/theme";
 import { CardCssPopout } from "./card-css-popout";
 import { CodeSection } from "./code-section";
 import { ColorsGrid } from "./colors-grid";
@@ -10,16 +18,18 @@ import { FontPicker } from "./font-picker";
 import { IdentityRow } from "./identity-row";
 import { LayoutPicker } from "./layout-picker";
 import { NavEditor } from "./nav-editor";
+import { PresetGallery } from "./preset-gallery";
 import { StylePicker } from "./style-picker";
-import { StyleSpecimen } from "./style-specimen";
+import { ROW_DESC, ToggleRow } from "../../shared";
+import { StudioSection } from "./controls/studio-section";
 import type { Draft } from "./studio-types";
 
 type Tab = "look" | "layout" | "code";
 
-const TABS: Array<{ id: Tab; label: string; icon: ReactNode }> = [
-  { id: "look", label: "Look", icon: <Palette size={18} strokeWidth={2.2} /> },
-  { id: "layout", label: "Layout", icon: <LayoutIcon size={18} strokeWidth={2.2} /> },
-  { id: "code", label: "Code", icon: <Code2 size={18} strokeWidth={2.2} /> },
+const TABS: Array<{ id: Tab; label: string }> = [
+  { id: "look", label: "Look" },
+  { id: "layout", label: "Layout" },
+  { id: "code", label: "Code" },
 ];
 
 export function Inspector({
@@ -39,102 +49,146 @@ export function Inspector({
 }) {
   const [tab, setTab] = useState<Tab>("look");
   const [cardCssOpen, setCardCssOpen] = useState(false);
+  const t = useT();
+
+  const shuffle = () => {
+    const list = Object.values(THEME_PRESETS);
+    if (list.length) onSeed(list[Math.floor(Math.random() * list.length)]);
+  };
 
   return (
     <div className="flex min-h-0 flex-1 flex-col">
-      <div className="flex shrink-0 items-center gap-1 border-b border-edge-soft px-5 py-2.5">
-        {TABS.map((t) => {
-          const active = tab === t.id;
-          return (
-            <button
-              key={t.id}
-              type="button"
-              onClick={() => setTab(t.id)}
-              className={`flex h-12 flex-1 items-center justify-center gap-1.5 rounded-lg text-[15px] font-semibold transition-colors ${
-                active
-                  ? "bg-accent-soft text-ink ring-1 ring-inset ring-accent"
-                  : "text-ink-muted hover:bg-elevated/50 hover:text-ink"
-              }`}
-            >
-              {t.icon}
-              {t.label}
-            </button>
-          );
-        })}
+      <div className="shrink-0 px-5 pb-1 pt-4">
+        <div className="flex items-center gap-1 rounded-md bg-raised p-1">
+          {TABS.map((item) => {
+            const active = tab === item.id;
+            return (
+              <button
+                key={item.id}
+                type="button"
+                onClick={() => setTab(item.id)}
+                aria-pressed={active}
+                className={`harbor-studio-tab flex h-11 flex-1 items-center justify-center rounded-md text-[15.5px] font-semibold transition-colors ${
+                  active
+                    ? "bg-canvas text-ink ring-1 ring-edge"
+                    : "text-ink-muted hover:bg-surface hover:text-ink"
+                }`}
+              >
+                <span
+                  key={active ? "on" : "off"}
+                  className={active ? "harbor-studio-pop" : undefined}
+                >
+                  {t(item.label)}
+                </span>
+              </button>
+            );
+          })}
+        </div>
       </div>
 
       <div className="min-h-0 flex-1 overflow-y-auto">
-        <div key={tab} className="animate-[studioTabIn_220ms_ease-out]">
-        {tab === "look" && (
-          <div className="flex flex-col">
-            <Group title="Identity" sub="What this theme is called.">
-              <IdentityRow
-                name={draft.name}
-                blurb={draft.blurb}
-                onChange={(p) => onPatch(p)}
-                onSeed={onSeed}
-              />
-            </Group>
-            <Group title="Colors" sub="Every surface in Harbor maps to one of these.">
-              <ColorsGrid colors={draft.colors} onChange={(colors) => onPatch({ colors })} />
-              <StyleSpecimen colors={draft.colors} />
-            </Group>
-            <Group title="Cards" sub="How thumbnails and panels render." defaultOpen={false}>
-              <StylePicker
-                kind="card"
-                value={draft.cardStyle}
-                onChange={(v) => onPatch({ cardStyle: v as ThemeCardStyle })}
-                onEditCustom={() => setCardCssOpen(true)}
-              />
-            </Group>
-            <Group title="Buttons" sub="Surface treatment for action buttons." defaultOpen={false}>
-              <StylePicker
-                kind="button"
-                value={draft.buttonStyle}
-                onChange={(v) => onPatch({ buttonStyle: v as ThemeButtonStyle })}
-              />
-            </Group>
-            <Group title="Typography" sub="Display + body type pairing, or upload your own font.">
-              <FontPicker
-                pairValue={draft.fontPair}
-                customValue={draft.customFontId}
-                onPickPair={(fontPair) => onPatch({ fontPair, customFontId: null })}
-                onPickCustom={(id) => onPatch({ customFontId: id })}
-              />
-            </Group>
-            <Group title="Ambience" defaultOpen={false}>
-              <BokehToggle value={draft.bokeh} onChange={(bokeh) => onPatch({ bokeh })} />
-            </Group>
-          </div>
-        )}
+        <div key={tab} className="harbor-studio-body px-5 py-4">
+          {tab === "look" && (
+            <div className="flex flex-col">
+              <IdentityRow name={draft.name} blurb={draft.blurb} onChange={(p) => onPatch(p)} />
+              <div className="h-5" />
+              <StudioSection
+                title={t("Start from")}
+                action={
+                  <HeaderAction
+                    icon={<Shuffle size={16} strokeWidth={2.2} />}
+                    label={t("Shuffle")}
+                    onClick={shuffle}
+                  />
+                }
+              >
+                <PresetGallery onSeed={onSeed} />
+              </StudioSection>
+              <Hairline />
+              <StudioSection
+                title={t("Palette")}
+                action={
+                  <HeaderAction
+                    icon={<RotateCcw size={16} strokeWidth={2.2} />}
+                    label={t("Reset")}
+                    onClick={() => onPatch({ colors: { ...DEFAULT_CUSTOM_COLORS } })}
+                  />
+                }
+              >
+                <ColorsGrid colors={draft.colors} onChange={(colors) => onPatch({ colors })} />
+              </StudioSection>
+              <Hairline />
+              <StudioSection title={t("Type")}>
+                <FontPicker
+                  pairValue={draft.fontPair}
+                  customValue={draft.customFontId}
+                  onPickPair={(fontPair) => onPatch({ fontPair, customFontId: null })}
+                  onPickCustom={(id) => onPatch({ customFontId: id })}
+                />
+              </StudioSection>
+              <StudioSection title={t("Surfaces")}>
+                <div className="flex flex-col gap-4">
+                  <div className="flex flex-col gap-2">
+                    <span className="text-[13px] font-extrabold uppercase leading-[18px] tracking-[0.72px] text-ink-subtle">{t("Cards")}</span>
+                    <StylePicker
+                      kind="card"
+                      value={draft.cardStyle}
+                      onChange={(v) => onPatch({ cardStyle: v as ThemeCardStyle })}
+                      onEditCustom={() => setCardCssOpen(true)}
+                    />
+                  </div>
+                  <div className="flex flex-col gap-2">
+                    <span className="text-[13px] font-extrabold uppercase leading-[18px] tracking-[0.72px] text-ink-subtle">{t("Buttons")}</span>
+                    <StylePicker
+                      kind="button"
+                      value={draft.buttonStyle}
+                      onChange={(v) => onPatch({ buttonStyle: v as ThemeButtonStyle })}
+                    />
+                  </div>
+                  <BokehToggle value={draft.bokeh} onChange={(bokeh) => onPatch({ bokeh })} />
+                </div>
+              </StudioSection>
+            </div>
+          )}
 
-        {tab === "layout" && (
-          <div className="flex flex-col">
-            <Group title="Layout" sub="Where the navigation lives. Pick one to see it live.">
-              <LayoutPicker value={draft.layout} onChange={(layout) => onPatch({ layout })} />
-            </Group>
-            {draft.layout === "custom" && (
-              <CustomChromeBuilder
-                config={draft.chrome}
-                dirty={draft.chromeDirty}
-                onChange={onChromeChange}
-                onRegenerate={onRegenerateChrome}
-                onOpenCode={() => onExpand("html")}
-              />
-            )}
-            {draft.layout !== "custom" && (
-              <Group title="Navigation items" sub="Reorder, rename, or hide what appears in your nav.">
-                <NavEditor layout={draft.layout} />
-              </Group>
-            )}
-          </div>
-        )}
+          {tab === "layout" && (
+            <div className="flex flex-col">
+              <StudioSection
+                title={t("Layout")}
+                hint={t("Where the navigation lives. Pick one to see it live.")}
+              >
+                <LayoutPicker value={draft.layout} onChange={(layout) => onPatch({ layout })} />
+              </StudioSection>
+              {draft.layout === "custom" && (
+                <CustomChromeBuilder
+                  config={draft.chrome}
+                  dirty={draft.chromeDirty}
+                  onChange={onChromeChange}
+                  onRegenerate={onRegenerateChrome}
+                  onOpenCode={() => onExpand("html")}
+                />
+              )}
+              {draft.layout !== "custom" && (
+                <StudioSection
+                  title={t("Navigation items")}
+                  hint={t("Reorder, rename, or hide what appears in your nav.")}
+                >
+                  <NavEditor layout={draft.layout} value={draft.navCustomization} onChange={(navCustomization) => onPatch({ navCustomization })} />
+                </StudioSection>
+              )}
+            </div>
+          )}
 
-        {tab === "code" && (
-          <Group title="Code" sub="CSS, HTML and JS layered over the whole app. Optional for built-in layouts, required for custom chrome.">
-            <CodeSection css={draft.css} js={draft.js} html={draft.html} onExpand={onExpand} />
-          </Group>
-        )}
+          {tab === "code" && (
+            <section className="pb-6">
+              <p className={`max-w-[70ch] pb-3 ${ROW_DESC}`}>
+                {t(
+                  "CSS, HTML and JS layered over the whole app. Optional for built-in layouts, required for custom chrome.",
+                )}
+              </p>
+              <CodeSection css={draft.css} js={draft.js} html={draft.html} onExpand={onExpand} />
+            </section>
+          )}
         </div>
       </div>
 
@@ -145,68 +199,39 @@ export function Inspector({
   );
 }
 
-function Group({
-  title,
-  sub,
-  defaultOpen = true,
-  children,
+function Hairline() {
+  return <div className="mb-6 h-px bg-edge-soft" />;
+}
+
+function HeaderAction({
+  icon,
+  label,
+  onClick,
 }: {
-  title: string;
-  sub?: string;
-  defaultOpen?: boolean;
-  children: ReactNode;
+  icon: ReactNode;
+  label: string;
+  onClick: () => void;
 }) {
-  const [open, setOpen] = useState(defaultOpen);
   return (
-    <section className="border-b border-edge-soft last:border-b-0">
-      <button
-        type="button"
-        onClick={() => setOpen((o) => !o)}
-        className="flex h-[52px] w-full items-center gap-2 px-5 text-start transition-colors hover:bg-white/[0.03]"
-      >
-        <span className="flex-1 text-[13px] font-bold uppercase tracking-[0.16em] text-ink-muted">
-          {title}
-        </span>
-        <ChevronDown
-          size={18}
-          strokeWidth={2.4}
-          className={`shrink-0 text-ink-subtle/70 transition-transform duration-200 ${
-            open ? "rotate-180" : ""
-          }`}
-        />
-      </button>
-      {open && (
-        <div className="flex flex-col gap-3 px-5 pb-5 pt-3">
-          {sub && <p className="text-[13px] leading-snug text-ink-muted">{sub}</p>}
-          {children}
-        </div>
-      )}
-    </section>
+    <button
+      type="button"
+      onClick={onClick}
+      className="flex h-11 items-center gap-1.5 rounded-md px-2.5 text-[15.5px] font-semibold text-ink-subtle transition-colors hover:bg-elevated hover:text-ink"
+    >
+      {icon}
+      {label}
+    </button>
   );
 }
 
 function BokehToggle({ value, onChange }: { value: boolean; onChange: (v: boolean) => void }) {
+  const t = useT();
   return (
-    <label className="-mx-1 flex cursor-pointer items-center justify-between gap-3 rounded-lg px-1 py-1 transition-colors hover:bg-white/[0.03]">
-      <div className="flex min-w-0 flex-col">
-        <span className="text-[14px] font-semibold text-ink">Bokeh background</span>
-        <span className="text-[13px] text-ink-muted">Floating orbs over the canvas.</span>
-      </div>
-      <span
-        className="relative inline-flex h-6 w-11 shrink-0 items-center rounded-full transition-colors"
-        style={{ background: value ? "var(--color-accent)" : "var(--color-edge)" }}
-      >
-        <input
-          type="checkbox"
-          checked={value}
-          onChange={(e) => onChange(e.target.checked)}
-          className="sr-only"
-        />
-        <span
-          className="absolute h-5 w-5 rounded-full bg-white shadow-[0_2px_6px_-2px_rgba(0,0,0,0.4)] transition-transform"
-          style={{ transform: value ? "translateX(22px)" : "translateX(2px)" }}
-        />
-      </span>
-    </label>
+    <ToggleRow
+      label={t("Bokeh background")}
+      sub={t("Floating orbs over the canvas.")}
+      value={value}
+      onChange={onChange}
+    />
   );
 }

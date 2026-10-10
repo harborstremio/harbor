@@ -1,0 +1,10 @@
+.music-gif-perch { position: absolute; inset-inline-start: 12px; bottom: 100%; max-width: min(288px, 45cqw); max-height: 28vh; pointer-events: none; user-select: none; }
+.music-gif-canvas { display: block; width: 100%; height: 100%; object-fit: contain; object-position: center bottom; }
+.music-gif-preview { flex: 0 0 144px; height: 126px; align-self: flex-start; }
+.music-gif-actions { display: flex; gap: 8px; flex-wrap: wrap; align-items: center; margin-block: 12px; }
+.music-gif-filename { overflow-wrap: anywhere; font-size: 13px; color: var(--color-ink-muted); }
+.music-gif-controls { display: flex; gap: 16px; flex-wrap: wrap; align-items: center; margin-top: 16px; }
+.music-gif-controls label { display: flex; gap: 12px; align-items: center; }
+.music-gif-controls input { width: 130px; accent-color: var(--color-accent); }
+.music-gif-error { color: var(--color-danger) !important; }
+@media (max-width: 550px) { .music-gif-preview { flex-basis: 84px; height: 96px; } .music-gif-controls { align-items: flex-start; flex-direction: column; } }

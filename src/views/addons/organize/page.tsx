@@ -1,7 +1,9 @@
-import { ArrowLeft, ChevronDown, History, Info, Loader2 } from "lucide-react";
+import { createPortal } from "react-dom";
+import { ArrowLeft, ChevronDown, CloudUpload, History, Info, Loader2 } from "lucide-react";
 import { useCallback, useEffect, useMemo, useRef, useState } from "react";
 import { getUserAddonsRaw, type Addon } from "@/lib/addons";
 import { loadInstalled, reorderInstalled, type InstalledAddon } from "@/lib/addon-store";
+import { moveDeviceAddonsToAccount, type MoveStep } from "@/lib/addons-store/move-to-account";
 import {
   applyOrderToItems,
   loadBackups,
@@ -45,6 +47,7 @@ export function OrganizeAddonsPage({
   const [workingDevice, setWorkingDevice] = useState<InstalledAddon[]>([]);
   const [backupsKey, setBackupsKey] = useState(0);
   const [backupsOpen, setBackupsOpen] = useState(false);
+  const [moving, setMoving] = useState<MoveStep | null>(null);
   const backupsWrapRef = useRef<HTMLDivElement>(null);
   const backedUpRef = useRef(false);
   const backupCount = useMemo(() => loadBackups().length, [backupsKey]);
@@ -96,6 +99,7 @@ export function OrganizeAddonsPage({
     escBlockRef.current =
       search.open ||
       phase.kind === "saving" ||
+      moving != null ||
       cloudDrag.dragIndex != null ||
       deviceDrag.dragIndex != null;
     backupsOpenRef.current = backupsOpen;
@@ -177,9 +181,59 @@ export function OrganizeAddonsPage({
       setPhase({ kind: "ready" });
       setNotice({
         tone: "danger",
-        text: t("Something unexpected went wrong. Nothing may have been written. Retry to re-check."),
+        text: t(
+          "Something unexpected went wrong. Nothing may have been written. Retry to re-check.",
+        ),
         retry: true,
       });
+    }
+  };
+
+  const handleMoveAll = async () => {
+    if (!authKey || moving != null || saving || dirty || workingDevice.length === 0) return;
+    setNotice(null);
+    setMoving("preparing");
+    try {
+      const result = await moveDeviceAddonsToAccount(authKey, workingDevice, setMoving);
+      setBackupsKey((k) => k + 1);
+      if (!result.ok) {
+        setNotice({
+          tone: "danger",
+          text:
+            result.stage === "fetch"
+              ? t("Couldn't read your local addon collection. Nothing was written.")
+              : result.stage === "write"
+                ? t(
+                    "Local storage didn't confirm the move. Your collection may be unchanged. Reload to see the current state.",
+                  )
+                : t(
+                    "Moved, but Harbor couldn't confirm the result. Reload to see the current state.",
+                  ),
+          reload: true,
+        });
+        return;
+      }
+      await load();
+      if (result.moved === 0) {
+        setNotice({ tone: "info", text: t("Everything here is already in your account.") });
+        return;
+      }
+      const movedText =
+        result.moved === 1
+          ? t("Moved 1 addon to this JL profile. It is saved on this device.")
+          : t("Moved {n} addons to this JL profile. They are saved on this device.", {
+              n: result.moved,
+            });
+      const skippedText =
+        result.skipped.length > 0
+          ? " " +
+            t("Couldn't reach {names}, so they stayed on this device.", {
+              names: result.skipped.join(", "),
+            })
+          : "";
+      setNotice({ tone: "info", text: movedText + skippedText });
+    } finally {
+      setMoving(null);
     }
   };
 
@@ -198,15 +252,17 @@ export function OrganizeAddonsPage({
     setBackupsOpen(false);
     setNotice({
       tone: "info",
-      text: t("Backup loaded into the editor. Addons added since stay at the end. Nothing changes until you press Save."),
+      text: t(
+        "Backup loaded into the editor. Addons added since stay at the end. Nothing changes until you press Save.",
+      ),
     });
   };
 
   const stepLabel = phase.kind === "saving" ? stepLabelFor(phase.step) : null;
   const showBackups = !!authKey && phase.kind !== "loadError";
 
-  return (
-    <div className="fixed inset-0 z-[140] flex flex-col bg-canvas animate-in fade-in duration-150">
+  return createPortal(
+    <div className="fixed inset-0 z-[185] flex flex-col bg-canvas animate-in fade-in duration-150">
       <header
         data-tauri-drag-region
         className="relative z-50 shrink-0 border-b border-edge-soft bg-canvas/85 backdrop-blur-xl"
@@ -214,7 +270,7 @@ export function OrganizeAddonsPage({
         <div className="mx-auto flex w-full max-w-[1160px] items-center gap-4 px-6 py-5 sm:px-10">
           <button
             onClick={onClose}
-            disabled={saving}
+            disabled={saving || moving != null}
             className="flex h-11 w-11 shrink-0 items-center justify-center rounded-full bg-elevated text-ink-muted ring-1 ring-edge-soft transition-colors hover:bg-raised hover:text-ink disabled:opacity-40"
             aria-label={t("Back to addons")}
             title={t("Back to addons")}
@@ -226,7 +282,9 @@ export function OrganizeAddonsPage({
               {t("Organize addons")}
             </h1>
             <p className="hidden truncate text-[13px] text-ink-muted sm:block">
-              {t("The order decides who answers first when you press Play. Drag, use the arrows, or jump anything straight to the top.")}
+              {t(
+                "This order drives your catalog rows and the default stream order. A stream priority set in Settings overrides it for streams.",
+              )}
             </p>
           </div>
           {showBackups && (
@@ -269,14 +327,14 @@ export function OrganizeAddonsPage({
             <div className="flex shrink-0 items-center gap-2.5">
               <button
                 onClick={onClose}
-                disabled={saving}
+                disabled={saving || moving != null}
                 className="flex h-11 items-center rounded-full bg-elevated px-5 text-[13.5px] font-semibold text-ink-muted ring-1 ring-edge-soft transition-colors hover:bg-raised hover:text-ink disabled:opacity-40"
               >
                 {t("Cancel")}
               </button>
               <button
                 onClick={() => void handleSave()}
-                disabled={!dirty || phase.kind !== "ready"}
+                disabled={!dirty || phase.kind !== "ready" || moving != null}
                 className={`flex h-11 items-center gap-2 rounded-full bg-ink px-6 text-[14px] font-semibold text-canvas transition-all hover:opacity-90 disabled:cursor-not-allowed disabled:opacity-40 ${
                   dirty && !saving ? "ring-2 ring-accent/50" : ""
                 }`}
@@ -300,7 +358,9 @@ export function OrganizeAddonsPage({
           {phase.kind === "loadError" ? (
             <div className="mx-auto flex max-w-md flex-col items-center gap-5 py-20 text-center">
               <p className="text-[15px] leading-relaxed text-ink-muted">
-                {t("Couldn't load your Stremio collection. Nothing can be reordered safely without it.")}
+                {t(
+                  "Couldn't load your local addon collection. Nothing can be reordered safely without it.",
+                )}
               </p>
               <div className="flex items-center gap-3">
                 <button
@@ -354,21 +414,21 @@ export function OrganizeAddonsPage({
                 {authKey ? (
                   <>
                     <SectionCard
-                      title={t("Your Stremio account")}
-                      sub={t("This order syncs to every Stremio app signed into this account.")}
+                      title={t("This JL profile")}
+                      sub={t("This order is saved on this device for the active JL profile.")}
                       count={workingCloud.length}
                     >
                       {phase.kind === "loading" ? (
                         <SkeletonRows />
                       ) : workingCloud.length === 0 ? (
                         <p className="rounded-xl border border-dashed border-edge-soft bg-canvas/30 px-5 py-4 text-[13.5px] text-ink-subtle">
-                          {t("No addons are synced to this account yet.")}
+                          {t("No addons are installed in this profile yet.")}
                         </p>
                       ) : (
                         <OrganizeList
                           entries={entriesOf(workingCloud)}
                           drag={cloudDrag}
-                          busy={saving}
+                          busy={saving || moving != null}
                           onMove={(i, delta) => setWorkingCloud((l) => moveItem(l, i, i + delta))}
                           onMoveTop={(i) => setWorkingCloud((l) => moveItem(l, i, 0))}
                         />
@@ -377,13 +437,43 @@ export function OrganizeAddonsPage({
                     {workingDevice.length > 0 && (
                       <SectionCard
                         title={t("On this device only")}
-                        sub={t("These live in Harbor on this computer and never touch your account.")}
+                        sub={t(
+                          "These live in Harbor on this computer and never touch your account.",
+                        )}
                         count={workingDevice.length}
+                        action={
+                          <button
+                            onClick={() => void handleMoveAll()}
+                            disabled={saving || moving != null || dirty}
+                            title={
+                              dirty
+                                ? t("Save or discard your order changes first")
+                                : t("Add every addon below to this JL profile")
+                            }
+                            className="flex h-9 items-center gap-1.5 rounded-full bg-raised px-3.5 text-[12.5px] font-semibold text-ink-muted ring-1 ring-edge-soft transition-colors hover:bg-elevated hover:text-ink disabled:cursor-not-allowed disabled:opacity-45"
+                          >
+                            {moving != null ? (
+                              <>
+                                <Loader2 size={13} className="animate-spin" />
+                                {moving === "preparing"
+                                  ? t("Checking")
+                                  : moving === "saving"
+                                    ? t("Saving")
+                                    : t("Verifying")}
+                              </>
+                            ) : (
+                              <>
+                                <CloudUpload size={14} strokeWidth={2.2} />
+                                {t("Move all to account")}
+                              </>
+                            )}
+                          </button>
+                        }
                       >
                         <OrganizeList
                           entries={entriesOf(workingDevice)}
                           drag={deviceDrag}
-                          busy={saving}
+                          busy={saving || moving != null}
                           onMove={(i, delta) => setWorkingDevice((l) => moveItem(l, i, i + delta))}
                           onMoveTop={(i) => setWorkingDevice((l) => moveItem(l, i, 0))}
                         />
@@ -393,7 +483,7 @@ export function OrganizeAddonsPage({
                 ) : (
                   <SectionCard
                     title={t("On this device")}
-                    sub={t("Sign in to Stremio to organize the addons synced to your account.")}
+                    sub={t("Choose a JL profile to organize its installed addons.")}
                     count={workingDevice.length}
                   >
                     {phase.kind === "loading" ? (
@@ -420,11 +510,27 @@ export function OrganizeAddonsPage({
                     </h2>
                   </div>
                   <ul className="flex flex-col gap-2.5 text-[13px] leading-relaxed text-ink-muted">
-                    <li>{t("Number 1 gets asked first for streams when you press Play.")}</li>
-                    <li>{t("The order also decides which addon's rows win on your Home screen.")}</li>
-                    <li>{t("Nothing changes until you press Save. Leaving this page discards edits.")}</li>
-                    <li>{t("The Backups button at the top keeps your last five orders. One click restores any of them.")}</li>
-                    <li>{t("Harbor double-checks with Stremio after saving, so a half-written order can't slip through.")}</li>
+                    <li>
+                      {t(
+                        "Number 1 answers first when you press Play, unless Settings has a stream priority.",
+                      )}
+                    </li>
+                    <li>
+                      {t("The order also decides which addon's rows win on your Home screen.")}
+                    </li>
+                    <li>
+                      {t("Nothing changes until you press Save. Leaving this page discards edits.")}
+                    </li>
+                    <li>
+                      {t(
+                        "The Backups button at the top keeps your last five orders. One click restores any of them.",
+                      )}
+                    </li>
+                    <li>
+                      {t(
+                        "JL Media Vision reads the saved local collection back to verify the order.",
+                      )}
+                    </li>
                   </ul>
                 </section>
               </div>
@@ -433,6 +539,7 @@ export function OrganizeAddonsPage({
         </div>
         <div className="h-10" />
       </div>
-    </div>
+    </div>,
+    document.body,
   );
 }

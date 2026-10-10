@@ -1,0 +1,22 @@
+export default {
+  "games.mods.browse": "ابحث عن تعديلات",
+  "games.mods.installed": "تعديلاتك",
+  "games.mods.enabled": "مفعّل",
+  "games.mods.disabled": "معطّل",
+  "games.mods.remove": "إزالة",
+  "games.mods.removeConfirm": "هل تريد إزالة هذا الملف المُدار؟",
+  "games.mods.noMatches": "لا توجد تعديلات مثبّتة تطابق هذا البحث.",
+  "games.mods.options": "خيارات {name}",
+  "games.mods.versions": "الإصدارات",
+  "games.mods.restore": "استعادة السابق",
+  "games.mods.restored": "تمت استعادة الإصدار السابق.",
+  "games.mods.changeTitle": "الملفات المطلوب تغييرها",
+  "games.mods.backupNote": "تُحفظ الإصدارات المستبدلة في نسخة احتياطية محلية. استخدم استعادة السابق في إعدادك للرجوع؛ سيُعاد فحص الاعتماديات.",
+  "games.mods.currentVersion": "المثبّت: {version}",
+  "games.mods.current": "مثبّت",
+  "games.mods.versionNote": "اختر إصدارًا متوافقًا. يراجع Harbor التغييرات ويحتفظ بالإصدار السابق محليًا. أغلق Minecraft قبل تطبيق التغييرات.",
+  "games.mods.applyChanges": "تطبيق التغييرات",
+  "games.mods.reviewChanges": "مراجعة التغييرات",
+  "games.mods.previousVersion": "السابق: {version}",
+  "games.mods.restoreConfirm": "هل تريد استعادة الإصدار {version}؟ أغلق Minecraft أولًا."
+} satisfies Record<string, string>;

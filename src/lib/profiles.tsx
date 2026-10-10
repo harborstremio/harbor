@@ -1,14 +1,24 @@
+import { purgeGameNotes } from "./games/game-notes";
 import {
   createContext,
   useCallback,
   useContext,
   useEffect,
   useMemo,
+  useRef,
   useState,
   type ReactNode,
 } from "react";
 import type { HiddenTabs } from "./lockable-tabs";
 import type { ContentFilters } from "./settings";
+import { isRemovedBuiltinAvatar } from "./avatars/catalog";
+import { deleteProfileBgImage } from "./theme-storage";
+// Concrete modules, not the barrel: it re-exports ProfileSyncRunner, and pulling the
+// whole sync layer in from the profile provider is how a cycle gets built by accident.
+import { configureRosterStore } from "./profile-sync/roster-store";
+import { noteProfileDeleted } from "./profile-sync/roster-section";
+import { refuseProfileSelect } from "./profile-sync/profile-lock";
+import type { LocalProfileLike } from "./profile-sync/types";
 
 export const PROFILE_COLORS = [
   "#7dd3fc",
@@ -33,6 +43,112 @@ export type KidConfig = {
 
 export const DEFAULT_KID: KidConfig = { age: 7, curfewMinutes: null, parentPinHash: null };
 
+// Every namespaced key a profile owns. Kept as one list because deleteProfile and the
+// sync roster apply both purge, and a key that only one of them knows about is a leak
+// that outlives the profile.
+const PROFILE_KEY_PREFIXES = [
+  "harbor.jl.library.v1.",
+  "harbor.jl.library-queue.v1.",
+  "jl.sports.favorites.v1.",
+  "jl.sports.players.v1.",
+  "jl.account.link.v2.",
+  "harbor.addonOrder.",
+  "harbor.addonOrderBackups.",
+  "harbor.games.sims.folder:",
+  "harbor.games.ffxiv.center:",
+  "harbor.games.eve.route:",
+  "harbor.auth.",
+  "harbor.games.search-view:",
+  "harbor.games.download-notified.v1.",
+  "harbor.theme-session.",
+  "harbor.localcw.v1.",
+  "harbor.localcw.private.v1.",
+  "harbor.resume.private.v1.",
+  "harbor.cw.dismissed.private.v1.",
+  "harbor.favorites.v1.",
+  "harbor.charfavorites.v1.",
+  "harbor.mangafav.v1.",
+  "harbor.mangaread.v1.",
+  "harbor.manga.match.mal.v1.",
+  "harbor.manga.match.anilist.v1.",
+  "harbor.localwatchlist.v1.",
+  "harbor.settings.",
+  "harbor.trakt.session.v1.",
+  "harbor.simkl.session.v1.",
+  "harbor.anilist.session.v1.",
+  "harbor.mal.session.v1.",
+  "harbor.simkl.cache.v2.",
+  "harbor.anilist.synced.v1.",
+  "harbor.mal.synced.v1.",
+  "harbor.moviewatched.v1.",
+  "harbor.watchedFlag.v1.",
+  "harbor.manualwatched.v1.",
+  "harbor.manualunwatched.v1.",
+  "harbor.manualwatched.meta.v1.",
+  "harbor.manualwatched.dismissed.v1.",
+  "harbor.manualunwatched.at.v1.",
+  "harbor.manualwatched.fromremote.v1.",
+  "harbor.watchevents.v1.",
+  "harbor.playback-history.v1.",
+  "harbor.watchlist.v1.",
+  "harbor.watchlist.aggregate.v1.",
+  "harbor.installed-addons.",
+  "harbor.addons.disabled.",
+  "harbor.stremio.freshwatched.v1.",
+];
+
+function purgeProfileStorage(id: string): void {
+  try {
+    purgeGameNotes(id);
+  } catch {
+    /* Keep the existing profile cleanup best-effort. */
+  }
+  try {
+    for (const prefix of PROFILE_KEY_PREFIXES) localStorage.removeItem(`${prefix}${id}`);
+    localStorage.removeItem(`harbor.games.search-history.v1:${encodeURIComponent(id)}`);
+    localStorage.removeItem(`harbor.league.pool:${encodeURIComponent(id)}`);
+    const tftPrefix = `harbor.games.tft.teams:${encodeURIComponent(id)}:`;
+    for (let index = localStorage.length - 1; index >= 0; index--) {
+      const key = localStorage.key(index);
+      if (key?.startsWith(tftPrefix)) localStorage.removeItem(key);
+    }
+  } catch {
+    /* ignore */
+  }
+}
+
+/**
+ * The wire carries no secrets and no shareStremioWith, so those come off the profile
+ * being replaced rather than being dropped. A parentPinHash lost here would silently
+ * unlock a kid profile on the device that adopted the roster.
+ */
+function adoptProfile(
+  next: LocalProfileLike,
+  prev: Profile | undefined,
+  fallbackColor: ProfileColor,
+): Profile {
+  return {
+    id: next.id,
+    name: next.name,
+    avatar: next.avatar,
+    color: next.color || prev?.color || fallbackColor,
+    isPrimary: next.isPrimary,
+    shareStremioWith: prev?.shareStremioWith ?? null,
+    passwordHash: next.passwordHash ?? prev?.passwordHash ?? null,
+    hideContent: (next.hideContent as ContentFilters | null) ?? null,
+    lockedTabs: (next.lockedTabs as HiddenTabs | null) ?? null,
+    kid: next.kid
+      ? {
+          age: next.kid.age,
+          curfewMinutes: next.kid.curfewMinutes,
+          parentPinHash: next.kid.parentPinHash ?? prev?.kid?.parentPinHash ?? null,
+        }
+      : null,
+    settingsLinked: next.settingsLinked !== false,
+    createdAt: next.createdAt,
+  };
+}
+
 export type Profile = {
   id: string;
   name: string;
@@ -51,6 +167,7 @@ export type Profile = {
 type ProfilesState = {
   profiles: Profile[];
   activeId: string | null;
+  _jlShowLiveSportsV1?: boolean;
 };
 
 export type PickerView =
@@ -68,7 +185,8 @@ type ProfilesValue = {
   openPicker: (view?: PickerView) => void;
   setPickerView: (view: PickerView) => void;
   closePicker: () => void;
-  selectProfile: (id: string, opts?: { unlocked?: boolean }) => void;
+  /** False when the profile is locked and this call did not prove the PIN. */
+  selectProfile: (id: string, opts?: { unlocked?: boolean }) => boolean;
   sessionUnlockedIds: Set<string>;
   createProfile: (input: {
     name: string;
@@ -81,6 +199,7 @@ type ProfilesValue = {
     patch: Partial<Omit<Profile, "id" | "createdAt" | "isPrimary">>,
   ) => void;
   deleteProfile: (id: string) => void;
+  setPrimary: (id: string) => void;
 };
 
 const STORAGE_KEY = "harbor.profiles.v1";
@@ -207,19 +326,43 @@ function markProfileSelectedNow(): void {
   }
 }
 
-const PICKER_SESSION_KEY = "harbor.pickerShown";
-function launchPickerShownThisSession(): boolean {
+// Module-level on purpose: sessionStorage can survive across app launches in the webview, which suppressed this prompt.
+let pickerPromptShownThisRun = false;
+
+export function readActiveProfileIdentity(): {
+  id: string;
+  name: string;
+  avatar: string | null;
+  color: string;
+} | null {
   try {
-    return sessionStorage.getItem(PICKER_SESSION_KEY) === "1";
+    const { profiles, activeId } = readState();
+    if (!profiles.length) return null;
+    const active =
+      profiles.find((p) => p.id === activeId) ?? profiles.find((p) => p.isPrimary) ?? profiles[0];
+    return active
+      ? { id: active.id, name: active.name, avatar: active.avatar, color: `${active.color}` }
+      : null;
   } catch {
-    return false;
+    return null;
   }
 }
-function markLaunchPickerShown(): void {
+
+export function readAllProfilesIdentity(): Array<{
+  id: string;
+  name: string;
+  avatar: string | null;
+  color: string;
+}> {
   try {
-    sessionStorage.setItem(PICKER_SESSION_KEY, "1");
+    return readState().profiles.map((p) => ({
+      id: p.id,
+      name: p.name,
+      avatar: p.avatar,
+      color: `${p.color}`,
+    }));
   } catch {
-    /* ignore */
+    return [];
   }
 }
 
@@ -236,8 +379,18 @@ function readState(): ProfilesState {
     const fallbackName = defaultPrimaryName();
     const identity = readSettingsIdentity();
     const legacyParental = readLegacyParental();
+    const unhideLiveSports = !parsed._jlShowLiveSportsV1;
     const migrated = parsed.profiles.map((p) => {
       const next = { ...p };
+      if (unhideLiveSports && p.hideContent) {
+        // Older stored filters may still carry a liveTv flag; clear it alongside sports.
+        const unhidden: Record<string, boolean> = {
+          ...p.hideContent,
+          liveTv: false,
+          sports: false,
+        };
+        next.hideContent = unhidden as ContentFilters;
+      }
       if (typeof p.shareStremioWith === "undefined") {
         next.shareStremioWith = p.isPrimary ? null : primaryId;
       }
@@ -262,7 +415,11 @@ function readState(): ProfilesState {
       if (p.isPrimary) {
         if (isPlaceholderName(p.name)) next.name = fallbackName;
         if (identity.color) next.color = identity.color;
-        if (identity.avatar != null && !identity.avatar.startsWith("/kids/avatars/")) {
+        if (
+          p.avatar == null &&
+          identity.avatar != null &&
+          !identity.avatar.startsWith("/kids/avatars/")
+        ) {
           next.avatar = identity.avatar;
         }
       }
@@ -273,9 +430,12 @@ function readState(): ProfilesState {
       ) {
         next.avatar = null;
       }
+      if (isRemovedBuiltinAvatar(next.avatar)) {
+        next.avatar = null;
+      }
       return next;
     });
-    return { profiles: migrated, activeId: parsed.activeId };
+    return { profiles: migrated, activeId: parsed.activeId, _jlShowLiveSportsV1: true };
   } catch {
     return { profiles: [], activeId: null };
   }
@@ -299,7 +459,62 @@ function newId(): string {
   return `p_${Date.now().toString(36)}_${Math.random().toString(36).slice(2, 8)}`;
 }
 
+function migrateLegacyStremioAuth(profiles: Profile[]): void {
+  try {
+    if (localStorage.getItem("harbor.auth.migrated.v1")) return;
+    const primary = profiles.find((p) => p.isPrimary) ?? profiles[0];
+    const legacy = localStorage.getItem("harbor.auth");
+    if (primary && legacy && !localStorage.getItem(`harbor.auth.${primary.id}`)) {
+      let valid = false;
+      try {
+        const parsed = JSON.parse(legacy) as { authKey?: unknown; user?: unknown };
+        valid = typeof parsed?.authKey === "string" && parsed.authKey.length > 0 && !!parsed.user;
+      } catch {
+        valid = false;
+      }
+      if (valid) localStorage.setItem(`harbor.auth.${primary.id}`, legacy);
+    }
+    localStorage.setItem("harbor.auth.migrated.v1", "1");
+  } catch {
+    /* ignore */
+  }
+}
+
 const Ctx = createContext<ProfilesValue | null>(null);
+
+// Auxiliary player windows follow the selected profile. They must never run the
+// application's launch selection, migration or roster persistence a second time.
+export function CompanionProfilesProvider({ children }: { children: ReactNode }) {
+  const [state, setState] = useState(readState);
+  useEffect(() => {
+    const refresh = (event: StorageEvent) => {
+      if (event.key === STORAGE_KEY || event.key === null) setState(readState());
+    };
+    window.addEventListener("storage", refresh);
+    return () => window.removeEventListener("storage", refresh);
+  }, []);
+  const value = useMemo<ProfilesValue>(() => {
+    const mainWindowOnly = (): never => {
+      throw new Error("Profile changes must be made in the main Harbor window");
+    };
+    return {
+      ...state,
+      activeProfile: state.profiles.find((p) => p.id === state.activeId) ?? null,
+      pickerOpen: false,
+      pickerView: { kind: "list" },
+      sessionUnlockedIds: new Set(),
+      openPicker: mainWindowOnly,
+      setPickerView: mainWindowOnly,
+      closePicker: mainWindowOnly,
+      selectProfile: mainWindowOnly,
+      createProfile: mainWindowOnly,
+      updateProfile: mainWindowOnly,
+      deleteProfile: mainWindowOnly,
+      setPrimary: mainWindowOnly,
+    };
+  }, [state]);
+  return <Ctx.Provider value={value}>{children}</Ctx.Provider>;
+}
 
 export function ProfilesProvider({ children }: { children: ReactNode }) {
   const [state, setState] = useState<ProfilesState>(() => {
@@ -320,10 +535,16 @@ export function ProfilesProvider({ children }: { children: ReactNode }) {
         kid: null,
         createdAt: Date.now(),
       };
-      const initial: ProfilesState = { profiles: [primary], activeId: primary.id };
+      const initial: ProfilesState = {
+        profiles: [primary],
+        activeId: primary.id,
+        _jlShowLiveSportsV1: true,
+      };
       writeState(initial);
+      migrateLegacyStremioAuth(initial.profiles);
       return initial;
     }
+    migrateLegacyStremioAuth(loaded.profiles);
     const def = launchDefault(loaded.profiles);
     return def ? { ...loaded, activeId: def.id } : loaded;
   });
@@ -334,9 +555,9 @@ export function ProfilesProvider({ children }: { children: ReactNode }) {
     const interval = readProfilePromptInterval();
     if (interval === "never") return false;
     if (interval === "launch") {
-      const shownThisSession = launchPickerShownThisSession();
-      markLaunchPickerShown();
-      return !shownThisSession;
+      const wasShown = pickerPromptShownThisRun;
+      pickerPromptShownThisRun = true;
+      return !wasShown;
     }
     return Date.now() - readLastProfileSelectAt() >= intervalMinutes(interval) * 60000;
   });
@@ -344,6 +565,7 @@ export function ProfilesProvider({ children }: { children: ReactNode }) {
 
   useEffect(() => {
     writeState(state);
+    window.dispatchEvent(new CustomEvent("harbor:profiles-updated"));
   }, [state]);
 
   const activeProfile = useMemo(
@@ -352,7 +574,22 @@ export function ProfilesProvider({ children }: { children: ReactNode }) {
   );
 
   const [sessionUnlockedIds, setSessionUnlockedIds] = useState<Set<string>>(() => new Set());
+  // Read through refs so the gate can see current state without giving selectProfile a
+  // changing identity, which several consumers put straight into their own dep arrays.
+  const profilesRef = useRef(state.profiles);
+  profilesRef.current = state.profiles;
+  const unlockedRef = useRef(sessionUnlockedIds);
+  unlockedRef.current = sessionUnlockedIds;
+
   const selectProfile = useCallback((id: string, opts?: { unlocked?: boolean }) => {
+    // THE GATE LIVES HERE, not in the UI. It used to be duplicated in picker-modal and
+    // use-account-menu, and RemoteOpenBridge has neither: it calls selectProfile(id)
+    // straight off a harbor:remote-set-profile event, so a paired phone walked past
+    // every profile PIN including a kid profile's parent PIN. Gated callers already
+    // pass { unlocked: true } after verifying, so they are unaffected and the remote
+    // now fails closed.
+    const target = profilesRef.current.find((p) => p.id === id) ?? null;
+    if (refuseProfileSelect(target, unlockedRef.current, opts)) return false;
     if (opts?.unlocked) {
       setSessionUnlockedIds((prev) => (prev.has(id) ? prev : new Set(prev).add(id)));
     }
@@ -365,13 +602,16 @@ export function ProfilesProvider({ children }: { children: ReactNode }) {
         localStorage.setItem(STORAGE_KEY, JSON.stringify(parsed));
       }
     } catch {}
+    window.dispatchEvent(new CustomEvent("harbor:active-profile-changed", { detail: { id } }));
     setState((s) => ({ ...s, activeId: id }));
     setPickerOpen(false);
     setPickerViewState({ kind: "list" });
+    return true;
   }, []);
 
   useEffect(() => {
     const onFocus = () => {
+      if (pickerOpen) return;
       const mins = intervalMinutes(readProfilePromptInterval());
       if (mins <= 0 || state.activeId == null || state.profiles.length <= 1) return;
       if (Date.now() - readLastProfileSelectAt() >= mins * 60000) {
@@ -381,7 +621,7 @@ export function ProfilesProvider({ children }: { children: ReactNode }) {
     };
     window.addEventListener("focus", onFocus);
     return () => window.removeEventListener("focus", onFocus);
-  }, [state.activeId, state.profiles.length]);
+  }, [state.activeId, state.profiles.length, pickerOpen]);
 
   const openPicker = useCallback((view: PickerView = { kind: "list" }) => {
     setPickerViewState(view);
@@ -395,14 +635,13 @@ export function ProfilesProvider({ children }: { children: ReactNode }) {
 
   const createProfile = useCallback<ProfilesValue["createProfile"]>(
     ({ name, avatar, color, kid }) => {
-      const primary = state.profiles.find((p) => p.isPrimary) ?? state.profiles[0];
       const created: Profile = {
         id: newId(),
         name: name.trim().slice(0, 32) || "Profile",
         avatar: avatar ?? null,
         color,
         isPrimary: false,
-        shareStremioWith: primary?.id ?? null,
+        shareStremioWith: null,
         passwordHash: null,
         hideContent: null,
         lockedTabs: null,
@@ -411,6 +650,11 @@ export function ProfilesProvider({ children }: { children: ReactNode }) {
         createdAt: Date.now(),
       };
       setState((s) => ({ ...s, profiles: [...s.profiles, created] }));
+      try {
+        localStorage.setItem(`jl.account.profile-created.v1.${created.id}`, "1");
+      } catch {
+        /* Explicit account linking remains available. */
+      }
       return created;
     },
     [state.profiles],
@@ -435,31 +679,63 @@ export function ProfilesProvider({ children }: { children: ReactNode }) {
     (id) => {
       const target = state.profiles.find((p) => p.id === id);
       if (!target || target.isPrimary) return;
-      try {
-        localStorage.removeItem(`harbor.auth.${id}`);
-        localStorage.removeItem(`harbor.favorites.v1.${id}`);
-        localStorage.removeItem(`harbor.localwatchlist.v1.${id}`);
-        localStorage.removeItem(`harbor.settings.${id}`);
-        localStorage.removeItem(`harbor.trakt.session.v1.${id}`);
-        localStorage.removeItem(`harbor.simkl.session.v1.${id}`);
-        localStorage.removeItem(`harbor.anilist.session.v1.${id}`);
-        localStorage.removeItem(`harbor.mal.session.v1.${id}`);
-        localStorage.removeItem(`harbor.simkl.cache.v2.${id}`);
-        localStorage.removeItem(`harbor.anilist.synced.v1.${id}`);
-        localStorage.removeItem(`harbor.mal.synced.v1.${id}`);
-      } catch {
-        /* ignore */
-      }
+      // Before the purge, while the id map still resolves. Without a tombstone the
+      // delete never reaches a third device: it still holds the profile, pushes it back
+      // up, and it reappears on the two devices that deleted it.
+      noteProfileDeleted(id);
+      purgeProfileStorage(id);
+      void deleteProfileBgImage(id);
       setState((s) => {
         const profiles = s.profiles
           .filter((p) => p.id !== id)
           .map((p) => (p.shareStremioWith === id ? { ...p, shareStremioWith: null } : p));
         const activeId = s.activeId === id ? (profiles[0]?.id ?? null) : s.activeId;
-        return { profiles, activeId };
+        return { ...s, profiles, activeId };
       });
     },
     [state.profiles],
   );
+
+  // The sync roster reads and applies through the provider, never through
+  // harbor.profiles.v1 directly: this component persists its own state on every change
+  // and never reads that key back, so an external write is clobbered on the next render.
+  useEffect(() => {
+    configureRosterStore({
+      read: () => profilesRef.current,
+      apply: (plan) => {
+        for (const id of plan.dropLocalIds) purgeProfileStorage(id);
+        setState((s) => {
+          const byId = new Map(s.profiles.map((p) => [p.id, p]));
+          const profiles = plan.replaceWith.map((next) =>
+            adoptProfile(next, byId.get(next.id), pickColor(s.profiles)),
+          );
+          const stillHere = profiles.some((p) => p.id === s.activeId);
+          return {
+            ...s,
+            profiles,
+            activeId: stillHere ? s.activeId : (profiles[0]?.id ?? null),
+          };
+        });
+      },
+    });
+    return () => configureRosterStore(null);
+  }, []);
+
+  const setPrimary = useCallback<ProfilesValue["setPrimary"]>((id) => {
+    setState((s) => {
+      if (!s.profiles.some((p) => p.id === id && !p.isPrimary)) return s;
+      return {
+        ...s,
+        profiles: s.profiles.map((p) =>
+          p.id === id
+            ? { ...p, isPrimary: true, shareStremioWith: null }
+            : p.isPrimary
+              ? { ...p, isPrimary: false }
+              : p,
+        ),
+      };
+    });
+  }, []);
 
   const value = useMemo<ProfilesValue>(
     () => ({
@@ -476,6 +752,7 @@ export function ProfilesProvider({ children }: { children: ReactNode }) {
       createProfile,
       updateProfile,
       deleteProfile,
+      setPrimary,
     }),
     [
       state.profiles,
@@ -491,6 +768,7 @@ export function ProfilesProvider({ children }: { children: ReactNode }) {
       createProfile,
       updateProfile,
       deleteProfile,
+      setPrimary,
     ],
   );
 
@@ -524,4 +802,20 @@ export function stremioSourceProfileId(active: Profile | null, profiles: Profile
   if (!active.shareStremioWith) return active.id;
   const exists = profiles.some((p) => p.id === active.shareStremioWith);
   return exists ? active.shareStremioWith : active.id;
+}
+
+export function sharesStremioStorage(
+  a: Profile | null | undefined,
+  b: Profile | null | undefined,
+  profiles: Profile[],
+): boolean {
+  if (!a || !b) return false;
+  return stremioSourceProfileId(a, profiles) === stremioSourceProfileId(b, profiles);
+}
+
+export function anyProfileSharesStremioWith(active: Profile | null, profiles: Profile[]): boolean {
+  if (!active) return false;
+  const source = stremioSourceProfileId(active, profiles);
+  if (!source) return false;
+  return profiles.some((p) => p.id !== active.id && stremioSourceProfileId(p, profiles) === source);
 }

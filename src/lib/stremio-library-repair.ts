@@ -1,4 +1,4 @@
-const API = "https://api.strem.io/api";
+import { ANIME_CLOUD_ID, library, libraryPut, type LibraryItem } from "@/lib/stremio";
 
 export type RepairProgress = {
   phase: "fetching" | "normalizing" | "pushing" | "done";
@@ -14,18 +14,6 @@ export type RepairResult = {
   repaired: number;
   unrepairable: number;
 };
-
-async function call(path: string, body: unknown): Promise<unknown> {
-  const res = await fetch(`${API}/${path}`, {
-    method: "POST",
-    headers: { "Content-Type": "application/json" },
-    body: JSON.stringify(body),
-  });
-  if (!res.ok) throw new Error(`${path} HTTP ${res.status}`);
-  const json = (await res.json()) as { result?: unknown; error?: { message?: string } };
-  if (json.error) throw new Error(`${path}: ${json.error.message ?? "request failed"}`);
-  return json.result;
-}
 
 function asString(v: unknown): string | null {
   return typeof v === "string" ? v : null;
@@ -53,8 +41,13 @@ function normalizeItem(raw: unknown): Record<string, unknown> | null {
   const r = raw as Record<string, unknown>;
   const id = asString(r._id);
   if (!id) return null;
-  const srcState = (r.state && typeof r.state === "object" ? r.state : {}) as Record<string, unknown>;
-  const srcHints = (r.behaviorHints && typeof r.behaviorHints === "object" ? r.behaviorHints : {}) as Record<string, unknown>;
+  const srcState = (r.state && typeof r.state === "object" ? r.state : {}) as Record<
+    string,
+    unknown
+  >;
+  const srcHints = (
+    r.behaviorHints && typeof r.behaviorHints === "object" ? r.behaviorHints : {}
+  ) as Record<string, unknown>;
   return {
     _id: id,
     name: asString(r.name) ?? "",
@@ -95,18 +88,8 @@ export async function repairStremioLibrary(
   onProgress?: (p: RepairProgress) => void,
 ): Promise<RepairResult> {
   onProgress?.({ phase: "fetching" });
-  const ids = (await call("datastoreMeta", { authKey, collection: "libraryItem" })) as Array<[string, string]>;
-  if (!Array.isArray(ids) || ids.length === 0) {
-    onProgress?.({ phase: "done", total: 0, needsRepair: 0, pushed: 0 });
-    return { total: 0, alreadyClean: 0, repaired: 0, unrepairable: 0 };
-  }
-  onProgress?.({ phase: "fetching", total: ids.length });
-  const items = (await call("datastoreGet", {
-    authKey,
-    collection: "libraryItem",
-    ids: ids.map(([id]) => id),
-    all: true,
-  })) as unknown[];
+  const items = await library(authKey);
+  onProgress?.({ phase: "fetching", total: items.length });
 
   onProgress?.({ phase: "normalizing", total: items.length, fetched: items.length });
   const toPush: Record<string, unknown>[] = [];
@@ -117,6 +100,9 @@ export async function repairStremioLibrary(
       unrepairable++;
       continue;
     }
+    const nid = String((normalized as { _id?: unknown })._id ?? "");
+    if (ANIME_CLOUD_ID.test(nid) && (normalized as { removed?: unknown }).removed !== true)
+      continue;
     if (differs(raw, normalized)) toPush.push(normalized);
   }
   onProgress?.({ phase: "normalizing", total: items.length, needsRepair: toPush.length });
@@ -125,7 +111,7 @@ export async function repairStremioLibrary(
   const BATCH = 25;
   for (let i = 0; i < toPush.length; i += BATCH) {
     const slice = toPush.slice(i, i + BATCH);
-    await call("datastorePut", { authKey, collection: "libraryItem", changes: slice });
+    for (const item of slice) await libraryPut(authKey, item as unknown as LibraryItem);
     pushed += slice.length;
     onProgress?.({ phase: "pushing", total: items.length, needsRepair: toPush.length, pushed });
   }

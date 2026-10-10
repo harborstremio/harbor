@@ -1,0 +1,2342 @@
+{
+ "shelves": {
+  "true-crime": [
+   "tt9425132",
+   "tt13651632",
+   "tt8259114",
+   "tt4299972",
+   "tt13492374",
+   "tt18970124",
+   "tt22010586",
+   "tt15085784",
+   "tt21946032",
+   "tt11307176",
+   "tt33480540",
+   "tt11318602",
+   "tt23553310",
+   "tt6792200",
+   "tt12987894",
+   "tt1152758",
+   "tt1277936",
+   "tt1966604",
+   "tt0096257",
+   "tt0117293",
+   "tt0342172",
+   "tt3568002",
+   "tt10222764",
+   "tt7768848",
+   "tt37438628",
+   "tt11141900",
+   "tt14111774",
+   "tt14923638",
+   "tt16303776",
+   "tt15723914",
+   "tt34962891",
+   "tt3904186",
+   "tt0364930",
+   "tt0103634",
+   "tt11668320",
+   "tt2106331",
+   "tt0358500",
+   "tt2934036",
+   "tt6442978",
+   "tt4503900",
+   "tt5329376",
+   "tt2011325",
+   "tt1972663",
+   "tt5083702",
+   "tt5952332",
+   "tt0914376",
+   "tt8342862",
+   "tt5189670",
+   "tt0388644",
+   "tt13987620",
+   "tt14167390",
+   "tt15484900",
+   "tt14178824",
+   "tt21811888",
+   "tt23751640",
+   "tt30177031",
+   "tt21867596",
+   "tt21059520",
+   "tt10915286",
+   "tt20560404",
+   "tt29388212",
+   "tt14832124",
+   "tt4257858",
+   "tt0762111",
+   "tt0120472",
+   "tt26687196",
+   "tt26340363",
+   "tt12312250",
+   "tt31183637",
+   "tt29926213"
+  ]
+ },
+ "items": [
+  {
+   "id": "tt9425132",
+   "imdbId": "tt9425132",
+   "title": "Conversations with a Killer: The Ted Bundy Tapes",
+   "year": "2019",
+   "type": "Series",
+   "section": "catalog",
+   "shelfLabel": "Documentary",
+   "description": "Recorded interviews and archival material examine Ted Bundy's crimes and the investigation that stopped him.",
+   "source": "https://www.imdb.com/title/tt9425132/",
+   "runtime": "51–74 min",
+   "imdbRating": "7.7",
+   "genres": [
+    "Documentary",
+    "Biography",
+    "Crime"
+   ],
+   "poster": "https://images.metahub.space/poster/medium/tt9425132/img",
+   "runtimeBasis": "Episode-length range from the official episode list.",
+   "documentarySource": "https://www.netflix.com/title/80226612?fromWatch=true&src=tudum&trkId=260364153"
+  },
+  {
+   "id": "tt13651632",
+   "imdbId": "tt13651632",
+   "title": "Night Stalker: The Hunt for a Serial Killer",
+   "year": "2021",
+   "type": "Series",
+   "section": "catalog",
+   "shelfLabel": "Documentary",
+   "description": "Survivors and detectives recount the investigation into the attacks that spread fear across California in 1985.",
+   "source": "https://www.imdb.com/title/tt13651632/",
+   "runtime": "46–48 min",
+   "imdbRating": "7.5",
+   "creator": "Tiller Russell",
+   "genres": [
+    "Documentary",
+    "Crime",
+    "Mystery"
+   ],
+   "poster": "https://images.metahub.space/poster/medium/tt13651632/img",
+   "runtimeBasis": "Episode-length range from the official episode list.",
+   "documentarySource": "https://media.netflix.com/en/only-on-netflix/81025701"
+  },
+  {
+   "id": "tt8259114",
+   "imdbId": "tt8259114",
+   "title": "I'll Be Gone in the Dark",
+   "year": "2020",
+   "type": "Series",
+   "section": "catalog",
+   "shelfLabel": "Documentary",
+   "description": "Michelle McNamara's investigation and survivors' accounts trace the long search for the Golden State Killer.",
+   "source": "https://www.imdb.com/title/tt8259114/",
+   "runtime": "~56 min",
+   "imdbRating": "7.4",
+   "creator": "Liz Garbus, Elizabeth Wolff, Myles Kane, Josh Koury",
+   "genres": [
+    "Documentary",
+    "Crime",
+    "Mystery"
+   ],
+   "poster": "https://images.metahub.space/poster/medium/tt8259114/img",
+   "runtimeBasis": "Approximate per-episode duration reported by Cinemeta; individual episodes vary.",
+   "documentarySource": "https://press.wbd.com/us/media-release/six-part-documentary-series-ill-be-gone-dark-debuts-june-28?language_content_entity=en"
+  },
+  {
+   "id": "tt4299972",
+   "imdbId": "tt4299972",
+   "title": "The Jinx: The Life and Deaths of Robert Durst",
+   "year": "2015",
+   "type": "Series",
+   "section": "catalog",
+   "shelfLabel": "Documentary",
+   "description": "An investigation of Robert Durst follows unresolved questions across decades of disappearances and deaths.",
+   "source": "https://www.imdb.com/title/tt4299972/",
+   "runtime": "~49 min",
+   "imdbRating": "8.6",
+   "creator": "Andrew Jarecki",
+   "genres": [
+    "Documentary",
+    "Biography",
+    "Crime"
+   ],
+   "poster": "https://images.metahub.space/poster/medium/tt4299972/img",
+   "runtimeBasis": "Approximate per-episode duration reported by Cinemeta; individual episodes vary.",
+   "documentarySource": "https://press.wbd.com/us/ca/media-release/hbo-0/jinx-part-two/hbo-original-documentary-series-jinx-part-two-debuts-april-21"
+  },
+  {
+   "id": "tt13492374",
+   "imdbId": "tt13492374",
+   "title": "The Ripper",
+   "year": "2020",
+   "type": "Series",
+   "section": "catalog",
+   "shelfLabel": "Documentary",
+   "description": "The search for the Yorkshire Ripper exposes how assumptions about women shaped a prolonged police investigation.",
+   "source": "https://www.imdb.com/title/tt13492374/",
+   "runtime": "47–51 min",
+   "imdbRating": "7.1",
+   "genres": [
+    "Documentary",
+    "Crime"
+   ],
+   "poster": "https://images.metahub.space/poster/medium/tt13492374/img",
+   "runtimeBasis": "Episode-length range from the official episode list.",
+   "documentarySource": "https://www.netflix.com/br-en/title/81006684"
+  },
+  {
+   "id": "tt18970124",
+   "imdbId": "tt18970124",
+   "title": "Conversations with a Killer: The John Wayne Gacy Tapes",
+   "year": "2022",
+   "type": "Series",
+   "section": "catalog",
+   "shelfLabel": "Documentary",
+   "description": "The investigation into a missing teenager uncovers John Wayne Gacy's murders and the task of identifying his victims.",
+   "source": "https://www.imdb.com/title/tt18970124/",
+   "runtime": "59–64 min",
+   "imdbRating": "7.1",
+   "creator": "Joe Berlinger",
+   "genres": [
+    "Documentary",
+    "Biography",
+    "Crime"
+   ],
+   "poster": "https://images.metahub.space/poster/medium/tt18970124/img",
+   "runtimeBasis": "Episode-length range from the official episode list.",
+   "documentarySource": "https://www.netflix.com/title/81298614?fromWatch=true"
+  },
+  {
+   "id": "tt15085784",
+   "imdbId": "tt15085784",
+   "title": "Memories of a Murderer: The Nilsen Tapes",
+   "year": "2021",
+   "type": "Film",
+   "section": "catalog",
+   "shelfLabel": "Documentary",
+   "description": "Archive recordings are placed alongside survivors' and investigators' accounts of the Dennis Nilsen case.",
+   "source": "https://www.imdb.com/title/tt15085784/",
+   "runtime": "84 min",
+   "imdbRating": "6.3",
+   "creator": "Michael Harte",
+   "genres": [
+    "Documentary",
+    "Biography",
+    "Crime"
+   ],
+   "poster": "https://images.metahub.space/poster/medium/tt15085784/img",
+   "documentarySource": "https://media.netflix.com/en/only-on-netflix/81097791"
+  },
+  {
+   "id": "tt21946032",
+   "imdbId": "tt21946032",
+   "title": "Conversations with a Killer: The Jeffrey Dahmer Tapes",
+   "year": "2022",
+   "type": "Series",
+   "section": "catalog",
+   "shelfLabel": "Documentary",
+   "description": "Interviews and recorded conversations examine Jeffrey Dahmer's crimes and the failures that allowed them to continue.",
+   "source": "https://www.imdb.com/title/tt21946032/",
+   "runtime": "58–62 min",
+   "imdbRating": "7.3",
+   "creator": "Joe Berlinger",
+   "genres": [
+    "Documentary",
+    "Biography",
+    "Crime"
+   ],
+   "poster": "https://images.metahub.space/poster/medium/tt21946032/img",
+   "runtimeBasis": "Episode-length range from the official episode list.",
+   "documentarySource": "https://www.netflix.com/title/81173345?source=35"
+  },
+  {
+   "id": "tt11307176",
+   "imdbId": "tt11307176",
+   "title": "The Confession Killer",
+   "year": "2019",
+   "type": "Series",
+   "section": "catalog",
+   "shelfLabel": "Documentary",
+   "description": "Investigators and families challenge the hundreds of murder confessions attributed to Henry Lee Lucas.",
+   "source": "https://www.imdb.com/title/tt11307176/",
+   "runtime": "45–50 min",
+   "imdbRating": "7.4",
+   "creator": "Robert Kenner, Taki Oldham",
+   "genres": [
+    "Documentary",
+    "Crime"
+   ],
+   "poster": "https://images.metahub.space/poster/medium/tt11307176/img",
+   "runtimeBasis": "Episode-length range from the official episode list.",
+   "documentarySource": "https://www.netflix.com/title/80213588?source=imdb"
+  },
+  {
+   "id": "tt33480540",
+   "imdbId": "tt33480540",
+   "title": "This Is the Zodiac Speaking",
+   "year": "2024",
+   "type": "Series",
+   "section": "catalog",
+   "shelfLabel": "Documentary",
+   "description": "A family revisits memories connected to a suspect in the unresolved Zodiac murders.",
+   "source": "https://www.imdb.com/title/tt33480540/",
+   "runtime": "42–49 min",
+   "imdbRating": "7.2",
+   "genres": [
+    "Documentary",
+    "Crime"
+   ],
+   "poster": "https://images.metahub.space/poster/medium/tt33480540/img",
+   "runtimeBasis": "Episode-length range from the official episode list.",
+   "documentarySource": "https://www.netflix.com/title/81681626?fromWatch=true"
+  },
+  {
+   "id": "tt11318602",
+   "imdbId": "tt11318602",
+   "title": "Don't F**k with Cats: Hunting an Internet Killer",
+   "year": "2019",
+   "type": "Series",
+   "section": "catalog",
+   "shelfLabel": "Documentary",
+   "description": "Online investigators follow a disturbing trail of videos as their search becomes part of a murder case.",
+   "source": "https://www.imdb.com/title/tt11318602/",
+   "runtime": "57–65 min",
+   "imdbRating": "8.0",
+   "genres": [
+    "Documentary",
+    "Crime",
+    "Mystery"
+   ],
+   "poster": "https://images.metahub.space/poster/medium/tt11318602/img",
+   "runtimeBasis": "Episode-length range from the official episode list.",
+   "documentarySource": "https://www.netflix.com/title/81031373?fromWatch=true"
+  },
+  {
+   "id": "tt23553310",
+   "imdbId": "tt23553310",
+   "title": "Crime Scene: The Texas Killing Fields",
+   "year": "2022",
+   "type": "Series",
+   "section": "catalog",
+   "shelfLabel": "Documentary",
+   "description": "Families and investigators revisit a stretch of Texas where women and girls disappeared or were found dead.",
+   "source": "https://www.imdb.com/title/tt23553310/",
+   "runtime": "47–50 min",
+   "imdbRating": "6.6",
+   "creator": "Jessica Dimmock",
+   "genres": [
+    "Documentary",
+    "Crime",
+    "History"
+   ],
+   "poster": "https://images.metahub.space/poster/medium/tt23553310/img",
+   "runtimeBasis": "Episode-length range from the official episode list.",
+   "documentarySource": "https://www.netflix.com/title/81555750"
+  },
+  {
+   "id": "tt6792200",
+   "imdbId": "tt6792200",
+   "title": "The Keepers",
+   "year": "2017",
+   "type": "Series",
+   "section": "catalog",
+   "shelfLabel": "Documentary",
+   "description": "Former students investigate a nun's unsolved murder and confront allegations of abuse at their school.",
+   "source": "https://www.imdb.com/title/tt6792200/",
+   "runtime": "56–66 min",
+   "imdbRating": "8.0",
+   "creator": "Ryan White",
+   "genres": [
+    "Documentary",
+    "Crime",
+    "Mystery"
+   ],
+   "poster": "https://images.metahub.space/poster/medium/tt6792200/img",
+   "runtimeBasis": "Episode-length range from the official episode list.",
+   "documentarySource": "https://www.netflix.com/title/80122179?fromWatch=true"
+  },
+  {
+   "id": "tt12987894",
+   "imdbId": "tt12987894",
+   "title": "American Murder: The Family Next Door",
+   "year": "2020",
+   "type": "Film",
+   "section": "catalog",
+   "shelfLabel": "Documentary",
+   "description": "Personal recordings and police footage reconstruct the disappearance of Shanann Watts and her daughters.",
+   "source": "https://www.imdb.com/title/tt12987894/",
+   "runtime": "83 min",
+   "imdbRating": "7.2",
+   "creator": "Jenny Popplewell",
+   "genres": [
+    "Documentary",
+    "Crime"
+   ],
+   "poster": "https://images.metahub.space/poster/medium/tt12987894/img",
+   "documentarySource": "https://www.netflix.com/title/81130130"
+  },
+  {
+   "id": "tt1152758",
+   "imdbId": "tt1152758",
+   "title": "Dear Zachary: A Letter to a Son About His Father",
+   "year": "2008",
+   "type": "Film",
+   "section": "catalog",
+   "shelfLabel": "Documentary",
+   "description": "A filmmaker gathers memories of his murdered friend for the son his friend never met.",
+   "source": "https://www.imdb.com/title/tt1152758/",
+   "runtime": "94 min",
+   "imdbRating": "8.5",
+   "creator": "Kurt Kuenne",
+   "genres": [
+    "Documentary",
+    "Biography",
+    "Crime"
+   ],
+   "poster": "https://images.metahub.space/poster/medium/tt1152758/img",
+   "documentarySource": "https://dearzachary.com/filmmaker/"
+  },
+  {
+   "id": "tt1277936",
+   "imdbId": "tt1277936",
+   "title": "Cropsey",
+   "year": "2009",
+   "type": "Film",
+   "section": "catalog",
+   "shelfLabel": "Documentary",
+   "description": "Two filmmakers investigate the real disappearances behind a Staten Island legend.",
+   "source": "https://www.imdb.com/title/tt1277936/",
+   "runtime": "84 min",
+   "imdbRating": "6.3",
+   "creator": "Barbara Brancaccio, Joshua Zeman",
+   "genres": [
+    "Documentary",
+    "Crime",
+    "Horror"
+   ],
+   "poster": "https://images.metahub.space/poster/medium/tt1277936/img",
+   "documentarySource": "https://tribecafilm.com/news/512c07be1c7d76d9a9000348-faces-of-the-festival-br"
+  },
+  {
+   "id": "tt1966604",
+   "imdbId": "tt1966604",
+   "title": "The Imposter",
+   "year": "2012",
+   "type": "Film",
+   "section": "catalog",
+   "shelfLabel": "Documentary",
+   "description": "A missing boy's family accepts a returning stranger whose account conceals an extraordinary deception.",
+   "source": "https://www.imdb.com/title/tt1966604/",
+   "runtime": "99 min",
+   "imdbRating": "7.4",
+   "creator": "Bart Layton",
+   "genres": [
+    "Documentary",
+    "Biography",
+    "Crime"
+   ],
+   "poster": "https://images.metahub.space/poster/medium/tt1966604/img",
+   "documentarySource": "https://www.bfi.org.uk/features/bfi-winners-british-independent-film-awards"
+  },
+  {
+   "id": "tt0096257",
+   "imdbId": "tt0096257",
+   "title": "The Thin Blue Line",
+   "year": "1988",
+   "type": "Film",
+   "section": "catalog",
+   "shelfLabel": "Documentary",
+   "description": "Errol Morris reexamines the evidence behind a man's conviction for a Dallas police officer's murder.",
+   "source": "https://www.imdb.com/title/tt0096257/",
+   "runtime": "102 min",
+   "imdbRating": "7.9",
+   "creator": "Errol Morris",
+   "genres": [
+    "Documentary",
+    "Crime"
+   ],
+   "poster": "https://images.metahub.space/poster/medium/tt0096257/img",
+   "runtimeBasis": "Criterion director-approved release.",
+   "documentarySource": "https://www.criterion.com/films/28355-the-thin-blue-line"
+  },
+  {
+   "id": "tt0117293",
+   "imdbId": "tt0117293",
+   "title": "Paradise Lost: The Child Murders at Robin Hood Hills",
+   "year": "1996",
+   "type": "Film",
+   "section": "catalog",
+   "shelfLabel": "Documentary",
+   "description": "Filmmakers follow the prosecutions of three teenagers accused of killing three children in West Memphis.",
+   "source": "https://www.imdb.com/title/tt0117293/",
+   "runtime": "150 min",
+   "imdbRating": "8.2",
+   "creator": "Joe Berlinger, Bruce Sinofsky",
+   "genres": [
+    "Documentary",
+    "Crime"
+   ],
+   "poster": "https://images.metahub.space/poster/medium/tt0117293/img",
+   "documentarySource": "https://www.netflix.com/title/70038380"
+  },
+  {
+   "id": "tt0342172",
+   "imdbId": "tt0342172",
+   "title": "Capturing the Friedmans",
+   "year": "2003",
+   "type": "Film",
+   "section": "catalog",
+   "shelfLabel": "Documentary",
+   "description": "Home videos and interviews trace a family's collapse during a child-abuse prosecution.",
+   "source": "https://www.imdb.com/title/tt0342172/",
+   "runtime": "107 min",
+   "imdbRating": "7.6",
+   "creator": "Andrew Jarecki",
+   "genres": [
+    "Documentary",
+    "Biography",
+    "Crime"
+   ],
+   "poster": "https://images.metahub.space/poster/medium/tt0342172/img",
+   "documentarySource": "https://www.bfi.org.uk/film/43ba01c8-89ad-5c8a-8ac0-16e498f0889b/capturing-the-friedmans"
+  },
+  {
+   "id": "tt22010586",
+   "imdbId": "tt22010586",
+   "title": "Capturing the Killer Nurse",
+   "year": "2022",
+   "type": "Film",
+   "section": "catalog",
+   "shelfLabel": "Documentary",
+   "description": "A nurse and investigators expose Charles Cullen's murders and the institutional failures that allowed him to keep working.",
+   "source": "https://www.imdb.com/title/tt22010586/",
+   "runtime": "95 min",
+   "imdbRating": "6.4",
+   "creator": "Tim Travers Hawkins",
+   "genres": [
+    "Documentary",
+    "Crime"
+   ],
+   "poster": "https://images.metahub.space/poster/medium/tt22010586/img",
+   "documentarySource": "https://media.netflix.com/en/only-on-netflix/81512108"
+  },
+  {
+   "id": "tt3568002",
+   "imdbId": "tt3568002",
+   "title": "The Witness",
+   "year": "2015",
+   "type": "Film",
+   "section": "catalog",
+   "shelfLabel": "Documentary",
+   "description": "A brother reexamines Kitty Genovese's murder and the story that grew around it.",
+   "source": "https://www.imdb.com/title/tt3568002/",
+   "runtime": "86 min",
+   "imdbRating": "7.0",
+   "creator": "James Solomon",
+   "genres": [
+    "Documentary",
+    "Biography",
+    "Crime"
+   ],
+   "poster": "https://images.metahub.space/poster/medium/tt3568002/img",
+   "documentarySource": "https://www.pbs.org/independentlens/documentaries/witness/"
+  },
+  {
+   "id": "tt10222764",
+   "imdbId": "tt10222764",
+   "title": "The Vow",
+   "year": "2020",
+   "type": "Series",
+   "section": "catalog",
+   "shelfLabel": "Documentary",
+   "description": "Former members describe how NXIVM's promises of self-improvement concealed coercion and abuse.",
+   "source": "https://www.imdb.com/title/tt10222764/",
+   "runtime": "~59 min",
+   "imdbRating": "7.2",
+   "creator": "Jehane Noujaim, Karim Amer",
+   "genres": [
+    "Documentary",
+    "Crime"
+   ],
+   "poster": "https://images.metahub.space/poster/medium/tt10222764/img",
+   "runtimeBasis": "Approximate per-episode duration reported by Cinemeta; individual episodes vary.",
+   "documentarySource": "https://press.wbd.com/na/media-release/hbo-0/vow-portrait-nxivm-debuts-august-23"
+  },
+  {
+   "id": "tt7768848",
+   "imdbId": "tt7768848",
+   "title": "Wild Wild Country",
+   "year": "2018",
+   "type": "Series",
+   "section": "catalog",
+   "shelfLabel": "Documentary",
+   "description": "Archival footage and interviews trace the conflict surrounding a religious commune in rural Oregon.",
+   "source": "https://www.imdb.com/title/tt7768848/",
+   "runtime": "64–71 min",
+   "imdbRating": "8.1",
+   "creator": "Chapman Way, Maclain Way",
+   "genres": [
+    "Documentary",
+    "Crime"
+   ],
+   "poster": "https://images.metahub.space/poster/medium/tt7768848/img",
+   "runtimeBasis": "Episode-length range from the official episode list.",
+   "documentarySource": "https://www.netflix.com/gb/title/80145240"
+  },
+  {
+   "id": "tt37438628",
+   "imdbId": "tt37438628",
+   "title": "Conversations with a Killer: The Son of Sam Tapes",
+   "year": "2025",
+   "type": "Series",
+   "section": "catalog",
+   "shelfLabel": "Documentary",
+   "source": "https://www.imdb.com/title/tt37438628/",
+   "imdbRating": "6.7",
+   "genres": [
+    "Documentary",
+    "Crime"
+   ],
+   "poster": "https://images.metahub.space/poster/medium/tt37438628/img",
+   "description": "Recordings and new interviews revisit David Berkowitz's shootings and the fear they spread through New York.",
+   "runtime": "54–60 min",
+   "runtimeBasis": "Episode-length range from the official episode list.",
+   "documentarySource": "https://www.netflix.com/us-en/browse/genre/81050"
+  },
+  {
+   "id": "tt11141900",
+   "imdbId": "tt11141900",
+   "title": "Ted Bundy: Falling for a Killer",
+   "year": "2020",
+   "type": "Series",
+   "section": "catalog",
+   "shelfLabel": "Documentary",
+   "source": "https://www.imdb.com/title/tt11141900/",
+   "imdbRating": "7.8",
+   "runtime": "~47 min",
+   "runtimeBasis": "Approximate episode runtime supplied by Cinemeta; episode lengths vary.",
+   "genres": [
+    "Documentary",
+    "Biography",
+    "Crime"
+   ],
+   "poster": "https://images.metahub.space/poster/medium/tt11141900/img",
+   "description": "Elizabeth Kendall, her daughter and survivors revisit Bundy's crimes through the lives of the women around him.",
+   "documentarySource": "https://www.primevideo.com/-/ms/detail/0L18ZXYEFHAZI4UJANL728LKV9"
+  },
+  {
+   "id": "tt14111774",
+   "imdbId": "tt14111774",
+   "title": "John Wayne Gacy: Devil in Disguise",
+   "year": "2021",
+   "type": "Series",
+   "section": "catalog",
+   "shelfLabel": "Documentary",
+   "source": "https://www.imdb.com/title/tt14111774/",
+   "imdbRating": "7.3",
+   "runtime": "48–55 min",
+   "runtimeBasis": "Episode-length range from the official episode list.",
+   "genres": [
+    "Documentary",
+    "Biography",
+    "Crime"
+   ],
+   "poster": "https://images.metahub.space/poster/medium/tt14111774/img",
+   "description": "Interviews and archival footage examine the Gacy investigation and the questions that continued after his trial.",
+   "documentarySource": "https://www.peacocktv.com/watch-online/tv/john-wayne-gacy-devil-in-disguise/6713218129274915112"
+  },
+  {
+   "id": "tt14923638",
+   "imdbId": "tt14923638",
+   "title": "Invisible Monsters: Serial Killers in America",
+   "year": "2021",
+   "type": "Series",
+   "section": "catalog",
+   "shelfLabel": "Documentary",
+   "source": "https://www.imdb.com/title/tt14923638/",
+   "imdbRating": "7.2",
+   "runtime": "~43 min",
+   "runtimeBasis": "Approximate episode runtime supplied by Cinemeta; episode lengths vary.",
+   "genres": [
+    "Documentary",
+    "Crime"
+   ],
+   "poster": "https://images.metahub.space/poster/medium/tt14923638/img",
+   "description": "Interwoven investigations examine how five American serial killers evaded detection during overlapping decades.",
+   "documentarySource": "https://www.aetv.com/shows/invisible-monsters"
+  },
+  {
+   "id": "tt16303776",
+   "imdbId": "tt16303776",
+   "title": "BTK: Confession of a Serial Killer",
+   "year": "2022",
+   "type": "Series",
+   "section": "catalog",
+   "shelfLabel": "Documentary",
+   "source": "https://www.imdb.com/title/tt16303776/",
+   "imdbRating": "7.0",
+   "runtime": "43 min",
+   "runtimeBasis": "Episode-length range from the official episode list.",
+   "genres": [
+    "Documentary",
+    "Crime"
+   ],
+   "poster": "https://images.metahub.space/poster/medium/tt16303776/img",
+   "description": "Prison conversations with Dennis Rader anchor an examination of the BTK murders and the search for their perpetrator.",
+   "documentarySource": "https://www.aetv.com/shows/btk-confession-of-a-serial-killer/season-1"
+  },
+  {
+   "id": "tt15723914",
+   "imdbId": "tt15723914",
+   "title": "Catching Killers",
+   "year": "2021",
+   "type": "Series",
+   "section": "catalog",
+   "shelfLabel": "Documentary",
+   "source": "https://www.imdb.com/title/tt15723914/",
+   "imdbRating": "7.2",
+   "runtime": "~40 min",
+   "runtimeBasis": "Approximate episode runtime supplied by Cinemeta; episode lengths vary.",
+   "genres": [
+    "Documentary",
+    "Crime",
+    "Mystery"
+   ],
+   "poster": "https://images.metahub.space/poster/medium/tt15723914/img",
+   "description": "Detectives recount the leads and setbacks in investigations that brought serial killers to justice.",
+   "documentarySource": "https://www.netflix.com/us-en/browse/genre/81050"
+  },
+  {
+   "id": "tt34962891",
+   "imdbId": "tt34962891",
+   "title": "The Perfect Neighbor",
+   "year": "2025",
+   "type": "Film",
+   "section": "catalog",
+   "shelfLabel": "Documentary",
+   "source": "https://www.imdb.com/title/tt34962891/",
+   "imdbRating": "7.1",
+   "runtime": "97 min",
+   "creator": "Geeta Gandbhir",
+   "genres": [
+    "Documentary",
+    "Crime",
+    "Drama"
+   ],
+   "poster": "https://images.metahub.space/poster/medium/tt34962891/img",
+   "description": "Police body-camera footage reconstructs the escalating conflict that ended in the killing of Ajike Owens.",
+   "documentarySource": "https://www.netflix.com/us-en/browse/genre/81050"
+  },
+  {
+   "id": "tt3904186",
+   "imdbId": "tt3904186",
+   "title": "Tales of the Grim Sleeper",
+   "year": "2014",
+   "type": "Film",
+   "section": "catalog",
+   "shelfLabel": "Documentary",
+   "source": "https://www.imdb.com/title/tt3904186/",
+   "imdbRating": "7.0",
+   "runtime": "105 min",
+   "creator": "Nick Broomfield",
+   "genres": [
+    "Documentary",
+    "Crime"
+   ],
+   "poster": "https://images.metahub.space/poster/medium/tt3904186/img",
+   "description": "Nick Broomfield investigates the murders of women in South Los Angeles and the community's unanswered questions.",
+   "documentarySource": "https://filmsandfestivals.britishcouncil.org/projects/tales-of-the-grim-sleeper"
+  },
+  {
+   "id": "tt0364930",
+   "imdbId": "tt0364930",
+   "title": "Aileen: Life and Death of a Serial Killer",
+   "year": "2003",
+   "type": "Film",
+   "section": "catalog",
+   "shelfLabel": "Documentary",
+   "source": "https://www.imdb.com/title/tt0364930/",
+   "imdbRating": "7.1",
+   "runtime": "89 min",
+   "creator": "Nick Broomfield, Joan Churchill",
+   "genres": [
+    "Documentary",
+    "Crime"
+   ],
+   "poster": "https://images.metahub.space/poster/medium/tt0364930/img",
+   "description": "Interviews with Aileen Wuornos and people who knew her examine her life and final years on death row.",
+   "documentarySource": "https://www.idfa.nl/en/film/502250bd-4f8f-422b-9b70-9176b5bbc607/aileen-life-and-death-of-a-serial-killer/"
+  },
+  {
+   "id": "tt0103634",
+   "imdbId": "tt0103634",
+   "title": "Aileen Wuornos: The Selling of a Serial Killer",
+   "year": "1992",
+   "type": "Film",
+   "section": "catalog",
+   "shelfLabel": "Documentary",
+   "source": "https://www.imdb.com/title/tt0103634/",
+   "imdbRating": "6.9",
+   "runtime": "87 min",
+   "creator": "Nick Broomfield",
+   "genres": [
+    "Documentary",
+    "Crime"
+   ],
+   "poster": "https://images.metahub.space/poster/medium/tt0103634/img",
+   "description": "Nick Broomfield follows the commercial scramble surrounding the prosecution of Aileen Wuornos.",
+   "documentarySource": "https://www.idfa.nl/en/film/502250bd-4f8f-422b-9b70-9176b5bbc607/aileen-life-and-death-of-a-serial-killer/"
+  },
+  {
+   "id": "tt11668320",
+   "imdbId": "tt11668320",
+   "title": "Crazy, Not Insane",
+   "year": "2020",
+   "type": "Film",
+   "section": "catalog",
+   "shelfLabel": "Documentary",
+   "source": "https://www.imdb.com/title/tt11668320/",
+   "imdbRating": "6.9",
+   "runtime": "117 min",
+   "creator": "Alex Gibney",
+   "genres": [
+    "Documentary",
+    "Biography",
+    "Crime"
+   ],
+   "poster": "https://images.metahub.space/poster/medium/tt11668320/img",
+   "description": "Alex Gibney follows psychiatrist Dorothy Otnow Lewis as she investigates the histories of people convicted of murder.",
+   "documentarySource": "https://press.wbd.com/na/media-release/hbo-0/hbos-crazy-not-insane-provocative-look-minds-serial-killers-debuts-november-18"
+  },
+  {
+   "id": "tt2106331",
+   "imdbId": "tt2106331",
+   "title": "Bayou Blue",
+   "year": "2011",
+   "type": "Film",
+   "section": "catalog",
+   "shelfLabel": "Documentary",
+   "source": "https://www.imdb.com/title/tt2106331/",
+   "imdbRating": "6.0",
+   "runtime": "80 min",
+   "creator": "Alix Lambert, David McMahon",
+   "genres": [
+    "Documentary",
+    "Crime",
+    "Drama"
+   ],
+   "poster": "https://images.metahub.space/poster/medium/tt2106331/img",
+   "description": "Families and investigators describe the long search for the man who killed men across southeastern Louisiana.",
+   "documentarySource": "https://www.idfa.nl/en/film/b93a795d-65d5-4c93-afbb-383633c568ee/bayou-blue"
+  },
+  {
+   "id": "tt0358500",
+   "imdbId": "tt0358500",
+   "title": "H.H. Holmes: America's First Serial Killer",
+   "year": "2004",
+   "type": "Film",
+   "section": "catalog",
+   "shelfLabel": "Documentary",
+   "source": "https://www.imdb.com/title/tt0358500/",
+   "imdbRating": "6.3",
+   "runtime": "64 min",
+   "creator": "John Borowski",
+   "genres": [
+    "Documentary",
+    "Crime",
+    "History"
+   ],
+   "poster": "https://images.metahub.space/poster/medium/tt0358500/img",
+   "description": "John Borowski examines H.H. Holmes's criminal life and the accounts surrounding his Chicago murders.",
+   "documentarySource": "https://www.johnborowski.com/films.html"
+  },
+  {
+   "id": "tt2934036",
+   "imdbId": "tt2934036",
+   "title": "The Cheshire Murders",
+   "year": "2013",
+   "type": "Film",
+   "section": "catalog",
+   "shelfLabel": "Documentary",
+   "source": "https://www.imdb.com/title/tt2934036/",
+   "imdbRating": "6.5",
+   "runtime": "115 min",
+   "creator": "Kate Davis, David Heilbroner",
+   "genres": [
+    "Documentary",
+    "Crime"
+   ],
+   "poster": "https://images.metahub.space/poster/medium/tt2934036/img",
+   "description": "The investigation and trials following a Connecticut home invasion raise questions about preventable failures.",
+   "documentarySource": "https://www.hbo.com/movies/a-z"
+  },
+  {
+   "id": "tt6442978",
+   "imdbId": "tt6442978",
+   "title": "Mommy Dead and Dearest",
+   "year": "2017",
+   "type": "Film",
+   "section": "catalog",
+   "shelfLabel": "Documentary",
+   "source": "https://www.imdb.com/title/tt6442978/",
+   "imdbRating": "7.3",
+   "runtime": "82 min",
+   "creator": "Erin Lee Carr",
+   "genres": [
+    "Documentary",
+    "Crime"
+   ],
+   "poster": "https://images.metahub.space/poster/medium/tt6442978/img",
+   "description": "The killing of Dee Dee Blanchard exposes the abuse concealed within her relationship with her daughter.",
+   "documentarySource": "https://www.hbo.com/documentaries"
+  },
+  {
+   "id": "tt4503900",
+   "imdbId": "tt4503900",
+   "title": "Thought Crimes: The Case of the Cannibal Cop",
+   "year": "2015",
+   "type": "Film",
+   "section": "catalog",
+   "shelfLabel": "Documentary",
+   "source": "https://www.imdb.com/title/tt4503900/",
+   "imdbRating": "6.3",
+   "runtime": "81 min",
+   "creator": "Erin Lee Carr",
+   "genres": [
+    "Documentary"
+   ],
+   "poster": "https://images.metahub.space/poster/medium/tt4503900/img",
+   "description": "The prosecution of Gilberto Valle raises contested questions about the boundary between online fantasies and criminal intent.",
+   "documentarySource": "https://www.abstract.productions/thoughtcrimes"
+  },
+  {
+   "id": "tt5329376",
+   "imdbId": "tt5329376",
+   "title": "Beware the Slenderman",
+   "year": "2016",
+   "type": "Film",
+   "section": "catalog",
+   "shelfLabel": "Documentary",
+   "source": "https://www.imdb.com/title/tt5329376/",
+   "imdbRating": "6.2",
+   "runtime": "115 min",
+   "creator": "Irene Taylor",
+   "genres": [
+    "Documentary",
+    "Biography",
+    "Crime"
+   ],
+   "poster": "https://images.metahub.space/poster/medium/tt5329376/img",
+   "description": "A real stabbing investigation examines how two children became fixated on an invented internet figure.",
+   "documentarySource": "https://www.idfa.nl/en/film/252cdda2-fbb4-4e72-8d67-ff2959229759/beware-the-slenderman/"
+  },
+  {
+   "id": "tt2011325",
+   "imdbId": "tt2011325",
+   "title": "There's Something Wrong with Aunt Diane",
+   "year": "2011",
+   "type": "Film",
+   "section": "catalog",
+   "shelfLabel": "Documentary",
+   "source": "https://www.imdb.com/title/tt2011325/",
+   "imdbRating": "6.6",
+   "runtime": "100 min",
+   "creator": "Liz Garbus",
+   "genres": [
+    "Documentary",
+    "Crime"
+   ],
+   "poster": "https://images.metahub.space/poster/medium/tt2011325/img",
+   "description": "Relatives and investigators revisit the circumstances of a fatal wrong-way crash on New York's Taconic Parkway.",
+   "documentarySource": "https://www.hbo.com/movies/a-z"
+  },
+  {
+   "id": "tt1972663",
+   "imdbId": "tt1972663",
+   "title": "Into the Abyss",
+   "year": "2011",
+   "type": "Film",
+   "section": "catalog",
+   "shelfLabel": "Documentary",
+   "source": "https://www.imdb.com/title/tt1972663/",
+   "imdbRating": "7.3",
+   "runtime": "107 min",
+   "creator": "Werner Herzog",
+   "genres": [
+    "Documentary",
+    "Crime",
+    "Drama"
+   ],
+   "poster": "https://images.metahub.space/poster/medium/tt1972663/img",
+   "description": "Werner Herzog speaks with people affected by a Texas triple homicide and the death sentences that followed.",
+   "documentarySource": "https://www.ifccenter.com/films/into-the-abyss-a-tale-of-death-a-tale-of-life/"
+  },
+  {
+   "id": "tt5083702",
+   "imdbId": "tt5083702",
+   "title": "The Fear of 13",
+   "year": "2015",
+   "type": "Film",
+   "section": "catalog",
+   "shelfLabel": "Documentary",
+   "source": "https://www.imdb.com/title/tt5083702/",
+   "imdbRating": "7.6",
+   "runtime": "92 min",
+   "creator": "David Sington",
+   "genres": [
+    "Documentary",
+    "Biography",
+    "Crime"
+   ],
+   "poster": "https://images.metahub.space/poster/medium/tt5083702/img",
+   "description": "Nick Yarris recounts the imprisonment and uncertainty that shaped more than two decades of his life.",
+   "documentarySource": "https://releasing.dogwoof.com/thefearof13"
+  },
+  {
+   "id": "tt5952332",
+   "imdbId": "tt5952332",
+   "title": "Amanda Knox",
+   "year": "2016",
+   "type": "Film",
+   "section": "catalog",
+   "shelfLabel": "Documentary",
+   "source": "https://www.imdb.com/title/tt5952332/",
+   "imdbRating": "6.9",
+   "runtime": "92 min",
+   "creator": "Rod Blackhurst, Brian McGinn",
+   "genres": [
+    "Documentary",
+    "Crime"
+   ],
+   "poster": "https://images.metahub.space/poster/medium/tt5952332/img",
+   "description": "Interviews with Amanda Knox and others revisit the murder investigation and media attention surrounding her prosecution.",
+   "documentarySource": "https://www.netflix.com/gb-en/browse/genre/8673"
+  },
+  {
+   "id": "tt0914376",
+   "imdbId": "tt0914376",
+   "title": "The Innocent Man",
+   "year": "2018",
+   "type": "Series",
+   "section": "catalog",
+   "shelfLabel": "Documentary",
+   "source": "https://www.imdb.com/title/tt0914376/",
+   "imdbRating": "7.3",
+   "runtime": "~47 min",
+   "runtimeBasis": "Approximate episode runtime supplied by Cinemeta; episode lengths vary.",
+   "genres": [
+    "Documentary",
+    "Crime"
+   ],
+   "poster": "https://images.metahub.space/poster/medium/tt0914376/img",
+   "description": "Two Oklahoma murder cases reveal the consequences of disputed evidence and wrongful convictions.",
+   "documentarySource": "https://www.netflix.com/us-en/browse/genre/81050"
+  },
+  {
+   "id": "tt8342862",
+   "imdbId": "tt8342862",
+   "title": "Evil Genius: The True Story of America's Most Diabolical Bank Heist",
+   "year": "2018",
+   "type": "Series",
+   "section": "catalog",
+   "shelfLabel": "Documentary",
+   "source": "https://www.imdb.com/title/tt8342862/",
+   "imdbRating": "7.5",
+   "runtime": "~48 min",
+   "runtimeBasis": "Approximate episode runtime supplied by Cinemeta; episode lengths vary.",
+   "genres": [
+    "Documentary",
+    "Crime"
+   ],
+   "poster": "https://images.metahub.space/poster/medium/tt8342862/img",
+   "description": "Investigators revisit the fatal collar-bomb bank robbery in Erie and the tangled relationships behind it.",
+   "documentarySource": "https://www.netflix.com/us-en/browse/genre/81050"
+  },
+  {
+   "id": "tt5189670",
+   "imdbId": "tt5189670",
+   "title": "Making a Murderer",
+   "year": "2015",
+   "type": "Series",
+   "section": "catalog",
+   "shelfLabel": "Documentary",
+   "source": "https://www.imdb.com/title/tt5189670/",
+   "imdbRating": "8.5",
+   "runtime": "~62 min",
+   "runtimeBasis": "Approximate episode runtime supplied by Cinemeta; episode lengths vary.",
+   "genres": [
+    "Documentary",
+    "Crime"
+   ],
+   "poster": "https://images.metahub.space/poster/medium/tt5189670/img",
+   "description": "Years of filming follow Steven Avery's exoneration and the later murder prosecution of Avery and Brendan Dassey.",
+   "documentarySource": "https://www.netflix.com/us-en/browse/genre/81050"
+  },
+  {
+   "id": "tt0388644",
+   "imdbId": "tt0388644",
+   "title": "The Staircase",
+   "year": "2004",
+   "type": "Series",
+   "section": "catalog",
+   "shelfLabel": "Documentary",
+   "source": "https://www.imdb.com/title/tt0388644/",
+   "imdbRating": "7.8",
+   "runtime": "~48 min",
+   "runtimeBasis": "Approximate episode runtime supplied by Cinemeta; episode lengths vary.",
+   "genres": [
+    "Documentary",
+    "Crime",
+    "Drama"
+   ],
+   "poster": "https://images.metahub.space/poster/medium/tt0388644/img",
+   "description": "A documentary crew follows Michael Peterson's defense and the legal proceedings after his wife Kathleen's death.",
+   "creator": "Jean-Xavier de Lestrade",
+   "documentarySource": "https://www.netflix.com/us-en/browse/genre/81050"
+  },
+  {
+   "id": "tt13987620",
+   "imdbId": "tt13987620",
+   "title": "Murder Among the Mormons",
+   "year": "2021",
+   "type": "Series",
+   "section": "catalog",
+   "shelfLabel": "Documentary",
+   "source": "https://www.imdb.com/title/tt13987620/",
+   "imdbRating": "7.0",
+   "runtime": "~54 min",
+   "runtimeBasis": "Approximate episode runtime supplied by Cinemeta; episode lengths vary.",
+   "genres": [
+    "Documentary",
+    "Crime",
+    "History"
+   ],
+   "poster": "https://images.metahub.space/poster/medium/tt13987620/img",
+   "description": "Deadly bombings in Salt Lake City expose a scheme involving forged historical documents.",
+   "documentarySource": "https://www.netflix.com/us-en/browse/genre/81050"
+  },
+  {
+   "id": "tt14167390",
+   "imdbId": "tt14167390",
+   "title": "House of Secrets: The Burari Deaths",
+   "year": "2021",
+   "type": "Series",
+   "section": "catalog",
+   "shelfLabel": "Documentary",
+   "source": "https://www.imdb.com/title/tt14167390/",
+   "imdbRating": "7.4",
+   "runtime": "~45 min",
+   "runtimeBasis": "Approximate episode runtime supplied by Cinemeta; episode lengths vary.",
+   "genres": [
+    "Documentary",
+    "Crime",
+    "History"
+   ],
+   "poster": "https://images.metahub.space/poster/medium/tt14167390/img",
+   "description": "A documentary investigation examines the deaths of eleven family members in a Delhi home.",
+   "documentarySource": "https://www.netflix.com/us-en/browse/genre/81050"
+  },
+  {
+   "id": "tt15484900",
+   "imdbId": "tt15484900",
+   "title": "The Raincoat Killer: Chasing a Predator in Korea",
+   "year": "2021",
+   "type": "Series",
+   "section": "catalog",
+   "shelfLabel": "Documentary",
+   "source": "https://www.imdb.com/title/tt15484900/",
+   "imdbRating": "6.4",
+   "runtime": "~49 min",
+   "runtimeBasis": "Approximate episode runtime supplied by Cinemeta; episode lengths vary.",
+   "genres": [
+    "Documentary",
+    "Crime",
+    "History"
+   ],
+   "poster": "https://images.metahub.space/poster/medium/tt15484900/img",
+   "description": "Investigators recount the search for the serial killer whose attacks shook Seoul in the early 2000s.",
+   "documentarySource": "https://www.netflix.com/us-en/browse/genre/81050"
+  },
+  {
+   "id": "tt14178824",
+   "imdbId": "tt14178824",
+   "title": "Indian Predator: The Butcher of Delhi",
+   "year": "2022",
+   "type": "Series",
+   "section": "catalog",
+   "shelfLabel": "Documentary",
+   "source": "https://www.imdb.com/title/tt14178824/",
+   "imdbRating": "6.1",
+   "runtime": "~43 min",
+   "runtimeBasis": "Approximate episode runtime supplied by Cinemeta; episode lengths vary.",
+   "creator": "Ayesha Sood",
+   "genres": [
+    "Documentary",
+    "Crime"
+   ],
+   "poster": "https://images.metahub.space/poster/medium/tt14178824/img",
+   "description": "Bodies left outside a Delhi prison draw investigators into a serial-murder case.",
+   "documentarySource": "https://www.netflix.com/us-en/browse/genre/81050"
+  },
+  {
+   "id": "tt21811888",
+   "imdbId": "tt21811888",
+   "title": "Indian Predator: The Diary of a Serial Killer",
+   "year": "2022",
+   "type": "Series",
+   "section": "catalog",
+   "shelfLabel": "Documentary",
+   "source": "https://www.imdb.com/title/tt21811888/",
+   "imdbRating": "6.2",
+   "runtime": "38–45 min",
+   "runtimeBasis": "Episode-length range from the official episode list.",
+   "genres": [
+    "Documentary",
+    "Crime"
+   ],
+   "poster": "https://images.metahub.space/poster/medium/tt21811888/img",
+   "description": "A journalist's murder leads investigators to a diary suggesting a larger pattern of killings.",
+   "documentarySource": "https://www.netflix.com/gb/title/81610333"
+  },
+  {
+   "id": "tt23751640",
+   "imdbId": "tt23751640",
+   "title": "Beast of Bangalore: Indian Predator",
+   "year": "2022",
+   "type": "Series",
+   "section": "catalog",
+   "shelfLabel": "Documentary",
+   "source": "https://www.imdb.com/title/tt23751640/",
+   "imdbRating": "6.2",
+   "runtime": "~45 min",
+   "runtimeBasis": "Approximate episode runtime supplied by Cinemeta; episode lengths vary.",
+   "genres": [
+    "Documentary",
+    "Crime"
+   ],
+   "poster": "https://images.metahub.space/poster/medium/tt23751640/img",
+   "description": "Survivors and investigators recount the hunt for a man who attacked women across Karnataka.",
+   "documentarySource": "https://www.netflix.com/us-en/browse/genre/81050"
+  },
+  {
+   "id": "tt30177031",
+   "imdbId": "tt30177031",
+   "title": "Curry & Cyanide: The Jolly Joseph Case",
+   "year": "2023",
+   "type": "Film",
+   "section": "catalog",
+   "shelfLabel": "Documentary",
+   "source": "https://www.imdb.com/title/tt30177031/",
+   "imdbRating": "6.7",
+   "runtime": "95 min",
+   "creator": "Christo Tomy",
+   "genres": [
+    "Documentary",
+    "Crime"
+   ],
+   "poster": "https://images.metahub.space/poster/medium/tt30177031/img",
+   "description": "A documentary examines the suspected poisonings within a Kerala family and the case against Jolly Joseph.",
+   "documentarySource": "https://www.netflix.com/title/81564452"
+  },
+  {
+   "id": "tt21867596",
+   "imdbId": "tt21867596",
+   "title": "Sins of Our Mother",
+   "year": "2022",
+   "type": "Series",
+   "section": "catalog",
+   "shelfLabel": "Documentary",
+   "source": "https://www.imdb.com/title/tt21867596/",
+   "imdbRating": "7.0",
+   "genres": [
+    "Crime",
+    "Documentary"
+   ],
+   "poster": "https://images.metahub.space/poster/medium/tt21867596/img",
+   "description": "The disappearance of Lori Vallow's children exposes a trail of deaths and apocalyptic beliefs.",
+   "runtime": "39–50 min",
+   "runtimeBasis": "Episode-length range from the official episode list.",
+   "documentarySource": "https://www.netflix.com/us-en/browse/genre/81050"
+  },
+  {
+   "id": "tt21059520",
+   "imdbId": "tt21059520",
+   "title": "Girl in the Picture",
+   "year": "2022",
+   "type": "Film",
+   "section": "catalog",
+   "shelfLabel": "Documentary",
+   "source": "https://www.imdb.com/title/tt21059520/",
+   "imdbRating": "7.3",
+   "runtime": "101 min",
+   "creator": "Skye Borgman",
+   "genres": [
+    "Documentary",
+    "Crime",
+    "Mystery"
+   ],
+   "poster": "https://images.metahub.space/poster/medium/tt21059520/img",
+   "description": "The search for a young woman's identity reveals years of abduction and abuse concealed by a fugitive.",
+   "documentarySource": "https://www.netflix.com/us-en/browse/genre/81050"
+  },
+  {
+   "id": "tt10915286",
+   "imdbId": "tt10915286",
+   "title": "Tell Me Who I Am",
+   "year": "2019",
+   "type": "Film",
+   "section": "catalog",
+   "shelfLabel": "Documentary",
+   "source": "https://www.imdb.com/title/tt10915286/",
+   "imdbRating": "7.6",
+   "runtime": "85 min",
+   "creator": "Ed Perkins",
+   "genres": [
+    "Documentary",
+    "Drama",
+    "Mystery"
+   ],
+   "poster": "https://images.metahub.space/poster/medium/tt10915286/img",
+   "description": "Twin brothers confront the childhood history one had concealed after the other lost his memory.",
+   "documentarySource": "https://www.netflix.com/gb-en/browse/genre/8673"
+  },
+  {
+   "id": "tt20560404",
+   "imdbId": "tt20560404",
+   "title": "Keep Sweet: Pray and Obey",
+   "year": "2022",
+   "type": "Series",
+   "section": "catalog",
+   "shelfLabel": "Documentary",
+   "source": "https://www.imdb.com/title/tt20560404/",
+   "imdbRating": "7.3",
+   "runtime": "~48 min",
+   "runtimeBasis": "Approximate episode runtime supplied by Cinemeta; episode lengths vary.",
+   "genres": [
+    "Documentary",
+    "Crime"
+   ],
+   "poster": "https://images.metahub.space/poster/medium/tt20560404/img",
+   "description": "Former members describe life under Warren Jeffs and the investigation into abuse within the FLDS community.",
+   "documentarySource": "https://www.netflix.com/us-en/browse/genre/81050"
+  },
+  {
+   "id": "tt29388212",
+   "imdbId": "tt29388212",
+   "title": "Escaping Twin Flames",
+   "year": "2023",
+   "type": "Series",
+   "section": "catalog",
+   "shelfLabel": "Documentary",
+   "source": "https://www.imdb.com/title/tt29388212/",
+   "imdbRating": "6.7",
+   "runtime": "~58 min",
+   "runtimeBasis": "Approximate episode runtime supplied by Cinemeta; episode lengths vary.",
+   "genres": [
+    "Documentary",
+    "Biography"
+   ],
+   "poster": "https://images.metahub.space/poster/medium/tt29388212/img",
+   "description": "Former members describe the pressure and coercion behind an online community promising destined romantic partners.",
+   "documentarySource": "https://www.netflix.com/us-en/browse/genre/10105"
+  },
+  {
+   "id": "tt14832124",
+   "imdbId": "tt14832124",
+   "title": "Love Has Won: The Cult of Mother God",
+   "year": "2023",
+   "type": "Series",
+   "section": "catalog",
+   "shelfLabel": "Documentary",
+   "source": "https://www.imdb.com/title/tt14832124/",
+   "imdbRating": "7.2",
+   "runtime": "~56 min",
+   "runtimeBasis": "Approximate episode runtime supplied by Cinemeta; episode lengths vary.",
+   "genres": [
+    "Documentary",
+    "Biography"
+   ],
+   "poster": "https://images.metahub.space/poster/medium/tt14832124/img",
+   "description": "Members of Love Has Won recount their devotion to Amy Carlson and the events leading to her death.",
+   "documentarySource": "https://www.hbo.com/series/genre/documentaries"
+  },
+  {
+   "id": "tt4257858",
+   "imdbId": "tt4257858",
+   "title": "Going Clear: Scientology and the Prison of Belief",
+   "year": "2015",
+   "type": "Film",
+   "section": "catalog",
+   "shelfLabel": "Documentary",
+   "source": "https://www.imdb.com/title/tt4257858/",
+   "imdbRating": "8.0",
+   "runtime": "120 min",
+   "creator": "Alex Gibney",
+   "genres": [
+    "Documentary"
+   ],
+   "poster": "https://images.metahub.space/poster/medium/tt4257858/img",
+   "description": "Former Scientologists describe the organization's history and their experiences inside it.",
+   "documentarySource": "https://www.hbo.com/movies/a-z"
+  },
+  {
+   "id": "tt0762111",
+   "imdbId": "tt0762111",
+   "title": "Jonestown: The Life and Death of Peoples Temple",
+   "year": "2006",
+   "type": "Film",
+   "section": "catalog",
+   "shelfLabel": "Documentary",
+   "source": "https://www.imdb.com/title/tt0762111/",
+   "imdbRating": "7.8",
+   "runtime": "86 min",
+   "creator": "Stanley Nelson",
+   "genres": [
+    "Documentary",
+    "History"
+   ],
+   "poster": "https://images.metahub.space/poster/medium/tt0762111/img",
+   "description": "Survivors and archival footage trace Peoples Temple from its beginnings to the deaths in Guyana.",
+   "documentarySource": "https://www.pbs.org/wgbh/americanexperience/films/jonestown/"
+  },
+  {
+   "id": "tt0120472",
+   "imdbId": "tt0120472",
+   "title": "Waco: The Rules of Engagement",
+   "year": "1997",
+   "type": "Film",
+   "section": "catalog",
+   "shelfLabel": "Documentary",
+   "source": "https://www.imdb.com/title/tt0120472/",
+   "imdbRating": "7.8",
+   "runtime": "136 min",
+   "creator": "William Gazecki",
+   "genres": [
+    "Documentary",
+    "History"
+   ],
+   "poster": "https://images.metahub.space/poster/medium/tt0120472/img",
+   "description": "A documentary challenges official accounts of the Branch Davidian siege and its fatal conclusion.",
+   "documentarySource": "https://www.documentary.org/feature/1997-ida-distinguished-documentary-achievement-awards"
+  },
+  {
+   "id": "tt26687196",
+   "imdbId": "tt26687196",
+   "title": "Waco: American Apocalypse",
+   "year": "2023",
+   "type": "Series",
+   "section": "catalog",
+   "shelfLabel": "Documentary",
+   "source": "https://www.imdb.com/title/tt26687196/",
+   "imdbRating": "7.0",
+   "runtime": "~47 min",
+   "runtimeBasis": "Approximate episode runtime supplied by Cinemeta; episode lengths vary.",
+   "genres": [
+    "Documentary",
+    "Crime"
+   ],
+   "poster": "https://images.metahub.space/poster/medium/tt26687196/img",
+   "description": "Archival recordings and eyewitness accounts revisit the 1993 siege at the Branch Davidian compound.",
+   "documentarySource": "https://www.netflix.com/us-en/browse/genre/81050"
+  },
+  {
+   "id": "tt26340363",
+   "imdbId": "tt26340363",
+   "title": "In the Name of God: A Holy Betrayal",
+   "year": "2023",
+   "type": "Series",
+   "section": "catalog",
+   "shelfLabel": "Documentary",
+   "source": "https://www.imdb.com/title/tt26340363/",
+   "imdbRating": "7.1",
+   "runtime": "~49 min",
+   "runtimeBasis": "Approximate episode runtime supplied by Cinemeta; episode lengths vary.",
+   "genres": [
+    "Documentary",
+    "Crime"
+   ],
+   "poster": "https://images.metahub.space/poster/medium/tt26340363/img",
+   "description": "Survivors describe abuse and coercion associated with four Korean religious leaders.",
+   "documentarySource": "https://www.netflix.com/us-en/browse/genre/81050"
+  },
+  {
+   "id": "tt12312250",
+   "imdbId": "tt12312250",
+   "title": "Jeffrey Epstein: Filthy Rich",
+   "year": "2020",
+   "type": "Series",
+   "section": "catalog",
+   "shelfLabel": "Documentary",
+   "source": "https://www.imdb.com/title/tt12312250/",
+   "imdbRating": "7.1",
+   "runtime": "~57 min",
+   "runtimeBasis": "Approximate episode runtime supplied by Cinemeta; episode lengths vary.",
+   "genres": [
+    "Documentary",
+    "Crime"
+   ],
+   "poster": "https://images.metahub.space/poster/medium/tt12312250/img",
+   "description": "Survivors recount Jeffrey Epstein's abuse and the network that enabled it.",
+   "documentarySource": "https://www.netflix.com/us-en/browse/genre/81050"
+  },
+  {
+   "id": "tt31183637",
+   "imdbId": "tt31183637",
+   "title": "The Program: Cons, Cults, and Kidnapping",
+   "year": "2024",
+   "type": "Series",
+   "section": "catalog",
+   "shelfLabel": "Documentary",
+   "source": "https://www.imdb.com/title/tt31183637/",
+   "imdbRating": "7.4",
+   "runtime": "~64 min",
+   "runtimeBasis": "Approximate episode runtime supplied by Cinemeta; episode lengths vary.",
+   "genres": [
+    "Documentary",
+    "Crime"
+   ],
+   "poster": "https://images.metahub.space/poster/medium/tt31183637/img",
+   "description": "A filmmaker returns to the troubled-teen institution she attended and investigates its methods alongside former students.",
+   "documentarySource": "https://www.netflix.com/us-en/browse/genre/10105"
+  },
+  {
+   "id": "tt29926213",
+   "imdbId": "tt29926213",
+   "title": "Let Us Prey: A Ministry of Scandals",
+   "year": "2023",
+   "type": "Series",
+   "section": "catalog",
+   "shelfLabel": "Documentary",
+   "source": "https://www.imdb.com/title/tt29926213/",
+   "imdbRating": "7.4",
+   "creator": "Sharon Liese",
+   "genres": [
+    "Documentary",
+    "Crime"
+   ],
+   "poster": "https://images.metahub.space/poster/medium/tt29926213/img",
+   "description": "Survivors and former church members describe abuse and efforts to seek accountability within Independent Fundamental Baptist churches.",
+   "documentarySource": "https://www.youtube.com/watch?v=dCrsz6y44p4"
+  }
+ ],
+ "checked": "2026-09-28",
+ "sources": [
+  {
+   "id": "netflix-bundy",
+   "publisher": "Netflix",
+   "title": "Conversations with a Killer: The Ted Bundy Tapes",
+   "url": "https://www.netflix.com/title/80226612?fromWatch=true&src=tudum&trkId=260364153",
+   "itemIds": [
+    "tt9425132"
+   ],
+   "basis": "Official page identifies the 2019 four-episode documentary series, recorded interviews and archival footage.",
+   "checked": "2026-09-28",
+   "episodeMinutes": [
+    53,
+    57,
+    51,
+    74
+   ]
+  },
+  {
+   "id": "netflix-night",
+   "publisher": "Netflix",
+   "title": "Night Stalker: The Hunt for a Serial Killer",
+   "url": "https://media.netflix.com/en/only-on-netflix/81025701",
+   "itemIds": [
+    "tt13651632"
+   ],
+   "basis": "Network press material identifies a four-part documentary directed by Tiller Russell, with survivor interviews and investigators.",
+   "checked": "2026-09-28",
+   "verifiedCreator": "Tiller Russell"
+  },
+  {
+   "id": "netflix-night-lengths",
+   "publisher": "Netflix",
+   "title": "Night Stalker episode guide",
+   "url": "https://qr.netflix.com/title/81025701",
+   "itemIds": [
+    "tt13651632"
+   ],
+   "basis": "Official episode guide confirms four episode lengths.",
+   "checked": "2026-09-28",
+   "episodeMinutes": [
+    48,
+    46,
+    47,
+    48
+   ]
+  },
+  {
+   "id": "hbo-gone",
+   "publisher": "HBO / Warner Bros. Discovery",
+   "title": "Six-part documentary series I'll Be Gone in the Dark",
+   "url": "https://press.wbd.com/us/media-release/six-part-documentary-series-ill-be-gone-dark-debuts-june-28?language_content_entity=en",
+   "itemIds": [
+    "tt8259114"
+   ],
+   "basis": "Official announcement identifies the documentary, Michelle McNamara's investigation and survivors' accounts, and names its directors.",
+   "checked": "2026-09-28",
+   "verifiedCreator": "Liz Garbus, Elizabeth Wolff, Myles Kane, Josh Koury"
+  },
+  {
+   "id": "hbo-jinx",
+   "publisher": "HBO / Warner Bros. Discovery",
+   "title": "The Jinx – Part Two announcement",
+   "url": "https://press.wbd.com/us/ca/media-release/hbo-0/jinx-part-two/hbo-original-documentary-series-jinx-part-two-debuts-april-21",
+   "itemIds": [
+    "tt4299972"
+   ],
+   "basis": "Network announcement identifies the 2015 documentary series and its 2024 continuation. The catalog record represents the series across both parts.",
+   "checked": "2026-09-28",
+   "verifiedCreator": "Andrew Jarecki"
+  },
+  {
+   "id": "netflix-ripper",
+   "publisher": "Netflix",
+   "title": "The Ripper",
+   "url": "https://www.netflix.com/br-en/title/81006684",
+   "itemIds": [
+    "tt13492374"
+   ],
+   "basis": "Official listing classifies the 2020 title as a documentary limited series and supplies the episode durations.",
+   "checked": "2026-09-28",
+   "episodeMinutes": [
+    51,
+    48,
+    49,
+    47
+   ]
+  },
+  {
+   "id": "netflix-gacy",
+   "publisher": "Netflix",
+   "title": "Conversations with a Killer: The John Wayne Gacy Tapes",
+   "url": "https://www.netflix.com/title/81298614?fromWatch=true",
+   "itemIds": [
+    "tt18970124"
+   ],
+   "basis": "Official listing classifies the three-part 2022 documentary and describes the identification of victims.",
+   "checked": "2026-09-28",
+   "episodeMinutes": [
+    64,
+    60,
+    59
+   ]
+  },
+  {
+   "id": "netflix-gacy-creator",
+   "publisher": "Netflix Tudum",
+   "title": "Who Was John Wayne Gacy?",
+   "url": "https://www.netflix.com/tudum/articles/who-was-john-wayne-gacy-everything-to-know",
+   "itemIds": [
+    "tt18970124"
+   ],
+   "basis": "The network's interview and account of the production identify Joe Berlinger as its filmmaker.",
+   "checked": "2026-09-28",
+   "verifiedCreator": "Joe Berlinger"
+  },
+  {
+   "id": "netflix-nilsen",
+   "publisher": "Netflix Media Center",
+   "title": "Memories of a Murderer: The Nilsen Tapes",
+   "url": "https://media.netflix.com/en/only-on-netflix/81097791",
+   "itemIds": [
+    "tt15085784"
+   ],
+   "basis": "Official press material explicitly identifies a feature-length documentary using recordings and interviews with survivors, families and investigators.",
+   "checked": "2026-09-28"
+  },
+  {
+   "id": "netflix-dahmer",
+   "publisher": "Netflix",
+   "title": "Conversations with a Killer: The Jeffrey Dahmer Tapes",
+   "url": "https://www.netflix.com/title/81173345?source=35",
+   "itemIds": [
+    "tt21946032"
+   ],
+   "basis": "Official listing classifies the three-part documentary. This is distinct from the dramatized Dahmer series.",
+   "checked": "2026-09-28",
+   "episodeMinutes": [
+    58,
+    62,
+    60
+   ]
+  },
+  {
+   "id": "netflix-dahmer-creator",
+   "publisher": "Netflix Tudum",
+   "title": "The Jeffrey Dahmer Tapes: What to Know",
+   "url": "https://www.netflix.com/tudum/articles/conversations-with-a-killer-the-jeffrey-dahmer-tapes-release-date-cast-news",
+   "itemIds": [
+    "tt21946032"
+   ],
+   "basis": "The network production guide identifies Joe Berlinger as the documentary filmmaker.",
+   "checked": "2026-09-28",
+   "verifiedCreator": "Joe Berlinger"
+  },
+  {
+   "id": "netflix-confession",
+   "publisher": "Netflix",
+   "title": "The Confession Killer",
+   "url": "https://www.netflix.com/title/80213588?source=imdb",
+   "itemIds": [
+    "tt11307176"
+   ],
+   "basis": "Official episode guide identifies the documentary and its examination of false confessions. Card copy does not treat all of Lucas's claims as proven murders.",
+   "checked": "2026-09-28",
+   "episodeMinutes": [
+    45,
+    49,
+    48,
+    45,
+    50
+   ]
+  },
+  {
+   "id": "netflix-confession-creator",
+   "publisher": "Netflix Media Center",
+   "title": "The Confession Killer",
+   "url": "https://media.netflix.com/en/only-on-netflix/80213588",
+   "itemIds": [
+    "tt11307176"
+   ],
+   "basis": "The network identifies the five-part docuseries and its two directors.",
+   "checked": "2026-09-28",
+   "verifiedCreator": "Robert Kenner, Taki Oldham"
+  },
+  {
+   "id": "netflix-zodiac",
+   "publisher": "Netflix",
+   "title": "This Is the Zodiac Speaking",
+   "url": "https://www.netflix.com/title/81681626?fromWatch=true",
+   "itemIds": [
+    "tt33480540"
+   ],
+   "basis": "Official listing identifies a three-part documentary about a family's account of a suspect. The selection does not endorse the series' theory as a solved case.",
+   "checked": "2026-09-28",
+   "episodeMinutes": [
+    49,
+    44,
+    42
+   ]
+  },
+  {
+   "id": "netflix-cats",
+   "publisher": "Netflix",
+   "title": "Don't F**k with Cats: Hunting an Internet Killer",
+   "url": "https://www.netflix.com/title/81031373?fromWatch=true",
+   "itemIds": [
+    "tt11318602"
+   ],
+   "basis": "Official listing classifies the three-part investigation as a documentary and provides episode durations.",
+   "checked": "2026-09-28",
+   "episodeMinutes": [
+    65,
+    57,
+    63
+   ]
+  },
+  {
+   "id": "netflix-texas",
+   "publisher": "Netflix",
+   "title": "Crime Scene: The Texas Killing Fields",
+   "url": "https://www.netflix.com/title/81555750",
+   "itemIds": [
+    "tt23553310"
+   ],
+   "basis": "Official listing classifies the 2022 three-part documentary and provides episode durations.",
+   "checked": "2026-09-28",
+   "episodeMinutes": [
+    50,
+    50,
+    47
+   ]
+  },
+  {
+   "id": "netflix-texas-creator",
+   "publisher": "Netflix Media Center",
+   "title": "Crime Scene: The Texas Killing Fields",
+   "url": "https://media.netflix.com/en/only-on-netflix/81555750",
+   "itemIds": [
+    "tt23553310"
+   ],
+   "basis": "Network press material identifies director Jessica Dimmock and the families' search for answers.",
+   "checked": "2026-09-28",
+   "verifiedCreator": "Jessica Dimmock"
+  },
+  {
+   "id": "netflix-keepers",
+   "publisher": "Netflix",
+   "title": "The Keepers",
+   "url": "https://www.netflix.com/title/80122179?fromWatch=true",
+   "itemIds": [
+    "tt6792200"
+   ],
+   "basis": "Official listing identifies the seven-part documentary and its examination of an unsolved murder and abuse allegations.",
+   "checked": "2026-09-28",
+   "episodeMinutes": [
+    56,
+    59,
+    64,
+    61,
+    60,
+    66,
+    66
+   ]
+  },
+  {
+   "id": "netflix-keepers-creator",
+   "publisher": "Netflix Media Center",
+   "title": "The Keepers",
+   "url": "https://media.netflix.com/en/only-on-netflix/80122179",
+   "itemIds": [
+    "tt6792200"
+   ],
+   "basis": "Network press material names Ryan White as director of the seven-part documentary.",
+   "checked": "2026-09-28",
+   "verifiedCreator": "Ryan White"
+  },
+  {
+   "id": "netflix-american",
+   "publisher": "Netflix",
+   "title": "American Murder: The Family Next Door",
+   "url": "https://www.netflix.com/title/81130130",
+   "itemIds": [
+    "tt12987894"
+   ],
+   "basis": "Official listing identifies a documentary film made with firsthand footage about Shanann Watts and her children.",
+   "checked": "2026-09-28"
+  },
+  {
+   "id": "dearzachary",
+   "publisher": "Dear Zachary / Oscilloscope",
+   "title": "About the Filmmaker",
+   "url": "https://dearzachary.com/filmmaker/",
+   "itemIds": [
+    "tt1152758"
+   ],
+   "basis": "The official film site identifies Kurt Kuenne and his documentary about Andrew Bagby. The card avoids revealing later developments.",
+   "checked": "2026-09-28"
+  },
+  {
+   "id": "tribeca-cropsey",
+   "publisher": "Tribeca",
+   "title": "Faces of the Festival: Joshua Zeman and Barbara Brancaccio",
+   "url": "https://tribecafilm.com/news/512c07be1c7d76d9a9000348-faces-of-the-festival-br",
+   "itemIds": [
+    "tt1277936"
+   ],
+   "basis": "The festival's 2009 interview identifies Cropsey as a horror documentary about actual missing-child cases, despite its use of thriller conventions.",
+   "checked": "2026-09-28"
+  },
+  {
+   "id": "bfi-imposter",
+   "publisher": "BFI",
+   "title": "BFI winners at the British Independent Film Awards",
+   "url": "https://www.bfi.org.uk/features/bfi-winners-british-independent-film-awards",
+   "itemIds": [
+    "tt1966604"
+   ],
+   "basis": "BFI, which supported the film's distribution, identifies Bart Layton's 2012 film as Best British Documentary. It uses dramatic reconstructions within a nonfiction film.",
+   "checked": "2026-09-28"
+  },
+  {
+   "id": "criterion-thinblue",
+   "publisher": "Criterion",
+   "title": "The Thin Blue Line",
+   "url": "https://www.criterion.com/films/28355-the-thin-blue-line",
+   "itemIds": [
+    "tt0096257"
+   ],
+   "basis": "The director-approved edition identifies Errol Morris's documentary and its stylized reenactments. The 102-minute distributor runtime is used.",
+   "checked": "2026-09-28"
+  },
+  {
+   "id": "netflix-paradise",
+   "publisher": "Netflix",
+   "title": "Paradise Lost: The Child Murders at Robin Hood Hills",
+   "url": "https://www.netflix.com/title/70038380",
+   "itemIds": [
+    "tt0117293"
+   ],
+   "basis": "Official distributor listing identifies a documentary following the prosecution of three teenagers. Card copy preserves the distinction between accusation and guilt.",
+   "checked": "2026-09-28"
+  },
+  {
+   "id": "bfi-friedmans",
+   "publisher": "BFI",
+   "title": "Capturing the Friedmans (2003)",
+   "url": "https://www.bfi.org.uk/film/43ba01c8-89ad-5c8a-8ac0-16e498f0889b/capturing-the-friedmans",
+   "itemIds": [
+    "tt0342172"
+   ],
+   "basis": "BFI explicitly classifies the film as a documentary assembled from home movies and interviews. It notes the film's ambiguity; no verdict on contested allegations is asserted in the card.",
+   "checked": "2026-09-28"
+  },
+  {
+   "id": "netflix-nurse",
+   "publisher": "Netflix Media Center",
+   "title": "Capturing the Killer Nurse",
+   "url": "https://media.netflix.com/en/only-on-netflix/81512108",
+   "itemIds": [
+    "tt22010586"
+   ],
+   "basis": "Network press material identifies Tim Travers Hawkins's documentary using interviews with Amy Loughren, detectives and victims' relatives. Distinct from the dramatized film The Good Nurse.",
+   "checked": "2026-09-28",
+   "verifiedCreator": "Tim Travers Hawkins"
+  },
+  {
+   "id": "pbs-witness",
+   "publisher": "PBS Independent Lens",
+   "title": "The Witness",
+   "url": "https://www.pbs.org/independentlens/documentaries/witness/",
+   "itemIds": [
+    "tt3568002"
+   ],
+   "basis": "Broadcaster identifies James Solomon's documentary revisiting Kitty Genovese's murder and the misleading story about its witnesses.",
+   "checked": "2026-09-28",
+   "verifiedCreator": "James Solomon"
+  },
+  {
+   "id": "witness-original",
+   "publisher": "The Witness official film site",
+   "title": "The Witness",
+   "url": "https://www.thewitness-film.com/",
+   "itemIds": [
+    "tt3568002"
+   ],
+   "basis": "Film site confirms James Solomon as director and the 2015 New York Film Festival world premiere. Cinemeta's extra director credit is corrected.",
+   "checked": "2026-09-28"
+  },
+  {
+   "id": "hbo-vow",
+   "publisher": "HBO / Warner Bros. Discovery",
+   "title": "The Vow: a portrait of NXIVM",
+   "url": "https://press.wbd.com/na/media-release/hbo-0/vow-portrait-nxivm-debuts-august-23",
+   "itemIds": [
+    "tt10222764"
+   ],
+   "basis": "Official announcement identifies a documentary series based on access to insiders and former members.",
+   "checked": "2026-09-28",
+   "verifiedCreator": "Jehane Noujaim, Karim Amer"
+  },
+  {
+   "id": "netflix-wild",
+   "publisher": "Netflix",
+   "title": "Wild Wild Country",
+   "url": "https://www.netflix.com/gb/title/80145240",
+   "itemIds": [
+    "tt7768848"
+   ],
+   "basis": "Official listing identifies the 2018 documentary series and provides all six episode lengths.",
+   "checked": "2026-09-28",
+   "episodeMinutes": [
+    64,
+    64,
+    66,
+    69,
+    66,
+    71
+   ]
+  },
+  {
+   "id": "netflix-truecrime-catalog",
+   "publisher": "Netflix",
+   "title": "True Crime Documentaries",
+   "url": "https://www.netflix.com/us-en/browse/genre/81050",
+   "itemIds": [
+    "tt37438628",
+    "tt15723914",
+    "tt34962891",
+    "tt0914376",
+    "tt8342862",
+    "tt5189670",
+    "tt0388644",
+    "tt13987620",
+    "tt14167390",
+    "tt15484900",
+    "tt14178824",
+    "tt23751640",
+    "tt21867596",
+    "tt21059520",
+    "tt20560404",
+    "tt26687196",
+    "tt26340363",
+    "tt12312250"
+   ],
+   "basis": "The official category page explicitly lists these documentary films or documentary series. Source used for nonfiction classification, not a promise of service availability. Title, year, IMDb rating and artwork are matched to saved Cinemeta records.",
+   "checked": "2026-09-28"
+  },
+  {
+   "id": "netflix-sonofsam-details",
+   "publisher": "Netflix",
+   "title": "Conversations with a Killer: The Son of Sam Tapes",
+   "url": "https://www.netflix.com/title/81721775",
+   "itemIds": [
+    "tt37438628"
+   ],
+   "basis": "Official page confirms the 2025 three-part documentary and lists episode lengths.",
+   "checked": "2026-09-28",
+   "episodeMinutes": [
+    54,
+    58,
+    60
+   ]
+  },
+  {
+   "id": "prime-bundy-falling",
+   "publisher": "Amazon Prime Video",
+   "title": "Ted Bundy: Falling for a Killer",
+   "url": "https://www.primevideo.com/-/ms/detail/0L18ZXYEFHAZI4UJANL728LKV9",
+   "itemIds": [
+    "tt11141900"
+   ],
+   "basis": "Network listing explicitly describes the 2020 docuseries centered on Elizabeth Kendall, her daughter and survivors. Per-episode runtime retains the approximate Cinemeta value.",
+   "checked": "2026-09-28"
+  },
+  {
+   "id": "peacock-gacy-documentary",
+   "publisher": "Peacock",
+   "title": "John Wayne Gacy: Devil in Disguise",
+   "url": "https://www.peacocktv.com/watch-online/tv/john-wayne-gacy-devil-in-disguise/6713218129274915112",
+   "itemIds": [
+    "tt14111774"
+   ],
+   "basis": "Official page labels this six-part series Documentary and lists all episode lengths. This is the 2021 documentary, not the separately titled 2025 scripted adaptation.",
+   "checked": "2026-09-28",
+   "episodeMinutes": [
+    48,
+    54,
+    51,
+    48,
+    55,
+    52
+   ]
+  },
+  {
+   "id": "ae-invisible-monsters",
+   "publisher": "A&E",
+   "title": "Invisible Monsters: Serial Killers in America",
+   "url": "https://www.aetv.com/shows/invisible-monsters",
+   "itemIds": [
+    "tt14923638"
+   ],
+   "basis": "Official six-episode listing describes interviews with survivors, investigators and families, combining five serial-killer investigations.",
+   "checked": "2026-09-28"
+  },
+  {
+   "id": "ae-btk",
+   "publisher": "A&E",
+   "title": "BTK: Confession of a Serial Killer",
+   "url": "https://www.aetv.com/shows/btk-confession-of-a-serial-killer/season-1",
+   "itemIds": [
+    "tt16303776"
+   ],
+   "basis": "Official four-part documentary listing and episode guide identify the Rader interviews and list four 43-minute episodes.",
+   "checked": "2026-09-28",
+   "episodeMinutes": [
+    43,
+    43,
+    43,
+    43
+   ]
+  },
+  {
+   "id": "british-council-grim-sleeper",
+   "publisher": "British Council",
+   "title": "Tales of the Grim Sleeper",
+   "url": "https://filmsandfestivals.britishcouncil.org/projects/tales-of-the-grim-sleeper",
+   "itemIds": [
+    "tt3904186"
+   ],
+   "basis": "Film database classifies the 2014 film as Documentary and distinguishes director Nick Broomfield from producer/editor Marc Hoeferlin and cinematographer Barney Broomfield. Cinemeta conflates these credits; corrected here.",
+   "checked": "2026-09-28",
+   "verifiedCreator": "Nick Broomfield"
+  },
+  {
+   "id": "idfa-aileen",
+   "publisher": "IDFA",
+   "title": "Aileen: Life and Death of a Serial Killer",
+   "url": "https://www.idfa.nl/en/film/502250bd-4f8f-422b-9b70-9176b5bbc607/aileen-life-and-death-of-a-serial-killer/",
+   "itemIds": [
+    "tt0364930",
+    "tt0103634"
+   ],
+   "basis": "Festival record identifies the 2003 Broomfield/Churchill documentary and its 1992 documentary predecessor as separate works. The latter investigates the commercial exploitation of the case; the follow-up returns to Wuornos before her execution.",
+   "checked": "2026-09-28"
+  },
+  {
+   "id": "bfi-aileen-selling",
+   "publisher": "BFI",
+   "title": "Aileen Wuornos The Selling of a Serial Killer (1992)",
+   "url": "https://www.bfi.org.uk/film/2c51b01a-5ffa-5993-83bc-9a64082c0498/aileen-wuornos-the-selling-of-a-serial-killer",
+   "itemIds": [
+    "tt0103634"
+   ],
+   "basis": "BFI verifies the original 1992 title and director. Runtime retained from Cinemeta because available editions differ.",
+   "checked": "2026-09-28"
+  },
+  {
+   "id": "wbd-crazy-not-insane",
+   "publisher": "HBO / Warner Bros. Discovery",
+   "title": "HBO’s Crazy, Not Insane",
+   "url": "https://press.wbd.com/na/media-release/hbo-0/hbos-crazy-not-insane-provocative-look-minds-serial-killers-debuts-november-18",
+   "itemIds": [
+    "tt11668320"
+   ],
+   "basis": "Official announcement identifies an HBO documentary directed by Alex Gibney about psychiatrist Dorothy Otnow Lewis. Inclusion describes the film rather than endorsing its psychiatric theories.",
+   "checked": "2026-09-28",
+   "verifiedCreator": "Alex Gibney"
+  },
+  {
+   "id": "idfa-bayou-blue",
+   "publisher": "IDFA",
+   "title": "Bayou Blue (2011)",
+   "url": "https://www.idfa.nl/en/film/b93a795d-65d5-4c93-afbb-383633c568ee/bayou-blue",
+   "itemIds": [
+    "tt2106331"
+   ],
+   "basis": "The world-premiere festival record identifies the 2011 documentary, its filmmakers, subject and 80-minute screening length. This avoids confusing the later distribution year with the original release.",
+   "checked": "2026-09-28"
+  },
+  {
+   "id": "borowski-holmes",
+   "publisher": "John Borowski",
+   "title": "Films of John Borowski",
+   "url": "https://www.johnborowski.com/films.html",
+   "itemIds": [
+    "tt0358500"
+   ],
+   "basis": "Filmmaker filmography explicitly labels the 2004 Holmes film a 64-minute documentary. The card describes the subject without endorsing every claim made about the murder castle.",
+   "checked": "2026-09-28",
+   "verifiedCreator": "John Borowski"
+  },
+  {
+   "id": "hbo-movie-catalog",
+   "publisher": "HBO",
+   "title": "All Movies",
+   "url": "https://www.hbo.com/movies/a-z",
+   "itemIds": [
+    "tt2934036",
+    "tt2011325",
+    "tt4257858"
+   ],
+   "basis": "Network catalog verifies these nonfiction titles and their subjects. Documentary classification is independently matched in each saved metadata record; no present availability guarantee is made.",
+   "checked": "2026-09-28"
+  },
+  {
+   "id": "bell-cheshire",
+   "publisher": "Bell Media / HBO Canada",
+   "title": "HBO Canada original documentaries",
+   "url": "https://www.bellmedia.ca/the-lede/press/hbo-canada-heats-up-monday-nights-this-summer-with-four-all-new-hbo-original-documentaries//",
+   "itemIds": [
+    "tt2934036"
+   ],
+   "basis": "The broadcaster’s 2013 announcement explicitly identifies The Cheshire Murders as an HBO documentary about the 2007 crime and its aftermath.",
+   "checked": "2026-09-28"
+  },
+  {
+   "id": "hbo-documentaries-mommy",
+   "publisher": "HBO",
+   "title": "Documentaries",
+   "url": "https://www.hbo.com/documentaries",
+   "itemIds": [
+    "tt6442978"
+   ],
+   "basis": "Official HBO documentary collection includes this film. The Cinemeta record confirms Erin Lee Carr’s 2017 documentary, rather than a scripted adaptation of the Blanchard case.",
+   "checked": "2026-09-28"
+  },
+  {
+   "id": "abstract-thought-crimes",
+   "publisher": "Abstract Productions",
+   "title": "Thought Crimes",
+   "url": "https://www.abstract.productions/thoughtcrimes",
+   "itemIds": [
+    "tt4503900"
+   ],
+   "basis": "Production company identifies the 2015 film directed by Erin Lee Carr and produced by Andrew Rossi, with documentary coverage and HBO broadcast details. Card copy preserves the contested distinction between fantasy and criminal conspiracy.",
+   "checked": "2026-09-28",
+   "verifiedCreator": "Erin Lee Carr"
+  },
+  {
+   "id": "idfa-slenderman",
+   "publisher": "IDFA",
+   "title": "Beware the Slenderman (2016)",
+   "url": "https://www.idfa.nl/en/film/252cdda2-fbb4-4e72-8d67-ff2959229759/beware-the-slenderman/",
+   "itemIds": [
+    "tt5329376"
+   ],
+   "basis": "Documentary festival record identifies the 2016 HBO documentary. The subject is the real attempted killing; the internet figure is fictional and is described as such.",
+   "checked": "2026-09-28"
+  },
+  {
+   "id": "ifc-into-abyss",
+   "publisher": "IFC Center",
+   "title": "Into the Abyss: A Tale of Death, A Tale of Life",
+   "url": "https://www.ifccenter.com/films/into-the-abyss-a-tale-of-death-a-tale-of-life/",
+   "itemIds": [
+    "tt1972663"
+   ],
+   "basis": "The exhibitor’s Documentaries by Herzog program identifies the film’s interviews with people affected by the Texas homicide and execution. Listed screening runtime is 107 minutes.",
+   "checked": "2026-09-28",
+   "verifiedCreator": "Werner Herzog"
+  },
+  {
+   "id": "dogwoof-fear13",
+   "publisher": "Dogwoof",
+   "title": "The Fear of 13",
+   "url": "https://releasing.dogwoof.com/thefearof13",
+   "itemIds": [
+    "tt5083702"
+   ],
+   "basis": "Distributor identifies David Sington’s film and Nick’s firsthand account. The psychological-thriller marketing language describes a nonfiction documentary rather than a fiction adaptation.",
+   "checked": "2026-09-28",
+   "verifiedCreator": "David Sington"
+  },
+  {
+   "id": "netflix-critically-acclaimed-docs",
+   "publisher": "Netflix",
+   "title": "Critically Acclaimed Documentaries",
+   "url": "https://www.netflix.com/gb-en/browse/genre/8673",
+   "itemIds": [
+    "tt5952332",
+    "tt10915286"
+   ],
+   "basis": "Official documentary catalog lists both films. Saved metadata distinguishes these nonfiction works from dramatized treatments of the same subjects.",
+   "checked": "2026-09-28"
+  },
+  {
+   "id": "netflix-staircase",
+   "publisher": "Netflix",
+   "title": "The Staircase",
+   "url": "https://www.netflix.com/title/80233441",
+   "itemIds": [
+    "tt0388644"
+   ],
+   "basis": "Official page identifies a documentary series. Netflix labels the expanded 2018 edition; the card retains the original 2004 series year. This is not the 2022 drama.",
+   "checked": "2026-09-28"
+  },
+  {
+   "id": "idfa-staircase",
+   "publisher": "IDFA",
+   "title": "The Staircase (2004)",
+   "url": "https://www.idfa.nl/film/f8f8d657-4ec1-487f-b04f-bbe03006dbbb/the-staircase/",
+   "itemIds": [
+    "tt0388644"
+   ],
+   "basis": "The original festival record confirms Jean-Xavier de Lestrade’s 2004 documentary and its initial six-hour version. The displayed runtime is a per-episode approximation, not the full-series duration.",
+   "checked": "2026-09-28",
+   "verifiedCreator": "Jean-Xavier de Lestrade"
+  },
+  {
+   "id": "netflix-indian-diary",
+   "publisher": "Netflix",
+   "title": "Indian Predator: The Diary of a Serial Killer",
+   "url": "https://www.netflix.com/gb/title/81610333",
+   "itemIds": [
+    "tt21811888"
+   ],
+   "basis": "Official guide confirms three documentary episodes at 38, 45 and 42 minutes. Replaces the erroneous one-minute value returned by Cinemeta.",
+   "checked": "2026-09-28",
+   "episodeMinutes": [
+    38,
+    45,
+    42
+   ]
+  },
+  {
+   "id": "netflix-curry",
+   "publisher": "Netflix",
+   "title": "Curry & Cyanide - The Jolly Joseph Case",
+   "url": "https://www.netflix.com/title/81564452",
+   "itemIds": [
+    "tt30177031"
+   ],
+   "basis": "Official listing classifies the 2023 film as a true-crime documentary. Card describes suspected poisonings and the case, without asserting an unverified verdict.",
+   "checked": "2026-09-28"
+  },
+  {
+   "id": "netflix-sins",
+   "publisher": "Netflix",
+   "title": "Sins of Our Mother",
+   "url": "https://www.netflix.com/title/81300060",
+   "itemIds": [
+    "tt21867596"
+   ],
+   "basis": "Official listing confirms the documentary and supplies three episode lengths.",
+   "checked": "2026-09-28",
+   "episodeMinutes": [
+    50,
+    50,
+    39
+   ]
+  },
+  {
+   "id": "netflix-doc-series",
+   "publisher": "Netflix",
+   "title": "Documentary Series",
+   "url": "https://www.netflix.com/us-en/browse/genre/10105",
+   "itemIds": [
+    "tt29388212",
+    "tt31183637"
+   ],
+   "basis": "Official documentary-series collection lists these two distinct investigations. Saved metadata confirms their 2023 and 2024 identities.",
+   "checked": "2026-09-28"
+  },
+  {
+   "id": "hbo-love-has-won",
+   "publisher": "HBO",
+   "title": "Documentary Series",
+   "url": "https://www.hbo.com/series/genre/documentaries",
+   "itemIds": [
+    "tt14832124"
+   ],
+   "basis": "Network’s documentary series catalog identifies the three-part portrait of Amy Carlson and Love Has Won.",
+   "checked": "2026-09-28"
+  },
+  {
+   "id": "pbs-jonestown",
+   "publisher": "PBS American Experience",
+   "title": "Jonestown: The Life and Death of Peoples Temple",
+   "url": "https://www.pbs.org/wgbh/americanexperience/films/jonestown/",
+   "itemIds": [
+    "tt0762111"
+   ],
+   "basis": "Broadcaster identifies Stanley Nelson’s documentary and its 2006 festival screenings before the 2007 broadcast. It uses firsthand recollections and archival footage.",
+   "checked": "2026-09-28",
+   "verifiedCreator": "Stanley Nelson"
+  },
+  {
+   "id": "ida-waco",
+   "publisher": "International Documentary Association",
+   "title": "1997 IDA Distinguished Documentary Achievement Awards",
+   "url": "https://www.documentary.org/feature/1997-ida-distinguished-documentary-achievement-awards",
+   "itemIds": [
+    "tt0120472"
+   ],
+   "basis": "The documentary institution’s award record verifies this 136-minute nonfiction film. The card attributes its challenge to the official account to the documentary, rather than asserting disputed claims as established fact.",
+   "checked": "2026-09-28"
+  },
+  {
+   "id": "id-let-us-prey",
+   "publisher": "Investigation Discovery",
+   "title": "Let Us Prey: A Ministry of Scandals — official trailer",
+   "url": "https://www.youtube.com/watch?v=dCrsz6y44p4",
+   "itemIds": [
+    "tt29926213"
+   ],
+   "basis": "Verified network channel’s November 2023 trailer description identifies the four-part investigation and its firsthand survivor accounts. Unknown episode runtime is omitted.",
+   "checked": "2026-09-28"
+  },
+  {
+   "id": "herizon-let-us-prey",
+   "publisher": "Herizon Productions",
+   "title": "Sharon Liese biography",
+   "url": "https://www.herizonproductions.com/about-4/",
+   "itemIds": [
+    "tt29926213"
+   ],
+   "basis": "Filmmaker’s production company confirms Liese directed and executive-produced the four-part series.",
+   "checked": "2026-09-28",
+   "verifiedCreator": "Sharon Liese"
+  }
+ ]
+}

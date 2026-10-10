@@ -1,0 +1,108 @@
+.music-collection-grid {
+  display: grid;
+  grid-template-columns: repeat(auto-fill, minmax(150px, 1fr));
+  gap: 26px 20px;
+}
+.music-collection-grid > * {
+  max-width: 240px;
+}
+.music-collection-card {
+  display: flex;
+  min-width: 0;
+  flex-direction: column;
+  text-align: start;
+  border-radius: 6px;
+}
+.music-collection-cover-wrap {
+  position: relative;
+  display: block;
+  width: 100%;
+}
+.music-collection-card > strong {
+  display: block;
+  max-width: 100%;
+  margin-top: 10px;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+  font-size: 14px;
+  font-weight: 600;
+  color: var(--color-ink);
+}
+.music-collection-card > span:last-child {
+  margin-top: 3px;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+  font-size: 12px;
+  color: var(--color-ink-muted);
+}
+
+.music-collection-art,
+.music-collection-pinned {
+  position: relative;
+  display: grid;
+  width: 100%;
+  aspect-ratio: 1;
+  place-items: center;
+  overflow: hidden;
+  border-radius: 8px;
+  background: var(--color-elevated);
+  transition: transform 220ms cubic-bezier(0.2, 0.8, 0.3, 1);
+}
+.music-collection-art > img {
+  width: 100%;
+  height: 100%;
+  object-fit: cover;
+}
+.music-collection-card[data-round] .music-collection-art,
+.music-collection-card[data-round] .music-collection-pinned {
+  border-radius: 50%;
+}
+.music-collection-card:hover .music-collection-art,
+.music-collection-card:hover .music-collection-pinned,
+.music-collection-card:focus-visible .music-collection-art,
+.music-collection-card:focus-visible .music-collection-pinned {
+  transform: translateY(-3px);
+}
+@media (prefers-reduced-motion: reduce) {
+  .music-collection-art,
+  .music-collection-pinned {
+    transition: none;
+  }
+  .music-collection-card:hover .music-collection-art,
+  .music-collection-card:hover .music-collection-pinned {
+    transform: none;
+  }
+}
+
+.music-collection-pinned {
+  color: var(--color-ink);
+}
+.music-collection-pinned[data-pinned="liked"],
+.music-collection-pinned[data-pinned="surprise"],
+.music-collection-pinned[data-pinned="recent"] {
+  background: linear-gradient(150deg, color-mix(in oklab, var(--color-accent) 30%, var(--color-elevated)) 0%, var(--color-elevated) 100%);
+}
+.music-collection-pinned > svg {
+  position: relative;
+  z-index: 1;
+  filter: drop-shadow(0 2px 10px rgba(0, 0, 0, 0.45));
+}
+.music-collection-pinned-wash {
+  position: absolute;
+  inset: 0;
+  display: grid;
+  grid-template-columns: 1fr 1fr;
+  opacity: 0.32;
+  filter: blur(var(--music-cover-blur, 14px)) saturate(1.1);
+  transform: scale(1.18);
+}
+.music-collection-pinned-wash > img {
+  width: 100%;
+  height: 100%;
+  object-fit: cover;
+}
+.music-collection-art[data-blank] {
+  background: var(--color-elevated);
+}

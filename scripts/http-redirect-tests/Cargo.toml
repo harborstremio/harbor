@@ -1,0 +1,15 @@
+[package]
+name = "harbor-http-redirect-tests"
+version = "0.1.0"
+edition = "2021"
+publish = false
+
+[lib]
+path = "../../src-tauri/src/http_redirect.rs"
+
+[dependencies]
+reqwest = { version = "=0.12.28", default-features = false, features = ["json", "native-tls"] }
+
+[dev-dependencies]
+axum = "0.8"
+tokio = { version = "1", features = ["full"] }

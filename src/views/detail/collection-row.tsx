@@ -7,7 +7,7 @@ import { tmdbCollection } from "@/lib/providers/tmdb";
 import { useActiveKid } from "@/lib/profiles";
 import { useSettings } from "@/lib/settings";
 import { useView } from "@/lib/view";
-import { dropAdultContent, dropUnreleased } from "@/views/kids/kids-filter";
+import { dropUnreleased, dropUnsafeGenres } from "@/views/kids/kids-filter";
 
 export function CollectionRow({
   collection,
@@ -29,7 +29,7 @@ export function CollectionRow({
       .then((c) => {
         if (cancelled || !c) return;
         const rest = c.parts.filter((p) => p.id !== currentId);
-        setParts(kid ? dropAdultContent(dropUnreleased(rest)) : rest);
+        setParts(kid ? dropUnsafeGenres(dropUnreleased(rest)) : rest);
       })
       .catch(() => {});
     return () => {

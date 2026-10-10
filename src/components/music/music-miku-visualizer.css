@@ -1,0 +1,182 @@
+.music-miku-perch {
+  position: absolute;
+  inset-inline-start: 6px;
+  bottom: 100%;
+  width: 189px;
+  height: 126px;
+  pointer-events: none;
+  user-select: none;
+  contain: layout style;
+  isolation: isolate;
+  /* Clip at the bar's top edge, retaining the wider dance's side gutters. */
+  clip-path: inset(-100% -50% 0);
+  visibility: visible;
+  transition: visibility 0s;
+}
+.music-miku-art { display: block; width: 100%; height: 100%; object-fit: contain; }
+/* Only the reveal moves; her mounted pose and beat clock keep running. CSS
+   transitions reverse from their current position during rapid toggles. */
+.music-miku-reveal {
+  position: relative;
+  width: 100%;
+  height: 100%;
+  transform: translateY(0);
+  transition: transform 440ms cubic-bezier(0.22, 0.8, 0.25, 1);
+}
+.music-miku-perch[data-concealed="true"] {
+  visibility: hidden;
+  transition-delay: 220ms;
+}
+.music-miku-perch[data-concealed="true"] .music-miku-reveal {
+  transform: translateY(101%);
+  transition-duration: 220ms;
+  transition-timing-function: ease-in-out;
+}
+.music-miku-sprite { background-repeat: no-repeat; background-position: 0 0; }
+.music-miku-eyes {
+  position: absolute;
+  /* Face-only crop: (88,44)–(200,132) in each 288 × 192 pose. */
+  left: 30.555556%;
+  top: 22.916667%;
+  width: 38.888889%;
+  height: 45.833333%;
+  background-repeat: no-repeat;
+  opacity: 0;
+  /* The expression clock owns the quick close and slower reopen. A second
+     CSS fade would keep chasing it and prevent a blink from fully closing. */
+}
+.music-miku-dancer {
+  position: absolute;
+  left: 0;
+  bottom: 0;
+  width: 100%;
+  height: 100%;
+  background-repeat: no-repeat;
+  opacity: 0;
+}
+.music-miku-idle {
+  display: none;
+  position: absolute;
+  inset: 0;
+  background-repeat: no-repeat;
+  background-size: 1200% 800%;
+  background-position: 0 0;
+}
+.music-miku-perch[data-stage="idle"] .music-miku-sprite { visibility: hidden; }
+.music-miku-perch[data-stage="idle"] .music-miku-eyes { visibility: hidden; }
+.music-miku-perch[data-stage="dancing"] .music-miku-eyes { visibility: hidden; }
+.music-miku-perch[data-stage="idle"] .music-miku-idle {
+  display: block;
+  animation: music-miku-idle 8s step-end infinite;
+}
+.music-miku-perch:not([data-ambient="true"]) .music-miku-idle { animation-play-state: paused; }
+/* Authored breathing, weight shifts and two brief blinks; 12 poses/second. */
+@keyframes music-miku-idle {
+  0.000000% { background-position: 0.000000% 0.000000%; }
+  1.041667% { background-position: 9.090909% 0.000000%; }
+  2.083333% { background-position: 18.181818% 0.000000%; }
+  3.125000% { background-position: 27.272727% 0.000000%; }
+  4.166667% { background-position: 36.363636% 0.000000%; }
+  5.208333% { background-position: 45.454545% 0.000000%; }
+  6.250000% { background-position: 54.545455% 0.000000%; }
+  7.291667% { background-position: 63.636364% 0.000000%; }
+  8.333333% { background-position: 72.727273% 0.000000%; }
+  9.375000% { background-position: 81.818182% 0.000000%; }
+  10.416667% { background-position: 90.909091% 0.000000%; }
+  11.458333% { background-position: 100.000000% 0.000000%; }
+  12.500000% { background-position: 0.000000% 14.285714%; }
+  13.541667% { background-position: 9.090909% 14.285714%; }
+  14.583333% { background-position: 18.181818% 14.285714%; }
+  15.625000% { background-position: 27.272727% 14.285714%; }
+  16.666667% { background-position: 36.363636% 14.285714%; }
+  17.708333% { background-position: 45.454545% 14.285714%; }
+  18.750000% { background-position: 54.545455% 14.285714%; }
+  19.791667% { background-position: 63.636364% 14.285714%; }
+  20.833333% { background-position: 72.727273% 14.285714%; }
+  21.875000% { background-position: 81.818182% 14.285714%; }
+  22.916667% { background-position: 90.909091% 14.285714%; }
+  23.958333% { background-position: 100.000000% 14.285714%; }
+  25.000000% { background-position: 0.000000% 28.571429%; }
+  26.041667% { background-position: 9.090909% 28.571429%; }
+  27.083333% { background-position: 18.181818% 28.571429%; }
+  28.125000% { background-position: 27.272727% 28.571429%; }
+  29.166667% { background-position: 36.363636% 28.571429%; }
+  30.208333% { background-position: 45.454545% 28.571429%; }
+  31.250000% { background-position: 54.545455% 28.571429%; }
+  32.291667% { background-position: 63.636364% 28.571429%; }
+  33.333333% { background-position: 72.727273% 28.571429%; }
+  34.375000% { background-position: 81.818182% 28.571429%; }
+  35.416667% { background-position: 90.909091% 28.571429%; }
+  36.458333% { background-position: 100.000000% 28.571429%; }
+  37.500000% { background-position: 0.000000% 42.857143%; }
+  38.541667% { background-position: 9.090909% 42.857143%; }
+  39.583333% { background-position: 18.181818% 42.857143%; }
+  40.625000% { background-position: 27.272727% 42.857143%; }
+  41.666667% { background-position: 36.363636% 42.857143%; }
+  42.708333% { background-position: 45.454545% 42.857143%; }
+  43.750000% { background-position: 54.545455% 42.857143%; }
+  44.791667% { background-position: 63.636364% 42.857143%; }
+  45.833333% { background-position: 72.727273% 42.857143%; }
+  46.875000% { background-position: 81.818182% 42.857143%; }
+  47.916667% { background-position: 90.909091% 42.857143%; }
+  48.958333% { background-position: 100.000000% 42.857143%; }
+  50.000000% { background-position: 0.000000% 57.142857%; }
+  51.041667% { background-position: 9.090909% 57.142857%; }
+  52.083333% { background-position: 18.181818% 57.142857%; }
+  53.125000% { background-position: 27.272727% 57.142857%; }
+  54.166667% { background-position: 36.363636% 57.142857%; }
+  55.208333% { background-position: 45.454545% 57.142857%; }
+  56.250000% { background-position: 54.545455% 57.142857%; }
+  57.291667% { background-position: 63.636364% 57.142857%; }
+  58.333333% { background-position: 72.727273% 57.142857%; }
+  59.375000% { background-position: 81.818182% 57.142857%; }
+  60.416667% { background-position: 90.909091% 57.142857%; }
+  61.458333% { background-position: 100.000000% 57.142857%; }
+  62.500000% { background-position: 0.000000% 71.428571%; }
+  63.541667% { background-position: 9.090909% 71.428571%; }
+  64.583333% { background-position: 18.181818% 71.428571%; }
+  65.625000% { background-position: 27.272727% 71.428571%; }
+  66.666667% { background-position: 36.363636% 71.428571%; }
+  67.708333% { background-position: 45.454545% 71.428571%; }
+  68.750000% { background-position: 54.545455% 71.428571%; }
+  69.791667% { background-position: 63.636364% 71.428571%; }
+  70.833333% { background-position: 72.727273% 71.428571%; }
+  71.875000% { background-position: 81.818182% 71.428571%; }
+  72.916667% { background-position: 90.909091% 71.428571%; }
+  73.958333% { background-position: 100.000000% 71.428571%; }
+  75.000000% { background-position: 0.000000% 85.714286%; }
+  76.041667% { background-position: 9.090909% 85.714286%; }
+  77.083333% { background-position: 18.181818% 85.714286%; }
+  78.125000% { background-position: 27.272727% 85.714286%; }
+  79.166667% { background-position: 36.363636% 85.714286%; }
+  80.208333% { background-position: 45.454545% 85.714286%; }
+  81.250000% { background-position: 54.545455% 85.714286%; }
+  82.291667% { background-position: 63.636364% 85.714286%; }
+  83.333333% { background-position: 72.727273% 85.714286%; }
+  84.375000% { background-position: 81.818182% 85.714286%; }
+  85.416667% { background-position: 90.909091% 85.714286%; }
+  86.458333% { background-position: 100.000000% 85.714286%; }
+  87.500000% { background-position: 0.000000% 100.000000%; }
+  88.541667% { background-position: 9.090909% 100.000000%; }
+  89.583333% { background-position: 18.181818% 100.000000%; }
+  90.625000% { background-position: 27.272727% 100.000000%; }
+  91.666667% { background-position: 36.363636% 100.000000%; }
+  92.708333% { background-position: 45.454545% 100.000000%; }
+  93.750000% { background-position: 54.545455% 100.000000%; }
+  94.791667% { background-position: 63.636364% 100.000000%; }
+  95.833333% { background-position: 72.727273% 100.000000%; }
+  96.875000% { background-position: 81.818182% 100.000000%; }
+  97.916667% { background-position: 90.909091% 100.000000%; }
+  98.958333% { background-position: 100.000000% 100.000000%; }
+  100% { background-position: 0 0; }
+}
+@media (prefers-reduced-motion: reduce) {
+  .music-miku-perch,
+  .music-miku-perch[data-concealed="true"],
+  .music-miku-perch[data-concealed="true"] .music-miku-reveal,
+  .music-miku-reveal { transition: none; }
+  .music-miku-perch[data-stage="idle"] .music-miku-idle { animation: none; }
+  .music-miku-eyes { transition: none; }
+}
+@container (max-width: 700px) { .music-miku-perch { inset-inline-start: 4px; width: 148.5px; height: 99px; } }
+@media (max-height: 460px) { .music-miku-perch { width: 121.5px; height: 81px; } }

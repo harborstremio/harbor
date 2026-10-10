@@ -1,0 +1,190 @@
+.hb-i-band {
+  background: var(--canvas);
+}
+
+.hb-i-stage {
+  position: absolute;
+  inset: 0;
+}
+
+.hb-i-plate {
+  position: absolute;
+  inset: 0;
+  opacity: 0;
+  transition: opacity var(--t-cross) var(--ease);
+}
+
+.hb-i-plate.is-live {
+  opacity: 1;
+}
+
+.hb-i-drift {
+  position: absolute;
+  left: -3%;
+  top: -3%;
+  width: 106%;
+  height: 106%;
+  animation: installing-drift 13200ms var(--ease) 0ms infinite alternate;
+}
+
+.hb-i-drift i {
+  position: absolute;
+  display: block;
+}
+
+.hb-i-scrim {
+  position: absolute;
+  left: 0;
+  right: 0;
+  bottom: 0;
+  height: 130px;
+  background: var(--scrim-art);
+  pointer-events: none;
+}
+
+.hb-i-caption {
+  position: absolute;
+  left: var(--gutter);
+  bottom: 28px;
+  max-width: 620px;
+}
+
+.hb-i-line {
+  margin: 0;
+  overflow: hidden;
+}
+
+.hb-i-line span {
+  display: block;
+  white-space: nowrap;
+}
+
+.hb-i-caption .t-eyebrow {
+  color: var(--ink-muted);
+}
+
+.hb-i-caption p:nth-child(2) {
+  margin-top: 6px;
+}
+
+.hb-i-caption p:nth-child(3) {
+  margin-top: 4px;
+}
+
+.hb-i-caption.is-in span {
+  animation: installing-line-in 460ms var(--ease) 0ms both;
+}
+
+.hb-i-caption.is-in p:nth-child(1) span {
+  animation-delay: 170ms;
+}
+
+.hb-i-caption.is-in p:nth-child(2) span {
+  animation-delay: 240ms;
+}
+
+.hb-i-caption.is-in p:nth-child(3) span {
+  animation-delay: 310ms;
+}
+
+.hb-i-phase {
+  display: flex;
+  flex-direction: column;
+  gap: 2px;
+}
+
+.hb-i-pct {
+  margin: 0;
+}
+
+.hb-i-step.is-in span {
+  animation: installing-line-in 380ms var(--ease) 0ms both;
+}
+
+.hb-i-drift .hb-i-steps {
+  left: 34%;
+  top: 20%;
+  right: 3%;
+  height: 56%;
+  display: flex;
+  align-items: flex-end;
+  gap: 12px;
+}
+
+.hb-i-drift .hb-i-ladder {
+  left: 0;
+  top: 0;
+  right: 0;
+  bottom: 0;
+  display: flex;
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .hb-i-drift {
+    animation: none;
+    transform: translate3d(0, 0, 0);
+  }
+
+  .hb-i-lantern {
+    animation: none;
+    opacity: 1;
+  }
+
+  .hb-i-caption.is-in span,
+  .hb-i-step.is-in span {
+    animation: installing-fade-in 120ms var(--ease) 0ms both;
+    transform: none;
+  }
+
+  .hb-i-caption.is-in p:nth-child(1) span,
+  .hb-i-caption.is-in p:nth-child(2) span,
+  .hb-i-caption.is-in p:nth-child(3) span {
+    animation-delay: 0ms;
+  }
+}
+
+.hb-i-plate::before {
+  content: "";
+  position: absolute;
+  inset: 0;
+  background: var(--canvas);
+}
+
+.hb-i-shot {
+  position: absolute;
+  inset: 0;
+  width: 100%;
+  height: 100%;
+  object-fit: cover;
+  object-position: center 34%;
+}
+
+.hb-i-veil {
+  position: absolute;
+  inset: 0;
+  pointer-events: none;
+  background: linear-gradient(
+    0deg,
+    color-mix(in srgb, var(--canvas) 88%, transparent) 0%,
+    color-mix(in srgb, var(--canvas) 66%, transparent) 30%,
+    color-mix(in srgb, var(--canvas) 22%, transparent) 52%,
+    transparent 70%
+  );
+}
+
+.hb-i-credit {
+  position: absolute;
+  right: var(--gutter);
+  bottom: 26px;
+  margin: 0;
+  max-width: 32%;
+  text-align: end;
+  font-size: 10.5px;
+  letter-spacing: 0.05em;
+  color: color-mix(in srgb, var(--ink) 72%, transparent);
+  text-shadow: 0 1px 3px rgba(0, 0, 0, 0.8);
+}
+
+.hb-i-band .hb-i-caption {
+  max-width: 50%;
+}

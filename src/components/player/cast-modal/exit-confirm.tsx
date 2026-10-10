@@ -27,7 +27,7 @@ export function ExitConfirm({
         className="group mt-5 flex items-center gap-2.5"
       >
         <span
-          className={`flex h-[18px] w-[18px] items-center justify-center rounded-[6px] ring-1 transition-colors ${
+          className={`flex h-[18px] w-[18px] items-center justify-center rounded-sm ring-1 transition-colors ${
             remember ? "bg-white ring-white" : "bg-white/5 ring-white/25 group-hover:ring-white/45"
           }`}
         >

@@ -1,5 +1,6 @@
 import { useMemo } from "react";
 import type { Season } from "@/lib/providers/tmdb";
+import { setViewedSeason } from "@/lib/season-view-pref";
 import { seasonDateRange, type TvdbOrder } from "@/lib/providers/tvdb-order";
 import { isNewSeason } from "../helpers";
 import type { ArcGroupsState } from "./use-arc-groups";
@@ -53,7 +54,10 @@ export function useSeasonArcPicker({
           };
         }),
         activeKey: String(orderSeasonEff),
-        onSelect: (k: string) => setOrderSeason(Number(k)),
+        onSelect: (k: string) => {
+          setViewedSeason(metaId, Number(k));
+          setOrderSeason(Number(k));
+        },
       };
     }
     return {
@@ -67,6 +71,7 @@ export function useSeasonArcPicker({
       activeKey: String(active),
       onSelect: (k: string) => {
         userPickedRef.current = true;
+        setViewedSeason(metaId, Number(k));
         setActive(Number(k));
       },
     };

@@ -1,7 +1,11 @@
 import { Layers } from "lucide-react";
 import { useEffect, useRef, useState } from "react";
 import { useT } from "@/lib/i18n";
-import { collectionNameMatches, tmdbCollection, tmdbSearchCollectionId } from "@/lib/providers/tmdb";
+import {
+  collectionNameMatches,
+  tmdbCollection,
+  tmdbSearchCollectionId,
+} from "@/lib/providers/tmdb";
 import { useSettings } from "@/lib/settings";
 import { useView } from "@/lib/view";
 
@@ -35,7 +39,7 @@ export function CollectionCard({
           io.disconnect();
         }
       },
-      { rootMargin: "600px" },
+      { rootMargin: "250px" },
     );
     io.observe(el);
     return () => io.disconnect();
@@ -79,7 +83,7 @@ export function CollectionCard({
     >
       {backdrop && (
         <img
-          src={backdrop}
+          src={backdrop.replace("/t/p/original/", "/t/p/w780/")}
           alt=""
           loading="lazy"
           draggable={false}
@@ -87,13 +91,19 @@ export function CollectionCard({
           onLoad={(e) => e.currentTarget.setAttribute("data-on", "true")}
         />
       )}
-      <div aria-hidden className="absolute inset-0 bg-black/15 transition-colors duration-300 group-hover/card:bg-black/0" />
-      <div aria-hidden className="absolute inset-0 bg-gradient-to-t from-black/88 via-black/30 to-transparent" />
+      <div
+        aria-hidden
+        className="absolute inset-0 bg-black/15 transition-colors duration-300 group-hover/card:bg-black/0"
+      />
+      <div
+        aria-hidden
+        className="absolute inset-0 bg-gradient-to-t from-black/88 via-black/30 to-transparent"
+      />
       <span className="absolute start-3.5 top-3 inline-flex items-center gap-1.5 rounded-full bg-black/40 px-2.5 py-1 text-[10px] font-bold uppercase tracking-[0.16em] text-white/85 backdrop-blur-md">
         <Layers size={11} strokeWidth={2.4} />
         {count != null ? t("{count} films", { count }) : t("Collection")}
       </span>
-      <h3 className="absolute inset-x-4 bottom-3.5 font-display text-[21px] font-medium leading-[1.08] tracking-tight text-white drop-shadow-[0_2px_14px_rgba(0,0,0,0.7)]">
+      <h3 className="absolute inset-x-4 bottom-3.5 font-display text-[21px] font-medium leading-[1.08] tracking-tight text-white [text-shadow:0_2px_14px_rgba(0,0,0,0.7)]">
         {name}
       </h3>
     </button>

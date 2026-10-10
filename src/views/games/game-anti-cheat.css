@@ -1,0 +1,14 @@
+.games-anti-cheat{display:flex;flex-direction:column;gap:8px;min-width:0;font-size:13px;line-height:1.55}
+.games-anti-cheat strong{font-size:14px;color:var(--color-ink);overflow-wrap:anywhere}
+.games-anti-cheat-system{display:flex;align-items:center;gap:12px;min-width:0}
+.games-anti-cheat-system strong{min-width:0;line-height:1.4}
+.games-anti-cheat-logo{display:flex;align-items:center;justify-content:center;flex:0 0 44px;width:44px;height:44px;overflow:hidden;border-radius:4px}
+.games-anti-cheat-logo.is-wide{flex-basis:88px;width:88px}
+.games-anti-cheat-logo.is-light{color-scheme:light;background:#f4f4f4;padding:5px}
+.games-anti-cheat-logo img{display:block;width:100%;height:100%;object-fit:contain}
+.games-anti-cheat-logo.is-fallback{color:var(--color-ink-muted)}
+.games-anti-cheat>span,.games-anti-cheat p{color:var(--color-ink-muted)}
+.games-anti-cheat p{margin:0}
+.games-anti-cheat a{display:inline-flex;align-items:center;gap:5px;align-self:flex-start;color:var(--color-ink);text-decoration:underline;text-underline-offset:3px}
+.games-anti-cheat a:focus-visible{outline:2px solid var(--color-accent);outline-offset:4px;border-radius:2px}
+.games-anti-cheat-skeleton{width:65%;height:20px;background:var(--color-elevated);border-radius:4px}

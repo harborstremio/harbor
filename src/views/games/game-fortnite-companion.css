@@ -1,0 +1,51 @@
+.games-detail-flow-block:has(> .games-fortnite) { clear:both; }
+.games-fortnite { padding-block:44px; container-type:inline-size; }
+.games-fortnite-heading { display:flex;align-items:center;justify-content:space-between;gap:20px;margin-bottom:26px; }
+.games-fortnite-heading img { width:112px;height:34px;object-fit:contain;object-position:left center;margin-bottom:18px; }
+.games-fortnite-heading h2 { font-size:clamp(25px,3.6cqw,36px);font-weight:650;letter-spacing:-.035em;line-height:1.15; }
+.games-fortnite-heading p { margin-top:8px;color:var(--color-ink-muted);font-size:14px; }
+.games-fortnite-heading > button { flex:none; }
+.games-fortnite-tools { display:flex;align-items:center;gap:20px;flex-wrap:wrap;margin-bottom:24px; }
+.games-fortnite-tools > :first-child { min-width:200px;max-width:100%; }
+.games-fortnite-tools > span { margin-inline-start:auto;font-size:12px;color:var(--color-ink-muted); }
+.games-fortnite-feature { display:grid;grid-template-columns:minmax(0,1.2fr) minmax(0,1fr);align-items:center;gap:32px; }
+.games-fortnite-image { position:relative;display:block;aspect-ratio:16/9;background:var(--color-elevated);overflow:hidden;border-radius:8px; }
+.games-fortnite-image > img { width:100%;height:100%;object-fit:cover;opacity:0;transition:opacity 180ms ease; }
+.games-fortnite-image > img[data-loaded=true] { opacity:1; }
+.games-fortnite-image > svg { position:absolute;inset:0;margin:auto;color:var(--color-ink-muted); }
+.games-fortnite-image > .games-fortnite-spinner { animation:games-fortnite-spin 1s linear infinite; }
+.games-fortnite-image:has(img[data-loaded=true]) > svg,.games-fortnite-image:not([data-pending=true]):has(.games-art-empty) > .games-fortnite-spinner { display:none; }
+.games-fortnite-image:has(img) > .games-fortnite-placeholder,.games-fortnite-image[data-pending=true] > .games-fortnite-placeholder { display:none; }
+.games-fortnite-copy { min-width:0; }
+.games-fortnite-copy > p:first-child { color:var(--color-ink-muted);font-size:12px;margin-bottom:8px; }
+.games-fortnite-copy h3 { font-size:clamp(22px,2.8cqw,32px);line-height:1.2;letter-spacing:-.025em;font-weight:650;overflow-wrap:anywhere; }
+.games-fortnite-description { margin-top:14px;white-space:pre-line;line-height:1.65;font-size:13px;color:var(--color-ink-muted);max-height:172px;overflow:auto;scrollbar-width:thin; }
+.games-fortnite-copy > span { display:block;font-size:12px;color:var(--color-ink-muted);margin-top:12px; }
+.games-fortnite-actions { display:flex;gap:10px;flex-wrap:wrap;margin-top:20px; }
+.games-fortnite-actions > button { font-size:12px; }
+.games-fortnite-actions > span { font-size:12px;color:var(--color-ink-muted); }
+.games-fortnite-activity { min-height:70px;display:flex;align-items:center;gap:28px;flex-wrap:wrap;padding-block:18px;margin-bottom:20px;border-bottom:1px solid var(--color-edge-soft);font-size:12px;color:var(--color-ink-muted); }
+.games-fortnite-activity > span:first-child { margin-inline-end:auto; }
+.games-fortnite-activity strong { color:var(--color-ink);font-size:19px;font-weight:600;margin-inline-end:8px;font-variant-numeric:tabular-nums; }
+.games-fortnite-grid { display:grid;grid-template-columns:repeat(3,minmax(0,1fr));gap:22px 20px; }
+.games-fortnite-card { text-align:start;min-width:0;border-radius:8px; }
+.games-fortnite-card:hover .games-fortnite-card-copy,.games-fortnite-card[aria-pressed=true] .games-fortnite-card-copy { background:var(--color-elevated); }
+.games-fortnite-card-copy { display:flex;align-items:baseline;gap:12px;padding:12px 10px;border-radius:0 0 8px 8px;min-height:70px; }
+.games-fortnite-card-copy > b { font-size:12px;color:var(--color-ink-muted);font-variant-numeric:tabular-nums;font-weight:500; }
+.games-fortnite-card-copy > span { min-width:0; }
+.games-fortnite-card strong { display:-webkit-box;-webkit-line-clamp:2;-webkit-box-orient:vertical;overflow:hidden;font-size:13px;line-height:1.4;overflow-wrap:anywhere; }
+.games-fortnite-card small { color:var(--color-ink-muted);font-size:11px;display:block;margin-top:4px;overflow:hidden;text-overflow:ellipsis;white-space:nowrap; }
+.games-fortnite-pagination { display:flex;align-items:center;gap:8px;margin-top:20px; }
+.games-fortnite-pagination > span { margin-inline-end:auto;color:var(--color-ink-muted);font-size:12px; }
+.games-fortnite-pagination > button { padding-inline:12px; }
+[dir=rtl] .games-fortnite-pagination svg { transform:scaleX(-1); }
+.games-fortnite-source { display:flex;gap:9px;color:var(--color-ink-muted);font-size:11px;margin-top:20px;flex-wrap:wrap; }
+.games-fortnite-source a:hover { color:var(--color-ink);text-decoration:underline; }
+.games-fortnite-status { font-size:13px;color:var(--color-ink-muted);margin-block:18px; }
+.games-fortnite-loading { display:grid;grid-template-columns:1.2fr 1fr;gap:32px;min-height:280px; }
+.games-fortnite-loading i { display:block;min-height:200px;border-radius:8px; }
+.games-fortnite-copy-loading { display:grid;gap:10px;margin-top:18px; }.games-fortnite-copy-loading i { height:15px; }
+@keyframes games-fortnite-spin { to { transform:rotate(360deg); } }
+@container (max-width:760px) { .games-fortnite-feature { grid-template-columns:1fr;gap:20px; }.games-fortnite-grid { grid-template-columns:repeat(2,minmax(0,1fr));gap:16px; }.games-fortnite-activity { gap:14px; }.games-fortnite-activity > span:first-child { width:100%; }.games-fortnite-loading { grid-template-columns:1fr; }.games-fortnite-tools > span { margin-inline-start:0; } }
+@container (max-width:390px) { .games-fortnite-grid { gap:16px 10px; }.games-fortnite-card-copy { padding:10px 2px;gap:6px; }.games-fortnite-card-copy > b { display:none; }.games-fortnite-activity strong { display:block; } }
+@media (prefers-reduced-motion:reduce) { .games-fortnite-image > img { transition:none; }.games-fortnite-image > .games-fortnite-spinner { animation:none; } }

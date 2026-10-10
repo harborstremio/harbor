@@ -642,7 +642,12 @@ pub fn svp_apply(app: tauri::AppHandle, target_fps: String) -> Result<String, St
     }
     #[cfg(target_os = "linux")]
     if std::env::var_os("VSSCRIPT_PATH").is_none() {
-        return Err("Restart Harbor after installing SVP or VapourSynth".to_string());
+        return Err(concat!(
+            "Restart ",
+            crate::product_name!(),
+            " after installing SVP or VapourSynth"
+        )
+        .to_string());
     }
 
     let output_dir = app

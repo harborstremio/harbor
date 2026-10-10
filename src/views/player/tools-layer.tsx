@@ -12,6 +12,7 @@ type SkipProps = ComponentProps<typeof SkipPillContainer>;
 type QuickToolsProps = ComponentProps<typeof QuickTools>;
 
 export const ToolsLayer = memo(function ToolsLayer({
+  tenFoot,
   engine,
   pipMode,
   drawMode,
@@ -35,6 +36,8 @@ export const ToolsLayer = memo(function ToolsLayer({
   gif,
   clip,
 }: {
+  /** Big Picture renders its own skip pill through BpTenFoot. */
+  tenFoot: boolean;
   engine: "html5" | "mpv";
   pipMode: boolean;
   drawMode: boolean;
@@ -60,26 +63,22 @@ export const ToolsLayer = memo(function ToolsLayer({
 }) {
   return (
     <>
-      {!pipMode &&
-        !drawMode &&
-        !showWaiting &&
-        pendingResumeSec == null &&
-        pendingSeekSec == null && (
-          <SkipPillContainer
-            engine={engine}
-            skipSegments={skipSegments}
-            durationSec={durationSec}
-            hasNextEpisode={hasNextEpisode}
-            hasNextEpDisplay={hasNextEpDisplay}
-            nextEp={nextEp}
-            nextEpMask={nextEpMask}
-            visible={pillsVisible}
-            allowAutoSkip={allowAutoSkip}
-            onSkip={onSkip}
-            onNextEpisode={onNextEpisode}
-            onCancelAutoNext={onCancelAutoNext}
-          />
-        )}
+      {!tenFoot && !pipMode && !drawMode && !showWaiting && pendingResumeSec == null && pendingSeekSec == null && (
+        <SkipPillContainer
+          engine={engine}
+          skipSegments={skipSegments}
+          durationSec={durationSec}
+          hasNextEpisode={hasNextEpisode}
+          hasNextEpDisplay={hasNextEpDisplay}
+          nextEp={nextEp}
+          nextEpMask={nextEpMask}
+          visible={pillsVisible}
+          allowAutoSkip={allowAutoSkip}
+          onSkip={onSkip}
+          onNextEpisode={onNextEpisode}
+          onCancelAutoNext={onCancelAutoNext}
+        />
+      )}
 
       {!pipMode && !drawMode && (
         <QuickTools

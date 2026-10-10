@@ -1,0 +1,46 @@
+# The repositories tools/corpus.py walks. One repo.json url per line.
+#
+# Each repo.json carries pluginLists; each of those is a JSON array of entries with a url to a
+# .cs3. Both hops are followed. Archives land in samples/corpus, which is gitignored. A line whose
+# document is already a JSON array is treated as a plugin list, which is how the codeberg mirror
+# below is reached.
+#
+# The first five are the repositories named in the brief. The rest come from the directory that
+# the MegaRepo plugin itself reads at runtime, recloudstream/cs-repos/repos-db.json, which is what
+# that plugin exists to do: it is the published index of repositories, followed here rather than
+# guessed at. Three of the five named repositories also appear in it.
+
+# named in the brief
+https://raw.githubusercontent.com/phisher98/cloudstream-extensions-phisher/refs/heads/builds/repo.json
+https://raw.githubusercontent.com/self-similarity/MegaRepo/builds/repo.json
+https://raw.githubusercontent.com/hexated/cloudstream-extensions-hexated/builds/plugins.json
+https://raw.githubusercontent.com/recloudstream/extensions/master/repo.json
+https://raw.githubusercontent.com/CranberrySoup/AniyomiCompatExtension/master/repo.json
+
+# from repos-db.json, the directory MegaRepo reads
+https://raw.githubusercontent.com/Gian-Fr/ItalianProvider/builds/repo.json
+https://raw.githubusercontent.com/CakesTwix/cloudstream-extensions-uk/master/repo.json
+https://raw.githubusercontent.com/techtanic/SkillShare-Repo/builds/repo.json
+https://raw.githubusercontent.com/SaurabhKaperwan/CSX/builds/CS.json
+https://git.disroot.org/ayza/FStream/raw/branch/main/repo.json
+https://raw.githubusercontent.com/NivinCNC/CNCVerse-Cloud-Stream-Extension/refs/heads/builds/CNC.json
+https://raw.githubusercontent.com/Luna712/Luna712-CloudStream-Extensions/master/repo.json
+https://raw.githubusercontent.com/redowan99/Redowan-CloudStream/master/repo.json
+https://raw.githubusercontent.com/Abodabodd/re-3arabi/refs/heads/main/repo
+https://raw.githubusercontent.com/doGior/doGiorsHadEnough/refs/heads/builds/repo.json
+https://raw.githubusercontent.com/DieGon7771/ItaliaInStreaming/builds/repo.json
+https://gitlab.com/tearrs/cloudstream-vietnamese/-/raw/main/repo.json
+https://raw.githubusercontent.com/Bnyro/GermanProviders/refs/heads/master/repo.json
+https://raw.githubusercontent.com/TeKuma25/IndoStream/builds/repo.json
+https://raw.githubusercontent.com/saimuelbr/saimuelrepo/refs/heads/main/builds/repo.json
+https://raw.githubusercontent.com/Kraptor123/cs-Karma/refs/heads/master/repo.json
+https://raw.githubusercontent.com/redblacker8/storm-ext/refs/heads/builds/repo.json
+https://raw.githubusercontent.com/rockhero1234/cinephile/refs/heads/builds/repo.json
+https://raw.githubusercontent.com/med1245/cartoonyrepo/builds/repo.json
+https://raw.githubusercontent.com/Reflex755/ReflexRepo/refs/heads/builds/repo.json
+https://raw.githubusercontent.com/KSHITIJ8473/raghav/builds/repo.json
+https://raw.githubusercontent.com/mouradchaouche/cloudstream-frenchrepo/main/repo.json
+https://raw.githubusercontent.com/yorik100/Cloudstream/refs/heads/builds/repo.json
+https://raw.githubusercontent.com/RVRBEAST76/allforu-repo/builds/repo.json
+https://raw.githubusercontent.com/errorcode26/Ayu-CloudStream-Games/builds/repo.json
+https://raw.githubusercontent.com/FlummoxGamer/FLUMMOX-Repo/builds/repo.json

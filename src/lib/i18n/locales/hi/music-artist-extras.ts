@@ -1,0 +1,20 @@
+const musicArtistExtras: Record<string, string> = {
+  "music.extras.merch": "कलाकार के उत्पाद",
+  "music.extras.tour": "लाइव कार्यक्रम",
+  "music.extras.store": "स्टोर देखें",
+  "music.extras.tourLink": "टूर की जानकारी",
+  "music.extras.official": "कलाकार की वेबसाइट",
+  "music.extras.loading": "कलाकार के अपडेट लोड हो रहे हैं…",
+  "music.extras.source": "{source} से",
+  "music.extras.event": "कार्यक्रम का विवरण",
+  "music.credits.title": "श्रेय",
+  "music.credits.main": "मुख्य कलाकार",
+  "music.credits.featured": "अतिथि कलाकार",
+  "music.credits.composer": "संगीतकार",
+  "music.credits.lyricist": "गीतकार",
+  "music.credits.producer": "निर्माता",
+  "music.credits.performer": "प्रस्तुतकर्ता",
+  "music.artist.readMore": "और पढ़ें",
+  "music.artist.readLess": "कम दिखाएँ",
+};
+export default musicArtistExtras;

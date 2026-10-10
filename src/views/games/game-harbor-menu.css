@@ -1,0 +1,79 @@
+/* Keep a single, persistent Games column. Changing navigation never resizes the page. */
+[data-games-library][data-games-layout] { --games-library-width:240px; --games-library-compact:68px; }
+[data-games-library][data-games-layout="sidebar"] { --games-library-compact:72px; }
+[data-games-library][data-games-layout="nord"] { --games-library-width:224px; --games-library-compact:78px; }
+[data-games-library][data-games-layout="dracula"] { --games-library-width:256px; --games-library-compact:78px; }
+[data-games-library][data-games-layout="forest"] { --games-library-compact:78px; }
+[data-games-library][data-games-layout="rail"] { --games-library-width:200px; }
+[data-games-library][data-games-layout][data-games-sidebar-collapsed] { --games-library-width:var(--games-library-compact); }
+[data-games-library][data-games-layout] .games-library-sidebar { width:var(--games-library-width); flex-basis:var(--games-library-width); }
+[data-games-library] .games-library-sidebar[data-concealed] { visibility:hidden; pointer-events:none; }
+[data-games-library] [data-harbor-native-backdrop]>aside:not([data-music-dock]) {
+  position:absolute;
+  inset-block:0;
+  inset-inline-start:0;
+  z-index:62;
+}
+[data-games-library]:not([data-games-navigation]) [data-harbor-native-backdrop]>aside:not([data-music-dock]),
+[data-games-library]:not([data-games-navigation]) [data-tv-top-chrome],
+[data-games-library]:not([data-games-navigation]) .harbor-minui-shell {
+  visibility:hidden;
+  opacity:0;
+  pointer-events:none;
+}
+/* Top navigation has its own reserved space; the Games column stays usable below it. */
+[data-games-layout="topdock"] .games-library-sidebar,
+[data-games-layout="royal"] .games-library-sidebar,
+[data-games-layout="cinematic"] .games-library-sidebar { margin-block-start:80px; height:calc(100% - 80px - var(--harbor-dock-gap, 0px)); }
+[data-games-layout="minui"] .games-library-sidebar,
+[data-games-layout="custom"] .games-library-sidebar { height:calc(100% - var(--harbor-dock-gap, 0px)); }
+.games-library-sidebar>header { display:flex; align-items:center; justify-content:space-between; gap:2px; }
+.games-library-collapse { display:grid; place-items:center; width:40px; height:44px; flex-shrink:0; color:var(--color-ink-muted); transition:color 140ms ease-out; }
+.games-library-collapse:hover { color:var(--color-ink); }
+.games-library-sidebar .games-library-collapse:focus:not(:focus-visible) { outline:none; }
+[data-games-library] .games-library-sidebar.is-collapsed>header { padding-inline:0; justify-content:center; gap:0; }
+.games-library-sidebar.is-collapsed>header>div:has(.games-library-home) { display:none; }
+.games-library-sidebar.is-collapsed>header .games-library-collapse { width:44px; }
+.games-library-sidebar.is-collapsed .games-library-side-list { overflow-x:hidden; scrollbar-width:none; }
+.games-library-sidebar.is-collapsed .games-library-side-list::-webkit-scrollbar { display:none; }
+.games-library-sidebar.is-collapsed .games-library-side-game { padding-inline:0; }
+.games-library-sidebar.is-collapsed .games-library-side-game>:is(img, .games-art-empty, svg) { width:32px; height:32px; flex-shrink:0; }
+.games-library-sidebar.is-collapsed .games-library-side-game>.games-art-empty { display:block; }
+.games-library-sidebar.is-collapsed>footer { display:none; }
+[dir=rtl] .games-library-collapse>svg { transform:scaleX(-1); }
+@media(max-width:1023px) {
+  [data-games-library][data-games-layout]:is([data-games-layout="sidebar"], [data-games-layout="nord"], [data-games-layout="dracula"], [data-games-layout="forest"]) { --games-library-width:var(--games-library-compact); }
+  [data-games-library]:is([data-games-layout="sidebar"], [data-games-layout="nord"], [data-games-layout="dracula"], [data-games-layout="forest"]) .games-workspace { padding-inline-start:var(--games-library-compact); }
+  [data-games-library]:is([data-games-layout="sidebar"], [data-games-layout="nord"], [data-games-layout="dracula"], [data-games-layout="forest"]) .games-library-sidebar { position:absolute; inset-block:0; inset-inline-start:0; }
+  [data-games-library]:is([data-games-layout="sidebar"], [data-games-layout="nord"], [data-games-layout="dracula"], [data-games-layout="forest"]) .games-library-sidebar:not(.is-collapsed) { width:270px; z-index:63; }
+}
+@media(max-width:600px) {
+  [data-games-library] .games-workspace { padding-inline-start:var(--games-library-compact); }
+  [data-games-library] .games-library-sidebar:not(.is-collapsed) { width:270px; }
+}
+@media(prefers-reduced-motion:no-preference) {
+  [data-games-library] .games-library-sidebar { overflow:hidden; transition:width 190ms cubic-bezier(.22,.61,.36,1), flex-basis 190ms cubic-bezier(.22,.61,.36,1), opacity 180ms ease-out, translate 220ms var(--ease-out), visibility 0s linear; }
+  [data-games-library] .games-library-sidebar[data-concealed] { opacity:0; translate:10px 0; transition-delay:0s,0s,0s,0s,220ms; }
+  [dir=rtl] [data-games-library] .games-library-sidebar[data-concealed] { translate:-10px 0; }
+  .games-library-sidebar:not(.is-collapsed) .games-library-destinations button>span:not(.games-navigation-rom-icon),
+  .games-library-sidebar:not(.is-collapsed) .games-library-side-game>span:not(.games-art-empty),
+  [data-games-library] .games-library-sidebar:not(.is-collapsed) .games-library-side-controls { animation:games-library-label-in 110ms ease-out 70ms backwards; }
+  /* The existing themed navigation stays mounted. Only its paint moves, never its column. */
+  [data-games-library] [data-harbor-native-backdrop]>aside:not([data-music-dock]) { transition:opacity 180ms ease-out, translate 220ms var(--ease-out), visibility 0s linear; }
+  [data-games-library]:not([data-games-navigation]) [data-harbor-native-backdrop]>aside:not([data-music-dock]) { translate:-12px 0; transition-delay:0s,0s,220ms; }
+  [dir=rtl] [data-games-library]:not([data-games-navigation]) [data-harbor-native-backdrop]>aside:not([data-music-dock]) { translate:12px 0; }
+  [data-games-library] [data-tv-top-chrome] { transition:opacity 180ms ease-out, translate 220ms var(--ease-out), visibility 0s linear; }
+  [data-games-library]:not([data-games-navigation]) [data-tv-top-chrome] { translate:0 -6px; transition-delay:0s,0s,220ms; }
+  [data-games-library] .harbor-minui-shell { transition:opacity 180ms ease-out, translate 220ms var(--ease-out), visibility 0s linear; }
+  [data-games-library]:not([data-games-navigation]) .harbor-minui-shell { translate:0 6px; transition-delay:0s,0s,220ms; }
+  [data-games-library] .games-library-sidebar>header,
+  [data-games-library] .games-library-destinations,
+  [data-games-library] .games-library-side-controls,
+  [data-games-library] .games-library-side-list,
+  [data-games-library] .games-library-sidebar>footer { animation:none; }
+}
+@keyframes games-library-label-in { from { opacity:0; } to { opacity:1; } }
+@media(prefers-reduced-motion:reduce) {
+  [data-games-library] :is(.games-library-sidebar, [data-tv-top-chrome], .harbor-minui-shell),
+  [data-games-library] [data-harbor-native-backdrop]>aside:not([data-music-dock]) { transition:none; }
+}

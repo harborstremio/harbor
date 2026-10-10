@@ -52,7 +52,7 @@ export function usePauseOnInactive({
           }
         } else if (autoPausedRef.current) {
           autoPausedRef.current = false;
-          if (snapRef.current.status === "paused") void bridge.play();
+          void bridge.play();
         }
       }).then((u) => {
         if (cancelled) u();

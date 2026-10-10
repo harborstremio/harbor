@@ -1,6 +1,10 @@
-import { useEffect, useRef, useState } from "react";
-import { Check, FolderOpen, X } from "lucide-react";
+import { useCallback, useRef, useState } from "react";
+import { AnchoredMenu } from "@/components/anchored-menu";
+import { Check, FolderOpen, X } from "./icons";
 import { saveTextFileWithPath } from "@/lib/download-text";
+import { advanceFocus } from "@/lib/keyboard-navigation";
+import { getDirection, isBackKey } from "@/lib/keyboard-navigation/geometry";
+import { useT } from "@/lib/i18n";
 
 export function DownloadMenu({
   docsRef,
@@ -9,38 +13,63 @@ export function DownloadMenu({
   docsRef: React.RefObject<HTMLDivElement | null>;
   onSaved: (path: string) => void;
 }) {
+  const t = useT();
   const [open, setOpen] = useState(false);
   const [busy, setBusy] = useState(false);
-  const wrap = useRef<HTMLDivElement>(null);
+  const btnRef = useRef<HTMLButtonElement>(null);
+  const listRef = useRef<HTMLDivElement | null>(null);
 
-  useEffect(() => {
-    if (!open) return;
-    const close = (e: MouseEvent) => {
-      if (!wrap.current?.contains(e.target as Node)) setOpen(false);
-    };
-    window.addEventListener("mousedown", close);
-    return () => window.removeEventListener("mousedown", close);
-  }, [open]);
+  const enterMenu = useCallback((el: HTMLDivElement | null) => {
+    listRef.current = el;
+    if (!el) return;
+    const first = el.querySelector<HTMLElement>('[role="menuitem"]');
+    if (first) advanceFocus(first);
+  }, []);
+
+  const close = (restore: boolean) => {
+    setOpen(false);
+    const trigger = btnRef.current;
+    if (restore && trigger) advanceFocus(trigger);
+  };
+
+  const onMenuKeyDown = (e: React.KeyboardEvent<HTMLDivElement>) => {
+    if (isBackKey(e.nativeEvent)) {
+      e.preventDefault();
+      e.stopPropagation();
+      close(true);
+      return;
+    }
+    const dir = getDirection(e.nativeEvent);
+    if (dir !== "up" && dir !== "down") return;
+    const items = Array.from(listRef.current?.querySelectorAll<HTMLElement>('[role="menuitem"]') ?? []);
+    if (!items.length) return;
+    e.preventDefault();
+    const from = items.indexOf(e.target as HTMLElement);
+    const next = items[from < 0 ? 0 : from + (dir === "down" ? 1 : -1)];
+    if (!next) return;
+    advanceFocus(next, dir);
+  };
 
   const exportAs = async (kind: "txt" | "json" | "pdf") => {
-    setOpen(false);
+    close(true);
     const root = docsRef.current;
     if (!root) return;
+    const documentTitle = t("Harbor Relay Documentation");
     if (kind === "pdf") {
-      printDocs(root);
+      printDocs(root, documentTitle);
       return;
     }
     const isTxt = kind === "txt";
     const content = isTxt
-      ? buildTxt(root)
-      : JSON.stringify(buildJson(root), null, 2);
+      ? buildTxt(root, documentTitle)
+      : JSON.stringify(buildJson(root, documentTitle), null, 2);
     setBusy(true);
     try {
       const { path } = await saveTextFileWithPath(
         isTxt ? "harbor-relay-docs.txt" : "harbor-relay-docs.json",
         content,
         [isTxt ? "txt" : "json"],
-        "Harbor Relay docs",
+        t("Harbor Relay docs"),
       );
       if (path) onSaved(path);
     } finally {
@@ -49,29 +78,38 @@ export function DownloadMenu({
   };
 
   return (
-    <div ref={wrap} className="relative">
+    <div className="relative">
       <button
+        ref={btnRef}
         type="button"
         onClick={() => setOpen((v) => !v)}
         disabled={busy}
         aria-haspopup="menu"
         aria-expanded={open}
-        className={`flex h-9 items-center gap-2 rounded-full border px-3.5 text-[12.5px] font-semibold transition-colors disabled:opacity-60 ${
-          open
-            ? "border-edge bg-elevated text-ink"
-            : "border-edge-soft text-ink-muted hover:border-edge hover:bg-elevated/60 hover:text-ink"
+        className={`flex h-11 items-center gap-2 rounded-[8px] px-4 text-[15px] font-semibold transition-colors disabled:opacity-60 ${
+          open ? "bg-raised text-ink" : "bg-canvas text-ink-muted hover:bg-raised hover:text-ink"
         }`}
       >
         <DownloadGlyph />
-        {busy ? "Saving…" : "Download"}
+        {busy ? t("Saving…") : t("Download")}
       </button>
-      {open && (
-        <div className="absolute end-0 top-[calc(100%+8px)] z-30 flex w-44 flex-col overflow-hidden rounded-xl border border-edge-soft bg-elevated shadow-[0_18px_50px_-15px_rgba(0,0,0,0.6)] backdrop-blur-md animate-in fade-in slide-in-from-top-1 duration-150">
-          <DownloadOption label="Plain text (.txt)" onClick={() => void exportAs("txt")} />
-          <DownloadOption label="JSON (.json)" onClick={() => void exportAs("json")} />
-          <DownloadOption label="PDF (print)" onClick={() => void exportAs("pdf")} />
+      <AnchoredMenu
+        anchorRef={btnRef}
+        open={open}
+        onClose={() => close(!!listRef.current?.contains(document.activeElement))}
+        width={224}
+      >
+        <div
+          ref={enterMenu}
+          role="menu"
+          onKeyDown={onMenuKeyDown}
+          className="flex flex-col gap-0.5 overflow-hidden rounded-md bg-raised p-1 harbor-float animate-in fade-in slide-in-from-top-1 duration-150"
+        >
+          <DownloadOption label={t("Plain text (.txt)")} onClick={() => void exportAs("txt")} />
+          <DownloadOption label={t("JSON (.json)")} onClick={() => void exportAs("json")} />
+          <DownloadOption label={t("PDF (print)")} onClick={() => void exportAs("pdf")} />
         </div>
-      )}
+      </AnchoredMenu>
     </div>
   );
 }
@@ -80,8 +118,9 @@ function DownloadOption({ label, onClick }: { label: string; onClick: () => void
   return (
     <button
       type="button"
+      role="menuitem"
       onClick={onClick}
-      className="flex w-full items-center px-3.5 py-2.5 text-start text-[12.5px] text-ink-muted transition-colors hover:bg-raised hover:text-ink"
+      className="flex h-11 w-full items-center rounded-md px-3 text-start text-[15.5px] text-ink-muted transition-colors hover:bg-elevated hover:text-ink"
     >
       {label}
     </button>
@@ -90,7 +129,7 @@ function DownloadOption({ label, onClick }: { label: string; onClick: () => void
 
 function DownloadGlyph() {
   return (
-    <svg width="14" height="14" viewBox="0 0 24 24" fill="none" aria-hidden>
+    <svg width="18" height="18" viewBox="0 0 24 24" fill="none" aria-hidden>
       <path
         d="M12 4v12m0 0l-5-5m5 5l5-5M4 20h16"
         stroke="currentColor"
@@ -103,6 +142,7 @@ function DownloadGlyph() {
 }
 
 export function SavePill({ path, onDismiss }: { path: string; onDismiss: () => void }) {
+  const t = useT();
   const reveal = async () => {
     try {
       const { revealItemInDir } = await import("@tauri-apps/plugin-opener");
@@ -115,31 +155,31 @@ export function SavePill({ path, onDismiss }: { path: string; onDismiss: () => v
   const dir = path.slice(0, Math.max(0, path.length - name.length)).replace(/[\\/]+$/, "");
   return (
     <div className="pointer-events-none fixed inset-x-0 bottom-6 z-[120] flex justify-center px-4">
-      <div className="pointer-events-auto flex max-w-[min(560px,90vw)] items-center gap-3 rounded-full border border-edge bg-elevated/95 py-2 ps-3 pe-2 shadow-[0_18px_50px_-15px_rgba(0,0,0,0.7)] backdrop-blur-md animate-in fade-in slide-in-from-bottom-2 duration-200">
-        <span className="flex h-6 w-6 shrink-0 items-center justify-center rounded-full bg-emerald-500/15 text-emerald-300">
-          <Check size={13} strokeWidth={2.8} />
+      <div className="pointer-events-auto flex max-w-[min(560px,90vw)] items-center gap-3 rounded-md bg-elevated p-2 ps-3 harbor-float animate-in fade-in slide-in-from-bottom-2 duration-200">
+        <span className="flex h-7 w-7 shrink-0 items-center justify-center rounded-md bg-success/15 text-success">
+          <Check size={16} strokeWidth={2.8} />
         </span>
         <div className="flex min-w-0 flex-col">
-          <span className="text-[12.5px] font-semibold leading-tight text-ink">Saved</span>
-          <span className="truncate text-[11px] leading-tight text-ink-subtle" title={path}>
+          <span className="text-[16.5px] font-medium leading-[24px] text-ink">{t("Saved")}</span>
+          <span className="truncate text-[15.5px] leading-[22px] text-ink-subtle" title={path}>
             {dir || name}
           </span>
         </div>
         <button
           type="button"
           onClick={reveal}
-          className="ms-1 flex h-8 shrink-0 items-center gap-1.5 rounded-full bg-raised px-3 text-[11.5px] font-semibold text-ink-muted transition-colors hover:bg-canvas hover:text-ink"
+          className="ms-1 flex h-11 shrink-0 items-center gap-2 rounded-[8px] bg-canvas px-4 text-[15px] font-semibold text-ink-muted transition-colors hover:bg-raised hover:text-ink"
         >
-          <FolderOpen size={13} strokeWidth={2.2} />
-          Show
+          <FolderOpen size={18} strokeWidth={2.2} />
+          {t("Show")}
         </button>
         <button
           type="button"
           onClick={onDismiss}
-          aria-label="Dismiss"
-          className="flex h-8 w-8 shrink-0 items-center justify-center rounded-full text-ink-subtle transition-colors hover:bg-raised hover:text-ink"
+          aria-label={t("Dismiss")}
+          className="flex h-11 w-11 shrink-0 items-center justify-center rounded-md text-ink-subtle transition-colors hover:bg-canvas hover:text-ink"
         >
-          <X size={14} strokeWidth={2.4} />
+          <X size={18} strokeWidth={2.4} />
         </button>
       </div>
     </div>
@@ -174,7 +214,7 @@ const PRINT_CSS = `
   @page { margin: 14mm; }
 `;
 
-function printDocs(root: HTMLElement) {
+function printDocs(root: HTMLElement, title: string) {
   const iframe = document.createElement("iframe");
   iframe.setAttribute("aria-hidden", "true");
   iframe.style.cssText = "position:fixed;right:0;bottom:0;width:0;height:0;border:0;opacity:0;";
@@ -186,8 +226,9 @@ function printDocs(root: HTMLElement) {
   }
   doc.open();
   doc.write(
-    `<!doctype html><html><head><meta charset="utf-8"><title>Harbor Relay Documentation</title><style>${PRINT_CSS}</style></head><body><main>${root.innerHTML}</main></body></html>`,
+    `<!doctype html><html><head><meta charset="utf-8"><title></title><style>${PRINT_CSS}</style></head><body><main>${root.innerHTML}</main></body></html>`,
   );
+  doc.title = title;
   doc.close();
   const win = iframe.contentWindow;
   let done = false;
@@ -204,7 +245,7 @@ function printDocs(root: HTMLElement) {
   }, 180);
 }
 
-function buildTxt(root: HTMLElement): string {
+function buildTxt(root: HTMLElement, title: string): string {
   const lines: string[] = [];
   root.querySelectorAll("h2, h3, p, li, pre").forEach((el) => {
     const tag = el.tagName.toLowerCase();
@@ -224,10 +265,10 @@ function buildTxt(root: HTMLElement): string {
       lines.push(text);
     }
   });
-  return `Harbor Relay Documentation\n${"=".repeat(28)}\n${lines.join("\n").trim()}\n`;
+  return `${title}\n${"=".repeat(Math.min(title.length, 60))}\n${lines.join("\n").trim()}\n`;
 }
 
-function buildJson(root: HTMLElement) {
+function buildJson(root: HTMLElement, title: string) {
   const sections: Array<{ heading: string; blocks: Array<unknown> }> = [];
   let current: { heading: string; blocks: Array<unknown> } | null = null;
   const ensureSection = (heading: string) => {
@@ -238,24 +279,31 @@ function buildJson(root: HTMLElement) {
     const head = sec.querySelector("h2, h3");
     if (head) ensureSection((head.textContent ?? "").trim());
     else if (!current) ensureSection("");
-    sec.querySelectorAll(":scope > p, :scope > ul, :scope > ol, :scope > pre, :scope > div table").forEach((el) => {
-      const tag = el.tagName.toLowerCase();
-      if (tag === "p") current!.blocks.push({ type: "paragraph", text: (el.textContent ?? "").trim() });
-      else if (tag === "pre") current!.blocks.push({ type: "code", text: el.textContent ?? "" });
-      else if (tag === "ul" || tag === "ol") {
-        const items = Array.from(el.querySelectorAll(":scope > li")).map((li) => (li.textContent ?? "").trim());
-        current!.blocks.push({ type: tag === "ol" ? "ordered_list" : "list", items });
-      } else if (tag === "table") {
-        const rows = Array.from(el.querySelectorAll("tbody tr")).map((tr) =>
-          Array.from(tr.querySelectorAll("td")).map((td) => (td.textContent ?? "").trim()),
-        );
-        const headers = Array.from(el.querySelectorAll("thead th")).map((th) => (th.textContent ?? "").trim());
-        current!.blocks.push({ type: "table", headers, rows });
-      }
-    });
+    sec
+      .querySelectorAll(":scope > p, :scope > ul, :scope > ol, :scope > pre, :scope > div table")
+      .forEach((el) => {
+        const tag = el.tagName.toLowerCase();
+        if (tag === "p")
+          current!.blocks.push({ type: "paragraph", text: (el.textContent ?? "").trim() });
+        else if (tag === "pre") current!.blocks.push({ type: "code", text: el.textContent ?? "" });
+        else if (tag === "ul" || tag === "ol") {
+          const items = Array.from(el.querySelectorAll(":scope > li")).map((li) =>
+            (li.textContent ?? "").trim(),
+          );
+          current!.blocks.push({ type: tag === "ol" ? "ordered_list" : "list", items });
+        } else if (tag === "table") {
+          const rows = Array.from(el.querySelectorAll("tbody tr")).map((tr) =>
+            Array.from(tr.querySelectorAll("td")).map((td) => (td.textContent ?? "").trim()),
+          );
+          const headers = Array.from(el.querySelectorAll("thead th")).map((th) =>
+            (th.textContent ?? "").trim(),
+          );
+          current!.blocks.push({ type: "table", headers, rows });
+        }
+      });
   });
   return {
-    title: "Harbor Relay Documentation",
+    title,
     generatedAt: new Date().toISOString(),
     sections,
   };

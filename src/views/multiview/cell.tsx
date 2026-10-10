@@ -1,6 +1,16 @@
-import { AlertTriangle, Loader2, Plus, RefreshCw, Repeat2, Volume2, VolumeX, X } from "lucide-react";
+import {
+  AlertTriangle,
+  Loader2,
+  Plus,
+  RefreshCw,
+  Repeat2,
+  Volume2,
+  VolumeX,
+  X,
+} from "lucide-react";
 import { useEffect, useRef, useState } from "react";
 import type { SlotChannel } from "@/lib/multiview/store";
+import { useT } from "@/lib/i18n";
 import { MultiPlayer } from "./multi-player";
 
 export type SlotStatus = "loading" | "playing" | "retrying" | "offline";
@@ -25,6 +35,7 @@ export function Cell({
   onFocus: () => void;
   onMute: () => void;
 }) {
+  const t = useT();
   const [status, setStatus] = useState<SlotStatus>("loading");
   const [attempt, setAttempt] = useState(0);
   const retryTimer = useRef<number | null>(null);
@@ -55,7 +66,7 @@ export function Cell({
         <span className="flex h-12 w-12 items-center justify-center rounded-full bg-elevated text-ink-muted transition-colors group-hover:text-ink">
           <Plus size={22} strokeWidth={2.2} />
         </span>
-        <span className="text-[13px] font-medium text-ink-muted">Add a channel</span>
+        <span className="text-[13px] font-medium text-ink-muted">{t("Add a channel")}</span>
       </button>
     );
   }
@@ -114,8 +125,8 @@ export function Cell({
               e.stopPropagation();
               onPick();
             }}
-            aria-label="Change channel"
-            title="Change channel"
+            aria-label={t("Change channel")}
+            title={t("Change channel")}
             className="flex h-6 w-6 items-center justify-center rounded-full text-ink-subtle transition-colors hover:bg-elevated hover:text-ink"
           >
             <Repeat2 size={13} />
@@ -126,8 +137,8 @@ export function Cell({
               if (focused) onMute();
               else onFocus();
             }}
-            aria-label={focused ? "Mute" : "Unmute this cell"}
-            title={focused ? "Mute" : "Unmute this cell"}
+            aria-label={focused ? t("Mute") : t("Unmute this cell")}
+            title={focused ? t("Mute") : t("Unmute this cell")}
             className={`flex h-6 w-6 items-center justify-center rounded-full transition-colors ${
               focused ? "bg-accent text-black" : "text-ink-subtle hover:bg-elevated hover:text-ink"
             }`}
@@ -139,7 +150,7 @@ export function Cell({
               e.stopPropagation();
               onClose();
             }}
-            aria-label="Close cell"
+            aria-label={t("Close cell")}
             className="flex h-6 w-6 items-center justify-center rounded-full text-ink-subtle transition-colors hover:bg-danger/20 hover:text-danger"
           >
             <X size={13} />
@@ -161,11 +172,14 @@ export function Cell({
             {status === "offline" ? (
               <>
                 <AlertTriangle size={22} className="text-danger" />
-                <span className="text-[12px] font-medium text-ink-muted">Stream offline</span>
+                <span className="text-[12px] font-medium text-ink-muted">
+                  {t("Stream offline")}
+                </span>
                 {exhausted && (
                   <p className="max-w-[260px] text-center text-[11px] leading-snug text-ink-subtle">
-                    If multiple streams are running, your IPTV provider may limit concurrent
-                    connections.
+                    {t(
+                      "If multiple streams are running, your IPTV provider may limit concurrent connections.",
+                    )}
                   </p>
                 )}
                 <button
@@ -177,14 +191,16 @@ export function Cell({
                   className="pointer-events-auto mt-1 flex h-7 items-center gap-1.5 rounded-full border border-edge-soft px-3 text-[11.5px] font-medium text-ink-muted transition-colors hover:border-edge hover:text-ink"
                 >
                   <RefreshCw size={11} strokeWidth={2.4} />
-                  Retry
+                  {t("Retry")}
                 </button>
               </>
             ) : (
               <>
                 <Loader2 size={20} className="animate-spin" />
                 {status === "retrying" && (
-                  <span className="text-[11px] font-medium text-ink-muted">Reconnecting…</span>
+                  <span className="text-[11px] font-medium text-ink-muted">
+                    {t("Reconnecting…")}
+                  </span>
                 )}
               </>
             )}

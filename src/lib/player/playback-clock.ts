@@ -1,18 +1,12 @@
 import { useSyncExternalStore } from "react";
+import type { PlayerStatus } from "./bridge";
+
+export { resolvePlaybackDownloadedFraction } from "./playback-download";
 
 let positionSec = 0;
 let bufferedSec = 0;
 let downloadedFraction = 0;
 const listeners = new Set<() => void>();
-
-export function resolvePlaybackDownloadedFraction(input: {
-  isP2pEngine: boolean;
-  streamProgress: number;
-  streamLen: number;
-}): number {
-  if (!input.isP2pEngine || input.streamLen <= 0) return 0;
-  return Math.max(0, Math.min(1, input.streamProgress / input.streamLen));
-}
 
 export function setPlaybackClock(pos: number, buf: number) {
   if (pos === positionSec && buf === bufferedSec) return;
@@ -110,5 +104,33 @@ export function usePlaybackDownloadedGated(active: boolean): number {
     active ? subscribePlaybackClock : NEVER,
     () => downloadedFraction,
     () => downloadedFraction,
+  );
+}
+
+let status: PlayerStatus = "idle";
+const statusListeners = new Set<() => void>();
+
+export function setPlaybackStatus(next: PlayerStatus): void {
+  if (status === next) return;
+  status = next;
+  for (const l of statusListeners) l();
+}
+
+export function getPlaybackStatus(): PlayerStatus {
+  return status;
+}
+
+export function subscribePlaybackStatus(cb: () => void): () => void {
+  statusListeners.add(cb);
+  return () => {
+    statusListeners.delete(cb);
+  };
+}
+
+export function usePlaybackStatus(): PlayerStatus {
+  return useSyncExternalStore(
+    subscribePlaybackStatus,
+    () => status,
+    () => status,
   );
 }

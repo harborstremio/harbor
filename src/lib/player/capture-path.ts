@@ -40,7 +40,7 @@ export async function captureDir(): Promise<string | null> {
   try {
     const pathMod = await import("@tauri-apps/api/path");
     const pictures = await pathMod.pictureDir();
-    return await pathMod.join(pictures, "Harbor");
+    return await pathMod.join(pictures, "JL Media Vision");
   } catch {
     return null;
   }

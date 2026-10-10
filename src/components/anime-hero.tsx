@@ -1,11 +1,21 @@
-import { Bookmark, BookmarkCheck, ChevronLeft, ChevronRight, Play, TrendingUp } from "lucide-react";
-import { useEffect, useState } from "react";
+import { Check, Plus, TrendingUp } from "lucide-react";
+import { Play } from "@/components/icons/play-filled";
+import { useEffect, useMemo, useState } from "react";
+import { useArtFallback } from "./anime-hero-art-fallback";
+import { NavArrow } from "@/components/nav-arrow";
+import { PopIcon } from "@/components/pop-icon";
+import { HeroPips } from "./anime-hero/hero-pips";
+import { HeroSlideBadges } from "./anime-hero/hero-slide-badges";
+import { HeroMangaAdaptation } from "./anime-hero/hero-manga-adaptation";
 import { awardSourceMeta, findTopAward, parseAwardYear } from "@/lib/anime-awards";
+import { useAwardMasterVersion } from "@/lib/anime-awards-source";
+import { useAwardIcon } from "@/lib/award-icons";
 import type { Meta } from "@/lib/cinemeta";
 import { isSaved, toggleSaved } from "@/lib/feed";
 import { useT } from "@/lib/i18n";
 import { useMalRating } from "@/lib/mal-rating";
 import { useSettings } from "@/lib/settings";
+import { useTitleLogo } from "@/lib/title-logo";
 import { useView } from "@/lib/view";
 import { observe, usePageVisible } from "@/lib/visibility";
 import { useHeroLogos } from "./anime-hero/use-hero-logos";
@@ -20,20 +30,32 @@ export function AnimeHero({
   slides,
   topPicks,
   trendingByMetaId,
+  topBleed = true,
 }: {
   slides: Meta[];
   topPicks: Meta[];
   trendingByMetaId?: Record<string, string>;
+  topBleed?: boolean;
 }) {
   const { openMeta } = useView();
   const { settings } = useSettings();
   const t = useT();
+  useAwardMasterVersion();
   const [active, setActive] = useState(0);
   const [paused, setPaused] = useState(false);
   const [inView, setInView] = useState(true);
   const visible = usePageVisible();
   const [savedTick, setSavedTick] = useState(0);
-  const logos = useHeroLogos(slides, settings.tmdbKey);
+  const n = slides.length;
+  const windowIdx = useMemo(() => {
+    const AHEAD = 3;
+    const BEHIND = 1;
+    const set = new Set<number>();
+    if (n > 0) for (let d = -BEHIND; d <= AHEAD; d += 1) set.add(((active + d) % n + n) % n);
+    return set;
+  }, [active, n]);
+  const windowSlides = useMemo(() => slides.filter((_, i) => windowIdx.has(i)), [slides, windowIdx]);
+  const logos = useHeroLogos(windowSlides, settings);
 
   useEffect(() => {
     if (slides.length === 0) return;
@@ -53,10 +75,12 @@ export function AnimeHero({
   }, [slides.length, active]);
 
   const malRating = useMalRating(slides[active]);
+  const pinnedLogo = useTitleLogo(slides[active]?.id);
   if (slides.length === 0) return null;
 
-  const current = slides[active];
-  const logo = current.logo ?? logos[current.id];
+  const current = slides[active] ?? slides[0];
+  if (!current) return null;
+  const logo = pinnedLogo ?? logos[current.id] ?? current.logo;
   const saved = isSaved(current.id);
 
   const next = () => setActive((i) => (i + 1) % slides.length);
@@ -65,14 +89,14 @@ export function AnimeHero({
   return (
     <section
       id="anime-hero-section"
-      className="relative -mx-12 -mt-28"
+      className={`group relative harbor-hero-bleed ${topBleed ? "harbor-hero-bleed-top" : ""}`}
       onMouseEnter={() => setPaused(true)}
       onMouseLeave={() => setPaused(false)}
     >
       <div className="absolute inset-0 z-0 overflow-hidden">
         {slides.map((m, i) => {
-          const src = m.background || m.poster;
-          if (!src) return null;
+          if (!windowIdx.has(i)) return null;
+          if (!m.background && !m.poster) return null;
           return (
             <div
               key={m.id}
@@ -83,13 +107,7 @@ export function AnimeHero({
                 transition: `opacity ${FADE_MS}ms cubic-bezier(0.32, 0.72, 0.24, 1)`,
               }}
             >
-              <img
-                src={src}
-                alt=""
-                decoding="async"
-                className="absolute inset-0 h-full w-full object-cover"
-                style={{ objectPosition: "75% center" }}
-              />
+              <HeroBackdrop meta={m} />
             </div>
           );
         })}
@@ -107,13 +125,13 @@ export function AnimeHero({
         />
       </div>
 
-      <div className="relative z-10 flex min-h-[520px] items-end px-12 pt-24 pb-10">
+      <div className="relative z-10 flex min-h-[520px] items-end px-20 pt-24 pb-10">
         <div
           className="flex max-w-[520px] flex-col gap-5"
           style={{ transition: `opacity ${FADE_MS}ms ease-out` }}
         >
-          <CrunchyrollBadge name={current.name} year={parseAwardYear(current.releaseInfo)} />
-          {!findTopAward(current.name, parseAwardYear(current.releaseInfo)) &&
+          <CrunchyrollBadge name={current.name} year={parseAwardYear(current.releaseInfo)} id={current.id} />
+          {!findTopAward(current.name, parseAwardYear(current.releaseInfo), current.id) &&
             trendingByMetaId?.[current.id] && (
               <TrendingBadge source={trendingByMetaId[current.id]} />
             )}
@@ -128,9 +146,9 @@ export function AnimeHero({
             <button
               type="button"
               onClick={() => openMeta(current)}
-              className="inline-flex items-center gap-2 rounded-md bg-accent px-5 py-3 text-[13px] font-bold uppercase tracking-[0.08em] text-canvas transition-colors duration-150 hover:bg-accent/90"
+              className="flex h-12 items-center gap-2.5 rounded-full bg-ink px-7 text-[15px] font-semibold text-canvas transition-transform duration-200 hover:scale-[1.03] active:scale-[0.98]"
             >
-              <Play size={17} fill="currentColor" />
+              <Play size={18} fill="currentColor" />
               {t("Start Watching")}
             </button>
             <button
@@ -141,9 +159,15 @@ export function AnimeHero({
               }}
               aria-label={saved ? t("Remove from saved") : t("Save for later")}
               aria-pressed={saved}
-              className="flex h-12 w-12 items-center justify-center rounded-md border border-edge bg-elevated/45 text-ink transition-colors duration-150 hover:bg-elevated"
+              className={`flex h-12 w-12 items-center justify-center rounded-full transition-[transform,background-color] duration-200 active:scale-[0.98] ${
+                saved ? "bg-ink/15 text-ink hover:bg-ink/20" : "bg-canvas/80 text-ink hover:bg-canvas/95"
+              }`}
             >
-              {saved ? <BookmarkCheck size={18} /> : <Bookmark size={18} />}
+              <PopIcon
+                active={saved}
+                activeIcon={<Check size={18} strokeWidth={2.4} />}
+                inactiveIcon={<Plus size={18} strokeWidth={2} />}
+              />
             </button>
             <span className="ms-1 hidden items-center gap-1.5 text-[13px] text-ink-muted sm:inline-flex">
               {malRating && (
@@ -159,43 +183,33 @@ export function AnimeHero({
 
       {slides.length > 1 && (
         <>
-          <button
-            type="button"
+          <NavArrow
+            dir="left"
             onClick={prev}
-            aria-label={t("Previous")}
-            className="absolute start-3 top-[260px] z-20 flex h-12 w-12 -translate-y-1/2 items-center justify-center rounded-full bg-canvas/35 text-ink-muted transition-colors duration-150 hover:bg-canvas/65 hover:text-ink"
-          >
-            <ChevronLeft size={26} className="dir-icon" />
-          </button>
-          <button
-            type="button"
+            label={t("Previous")}
+            size={38}
+            className="absolute start-2 top-1/2 z-30 h-14 w-14 -translate-y-1/2 opacity-25 transition-opacity group-hover:opacity-100"
+          />
+          <NavArrow
+            dir="right"
             onClick={next}
-            aria-label={t("Next")}
-            className="absolute end-3 top-[260px] z-20 flex h-12 w-12 -translate-y-1/2 items-center justify-center rounded-full bg-canvas/35 text-ink-muted transition-colors duration-150 hover:bg-canvas/65 hover:text-ink"
-          >
-            <ChevronRight size={26} className="dir-icon" />
-          </button>
+            label={t("Next")}
+            size={38}
+            className="absolute end-2 top-1/2 z-30 h-14 w-14 -translate-y-1/2 opacity-25 transition-opacity group-hover:opacity-100"
+          />
         </>
       )}
 
       <div className="relative z-10 flex flex-col gap-5 px-12 pb-12" data-saved={savedTick}>
-        <div className="flex items-center justify-between gap-4">
+        <div className="flex items-end justify-between gap-4">
           <h2 className="text-[20px] font-medium tracking-tight text-ink">{t("Top Picks for You")}</h2>
-          {slides.length > 1 && (
-            <div className="flex gap-1.5">
-              {slides.map((_, i) => (
-                <button
-                  key={i}
-                  type="button"
-                  onClick={() => setActive(i)}
-                  aria-label={t("Slide {n}", { n: i + 1 })}
-                  className={`h-1.5 rounded-full transition-all duration-200 ${
-                    i === active ? "w-10 bg-accent" : "w-6 bg-ink-subtle/35 hover:bg-ink-subtle/60"
-                  }`}
-                />
-              ))}
+          <div className="flex flex-col items-end gap-2.5">
+            <div className="flex min-h-[48px] items-center gap-3">
+              <HeroMangaAdaptation meta={current} />
+              <HeroSlideBadges meta={current} />
             </div>
-          )}
+            {slides.length > 1 && <HeroPips total={slides.length} active={active} onSelect={setActive} />}
+          </div>
         </div>
         {topPicks.length > 0 ? (
           <Row scrollKey="anime:topPicks">
@@ -261,27 +275,12 @@ export function AnimeHeroSkeleton() {
 }
 
 function HeroLogo({ title, logo }: { title: string; logo?: string }) {
-  const [loaded, setLoaded] = useState(false);
   const [failed, setFailed] = useState(false);
   useEffect(() => {
-    setLoaded(false);
     setFailed(false);
   }, [logo]);
   if (logo && !failed) {
-    return (
-      <img
-        src={logo}
-        alt={title}
-        decoding="async"
-        onLoad={() => setLoaded(true)}
-        onError={() => setFailed(true)}
-        className="max-h-[120px] w-auto max-w-[420px] object-contain object-left rtl:object-right drop-shadow-[0_6px_24px_rgba(0,0,0,0.55)]"
-        style={{
-          opacity: loaded ? 1 : 0,
-          transition: "opacity 420ms cubic-bezier(0.32, 0.72, 0.24, 1)",
-        }}
-      />
-    );
+    return <HeroLogoImage logo={logo} title={title} onFail={() => setFailed(true)} />;
   }
   return (
     <h1 className="font-display text-[56px] font-medium leading-[0.98] tracking-tight text-ink drop-shadow-[0_2px_22px_rgba(0,0,0,0.6)]">
@@ -290,16 +289,20 @@ function HeroLogo({ title, logo }: { title: string; logo?: string }) {
   );
 }
 
-function CrunchyrollBadge({ name, year }: { name: string; year?: number }) {
+function CrunchyrollBadge({ name, year, id }: { name: string; year?: number; id?: string }) {
   const [hover, setHover] = useState(false);
-  const win = findTopAward(name, year);
+  const win = findTopAward(name, year, id);
+  const srcIcon = useAwardIcon(win?.source ?? "");
   if (!win) return null;
   const src = awardSourceMeta(win.source);
   const label = win.isAOTY
     ? `${win.year} Anime of the Year`
     : `${win.year} ${win.categoryName.replace(/^Best\s+/i, "Best ")}`;
-  const iconCls = `h-4 w-4 shrink-0 object-contain ${win.source === "animation_kobe" ? "brightness-0 invert" : ""}`;
-  const tipIconCls = `h-3.5 w-3.5 object-contain ${win.source === "animation_kobe" ? "brightness-0 invert" : ""}`;
+  const iconUrl = srcIcon ?? src.iconSmall;
+  const invert =
+    !srcIcon && win.source === "animation_kobe" ? "brightness-0 invert" : "";
+  const iconCls = `h-4 w-4 shrink-0 object-contain ${invert}`;
+  const tipIconCls = `h-3.5 w-3.5 object-contain ${invert}`;
   return (
     <div
       className="relative inline-flex items-center gap-2 self-start"
@@ -307,7 +310,7 @@ function CrunchyrollBadge({ name, year }: { name: string; year?: number }) {
       onMouseLeave={() => setHover(false)}
     >
       <img
-        src={src.iconSmall}
+        src={iconUrl}
         alt=""
         width={16}
         height={16}
@@ -324,7 +327,7 @@ function CrunchyrollBadge({ name, year }: { name: string; year?: number }) {
         }`}
       >
         <div className="flex items-center gap-2">
-          <img src={src.iconSmall} alt="" width={14} height={14} className={tipIconCls} draggable={false} />
+          <img src={iconUrl} alt="" width={14} height={14} className={tipIconCls} draggable={false} />
           <span className="text-[11px] font-bold uppercase tracking-[0.16em] text-accent">
             {src.name}
           </span>
@@ -368,5 +371,55 @@ function HeroTags({ meta }: { meta: Meta }) {
         </span>
       ))}
     </div>
+  );
+}
+
+function HeroBackdrop({ meta }: { meta: Meta }) {
+  const art = useArtFallback([meta.background, meta.poster]);
+  if (!art.src) return null;
+  return (
+    <img
+      src={art.src}
+      alt=""
+      decoding="async"
+      onLoad={art.onLoad}
+      onError={art.onError}
+      className="absolute inset-0 h-full w-full object-cover"
+      style={{ objectPosition: "75% center" }}
+    />
+  );
+}
+
+function HeroLogoImage({
+  logo,
+  title,
+  onFail,
+}: {
+  logo: string;
+  title: string;
+  onFail: () => void;
+}) {
+  const art = useArtFallback([logo]);
+  const [shown, setShown] = useState(false);
+  useEffect(() => {
+    if (art.exhausted) onFail();
+  }, [art.exhausted, onFail]);
+  if (!art.src) return null;
+  return (
+    <img
+      src={art.src}
+      alt={title}
+      decoding="async"
+      onLoad={() => {
+        art.onLoad();
+        setShown(true);
+      }}
+      onError={art.onError}
+      className="max-h-[120px] w-auto max-w-[420px] object-contain object-left rtl:object-right drop-shadow-[0_6px_24px_rgba(0,0,0,0.55)]"
+      style={{
+        opacity: shown ? 1 : 0,
+        transition: "opacity 420ms cubic-bezier(0.32, 0.72, 0.24, 1)",
+      }}
+    />
   );
 }

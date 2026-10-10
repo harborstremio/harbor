@@ -4,6 +4,7 @@ import { useT } from "@/lib/i18n";
 import { tmdbDiscover } from "@/lib/providers/tmdb";
 import { rpdbPoster } from "@/lib/providers/rpdb";
 import { useSettings } from "@/lib/settings";
+import { claimUniqueArt, releaseUniqueArt } from "@/lib/unique-art";
 import { useView } from "@/lib/view";
 import { Row } from "./row";
 import { Poster } from "./poster";
@@ -31,10 +32,10 @@ const LANGS: Lang[] = [
   { iso: "ar", name: "Arabic", endonym: "العربية", hue: 165 },
 ];
 
-export function LanguageTiles() {
+export function LanguageTiles({ title }: { title?: string }) {
   const t = useT();
   return (
-    <Row title={t("Browse by Language")} min={210} shape="tile" alwaysActive>
+    <Row title={title ?? t("Browse by Language")} min={210} shape="tile" alwaysActive>
       {LANGS.map((l) => (
         <LanguageTile key={l.iso} lang={l} />
       ))}
@@ -53,6 +54,7 @@ function LanguageTile({ lang }: { lang: Lang }) {
 
   useEffect(() => {
     let cancelled = false;
+    const key = `lang:${lang.iso}`;
     tmdbDiscover(settings.tmdbKey, "tv", {
       with_original_language: lang.iso,
       sort_by: "popularity.desc",
@@ -60,11 +62,13 @@ function LanguageTile({ lang }: { lang: Lang }) {
     })
       .then((list) => {
         if (cancelled) return;
-        setBackdrops(list.filter((m) => m.background).slice(0, 3));
+        const pool = list.filter((m) => m.background);
+        setBackdrops(claimUniqueArt(key, pool, (m) => m.id, 3));
       })
       .catch(() => {});
     return () => {
       cancelled = true;
+      releaseUniqueArt(key);
     };
   }, [lang.iso, settings.tmdbKey]);
 
@@ -100,7 +104,7 @@ function LanguageTile({ lang }: { lang: Lang }) {
       </span>
       <div className="absolute inset-x-5 bottom-5 flex items-end justify-between">
         <h3
-          className="font-display text-[26px] font-medium leading-tight tracking-tight drop-shadow-[0_2px_18px_rgba(0,0,0,0.4)]"
+          className="font-display text-[26px] font-medium leading-tight tracking-tight [text-shadow:0_2px_18px_rgba(0,0,0,0.4)]"
           style={{ color: ink }}
         >
           {t(lang.name)}
@@ -131,6 +135,7 @@ function Collage({ backdrops, rpdbKey }: { backdrops: Meta[]; rpdbKey: string })
             src={rpdbPoster(rpdbKey, m.id, m.background ?? m.poster)}
             seed={m.id}
             ratio="landscape"
+            lazy="release"
             className="h-full rounded-none [transform:skewX(8deg)_scale(1.4)]"
           />
         </div>

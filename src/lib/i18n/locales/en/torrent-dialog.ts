@@ -1,0 +1,18 @@
+export default {
+  "games.torrent.introClean": "Paste a magnet link or choose a torrent file to review its contents.",
+  "games.torrent.filesLabel": "Files",
+  "games.torrent.sizeLabel": "Size",
+  "games.torrent.pieceNoteClean": "Your folder structure is preserved. Shared pieces may also create partial files.",
+  "games.torrent.drive": "Choose a drive",
+  "games.torrent.loadingDrives": "Reading drives…",
+  "games.torrent.free": "{size} free",
+  "games.torrent.browse": "Browse folders",
+  "games.torrent.drivesUnavailable": "Drive information is unavailable. You can still choose a folder.",
+  "games.torrent.required": "{size} needed",
+  "games.torrent.notEnoughSpace": "Choose another drive or fewer files to fit the available space.",
+  "games.torrent.options": "Speed limits & torrent details",
+  "games.torrent.added": "Added to Downloads",
+  "games.torrent.nextDownloads": "Opens Downloads when ready.",
+  "games.torrent.starting": "Starting download…",
+  "games.torrent.folderCount": "{count} files",
+};

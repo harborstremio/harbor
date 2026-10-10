@@ -147,7 +147,7 @@ function LetterboxdPanelInner({ meta, imdbId }: { meta: Meta; imdbId: string | n
 
   if (unavailable) {
     return (
-      <section className="flex items-center gap-2 rounded-2xl border border-edge-soft bg-elevated/30 px-5 py-4 text-[13px] text-ink-subtle">
+      <section className="flex items-center gap-2 rounded-2xl bg-elevated px-5 py-4 text-[13px] text-ink-subtle">
         <Star size={14} className="text-ink-subtle" />
         {t("Letterboxd unavailable right now.")}
       </section>
@@ -206,7 +206,7 @@ function LetterboxdPanelInner({ meta, imdbId }: { meta: Meta; imdbId: string | n
   };
 
   return (
-    <section className="flex flex-col gap-3 rounded-2xl border border-edge-soft bg-elevated/40 p-5">
+    <section className="flex flex-col gap-3 rounded-2xl bg-elevated p-5">
       <div className="flex items-center justify-between gap-3">
         <div className="flex items-center gap-2">
           <Star size={16} className="text-amber-300" fill="currentColor" />
@@ -215,7 +215,7 @@ function LetterboxdPanelInner({ meta, imdbId }: { meta: Meta; imdbId: string | n
         {filmUrl && (
           <button
             onClick={() => openUrl(filmUrl)}
-            className="flex items-center gap-1.5 rounded-lg border border-edge-soft px-3 py-1.5 text-[12.5px] font-medium text-ink-muted transition-colors hover:border-edge hover:text-ink"
+            className="flex items-center gap-1.5 rounded-lg bg-white/[0.06] px-3 py-1.5 text-[12.5px] font-medium text-ink-muted transition-colors hover:bg-white/[0.10] hover:text-ink"
           >
             {t("Open on Letterboxd")}
             <ExternalLink size={11} strokeWidth={2.2} />
@@ -283,7 +283,7 @@ function LetterboxdPanelInner({ meta, imdbId }: { meta: Meta; imdbId: string | n
 
           {/* In-app star rating picker */}
           {showRater && (
-            <div className="flex flex-col gap-4 rounded-xl border border-edge-soft bg-canvas/60 p-5">
+            <div className="flex flex-col gap-4 rounded-xl bg-canvas p-5">
               <div className="flex items-center justify-between">
                 <span className="text-[13px] font-medium text-ink">{t("Rate this film")}</span>
                 <button
@@ -394,7 +394,7 @@ function Badge({
 }) {
   const toneClass =
     tone === "active"
-      ? "border-emerald-400/30 bg-emerald-400/10 text-emerald-200"
+      ? "border-success/30 bg-success/10 text-success"
       : tone === "liked"
         ? "border-rose-400/30 bg-rose-400/10 text-rose-200"
         : tone === "rated"
@@ -423,7 +423,7 @@ function ActionButton({
 }) {
   const toneClass =
     tone === "active"
-      ? "border-emerald-400/30 bg-emerald-400/10 text-emerald-200 hover:bg-emerald-400/20"
+      ? "border-success/30 bg-success/10 text-success hover:bg-success/20"
       : tone === "liked"
         ? "border-rose-400/30 bg-rose-400/10 text-rose-200 hover:bg-rose-400/20"
         : tone === "rated"
