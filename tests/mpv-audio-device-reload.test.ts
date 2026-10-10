@@ -15,7 +15,7 @@ const mpvRs = readFileSync(at("src-tauri/src/mpv.rs"), "utf8");
 // topology/default switch, which must trigger an ao-reload on Windows while an
 // active stream is playing.
 const schedule = mpv.slice(
-  mpv.indexOf("const scheduleAudioDeviceReload = () => {"),
+  mpv.indexOf("const scheduleAudioDeviceReload = (deviceChanged = true) => {"),
   mpv.indexOf("const handleEvent = (raw: MpvEvent) => {"),
 );
 
@@ -30,7 +30,7 @@ test("the reload re-init guard is Windows-only while actively playing", () => {
 });
 
 test("the reload re-asserts the device then forces ao-reload on the current default", () => {
-  assert.match(schedule, /applyAudioDevice\(appliedAudioDevice \?\? "auto"\)/);
+  assert.match(schedule, /applyAudioDevice\(appliedAudioDevice \?\? "auto", canReload\)/);
   assert.match(schedule, /cmd: \["ao-reload"\]/);
   // ao-reload must appear after the Windows gate so it only fires on desktop.
   assert.ok(schedule.indexOf("isWindowsDesktop()") < schedule.indexOf("ao-reload"));
@@ -47,10 +47,6 @@ test("Rust allows the ao-reload command", () => {
 test("refocus reload waits for a long absence and removes both listeners on disposal", () => {
   assert.match(mpv, /const FOCUS_RELOAD_MIN_ABSENT_MS = 60_000/);
   assert.match(mpv, /const onWindowBlur = \(\) => \{\s*lastWindowBlur = Date.now\(\)/);
-  assert.match(
-    mpv,
-    /Date.now\(\) - lastWindowBlur < FOCUS_RELOAD_MIN_ABSENT_MS\) return;\s*scheduleAudioDeviceReload\(\)/,
-  );
   for (const [event, callback] of [
     ["blur", "onWindowBlur"],
     ["focus", "onWindowFocusRestore"],

@@ -130,6 +130,9 @@ export function mpvBridgeHarness(prefs = { volume: 0.35, muted: false }, options
   const frames = new Map<number, FrameRequestCallback>();
   let frameId = 0;
   const documentEvents = new EventTarget();
+  const timers = new Map<number, () => void>();
+  let timerId = 0;
+  let visibilityState: DocumentVisibilityState = "visible";
   new Function("require", "module", "exports", "window", "console", "document", compiled)(
     (id: string) => {
       if (!(id in dependencies)) throw new Error(`Unexpected dependency: ${id}`);
@@ -138,6 +141,11 @@ export function mpvBridgeHarness(prefs = { volume: 0.35, muted: false }, options
     module,
     module.exports,
     {
+      setTimeout: (callback: () => void) => {
+        timers.set(++timerId, callback);
+        return timerId;
+      },
+      clearTimeout: (id: number) => timers.delete(id),
       requestAnimationFrame: (callback: FrameRequestCallback) => {
         frames.set(++frameId, callback);
         return frameId;
@@ -152,6 +160,7 @@ export function mpvBridgeHarness(prefs = { volume: 0.35, muted: false }, options
     },
     { warn() {}, info() {} },
     {
+      get visibilityState() { return visibilityState; },
       addEventListener: documentEvents.addEventListener.bind(documentEvents),
       removeEventListener: documentEvents.removeEventListener.bind(documentEvents),
     },
@@ -166,6 +175,15 @@ export function mpvBridgeHarness(prefs = { volume: 0.35, muted: false }, options
     commands,
     errors,
     emitWindow(name: string) { windowEvents.dispatchEvent(new Event(name)); },
+    emitVisibility(state: DocumentVisibilityState) {
+      visibilityState = state;
+      documentEvents.dispatchEvent(new Event("visibilitychange"));
+    },
+    runTimers() {
+      const callbacks = [...timers.values()];
+      timers.clear();
+      callbacks.forEach((callback) => callback());
+    },
     runFrame() {
       const callbacks = [...frames.values()];
       frames.clear();
