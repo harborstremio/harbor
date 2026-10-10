@@ -31,11 +31,14 @@ function parseHits(md: string): WebHit[] {
   const seen = new Set<string>();
   const lines = md.split(/\r?\n/);
   const isHostname = (u: string) => {
-    try { return new URL(u).hostname; } catch { return ""; }
+    try {
+      return new URL(u).hostname;
+    } catch {
+      return "";
+    }
   };
 
-  const cleanText = (s: string) =>
-    s.replace(/\*+/g, "").replace(/\s+/g, " ").trim();
+  const cleanText = (s: string) => s.replace(/\*+/g, "").replace(/\s+/g, " ").trim();
 
   for (let i = 0; i < lines.length && hits.length < MAX_RESULTS; i++) {
     const line = lines[i];
@@ -64,7 +67,8 @@ function parseHits(md: string): WebHit[] {
     }
 
     const finalHost = isHostname(url);
-    if (!finalHost || /duckduckgo\.com|external-content\.duckduckgo\.com/i.test(finalHost)) continue;
+    if (!finalHost || /duckduckgo\.com|external-content\.duckduckgo\.com/i.test(finalHost))
+      continue;
     if (!/^https?:\/\//.test(url)) continue;
     if (seen.has(url)) continue;
 
@@ -88,10 +92,10 @@ function parseHits(md: string): WebHit[] {
   return hits;
 }
 
-async function readerFetch(url: string, apiKey?: string): Promise<string> {
+async function readerFetch(url: string, apiKey?: string, signal?: AbortSignal): Promise<string> {
   const headers: Record<string, string> = { Accept: "text/plain" };
   if (apiKey) headers["Authorization"] = `Bearer ${apiKey.trim()}`;
-  const res = await fetch(READER + url, { headers });
+  const res = await fetch(READER + url, { headers, signal });
   if (!res.ok) {
     const body = await res.text().catch(() => "");
     throw new Error(`Jina error (${res.status}). ${body.slice(0, 120)}`);
@@ -99,16 +103,20 @@ async function readerFetch(url: string, apiKey?: string): Promise<string> {
   return res.text();
 }
 
-export async function webSearch(query: string, apiKey?: string): Promise<WebHit[]> {
+export async function webSearch(
+  query: string,
+  apiKey?: string,
+  signal?: AbortSignal,
+): Promise<WebHit[]> {
   const q = query.trim();
   if (!q) return [];
   const upstream = `https://html.duckduckgo.com/html/?q=${encodeURIComponent(q)}`;
-  const md = await readerFetch(upstream, apiKey);
+  const md = await readerFetch(upstream, apiKey, signal);
   return parseHits(md);
 }
 
-export async function readUrl(url: string, apiKey?: string): Promise<string> {
-  return readerFetch(url, apiKey);
+export async function readUrl(url: string, apiKey?: string, signal?: AbortSignal): Promise<string> {
+  return readerFetch(url, apiKey, signal);
 }
 
 export function hitsToContext(hits: WebHit[]): string {
@@ -122,25 +130,31 @@ export function hitsToContext(hits: WebHit[]): string {
 export async function enrichWithContent(
   query: string,
   apiKey?: string,
+  signal?: AbortSignal,
 ): Promise<{ hits: WebHit[]; context: string }> {
-  const hits = await webSearch(query, apiKey);
+  const hits = await webSearch(query, apiKey, signal);
   if (hits.length === 0) return { hits: [], context: "" };
 
   const priority = (u: string) =>
-    /wikipedia\.org|themoviedb\.org|rottentomatoes\.com|letterboxd\.com|metacritic\.com/i.test(u) ? 1 : 0;
+    /wikipedia\.org|themoviedb\.org|rottentomatoes\.com|letterboxd\.com|metacritic\.com/i.test(u)
+      ? 1
+      : 0;
 
   const promoted = [...hits].sort((a, b) => priority(b.url) - priority(a.url));
   const toFetch = promoted
     .slice(0, 3)
     .concat(
-      promoted.slice(3).filter((h) => priority(h.url) > 0).slice(0, 1),
+      promoted
+        .slice(3)
+        .filter((h) => priority(h.url) > 0)
+        .slice(0, 1),
     )
     .slice(0, 4);
 
   const enriched = await Promise.all(
     toFetch.map(async (h) => {
       try {
-        const md = await readUrl(h.url, apiKey);
+        const md = await readUrl(h.url, apiKey, signal);
         const body = md.split(/\r?\n/).slice(0, 60).join("\n");
         const cleaned = body
           .replace(/!\[[^\]]*\]\([^)]*\)/g, "")
@@ -150,6 +164,7 @@ export async function enrichWithContent(
           .trim();
         return { ...h, snippet: cleaned };
       } catch {
+        signal?.throwIfAborted();
         return h;
       }
     }),

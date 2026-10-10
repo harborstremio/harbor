@@ -434,6 +434,10 @@ export type Settings = {
   songIdProvider: "audd" | "ai";
   songIdAiKey: string;
   songIdAiModel: string;
+  aiChatEnabled: boolean;
+  geminiApiKey: string;
+  geminiAiModel: string;
+  tavilyApiKey: string;
   aiSearchKey: string;
   steamSearchShortcut: boolean;
   gameAgeRatingAgency: "ESRB" | "PEGI";

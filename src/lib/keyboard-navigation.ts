@@ -70,7 +70,7 @@ const BACK_KEYS = new Set(["Escape", "Esc", "BrowserBack", "GoBack", "Back"]);
 const MODAL_SELECTOR = '[role="dialog"], [aria-modal="true"]';
 const LOCAL_KEYBOARD_SELECTOR = [
   // Embedded surfaces handle their own keys; shadow DOM retargets events to their host.
-  '[data-local-keyboard]',
+  "[data-local-keyboard]",
   '[role="listbox"]',
   '[role="menu"]',
   '[role="grid"]',
@@ -713,10 +713,7 @@ function scrollNavItemIntoView(el: HTMLElement, mode: "center" | "nearest" = "ce
 function getSearchFocusVisual(el: HTMLElement): HTMLElement | null {
   if (!isSearchLikeField(el)) return null;
 
-  return (
-    el.closest<HTMLElement>("label, [data-tv-text-field], [data-tv-focus-container]") ??
-    el
-  );
+  return el.closest<HTMLElement>("label, [data-tv-text-field], [data-tv-focus-container]") ?? el;
 }
 
 function clearSearchVisualFocus() {
@@ -756,7 +753,12 @@ function focusElement(el: HTMLElement, scroll: "center" | "nearest" | "none" = "
     document.getElementById("root")?.setAttribute("data-card-focus-active", "");
   }
 
-  if (navEnabled && inputModality !== "pointer" && isSearchLikeField(el) && activeSearchEditEl !== el) {
+  if (
+    navEnabled &&
+    inputModality !== "pointer" &&
+    isSearchLikeField(el) &&
+    activeSearchEditEl !== el
+  ) {
     // Navigation focus is not editing mode.
     el.removeAttribute("data-search-editing");
     setSearchNavMode(el);
@@ -1296,6 +1298,45 @@ export function useKeyboardNavigation(options: TVNavigationOptions = {}) {
 
       const target = e.target instanceof HTMLElement ? e.target : null;
       const active = document.activeElement instanceof HTMLElement ? document.activeElement : null;
+
+      // Modal tools such as chat own their controls; global TV arrows and Enter
+      // must not move focus or activate navigation behind the open dialog.
+      const navigationIsolated =
+        getTopFocusScope()?.closest<HTMLElement>("[data-navigation-isolated]") ??
+        target?.closest<HTMLElement>("[data-navigation-isolated]");
+      if (navigationIsolated) {
+        if (e.key === "Tab") {
+          const focusable = Array.from(
+            navigationIsolated.querySelectorAll<HTMLElement>(
+              'a[href], button:not([disabled]), input:not([disabled]), select:not([disabled]), textarea:not([disabled]), [tabindex]:not([tabindex="-1"])',
+            ),
+          ).filter((el) => el.getClientRects().length > 0);
+          if (focusable.length > 0) {
+            const first = focusable[0];
+            const last = focusable[focusable.length - 1];
+            if (e.shiftKey && (active === first || !navigationIsolated.contains(active))) {
+              e.preventDefault();
+              last.focus();
+            } else if (!e.shiftKey && (active === last || !navigationIsolated.contains(active))) {
+              e.preventDefault();
+              first.focus();
+            }
+          }
+          return;
+        }
+        if (target instanceof HTMLSelectElement && !isBackKey(e)) return;
+        if (isBackKey(e) && activeSearchEditEl !== active) {
+          const close = navigationIsolated.querySelector<HTMLElement>(
+            "[data-navigation-isolated-close]",
+          );
+          if (close) {
+            e.preventDefault();
+            e.stopPropagation();
+            close.click();
+          }
+          return;
+        }
+      }
 
       const activeIsSearch = isSearchLikeField(active);
       const isEditingSearch = !!activeSearchEditEl && activeSearchEditEl === active;

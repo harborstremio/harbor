@@ -31,7 +31,7 @@ export function ProviderLogo({
   size = 19,
   round = false,
 }: {
-  provider: AiProvider;
+  provider: AiProvider | "openrouter";
   size?: number;
   round?: boolean;
 }) {

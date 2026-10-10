@@ -4,6 +4,7 @@ import {
 } from "@/lib/gamepad/cursor";
 import { DEFAULT_THEME } from "@/lib/theme";
 import { DEFAULT_FULLSCREEN_CLOCK_SIZE_PX } from "@/lib/local-time";
+import { DEFAULT_GEMINI_CHAT_MODEL } from "@/lib/ai-chat-models";
 import { AUTO_DISPLAY } from "@/lib/monitors";
 import type { Settings } from "./types";
 
@@ -352,6 +353,10 @@ export const DEFAULT: Settings = {
   songIdProvider: "audd",
   songIdAiKey: "",
   songIdAiModel: "gemini-3.6-flash",
+  aiChatEnabled: true,
+  geminiApiKey: "",
+  geminiAiModel: DEFAULT_GEMINI_CHAT_MODEL,
+  tavilyApiKey: "",
   aiSearchKey: "",
   steamSearchShortcut: true,
   gameAgeRatingAgency: "ESRB",
