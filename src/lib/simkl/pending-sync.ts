@@ -34,6 +34,18 @@ export type PendingWatch = {
 
 export type FlushDeps = {
   hasSession: () => boolean;
+  /** True when Simkl already lists the item as watched — the entry needs no write. */
+  isWatched?: (
+    metaId: string,
+    episode: PendingEpisode | undefined,
+    imdb?: string,
+  ) => Promise<boolean>;
+  /** True when Simkl still holds an active playback session for the item. */
+  hasActivePlayback?: (
+    metaId: string,
+    episode: PendingEpisode | undefined,
+    imdb?: string,
+  ) => Promise<boolean>;
   stopScrobble: (metaId: string, episode: PendingEpisode | undefined) => Promise<boolean>;
   recordWatched: (
     metaId: string,
@@ -130,6 +142,7 @@ export function recordPendingWatch(
   };
   const rest = load().filter((p) => keyOf(p) !== keyOf(next));
   save([next, ...rest]);
+  scheduleSoon();
 }
 
 function clearPending(key: string): void {
@@ -138,9 +151,63 @@ function clearPending(key: string): void {
 
 let flushDeps: FlushDeps | null = null;
 
-export async function flushPendingWatches(
+// A queued watch must not wait for the next app launch. Retry shortly after a
+// failure (past Simkl's 20s per-user scrobble lock), then on a slow clock.
+const RETRY_INTERVAL_MS = 60_000;
+const RETRY_SOON_MS = 20_000;
+
+let retryTimer: number | null = null;
+let soonTimer: number | null = null;
+let flushing: Promise<{ flushed: number; remaining: number }> | null = null;
+
+function hasWork(): boolean {
+  if (!flushDeps || !flushDeps.hasSession()) return false;
+  if (typeof navigator !== "undefined" && navigator.onLine === false) return false;
+  return load().length > 0;
+}
+
+function attemptFlush(): void {
+  if (!hasWork()) return;
+  void flushPendingWatches().catch(() => {});
+}
+
+/** Give a freshly queued watch a quick second chance before the slow clock. */
+function scheduleSoon(): void {
+  if (typeof window === "undefined") return;
+  if (soonTimer != null) window.clearTimeout(soonTimer);
+  soonTimer = window.setTimeout(() => {
+    soonTimer = null;
+    attemptFlush();
+  }, RETRY_SOON_MS);
+}
+
+function startRetryTimer(): void {
+  if (typeof window === "undefined" || retryTimer != null) return;
+  retryTimer = window.setInterval(attemptFlush, RETRY_INTERVAL_MS);
+}
+
+function stopRetryTimer(): void {
+  if (retryTimer != null) {
+    window.clearInterval(retryTimer);
+    retryTimer = null;
+  }
+  if (soonTimer != null) {
+    window.clearTimeout(soonTimer);
+    soonTimer = null;
+  }
+}
+
+export function flushPendingWatches(
   deps?: FlushDeps,
 ): Promise<{ flushed: number; remaining: number }> {
+  if (flushing) return flushing;
+  flushing = replayPending(deps).finally(() => {
+    flushing = null;
+  });
+  return flushing;
+}
+
+async function replayPending(deps?: FlushDeps): Promise<{ flushed: number; remaining: number }> {
   const d = deps ?? flushDeps;
   if (!d || !d.hasSession()) return { flushed: 0, remaining: load().length };
   const owner = storageKey();
@@ -150,12 +217,28 @@ export async function flushPendingWatches(
   for (const p of load()) {
     if (!stillOwned()) break;
     const key = keyOf(p);
+    // An item Simkl already lists as watched needs no write; replaying one
+    // would only re-mark an entry the user may have removed from their history.
+    try {
+      if (d.isWatched && (await d.isWatched(p.metaId, p.episode, p.imdb))) {
+        if (!stillOwned()) break;
+        flushed += 1;
+        clearPending(key);
+        continue;
+      }
+    } catch {
+      /* An unavailable lookup falls through to the write path. */
+    }
     let stopOk = false;
     let histOk = false;
     try {
-      // Replays the terminal stop first: this is what clears Simkl's
-      // "actively playing" state. The history write alone does not.
-      stopOk = await d.stopScrobble(p.metaId, p.episode);
+      // The terminal stop clears Simkl's "actively playing" state, which the
+      // history write alone does not. Gated on a live session when the caller
+      // can tell: without one it would only re-mark an unmarked item.
+      if (!d.hasActivePlayback || (await d.hasActivePlayback(p.metaId, p.episode, p.imdb))) {
+        if (!stillOwned()) break;
+        stopOk = await d.stopScrobble(p.metaId, p.episode);
+      }
     } catch {
       stopOk = false;
     }
@@ -165,7 +248,11 @@ export async function flushPendingWatches(
     } catch {
       histOk = false;
     }
-    if (stopOk && histOk && stillOwned()) {
+    // Either confirmed write means Simkl holds the watch: the stop is posted at
+    // full progress, and the history write accepts the already-watched no-op.
+    // Requiring both would loop forever whenever one lands and the other
+    // reports the item as already present.
+    if ((stopOk || histOk) && stillOwned()) {
       flushed += 1;
       clearPending(key);
     }
@@ -173,22 +260,19 @@ export async function flushPendingWatches(
   return { flushed, remaining: load().length };
 }
 
-let onlineArmed = false;
-
-export function armOnlineFlush(deps: FlushDeps): () => void {
+/**
+ * Arms the pending-watch replay: a failed write is retried on a timer and when
+ * the browser regains its connection, instead of waiting for a relaunch.
+ */
+export function armPendingFlush(deps: FlushDeps): () => void {
   flushDeps = deps;
   if (typeof window === "undefined") return () => {};
-  const onOnline = () => {
-    void flushPendingWatches().catch(() => {});
-  };
-  if (!onlineArmed) {
-    onlineArmed = true;
-    window.addEventListener("online", onOnline);
-    return () => {
-      onlineArmed = false;
-      window.removeEventListener("online", onOnline);
-    };
-  }
+  const onOnline = () => attemptFlush();
   window.addEventListener("online", onOnline);
-  return () => window.removeEventListener("online", onOnline);
+  startRetryTimer();
+  attemptFlush();
+  return () => {
+    window.removeEventListener("online", onOnline);
+    stopRetryTimer();
+  };
 }

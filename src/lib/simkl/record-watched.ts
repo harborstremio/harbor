@@ -3,7 +3,7 @@ import { getSession } from "./session";
 import { resolveForMeta } from "@/lib/tracker-resolve";
 import { resolveSimklEpisodeTarget, stremioIdToSimklTarget } from "./ids";
 import { addToHistory, markEpisodesWatched } from "./history";
-import type { ScrobbleInfo } from "./scrobble-body";
+import { animeIdentity, type ScrobbleInfo } from "./scrobble-body";
 import type { PlayerSrc } from "@/lib/view";
 
 const ANIME_ID = /^(kitsu|mal|anilist|anidb):/;
@@ -25,6 +25,12 @@ export async function recordWatchedFallback(
   const session = getSession();
   const owned = () => session != null && getSession() === session && activeProfileId() === profile;
   if (!owned()) return false;
+  // The episode knows which anime entry aired it; that is the entry Simkl can
+  // match, not the row's umbrella IMDb show.
+  const anime = animeIdentity(episode);
+  if (anime?.number != null) {
+    if (await markEpisodesWatched({ [anime.scheme]: anime.id }, 1, [anime.number])) return true;
+  }
   const r = stremioIdToSimklTarget(metaId, episode);
   const t = r.ok
     ? r.target

@@ -9,6 +9,25 @@ import type { LibraryItem } from "../src/lib/stremio";
 
 const read = (path: string) => readFileSync(new URL(`../${path}`, import.meta.url), "utf8");
 
+// `simkl/playback.ts` reads the shared id helpers; the fetch harness must
+// provide them, loaded the same way the dedicated simkl tests do.
+const simklIds = (() => {
+  const code = ts.transpileModule(read("src/lib/simkl/ids.ts"), {
+    compilerOptions: { target: ts.ScriptTarget.ES2022, module: ts.ModuleKind.CommonJS },
+  }).outputText;
+  const module = { exports: {} as Record<string, unknown> };
+  new Function("require", "module", "exports", code)(
+    () => ({
+      anidbToMal: async () => null,
+      anilistToMal: async () => null,
+      kitsuToMal: async () => null,
+    }),
+    module,
+    module.exports,
+  );
+  return module.exports;
+})();
+
 // Run the real dismissal module with isolated storage and no cloud/network writes.
 function harness(seed?: string, onChange = () => {}) {
   let privateProfile: string | null = null;
@@ -217,6 +236,7 @@ test("external backfills preserve dismissals and save true remote progress only 
     const remoteTime = Date.parse("2026-09-13T10:00:00Z");
     const mocks: Record<string, unknown> = {
       "./session": { getSession: () => session },
+      "./ids": simklIds,
       "./client": {
         [`${provider}Request`]: async () => [
           {
@@ -231,6 +251,12 @@ test("external backfills preserve dismissals and save true remote progress only 
         readResumeEntry: () => existing,
         saveResumeMs: (...args: unknown[]) => writes.push(args),
         saveResumeBatch: (entries: any[]) => entries.forEach((e) => writes.push([e.id, e.ms, e.season, e.episode, undefined, e.pct, e.source])),
+      },
+      "@/lib/providers/anizip": {
+        aniZipByMal: async () => null,
+        aniZipByKitsu: async () => null,
+        aniZipByAnilist: async () => null,
+        aniZipByAnidb: async () => null,
       },
     };
     const module = { exports: {} as Record<string, () => Promise<LibraryItem[]>> };

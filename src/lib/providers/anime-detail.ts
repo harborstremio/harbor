@@ -9,13 +9,18 @@ import {
 } from "@/lib/providers/anime-episode-build";
 import { animeKitsuMeta } from "@/lib/providers/anime-kitsu-addon";
 import {
+  applyAnidbSeasonWindow,
   kitsuToTvdb,
   kitsuToImdb,
+  kitsuToMal,
   externalToKitsu,
   kitsuToAnilist,
-  kitsuToAnidb,
-  loadAnidbMaps,
 } from "@/lib/providers/anime-mapping";
+import {
+  applyMalEpisodeTitles,
+  episodesMissingTitle,
+} from "@/lib/providers/episode-placeholder";
+import { malEpisodeTitles } from "@/lib/providers/mal-episodes";
 import { anilistFranchise, type AnilistFranchiseNode } from "@/lib/anilist/relations";
 import { anilistArtById, anilistRecommendations } from "@/lib/anilist/browse";
 import { enrichEpisodes } from "@/lib/providers/anime-episode-enrich";
@@ -471,39 +476,36 @@ export async function animeDetails(
       tmdbEnRaw = en;
     }
   }
-  mergeAniZipEpisodes(episodes, aniZip, { lang: localized ? iso1 : undefined });
-  mergeTvdbEpisodes(episodes, tvdbEpsRaw?.loc ?? null, { lang: localized ? iso1 : undefined });
-  mergeTmdbEpisodes(episodes, tmdbEpsRaw, { lang: localized ? iso1 : undefined });
+  mergeAniZipEpisodes(episodes, aniZip, { lang: localized ? iso1 : undefined, targetLang: iso1 });
+  // AniZip often carries a new season's ids before its episode records, and
+  // the addon labels the cour "season 1" — the window must land before the
+  // TVDB merge or the cour's identity-less rows match franchise season 1.
+  await applyAnidbSeasonWindow(episodes, kitsuId);
+  mergeTvdbEpisodes(episodes, tvdbEpsRaw?.loc ?? null, {
+    lang: localized ? iso1 : undefined,
+    targetLang: iso1,
+  });
+  mergeTmdbEpisodes(episodes, tmdbEpsRaw, { lang: localized ? iso1 : undefined, targetLang: iso1 });
   // Fall back to English titles/overviews when the localized translation is missing (providers
-  // otherwise fall back to the original, e.g. Japanese for anime).
+  // otherwise fall back to the original, e.g. Japanese for anime). `targetLang` keeps this pass
+  // from overwriting a title the user already has in their own language.
   if (localized) {
-    if (tvdbEpsRaw?.en) mergeTvdbEpisodes(episodes, tvdbEpsRaw.en);
-    if (tmdbEnRaw) mergeTmdbEpisodes(episodes, tmdbEnRaw);
+    if (tvdbEpsRaw?.en) mergeTvdbEpisodes(episodes, tvdbEpsRaw.en, { targetLang: iso1 });
+    if (tmdbEnRaw) mergeTmdbEpisodes(episodes, tmdbEnRaw, { targetLang: iso1 });
+  }
+  // Last resort: MAL names episodes the other providers leave unnamed (it
+  // carries English and romaji early). Only rows with no real title are filled.
+  if (episodesMissingTitle(episodes)) {
+    const malId = aniZip?.mappings?.mal_id ?? (await kitsuToMal(kitsuId).catch(() => null));
+    if (malId != null) {
+      const malEps = await malEpisodeTitles(malId).catch(() => null);
+      applyMalEpisodeTitles(episodes, malEps);
+    }
   }
 
   // AniZip has no mapping for not-yet-indexed cours (e.g. Bleach TYBW cour 4).
-  // Fall back to the AniDB id (ARM) plus the anime-lists season window to
-  // attach provider season/episode coords, so stream queries carry the season.
-  if (!aniZip) {
-    const anidb = await kitsuToAnidb(kitsuId).catch(() => null);
-    if (anidb != null) {
-      const maps = await loadAnidbMaps().catch(() => null);
-      const tvdbId = maps?.tvdb[String(anidb)];
-      const win =
-        tvdbId != null
-          ? maps?.byTvdb?.[String(tvdbId)]?.find((w) => w.anidbId === anidb)
-          : undefined;
-      if (win && typeof win.season === "number") {
-        const imdbId = maps?.imdb[String(anidb)] ?? null;
-        for (const ep of episodes) {
-          if (ep.number == null) continue;
-          if (ep.imdbSeason == null) ep.imdbSeason = win.season;
-          if (ep.imdbEpisode == null) ep.imdbEpisode = ep.number + win.offset;
-          if (imdbId && !ep.imdbId) ep.imdbId = imdbId;
-        }
-      }
-    }
-  }
+  // applyAnidbSeasonWindow above already attached the AniDB id (ARM) plus the
+  // anime-lists season window to any episode AniZip left without coordinates.
 
   let seriesImdb = aniZip?.mappings?.imdb_id ?? episodes.find((e) => e.imdbId)?.imdbId ?? null;
   if (!seriesImdb) seriesImdb = await kitsuToImdb(kitsuId).catch(() => null);

@@ -18,10 +18,14 @@ function fixture(initial: Record<string, string> = {}) {
       metaCalls.push(id);
       return metadata.get(id) ?? null;
     } },
-    "@/lib/providers/anime-mapping": { imdbToKitsu: async (id: string) => {
-      mappingCalls.push(id);
-      return mapping.get(id) ?? null;
-    } },
+    "@/lib/providers/anime-mapping": {
+      imdbToKitsu: async (id: string) => {
+        mappingCalls.push(id);
+        return mapping.get(id) ?? null;
+      },
+      tmdbTvToKitsu: async () => null,
+    },
+    "@/lib/providers/kitsu": { kitsuAnime: async () => null },
     "@/lib/storage-recovery": { setItemWithRecovery: (key: string, value: string) => storage.set(key, value) },
   };
   const compiled = ts.transpileModule(readFileSync(new URL("../src/lib/anime-detect.ts", import.meta.url), "utf8"), {

@@ -5,7 +5,12 @@ import { readFileSync } from "node:fs";
 // @ts-expect-error Node test types are outside the browser tsconfig.
 import test from "node:test";
 import ts from "typescript";
-import { mergeTmdbEpisodes, mergeTvdbEpisodes } from "../src/lib/providers/anime-episode-build.ts";
+import {
+  buildKitsuEpisodes,
+  mergeAniZipEpisodes,
+  mergeTmdbEpisodes,
+  mergeTvdbEpisodes,
+} from "../src/lib/providers/anime-episode-build.ts";
 import type { KitsuEpisode } from "../src/lib/providers/kitsu.ts";
 
 function episode(overrides: Partial<KitsuEpisode> = {}): KitsuEpisode {
@@ -38,8 +43,25 @@ function enrichment({ videos = [], ratings = new Map(), thumbs = null }: {
     "@/lib/anime-fillers": { fillerEpisodes: async () => new Set() },
     "@/lib/providers/anime-tvdb-thumbs": { fetchTvdbThumbs: async () => thumbs },
     "@/lib/cinemeta": { meta: async () => ({ videos }) },
+    "@/lib/providers/tmdb/tmdb-details": { tmdbSeasonEpisodes: async () => [] },
+    "@/lib/providers/tmdb/tmdb-image-rungs": { STILL_HD_RUNG: "w780", tmdbStillUrl: () => undefined },
+    "@/lib/dates": load("src/lib/dates.ts", {}),
   }).enrichEpisodes;
 }
+
+test("a newer AniZip entry's lowercase air date still reaches the episode", () => {
+  const ep = episode({ number: 2, airdate: null });
+  mergeAniZipEpisodes([ep], {
+    mappings: { kitsu_id: 50404 },
+    episodes: { "2": { episode: "2", airdate: "2026-10-03" } },
+  } as any);
+  assert.equal(ep.airdate, "2026-10-03");
+});
+
+test("newer AniZip lowercase air dates are read by the episode list builder", () => {
+  const src = readFileSync(new URL("../src/lib/series-episodes.ts", import.meta.url), "utf8");
+  assert.match(src, /m\.airDateUtc \?\? m\.airDate \?\? m\.airdate/);
+});
 
 test("TVDB does not replace a mapped later cour with season-one metadata", () => {
   const ep = episode({ thumbnail: "cour-three.jpg" });
@@ -120,6 +142,86 @@ test("ratings cannot fall back to episode one of another season", async () => {
   await enrichment({ ratings: new Map([["1:1", 9.5]]) })([ep], {}, 1, "tt1");
   assert.equal(ep.rating, undefined);
   assert.equal(ep.ratingIsImdb, undefined);
+});
+
+test("unaired episodes receive no IMDb rating even when the map carries their key", async () => {
+  const ep = episode({ imdbSeason: 2, imdbEpisode: 2, absoluteNumber: 172, airdate: "2999-10-10" });
+  await enrichment({ ratings: new Map([["2:2", 8.2]]) })([ep], {}, 1, "tt1");
+  assert.equal(ep.rating, undefined);
+  assert.equal(ep.ratingIsImdb, undefined);
+});
+
+test("undated episodes beyond the airing frontier receive no borrowed rating", async () => {
+  const aired = episode({ id: 1, number: 1, imdbSeason: 2, imdbEpisode: 1, airdate: "2026-10-03" });
+  const upcoming = episode({
+    id: 2, number: 2, imdbSeason: 2, imdbEpisode: 2, airdate: "2999-10-10",
+  });
+  const undated = episode({
+    id: 5, number: 5, imdbSeason: undefined, imdbEpisode: undefined, title: "Episode 5",
+  });
+  await enrichment({ ratings: new Map([["2:1", 7.8], ["1:5", 7.9]]) })(
+    [aired, upcoming, undated], {}, 1, "tt1",
+  );
+  assert.equal(aired.rating, 7.8);
+  assert.equal(upcoming.rating, undefined);
+  assert.equal(undated.rating, undefined);
+  assert.equal(undated.ratingIsImdb, undefined);
+});
+
+test("undated episodes beyond the airing frontier are not given another season's thumbnail", async () => {
+  const aired = episode({ id: 1, number: 1, imdbSeason: 2, imdbEpisode: 1, airdate: "2026-10-03" });
+  const upcoming = episode({
+    id: 2, number: 2, imdbSeason: 2, imdbEpisode: 2, airdate: "2999-10-10",
+  });
+  const undated = episode({
+    id: 5, number: 5, imdbSeason: undefined, imdbEpisode: undefined, title: "Episode 5",
+  });
+  await enrichment({ videos: [{ season: 1, episode: 5, thumbnail: "s1e5.jpg" }] })(
+    [aired, upcoming, undated], {}, 1, "tt1",
+  );
+  assert.equal(undated.thumbnail, null);
+});
+
+test("a list with no aired anchor still enriches its undated episodes", async () => {
+  const ep = episode({ imdbSeason: undefined, imdbEpisode: undefined });
+  await enrichment({ ratings: new Map([["1:1", 7.3]]) })([ep], {}, 1, "tt1");
+  assert.equal(ep.rating, 7.3);
+  assert.equal(ep.ratingIsImdb, true);
+});
+
+test("the Kitsu addon's shared season-start released date does not mark unaired episodes aired", () => {
+  const raw = [
+    episode({ id: 11, number: 1, airdate: "2026-10-03" }),
+    episode({ id: 12, number: 2, airdate: null }),
+  ];
+  const out = buildKitsuEpisodes({
+    videos: [
+      { episode: 1, season: 1, released: "2026-10-03T00:00:00.000Z" },
+      { episode: 2, season: 1, released: "2026-10-03T00:00:00.000Z" },
+    ],
+  } as any, raw);
+  assert.equal(out[0].airdate, "2026-10-03");
+  assert.equal(out[1].airdate, null);
+});
+
+test("distinct addon released dates still win over the Kitsu raw air date", () => {
+  const out = buildKitsuEpisodes({
+    videos: [
+      { episode: 1, season: 1, released: "2026-10-03T00:00:00.000Z" },
+      { episode: 2, season: 1, released: "2026-10-10T00:00:00.000Z" },
+    ],
+  } as any, []);
+  assert.equal(out[0].airdate, "2026-10-03T00:00:00.000Z");
+  assert.equal(out[1].airdate, "2026-10-10T00:00:00.000Z");
+});
+
+test("an unaired episode is not given another season's thumbnail", async () => {
+  const ep = episode({ imdbSeason: 2, imdbEpisode: 2, absoluteNumber: 172, airdate: "2999-10-10" });
+  await enrichment({
+    videos: [{ season: 1, episode: 2, thumbnail: "s1e2.jpg" }],
+    thumbs: { bySeasonEpisode: new Map([["1:2", "s1e2.jpg"]]), byAbsolute: new Map([[2, "s1e2.jpg"]]) },
+  })([ep], { tvdbKey: "fixture" }, 1, "tt1");
+  assert.equal(ep.thumbnail, null);
 });
 
 test("exact provider matches and known absolute fallback remain usable", async () => {

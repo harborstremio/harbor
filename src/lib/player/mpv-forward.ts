@@ -135,13 +135,13 @@ export function createForwardingMpvBridge(): ForwardingBridge {
     },
     setAnime4kShaders(shaders) {
       const sep = isWindowsDesktop() ? ";" : ":";
-      void set(
+      set(
         "glsl-shaders",
         shaders
           .filter(Boolean)
           .map((s) => s.replace(/\\/g, "/"))
           .join(sep),
-      );
+      ).catch((e) => console.warn("[shaders] glsl-shaders apply failed", e));
     },
     setShaderProps(props) {
       for (const [name, value] of Object.entries(props)) void set(name, value);

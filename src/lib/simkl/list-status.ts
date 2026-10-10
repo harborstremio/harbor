@@ -1,8 +1,9 @@
 import { activeProfileId } from "@/lib/active-profile-id";
 import { currentActivitiesAll } from "./activities/gate";
 import { simklRequest } from "./client";
-import { simklTargetIds } from "./ids";
+import { simklEntryIdKeys, simklEpisodeWatchKeys, simklLookupIds, simklTargetIds } from "./ids";
 import { getSession, subscribeSession } from "./session";
+import type { SimklEpisodeCoords } from "./ids";
 import type { SimklTarget } from "./types";
 import type { LibraryItem } from "@/lib/stremio";
 
@@ -64,16 +65,7 @@ function isStatus(s: string | undefined): s is WatchlistStatus {
 }
 
 function idKeys(ids: RawIds | undefined, kind: "movie" | "show"): string[] {
-  if (!ids) return [];
-  const keys: string[] = [];
-  if (ids.imdb) keys.push(ids.imdb);
-  if (ids.tmdb != null)
-    keys.push(kind === "movie" ? `tmdb:movie:${ids.tmdb}` : `tmdb:tv:${ids.tmdb}`);
-  if (ids.mal != null) keys.push(`mal:${ids.mal}`);
-  if (ids.kitsu != null) keys.push(`kitsu:${ids.kitsu}`);
-  if (ids.anilist != null) keys.push(`anilist:${ids.anilist}`);
-  if (ids.anidb != null) keys.push(`anidb:${ids.anidb}`);
-  return keys;
+  return simklEntryIdKeys(ids, kind);
 }
 
 function targetKeys(target: SimklTarget): string[] {
@@ -286,6 +278,21 @@ export function simklWatchedForId(
     if (set) return set;
   }
   return new Set();
+}
+
+// True when Simkl's own library data already lists the episode as watched (or
+// the show as completed), so a queued watch needs no further write.
+export async function isSimklEpisodeWatched(
+  metaId: string,
+  episode: SimklEpisodeCoords | undefined,
+  imdb?: string,
+): Promise<boolean> {
+  if (!episode?.episode) return false;
+  const lookup = simklLookupIds(metaId, imdb);
+  const data = await loadSimklProgress();
+  const set = simklWatchedForId(data.watched, ...lookup);
+  if (set.size > 0) return simklEpisodeWatchKeys(episode).some((key) => set.has(key));
+  return lookup.some((id) => statusForId(data.statuses, id) === "completed");
 }
 
 export async function setSimklStatus(

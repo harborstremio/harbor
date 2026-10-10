@@ -10,7 +10,7 @@ import type { Meta } from "@/lib/cinemeta";
 import { useSearch } from "@/lib/search-context";
 import { useView } from "@/lib/view";
 import { MOVIE_GENRES, TV_GENRES } from "@/lib/feed/tags";
-import { metaLooksAnime } from "@/lib/anime-detect";
+import { metaLooksAnime, warmAnimeResolution } from "@/lib/anime-detect";
 import { AnimeRow } from "./anime-row";
 import { AnimeRelations } from "./anime-relations";
 import { MangaRow } from "./manga-row";
@@ -88,6 +88,15 @@ export function SearchOverlay() {
     () => () => backdropGesture.current?.(),
     [open, closing, settings.dragAnywhere, fullscreen],
   );
+
+  // Warm the anime identity resolution for the top match only — one resolution
+  // per search, for the result the user is most likely to open.
+  const topMatchId = results?.topMatch?.meta.id ?? "";
+  useEffect(() => {
+    const top = results?.topMatch?.meta;
+    if (top) warmAnimeResolution(top);
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [topMatchId]);
 
   const close = () => {
     backdropGesture.current?.();

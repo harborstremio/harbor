@@ -679,7 +679,8 @@ export type Settings = {
   simklUpNextRailEnabled: boolean;
   simklTrendingRailEnabled: boolean;
   simklScrobbleEnabled: boolean;
-  simklAnimeTitleLanguage: "english" | "romaji" | "native";
+  /** Preferred language for anime titles across the app (cards, picker, presence). */
+  animeTitleLanguage: "english" | "romaji" | "native";
   weekStartsMonday: boolean;
   calendarPosterSize: CalendarPosterSize;
   customCalendar: {

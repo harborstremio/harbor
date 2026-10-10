@@ -3,7 +3,7 @@ import { useEffect, useRef, useState } from "react";
 import { useT } from "@/lib/i18n";
 import { tvFocus } from "@/lib/keyboard-navigation";
 import { navOwnsFocus } from "@/lib/keyboard-navigation/geometry";
-import { anime4kDir, downloadAnime4k } from "@/lib/anime4k";
+import { anime4kDir, anime4kPackComplete, downloadAnime4k, repairAnime4kPack } from "@/lib/anime4k";
 import { BeforeAfter } from "../shaders-panel/before-after";
 import {
   anime4kChain,
@@ -43,6 +43,24 @@ export function Anime4kShaderList() {
     };
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, []);
+
+  useEffect(() => {
+    if (!folder) return;
+    let cancelled = false;
+    // A pack upgrade adds kernels the current chain can reference. `anime4k_dir`
+    // reports None while anything is missing, and `downloadAnime4k(false)`
+    // only fetches the absent files, so existing installs fill the gap without
+    // touching the folder setting or re-downloading what they already have.
+    anime4kPackComplete()
+      .then((complete) => {
+        if (cancelled || complete) return;
+        return repairAnime4kPack();
+      })
+      .catch(() => {});
+    return () => {
+      cancelled = true;
+    };
+  }, [folder]);
 
   useEffect(() => {
     if (!folder || !handOff.current) return;

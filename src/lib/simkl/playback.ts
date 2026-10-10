@@ -1,5 +1,7 @@
 import { simklRequest, SimklApiError } from "./client";
 import { getSession } from "./session";
+import { simklEntryIdKeys, simklEpisodeWatchKeys, simklLookupIds } from "./ids";
+import type { SimklEpisodeCoords } from "./ids";
 import { isCwDismissed } from "@/lib/cw-dismiss";
 import { readResumeEntry, saveResumeBatch } from "@/lib/resume";
 import type { LibraryItem } from "@/lib/stremio";
@@ -83,7 +85,7 @@ function buildItem(
   };
 }
 
-function toLibraryItem(raw: RawSession): LibraryItem | null {
+async function toLibraryItem(raw: RawSession): Promise<LibraryItem | null> {
   const pct = Math.min(100, Math.max(0, raw.progress ?? 0));
   if (pct < 1 || pct > 98) return null;
   const when = raw.paused_at ?? raw.watched_at ?? new Date(0).toISOString();
@@ -149,6 +151,37 @@ function toLibraryItem(raw: RawSession): LibraryItem | null {
   return null;
 }
 
+// The replayed stop exists to close a stuck "actively playing" session; a stop
+// without one would only re-mark an item the user may have unmarked since the
+// watch, so the pending replay gates it on this check.
+export async function hasActiveSimklPlayback(
+  metaId: string,
+  episode: SimklEpisodeCoords | undefined,
+  imdb?: string,
+): Promise<boolean> {
+  const wanted = new Set(simklLookupIds(metaId, imdb));
+  let raw: RawSession[];
+  try {
+    raw = await simklRequest<RawSession[]>("/sync/playback?hide_watched=true&limit=40");
+  } catch (e) {
+    if (e instanceof SimklApiError && e.status === 404) return false;
+    throw e;
+  }
+  if (!Array.isArray(raw)) return false;
+  for (const r of raw) {
+    const kind = r.movie ? "movie" : "show";
+    const node = r.movie ?? r.show ?? r.anime;
+    if (!node) continue;
+    if (!simklEntryIdKeys(node.ids, kind).some((key) => wanted.has(key))) continue;
+    if (!episode) return true;
+    const season = r.episode?.season;
+    const number = r.episode?.number ?? r.episode?.episode;
+    if (season == null && number == null) continue;
+    if (simklEpisodeWatchKeys(episode).includes(`${season}:${number}`)) return true;
+  }
+  return false;
+}
+
 export async function fetchSimklPlaybackItems(): Promise<LibraryItem[]> {
   const owner = getSession();
   if (!owner) return [];
@@ -165,7 +198,7 @@ export async function fetchSimklPlaybackItems(): Promise<LibraryItem[]> {
   const items: LibraryItem[] = [];
   const seen = new Set<string>();
   for (const r of raw) {
-    const item = toLibraryItem(r);
+    const item = await toLibraryItem(r);
     if (!item?.state) continue;
     const key = `${item._id}|${item.state.season ?? ""}|${item.state.episode ?? ""}`;
     if (seen.has(key)) continue;

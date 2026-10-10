@@ -76,9 +76,11 @@ function circleTop(slots: number): string {
 }
 
 function getTitleFromAniZip(titles: Record<string, string>, lang: "english" | "romaji" | "native"): string | null {
-  if (lang === "english") return titles.en || titles.en_jp || titles.ja || null;
-  if (lang === "romaji") return titles["x-jat"] || titles.en_jp || titles.en || null;
-  if (lang === "native") return titles.ja || titles["x-jat"] || titles.en || null;
+  if (lang === "english") return titles.en || titles.ja || null;
+  // AniZip's `x-jat` is AniDB's abbreviated short title ("OP TV", "Bleach3"),
+  // so romaji never comes from here — Kitsu's `en_jp` does.
+  if (lang === "romaji") return titles.en || null;
+  if (lang === "native") return titles.ja || titles.en || null;
   return null;
 }
 
@@ -427,10 +429,12 @@ const PosterCard = memo(function PosterCard({
       }
     }
 
-    const preferred = settings.simklAnimeTitleLanguage;
+    const preferred = settings.animeTitleLanguage;
 
     const fetchTitles = async () => {
-      if (malId) {
+      // Romaji series titles only exist in Kitsu's own map; AniZip carries an
+      // abbreviated AniDB short title in `x-jat` instead.
+      if (preferred !== "romaji" && malId) {
         const map = await aniZipByMal(malId).catch(() => null);
         if (cancelled) return;
         if (map?.titles) {
@@ -442,7 +446,7 @@ const PosterCard = memo(function PosterCard({
         }
       }
 
-      if (kitsuId) {
+      if (preferred !== "romaji" && kitsuId) {
         const map = await aniZipByKitsu(kitsuId).catch(() => null);
         if (cancelled) return;
         if (map?.titles) {
@@ -489,7 +493,7 @@ const PosterCard = memo(function PosterCard({
       cancelled = true;
       off?.();
     };
-  }, [meta.id, isAnimeCardId, settings.simklAnimeTitleLanguage]);
+  }, [meta.id, isAnimeCardId, settings.animeTitleLanguage]);
 
   useEffect(() => {
     if (

@@ -135,7 +135,7 @@ async function getAnimeEpisodes(id: string): Promise<PlayEpisode[] | null> {
       if (ep.absoluteNumber == null && m.absoluteEpisodeNumber)
         ep.absoluteNumber = m.absoluteEpisodeNumber;
       if (ep.tvdbEpisodeId == null && m.tvdbId) ep.tvdbEpisodeId = m.tvdbId;
-      const air = m.airDateUtc ?? m.airDate;
+      const air = m.airDateUtc ?? m.airDate ?? m.airdate;
       if (air && (!ep.airDate || bogusAirdates)) ep.airDate = air;
       if (!ep.overview && m.overview) ep.overview = m.overview;
       if (!ep.name) ep.name = pickEpisodeTitle(m) ?? undefined;

@@ -129,6 +129,21 @@ export function AppLanguageTab() {
           value={settings.translateDescriptions}
           onChange={(v) => update({ translateDescriptions: v })}
         />
+        <SettingRow
+          label={t("Anime Title Language")}
+          desc={t("Preferred language for anime titles shown on cards, in the picker, and in your Discord presence.")}
+        >
+          <Dropdown
+            value={settings.animeTitleLanguage}
+            onChange={(v) => update({ animeTitleLanguage: v as "english" | "romaji" | "native" })}
+            options={[
+              { value: "english", label: t("English") },
+              { value: "romaji", label: t("Romaji") },
+              { value: "native", label: t("Native/Japanese") },
+            ]}
+            className="w-[280px] max-w-full"
+          />
+        </SettingRow>
       </Section>
 
       <Section

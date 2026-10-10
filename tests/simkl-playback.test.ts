@@ -6,13 +6,48 @@ import { readFileSync } from "node:fs";
 import test from "node:test";
 import ts from "typescript";
 
+// The harness swaps ./client and ./session but keeps the real id helpers, since
+// the session gate matches on their exact key spellings.
+const idsModule = (() => {
+  const code = ts.transpileModule(readFileSync(new URL("../src/lib/simkl/ids.ts", import.meta.url), "utf8"), {
+    compilerOptions: { target: ts.ScriptTarget.ES2022, module: ts.ModuleKind.CommonJS },
+  }).outputText;
+  const module = { exports: {} as Record<string, unknown> };
+  new Function("require", "module", "exports", code)(
+    () => ({
+      anidbToMal: async () => null,
+      anilistToMal: async () => null,
+      kitsuToMal: async () => null,
+    }),
+    module,
+    module.exports,
+  );
+  return module.exports;
+})();
+
+class StubSimklApiError extends Error {
+  status: number;
+  constructor(status: number, body = "") {
+    super(`Simkl HTTP ${status}: ${body}`);
+    this.status = status;
+  }
+}
+
 function playback(sessions: unknown[], existing?: { ms: number; t: number }) {
   const writes: unknown[][] = [];
+  let failure: Error | null = null;
   const session = {};
   const source = readFileSync(new URL("../src/lib/simkl/playback.ts", import.meta.url), "utf8");
   const mocks: Record<string, unknown> = {
     "./session": { getSession: () => session },
-    "./client": { simklRequest: async () => sessions },
+    "./ids": idsModule,
+    "./client": {
+      simklRequest: async () => {
+        if (failure) throw failure;
+        return sessions;
+      },
+      SimklApiError: StubSimklApiError,
+    },
     "@/lib/cw-dismiss": { isCwDismissed: () => false },
     "@/lib/resume": {
       readResumeEntry: () => existing,
@@ -31,7 +66,14 @@ function playback(sessions: unknown[], existing?: { ms: number; t: number }) {
     module,
     module.exports,
   );
-  return { api: module.exports as typeof import("../src/lib/simkl/playback"), writes };
+  return {
+    api: module.exports as typeof import("../src/lib/simkl/playback"),
+    writes,
+    StubSimklApiError,
+    failRequests: (error: Error | null) => {
+      failure = error;
+    },
+  };
 }
 
 test("Simkl paused episodes retain timestamp, episode identity and resume progress", async () => {
@@ -136,4 +178,69 @@ test("Simkl still excludes unstarted and finished sessions", async () => {
     ["tt1234561"],
   );
   assert.equal(h.writes.length, 1);
+});
+
+test("Simkl keeps the anime-native id and entry-relative coords for a mal-only node", async () => {
+  const h = playback([
+    {
+      progress: 30,
+      paused_at: "2026-09-29T10:30:00.000Z",
+      anime: { title: "Fixture anime", ids: { mal: 51715 } },
+      episode: { season: 1, number: 6 },
+    },
+  ]);
+  const items = await h.api.fetchSimklPlaybackItems();
+  assert.equal(items[0]._id, "mal:51715");
+  assert.equal(items[0].isAnime, true);
+  assert.deepEqual(items[0].state?.video_id, "mal:51715:1:6");
+});
+
+test("an active session for the same episode is detected for the replay gate", async () => {
+  const h = playback([
+    {
+      progress: 40,
+      paused_at: "2026-09-29T10:30:00.000Z",
+      show: { ids: { imdb: "tt1234567" } },
+      episode: { season: 1, number: 5 },
+    },
+  ]);
+  assert.equal(await h.api.hasActiveSimklPlayback("tt1234567", { season: 1, episode: 5 }), true);
+  assert.equal(await h.api.hasActiveSimklPlayback("tt1234567", { season: 1, episode: 6 }), false);
+  assert.equal(await h.api.hasActiveSimklPlayback("tt7654321", { season: 1, episode: 5 }), false);
+});
+
+test("anime sessions match entry-relative or provider episode spellings", async () => {
+  const h = playback([
+    {
+      progress: 40,
+      paused_at: "2026-09-29T10:30:00.000Z",
+      anime: { ids: { mal: 51715 } },
+      episode: { season: 1, number: 2 },
+    },
+  ]);
+  assert.equal(await h.api.hasActiveSimklPlayback("mal:51715", { season: 1, episode: 2 }), true);
+  assert.equal(
+    await h.api.hasActiveSimklPlayback("mal:51715",
+      { season: 2, episode: 2, imdbSeason: 1, imdbEpisode: 2 }),
+    true,
+  );
+  assert.equal(
+    await h.api.hasActiveSimklPlayback("mal:51715",
+      { season: 2, episode: 2, imdbSeason: 2, imdbEpisode: 2 }),
+    false,
+  );
+});
+
+test("a watch without episode coordinates matches any session for its item", async () => {
+  const h = playback([
+    { progress: 40, paused_at: "2026-09-29T10:30:00.000Z", movie: { ids: { imdb: "tt1234567" } } },
+  ]);
+  assert.equal(await h.api.hasActiveSimklPlayback("tt1234567", undefined), true);
+  assert.equal(await h.api.hasActiveSimklPlayback("tt7654321", undefined), false);
+});
+
+test("a missing sessions endpoint reports no active playback", async () => {
+  const h = playback([]);
+  h.failRequests(new h.StubSimklApiError(404, "no sessions"));
+  assert.equal(await h.api.hasActiveSimklPlayback("tt1234567", { season: 1, episode: 5 }), false);
 });

@@ -824,7 +824,14 @@ function NativePlayerView({ src }: { src: PlayerSrc }) {
 
   const videoFill = useVideoFill(bridgeRef, src.url, playing);
   useLivePictureEq(bridgeRef, src.url);
-  const anime4k = useAnime4k(bridgeRef, src.url, src, snap.videoWidth, bridgeReady);
+  const anime4k = useAnime4k(
+    bridgeRef,
+    src.url,
+    src,
+    snap.videoWidth,
+    snap.videoSourceWidth,
+    bridgeReady,
+  );
   const [mouseHoldSpeedActive, setMouseHoldSpeedActive] = useState(false);
   const mouseHoldRef = useRef<{
     pointerId: number | null;

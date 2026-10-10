@@ -6,7 +6,7 @@ import { readFileSync } from "node:fs";
 import test from "node:test";
 import "./_localstorage-stub.ts";
 import {
-  armOnlineFlush,
+  armPendingFlush,
   flushPendingWatches,
   listPendingWatches,
   recordPendingWatch,
@@ -136,13 +136,75 @@ test("flush replays the terminal stop before the history write", async () => {
   clearPending();
 });
 
-test("entry stays queued when the stop fails even if history succeeds", async () => {
+test("an entry Simkl already lists as watched clears without any write", async () => {
+  clearPending();
+  recordPendingWatch("kitsu:1", { season: 1, episode: 2 });
+  const stops: string[] = [];
+  const watched: string[] = [];
+  const r = await flushPendingWatches({
+    hasSession: () => true,
+    isWatched: async () => true,
+    stopScrobble: async (metaId) => {
+      stops.push(metaId);
+      return true;
+    },
+    recordWatched: async (metaId) => {
+      watched.push(metaId);
+      return true;
+    },
+  });
+  assert.equal(r.flushed, 1);
+  assert.equal(r.remaining, 0);
+  assert.deepEqual(stops, [], "a watched entry must not be stop-scrobbled again");
+  assert.deepEqual(watched, [], "a watched entry must not be written to history again");
+  assert.equal(listPendingWatches().length, 0);
+  clearPending();
+});
+
+test("without an active playback session the replay records without a stop scrobble", async () => {
+  clearPending();
+  recordPendingWatch("kitsu:1", { season: 1, episode: 2 });
+  const stops: string[] = [];
+  const r = await flushPendingWatches({
+    hasSession: () => true,
+    isWatched: async () => false,
+    hasActivePlayback: async () => false,
+    stopScrobble: async (metaId) => {
+      stops.push(metaId);
+      return true;
+    },
+    recordWatched: async () => true,
+  });
+  assert.equal(r.flushed, 1);
+  assert.deepEqual(stops, [], "a stop without a live session would re-mark an unmarked item");
+  assert.equal(listPendingWatches().length, 0);
+  clearPending();
+});
+
+test("an active playback session still replays the terminal stop and either write clears", async () => {
   clearPending();
   recordPendingWatch("kitsu:1", { season: 1, episode: 2 });
   const r = await flushPendingWatches({
     hasSession: () => true,
+    isWatched: async () => false,
+    hasActivePlayback: async () => true,
+    stopScrobble: async () => true,
+    recordWatched: async () => false,
+  });
+  assert.equal(r.flushed, 1, "a full-progress stop means Simkl holds the watch");
+  assert.equal(listPendingWatches().length, 0);
+  clearPending();
+});
+
+test("a watch that no write confirms stays queued for the next attempt", async () => {
+  clearPending();
+  recordPendingWatch("kitsu:1", { season: 1, episode: 2 });
+  const r = await flushPendingWatches({
+    hasSession: () => true,
+    isWatched: async () => false,
+    hasActivePlayback: async () => false,
     stopScrobble: async () => false,
-    recordWatched: async () => true,
+    recordWatched: async () => false,
   });
   assert.equal(r.flushed, 0);
   assert.equal(r.remaining, 1);
@@ -151,7 +213,7 @@ test("entry stays queued when the stop fails even if history succeeds", async ()
 });
 
 test("online arming is safe without a window", () => {
-  const off = armOnlineFlush({
+  const off = armPendingFlush({
     hasSession: () => false,
     stopScrobble: async () => false,
     recordWatched: async () => false,
@@ -165,8 +227,19 @@ test("hook queues failed stops and provider flushes on session", () => {
   assert.match(hook, /recordPendingWatch\(prev\.metaId, prev\.episode,/);
   assert.match(hook, /recordPendingWatch\(a\.metaId, a\.episode,/);
   const provider = readFileSync(new URL("../src/lib/simkl/provider.tsx", import.meta.url), "utf8");
-  assert.match(provider, /armOnlineFlush\(\{/);
+  assert.match(provider, /armPendingFlush\(\{/);
   assert.match(provider, /stopScrobble:/);
   assert.match(provider, /simklScrobble\("stop", metaId, episode, 100\)/);
   assert.match(provider, /flushPendingWatches\(\)/);
+});
+
+test("the armed replay retries on a clock, not only on the next launch", () => {
+  const src = readFileSync(new URL("../src/lib/simkl/pending-sync.ts", import.meta.url), "utf8");
+  assert.match(src, /window\.setInterval\(attemptFlush, RETRY_INTERVAL_MS\)/);
+  assert.match(src, /scheduleSoon\(\)/);
+  assert.match(src, /window\.setTimeout\(\(\) => \{/);
+  // A 409 means the watch is already recorded; treating it as failure would
+  // leave the entry queued forever.
+  const scrobble = readFileSync(new URL("../src/lib/simkl/scrobble.ts", import.meta.url), "utf8");
+  assert.match(scrobble, /action === "stop" && e instanceof SimklApiError && e\.status === 409/);
 });

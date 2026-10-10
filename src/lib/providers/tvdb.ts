@@ -127,7 +127,11 @@ async function getToken(apiKey: string): Promise<string | null> {
 }
 
 const RESPONSE_CACHE_MAX = 200;
-const responseCache = new Map<string, unknown>();
+// Providers correct episode data shortly after an episode airs (a "TBA"
+// placeholder becomes the real name), so cached responses expire instead of
+// pinning stale titles for the lifetime of a long-running session.
+const RESPONSE_TTL_MS = 10 * 60 * 1000;
+const responseCache = new Map<string, { t: number; v: unknown }>();
 const responseInflight = new Map<string, Promise<unknown>>();
 
 registerCache("tvdb:response", () => responseCache.size);
@@ -135,7 +139,8 @@ registerCache("tvdb:response", () => responseCache.size);
 async function getJson<T>(apiKey: string, path: string): Promise<T | null> {
   const useProxy = !apiKey;
   const key = `${useProxy ? "proxy" : apiKey.slice(0, 6)}::${path}`;
-  if (responseCache.has(key)) return responseCache.get(key) as T;
+  const hit = responseCache.get(key);
+  if (hit && Date.now() - hit.t < RESPONSE_TTL_MS) return hit.v as T;
   const existing = responseInflight.get(key);
   if (existing) return existing as Promise<T | null>;
   const p = (async (): Promise<T | null> => {
@@ -171,7 +176,7 @@ async function getJson<T>(apiKey: string, path: string): Promise<T | null> {
           if (!res.ok) return null;
           const j = (await res.json()) as { data?: T };
           const data = (j?.data ?? null) as T | null;
-          if (data !== null) lruSet(responseCache, key, data, RESPONSE_CACHE_MAX);
+          if (data !== null) lruSet(responseCache, key, { t: Date.now(), v: data }, RESPONSE_CACHE_MAX);
           return data;
         } catch {
           if (attempt === 0) {

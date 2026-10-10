@@ -162,6 +162,9 @@ function parseStoredSettings(raw: string | null): Settings {
       _stremioDeeplinkOnByDefault?: boolean;
       _skipButtonHideSecV2?: boolean;
       _anilistSyncOnV1?: boolean;
+      _animeTitleLanguageV1?: boolean;
+      /** Legacy: the preference used to live in the Simkl panel. */
+      simklAnimeTitleLanguage?: "english" | "romaji" | "native";
       _musicSeekThumbV1?: boolean;
       _rememberLastStreamOnV1?: boolean;
       _streamSortAddonV1?: boolean;
@@ -290,6 +293,16 @@ function parseStoredSettings(raw: string | null): Settings {
     if (!parsed._anime4kIndicatorOffV1) {
       parsed.playerAnime4kIndicator = false;
       parsed._anime4kIndicatorOffV1 = true;
+    }
+    if (!parsed._animeTitleLanguageV1) {
+      // The anime title language preference used to live in the Simkl panel and
+      // only there, so a user without Simkl could never reach it. It governs
+      // cards, the picker and presence, so it moved to Language → App.
+      if (parsed.simklAnimeTitleLanguage) {
+        parsed.animeTitleLanguage = parsed.simklAnimeTitleLanguage;
+      }
+      delete parsed.simklAnimeTitleLanguage;
+      parsed._animeTitleLanguageV1 = true;
     }
     if (!parsed._subStyleV2) {
       if (parsed.subFontSize === 55) parsed.subFontSize = DEFAULT.subFontSize;
@@ -475,6 +488,10 @@ function parseStoredSettings(raw: string | null): Settings {
         DEFAULT.seekForwardStepShortSec,
       ),
       theme: sanitizeTheme(parsed.theme),
+      animeTitleLanguage:
+        parsed.animeTitleLanguage === "romaji" || parsed.animeTitleLanguage === "native"
+          ? parsed.animeTitleLanguage
+          : DEFAULT.animeTitleLanguage,
       webhooks: {
         ...DEFAULT.webhooks,
         ...parsed.webhooks,

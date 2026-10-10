@@ -111,6 +111,7 @@ test("missing later-season resume reaches the existing sibling identity resolver
       kitsuToAnidb: async () => 3100, findSiblingAnidbEntries: async () => [3990],
       externalToKitsu: async () => 399,
     };
+    if (name.endsWith("/kitsu")) return { kitsuSearchAnime: async () => [] };
     if (name.endsWith("anime-identity-core")) return identityCore;
     if (name.endsWith("stream-ids")) return { buildStreamIds };
     if (name.endsWith("/debug")) return { dlog() {} };

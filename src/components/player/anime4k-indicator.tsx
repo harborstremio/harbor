@@ -7,10 +7,6 @@ import type { Anime4kChoice } from "@/views/player/hooks/use-anime4k";
 
 const isTauri = typeof window !== "undefined" && "__TAURI_INTERNALS__" in window;
 
-function shadersActive(v: unknown): boolean {
-  return typeof v === "string" && v.trim().length > 0;
-}
-
 export function Anime4kIndicator({
   engine,
   chromeVisible,
@@ -30,9 +26,15 @@ export function Anime4kIndicator({
       return;
     }
     let cancelled = false;
+    // `glsl-shaders` only echoes the request back, so a chain that failed to
+    // compile still looked active there. `vo-passes` describes what the video
+    // output actually ran, and mpv names Anime4K's own passes `Anime4K-v...`,
+    // which is what the badge should key off.
     const tick = async () => {
-      const shaders = await invoke("mpv_get_property", { name: "glsl-shaders" }).catch(() => null);
-      if (!cancelled) setActive(shadersActive(shaders));
+      const passes = await invoke<string[]>("mpv_vo_passes").catch(() => null);
+      if (!cancelled) {
+        setActive(Array.isArray(passes) && passes.some((p) => p.includes("Anime4K")));
+      }
     };
     void tick();
     const id = window.setInterval(() => void tick(), 2000);

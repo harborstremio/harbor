@@ -63,7 +63,7 @@ export async function resolveBestDownload(
   opts: ResolveOptions,
 ): Promise<DownloadPick | null> {
   const imdbId = meta.id.startsWith("tt") ? meta.id : opts.imdbId;
-  const streamIds = await buildStreamIdsWithIdentity(meta.id, episode, imdbId);
+  const streamIds = await buildStreamIdsWithIdentity(meta.id, episode, imdbId, undefined, meta.name);
   if (streamIds.length === 0) return null;
 
   const input = buildEpisodePipelineInput({

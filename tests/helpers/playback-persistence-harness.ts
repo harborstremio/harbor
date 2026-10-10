@@ -43,6 +43,7 @@ export function playbackPersistenceHarness(kind: "local" | "cloud" = "local") {
     markAnimeWatching: noop, syncAnimeProgress: noop, markMalWatching: noop, syncMalProgress: noop,
     animeTrackerTarget, activeProfileId: () => profileId, getSession: () => trackerSession,
     animeIdentityEligible: () => false, resolveAnimeIdentity: async () => null,
+    resolveTrackerAnimeEntry: async () => null,
     isForeignSplitSeason: () => false, splitFranchiseDisplaySeason: () => undefined,
     isSplitFranchiseKitsu: () => false, parseKitsuId: () => null,
     profileFromMeta: () => ({}), trackEvent: noop, isExternalPlaylistId: () => false,

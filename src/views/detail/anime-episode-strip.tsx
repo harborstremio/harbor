@@ -29,6 +29,7 @@ export function AnimeEpisodeStrip({
   onReachEnd,
   metaForEp,
   showSeason,
+  unairedIds,
 }: {
   meta: Meta;
   episodes: KitsuEpisode[];
@@ -45,6 +46,8 @@ export function AnimeEpisodeStrip({
   onReachEnd?: () => void;
   metaForEp?: (ep: KitsuEpisode) => Meta;
   showSeason?: boolean;
+  /** Episode ids the air-date frontier marks as unaired (undated unaired rows included). */
+  unairedIds?: Set<number>;
 }) {
   const { openPicker, openEpisodeDetail } = useView();
   const { settings } = useSettings();
@@ -67,7 +70,7 @@ export function AnimeEpisodeStrip({
           rating: ep.rating ?? undefined,
           ratingIsImdb: ep.rating != null ? !!ep.ratingIsImdb : false,
           filler: ep.filler,
-          upcoming: isUpcomingDate(ep.airdate),
+          upcoming: isUpcomingDate(ep.airdate) || (!!unairedIds && unairedIds.has(ep.id)),
           meta: epMeta,
           sourceMetaId: ep.sourceMetaId,
           play: (opts) =>
@@ -82,7 +85,7 @@ export function AnimeEpisodeStrip({
           },
         };
       }),
-    [episodes, meta, metaForEp, openEpisodeDetail, openPicker, settings.instantPlay, t, showSeason],
+    [episodes, meta, metaForEp, openEpisodeDetail, openPicker, settings.instantPlay, t, showSeason, unairedIds],
   );
   const epByKey = useMemo(() => {
     const m = new Map<string, KitsuEpisode>();
@@ -117,6 +120,7 @@ export function AnimeEpisodeStrip({
             spoiler={spoilerFor?.(ep)}
             onContextMenu={onContextMenu}
             showSeason={showSeason}
+            forceUpcoming={!!unairedIds && unairedIds.has(ep.id)}
           />
         </div>
       ))}
@@ -132,6 +136,7 @@ function AnimeEpisodeStripCard({
   spoiler,
   onContextMenu,
   showSeason,
+  forceUpcoming,
 }: {
   meta: Meta;
   parentMeta?: Meta;
@@ -146,11 +151,12 @@ function AnimeEpisodeStripCard({
     sourceMetaId?: string,
   ) => void;
   showSeason?: boolean;
+  forceUpcoming?: boolean;
 }) {
   const t = useT();
   const { openPicker, openEpisodeDetail } = useView();
   const { settings } = useSettings();
-  const upcoming = isUpcomingDate(ep.airdate);
+  const upcoming = isUpcomingDate(ep.airdate) || !!forceUpcoming;
 
   const handlePlayClick = () => {
     openPicker(

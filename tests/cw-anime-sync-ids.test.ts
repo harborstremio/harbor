@@ -11,7 +11,7 @@ import {
   needsAniZipSyncIds,
 } from "../src/lib/cw-anime-episode.ts";
 import { stripFranchiseSuffix, franchiseDedupKey } from "../src/lib/providers/jikan.ts";
-import { buildBody } from "../src/lib/simkl/scrobble-body.ts";
+import { buildAnimeBody, buildBody } from "../src/lib/simkl/scrobble-body.ts";
 import {
   animeCoordPairs,
   findAnimeEntryNumber,
@@ -81,13 +81,17 @@ test("Trakt silently dropped the anime scrobble before enrichment and accepts it
   assert.deepEqual(after.target.episodeIds, { tvdb: 11872046 });
 });
 
-test("Simkl gets the imdb id as a second way to match a brand new season", () => {
+test("Simkl names an anime by its own id, never the row's IMDb id", () => {
+  // An IMDb id can resolve to a different Simkl entry than the anime the
+  // episode belongs to: JoJo's umbrella id (tt2359704) maps to Stone Ocean,
+  // while the episode aired in Steel Ball Run (kitsu 49847). Sending both ids
+  // in one node let Simkl record the watch on the wrong entry.
   const enriched = applyAniZipEpisode({ season: 1, episode: 6 }, MUSHOKU);
   const body = buildBody("kitsu:49002", enriched, 100) as {
     anime: { ids: Record<string, unknown> };
   };
   assert.equal(body.anime.ids.kitsu, 49002);
-  assert.equal(body.anime.ids.imdb, "tt13293588");
+  assert.equal(body.anime.ids.imdb, undefined);
 });
 
 test("non-anime scrobbles are byte for byte what they were", () => {
@@ -103,6 +107,18 @@ test("anime lookups are only attempted for anime id schemes", () => {
   assert.deepEqual(aniZipLookupKey("mal:59193"), { scheme: "mal", id: 59193 });
   assert.equal(aniZipLookupKey("tt13293588"), null);
   assert.equal(aniZipLookupKey("tmdb:tv:94664"), null);
+});
+
+test("a resolved sequel is scrobbled as a single-season anime entry, not the umbrella show", () => {
+  assert.deepEqual(buildAnimeBody({ kitsu: 50404 }, 2, 80), {
+    progress: 80,
+    anime: { ids: { kitsu: 50404 } },
+    episode: { season: 1, number: 2 },
+  });
+  const src = readFileSync(new URL("../src/lib/simkl/scrobble.ts", import.meta.url), "utf8");
+  assert.match(src, /animeBodyForEntry\(entry\.id, entry\.episode, progress\)/);
+  assert.match(src, /resolveTrackerAnimeEntry\(metaId, \{/);
+  assert.match(src, /if \(isAnimeNode\)/);
 });
 
 test("the season is not printed twice in the Continue Watching title", () => {
@@ -238,7 +254,7 @@ test("multi-season sync prefers the season-scoped identity over the base track i
     src,
     /const useIdentity =\s*\n\s*\(anilistAutoSyncRef\.current \|\| malAutoSyncRef\.current\)/,
   );
-  assert.match(src, /if \(trackId && !useIdentity\)/);
+  assert.match(src, /if \(track && !useIdentity\)/);
   assert.match(
     src,
     /else if \(useIdentity\)/,

@@ -48,6 +48,21 @@ const FILES: &[(&str, &str)] = &[
         "Upscale/Anime4K_AutoDownscalePre_x4.glsl",
         "Anime4K_AutoDownscalePre_x4.glsl",
     ),
+    // Light kernels. Upstream's low-end preset uses these for the final
+    // upscale and the optional second restore, so the Performance tier is
+    // actually lighter than Quality instead of running the same passes.
+    (
+        "Restore/Anime4K_Restore_CNN_S.glsl",
+        "Anime4K_Restore_CNN_S.glsl",
+    ),
+    (
+        "Restore/Anime4K_Restore_CNN_Soft_S.glsl",
+        "Anime4K_Restore_CNN_Soft_S.glsl",
+    ),
+    (
+        "Upscale/Anime4K_Upscale_CNN_x2_S.glsl",
+        "Anime4K_Upscale_CNN_x2_S.glsl",
+    ),
 ];
 
 fn shaders_dir(app: &tauri::AppHandle) -> Result<PathBuf, String> {

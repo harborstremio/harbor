@@ -75,6 +75,24 @@ export function findAnimeEntryNumber(
     // Known season + missing episode: never guess across entries or pairs.
     if (coversSeason) return null;
   }
+  // A freshly published cour can ship an AniZip entry whose episodes carry only
+  // the entry-relative key and an airdate, no provider season/episode pair yet.
+  // For a season-1 request the key is the provider episode number, so match it
+  // directly. Later seasons are left to the sibling/sequel resolvers, which can
+  // prove ownership instead of guessing across a franchise.
+  const flat = entries.every(([, m]) => m.seasonNumber == null && m.episodeNumber == null);
+  if (flat) {
+    for (const [season, episodeNumber] of pairs) {
+      if (season !== 1) continue;
+      for (const [key, m] of entries) {
+        const fromKey = Number(key);
+        const keyed = Number.isFinite(fromKey) && fromKey > 0 ? fromKey : null;
+        if (keyed !== episodeNumber && m.absoluteEpisodeNumber !== episodeNumber) continue;
+        const n = keyed ?? m.absoluteEpisodeNumber ?? NaN;
+        return Number.isFinite(n) && n > 0 ? n : null;
+      }
+    }
+  }
   return null;
 }
 

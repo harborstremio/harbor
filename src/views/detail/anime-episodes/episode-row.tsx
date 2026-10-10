@@ -29,6 +29,7 @@ export function AnimeEpisodeRow({
   onContextMenu,
   metaForEp,
   showSeason,
+  forceUpcoming,
 }: {
   meta: Meta;
   ep: KitsuEpisode;
@@ -43,6 +44,7 @@ export function AnimeEpisodeRow({
   ) => void;
   metaForEp?: (ep: KitsuEpisode) => Meta;
   showSeason?: boolean;
+  forceUpcoming?: boolean;
 }) {
   const t = useT();
   const { openPicker } = useView();
@@ -131,7 +133,7 @@ export function AnimeEpisodeRow({
               {ep.title || t("Episode {n}", { n: ep.number })}
             </span>
             {ep.filler && <FillerBadge />}
-            {isUpcomingDate(ep.airdate) ? <UpcomingBadge /> : null}
+            {isUpcomingDate(ep.airdate) || forceUpcoming ? <UpcomingBadge /> : null}
           </h4>
           <p className="flex flex-wrap items-center gap-x-2 text-[12px] text-ink-subtle">
             <span>

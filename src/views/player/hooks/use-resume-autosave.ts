@@ -5,6 +5,7 @@ import { getSession as getAnilistSession } from "@/lib/anilist/session";
 import { getSession as getMalSession } from "@/lib/mal/session";
 import { activeProfileId } from "@/lib/active-profile-id";
 import { animeIdentityEligible, resolveAnimeIdentity } from "@/lib/streams/anime-identity";
+import { resolveTrackerAnimeEntry } from "@/lib/anime-tracker-entry";
 import {
   isForeignSplitSeason,
   splitFranchiseDisplaySeason,
@@ -289,7 +290,44 @@ export function useResumeAutosave(params: ResumeAutosaveParams) {
     const useIdentity =
       (anilistAutoSyncRef.current || malAutoSyncRef.current) &&
       animeIdentityEligibleForSync(id, s.episode);
+    // A row can resolve to the season that aired an earlier cour: a Kitsu-based
+    // row or a catalog row mapped to its parent entry keeps provider season 2
+    // under the season-1 entry. Walk the franchise to the cour that aired the
+    // requested season, while keeping the row's own track id as the priority
+    // whenever the walk does not name a later cour.
+    const pickTracker = (
+      resolved: Awaited<ReturnType<typeof resolveTrackerAnimeEntry>>,
+    ): { id: string; episode: number | undefined } | null => {
+      if (!resolved) return track ? { id: track.id, episode: track.episode } : null;
+      // A stream-scoped cour (not the row's parent entry) owns its own number.
+      if (track && resolved.id !== track.id && track.id !== resolved.baseId) {
+        return { id: track.id, episode: track.episode };
+      }
+      if (track && resolved.id === track.id) {
+        return { id: track.id, episode: track.episode };
+      }
+      return { id: resolved.id, episode: resolved.episode };
+    };
+    const syncAnime = (): void => {
+      if (!anilistAutoSyncRef.current && !malAutoSyncRef.current) return;
+      void resolveTrackerAnimeEntry(id, {
+        season: cs,
+        episode: ep,
+        imdbSeason: s.episode?.imdbSeason,
+        imdbEpisode: s.episode?.imdbEpisode,
+      })
+        .then((resolved) => {
+          const pick = pickTracker(resolved);
+          if (pick) fireTrackers(pick.id, pick.episode);
+        })
+        .catch(() => {
+          if (track) fireTrackers(track.id, track.episode);
+        });
+    };
     if (track && !useIdentity) {
+      // Identity resolution is off for this row; its own track id is the
+      // answer and must fire synchronously. Multi-season rows route through
+      // the identity branch below instead.
       fireTrackers(track.id, track.episode);
     } else if (useIdentity) {
       void resolveAnimeIdentity(id, rid, {
@@ -302,11 +340,14 @@ export function useResumeAutosave(params: ResumeAutosaveParams) {
           // Prefer the season-scoped entry so multi-season franchises sync to
           // the correct per-season AniList/MAL media, not the season-1 entry.
           if (identity) fireTrackers(`kitsu:${identity.kitsuId}`, identity.number);
-          else if (track) fireTrackers(track.id, track.episode);
+          else syncAnime();
         })
         .catch(() => {
           if (track) fireTrackers(track.id, track.episode);
+          else syncAnime();
         });
+    } else {
+      syncAnime();
     }
     const kind = finished ? "watched" : "play";
     const key = `${id}|${kind}`;

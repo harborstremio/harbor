@@ -1,6 +1,8 @@
 import { meta as cinemetaMeta } from "./cinemeta";
 import { library, type LibraryItem } from "./stremio";
 import { readLocalEntries } from "./watchlist";
+import { listLocalCw } from "./local-cw";
+import { manualWatchedLibraryItems } from "./manual-watched";
 import { fetchWatchlist as fetchTraktWatchlist } from "./trakt/watchlist";
 import { tvmazeUpcoming } from "./providers/tvmaze";
 import {
@@ -10,6 +12,8 @@ import {
   tmdbTvUpcoming,
 } from "./providers/tmdb/tmdb-calendar";
 import { aniZipByAnilist, aniZipByKitsu, aniZipByMal, pickEpisodeTitle } from "./providers/anizip";
+import { imdbToKitsu, tmdbTvToKitsu } from "./providers/anime-mapping";
+import { franchiseRoot } from "./providers/anime-franchise-root";
 import type { CalendarItem } from "./calendar";
 import { localDateTimeFromIso } from "./calendar-time";
 
@@ -117,7 +121,7 @@ async function animeUpcoming(
   if (!mapping?.episodes) return null;
   const episodes: ResolvedEpisode[] = [];
   for (const [k, ep] of Object.entries(mapping.episodes)) {
-    const { date, time, atMs } = localDateTimeFromIso(ep.airDateUtc ?? ep.airDate);
+    const { date, time, atMs } = localDateTimeFromIso(ep.airDateUtc ?? ep.airDate ?? ep.airdate);
     if (!date || !inWindow(date)) continue;
     episodes.push({
       season: ep.seasonNumber ?? 1,
@@ -276,6 +280,7 @@ function gatherCandidates(
   stremio: LibraryItem[],
   local: ReturnType<typeof readLocalEntries>,
   trakt: Awaited<ReturnType<typeof fetchTraktWatchlist>>,
+  watched: Candidate[],
 ): Candidate[] {
   const byId = new Map<string, Candidate>();
   const add = (c: Candidate) => {
@@ -319,11 +324,74 @@ function gatherCandidates(
       temp: false,
     });
   }
+  // Anime with a Kitsu/MAL/AniList id is deliberately never written to the
+  // Stremio library (cloudWriteId/libraryPut return for anime ids), so a show
+  // the user started watching only lives in Continue Watching and manual-watched
+  // state. Include those, or a just-started anime never reaches this calendar.
+  for (const c of watched) add(c);
   return Array.from(byId.values());
+}
+
+function locallyWatchedCandidates(): Candidate[] {
+  const out: Candidate[] = [];
+  const seen = new Set<string>();
+  const push = (id: string, type: "movie" | "series", name: string, mtime: number) => {
+    if (!id || seen.has(id)) return;
+    seen.add(id);
+    out.push({ id, type, name, mtime, temp: false });
+  };
+  for (const i of manualWatchedLibraryItems()) {
+    push(
+      i._id,
+      i.type === "anime" || i.type === "series" ? "series" : "movie",
+      i.name ?? "",
+      Date.parse(i._mtime ?? "") || 0,
+    );
+  }
+  for (const e of listLocalCw()) {
+    push(e.id, e.type === "movie" ? "movie" : "series", e.name ?? "", e.t || 0);
+  }
+  return out;
 }
 
 const curatedFirst = (a: Candidate, b: Candidate) =>
   (a.temp ? 1 : 0) - (b.temp ? 1 : 0) || b.mtime - a.mtime;
+
+/**
+ * The same anime is often in the library twice: once as a Kitsu/MAL/AniList row
+ * (started watching) and once as its IMDb/TMDB row (porvider metadata). They
+ * resolve to the same franchise but with different names and provider dates, so
+ * the per-episode dedup cannot see the overlap. When an anime-scheme candidate
+ * covers a franchise, drop the catalog candidate for that same franchise.
+ */
+async function candidateRoot(id: string): Promise<string> {
+  if (isAnimeId(id) || id.startsWith("anidb:")) return franchiseRoot(id).catch(() => id);
+  // franchiseRoot knows imdb and anime-scheme ids, but not tmdb:tv — bridge it.
+  let kitsu: number | null = null;
+  if (/^tt\d+/.test(id)) kitsu = await imdbToKitsu(id.split(":")[0]).catch(() => null);
+  else if (id.startsWith("tmdb:tv:")) {
+    const n = Number(id.split(":")[2]);
+    kitsu = Number.isFinite(n) ? await tmdbTvToKitsu(n).catch(() => null) : null;
+  }
+  if (kitsu == null) return id;
+  return franchiseRoot(`kitsu:${kitsu}`).catch(() => `kitsu:${kitsu}`);
+}
+
+async function dropCatalogDuplicates(candidates: Candidate[]): Promise<Candidate[]> {
+  const roots = new Map<string, string>();
+  const animeRoots = new Set<string>();
+  for (const c of candidates) {
+    const root = await candidateRoot(c.id);
+    roots.set(c.id, root);
+    if (isAnimeId(c.id)) animeRoots.add(root);
+  }
+  if (animeRoots.size === 0) return candidates;
+  return candidates.filter((c) => {
+    if (isAnimeId(c.id)) return true;
+    const root = roots.get(c.id);
+    return root == null || !animeRoots.has(root);
+  });
+}
 
 export async function fetchLibraryCalendar(
   authKey: string,
@@ -343,7 +411,8 @@ export async function fetchLibraryCalendar(
   }
   const trakt = opts.includeTrakt ? await fetchTraktWatchlist().catch(() => []) : [];
 
-  const candidates = gatherCandidates(stremio, local, trakt);
+  const gathered = gatherCandidates(stremio, local, trakt, locallyWatchedCandidates());
+  const candidates = await dropCatalogDuplicates(gathered);
   if (candidates.length === 0) {
     if (stremioFailed) throw new Error("Couldn't load your library");
     return [];
@@ -426,17 +495,56 @@ export async function resolveSavedCalendar(
   for (const mi of movieResults) if (mi && inMonth(mi.releaseDate)) out.push(mi);
 
   const seen = new Set<string>();
-  const deduped: CalendarItem[] = [];
+  const unique: CalendarItem[] = [];
+  const episodeOf = (item: CalendarItem) => item.name.match(/\sS(\d+)E(\d+)/i);
+  const showKeyOf = (item: CalendarItem, ep: RegExpMatchArray) =>
+    item.name
+      .slice(0, item.name.indexOf(ep[0]))
+      .toLowerCase()
+      .replace(/[^a-z0-9]+/g, "");
   for (const item of out) {
-    const ep = item.name.match(/\sS(\d+)E(\d+)/i);
-    const show = ep ? item.name.slice(0, item.name.indexOf(ep[0])) : item.name;
-    const norm = show.toLowerCase().replace(/[^a-z0-9]+/g, "");
+    const ep = episodeOf(item);
     const key = ep
-      ? `tv|${norm}|s${Number(ep[1])}e${Number(ep[2])}|${item.releaseDate}`
-      : `movie|${norm}|${item.releaseDate}`;
+      ? `tv|${showKeyOf(item, ep)}|s${Number(ep[1])}e${Number(ep[2])}|${item.releaseDate}`
+      : `movie|${item.name.toLowerCase().replace(/[^a-z0-9]+/g, "")}|${item.releaseDate}`;
     if (seen.has(key)) continue;
     seen.add(key);
-    deduped.push(item);
+    unique.push(item);
+  }
+  // TMDB merges a sequel into the parent season, so a single airing can arrive
+  // as both S1E14 and S2E03 on the same date. When a show reports several
+  // seasons on one date, keep the newest season; the older label is the merge.
+  const byShowDate = new Map<string, CalendarItem[]>();
+  const deduped: CalendarItem[] = [];
+  for (const item of unique) {
+    const ep = episodeOf(item);
+    if (!ep) {
+      deduped.push(item);
+      continue;
+    }
+    const key = `tv|${showKeyOf(item, ep)}|${item.releaseDate}`;
+    const list = byShowDate.get(key);
+    if (list) list.push(item);
+    else byShowDate.set(key, [item]);
+  }
+  for (const list of byShowDate.values()) {
+    if (list.length === 1) {
+      deduped.push(list[0]);
+      continue;
+    }
+    const seasons = new Map<number, CalendarItem[]>();
+    for (const item of list) {
+      const season = Number(episodeOf(item)![1]);
+      const bucket = seasons.get(season);
+      if (bucket) bucket.push(item);
+      else seasons.set(season, [item]);
+    }
+    if (seasons.size > 1) {
+      const newest = Math.max(...seasons.keys());
+      deduped.push(...seasons.get(newest)!);
+    } else {
+      deduped.push(...list);
+    }
   }
   deduped.sort((a, b) => a.releaseDate.localeCompare(b.releaseDate));
   return deduped;

@@ -27,6 +27,28 @@ type RawNode = { title?: string; year?: number | null; ids?: RawIds };
 type RawEntry = { last_watched_at?: string; movie?: RawNode; show?: RawNode };
 type RawAllItems = { movies?: RawEntry[]; shows?: RawEntry[]; anime?: RawEntry[] };
 
+type HistoryAddResponse = {
+  added?: { movies?: number; shows?: number; episodes?: number };
+  not_found?: { movies?: unknown[]; shows?: unknown[]; episodes?: unknown[] };
+};
+
+// Simkl deduplicates history: re-adding something already watched is a silent
+// no-op with zero added counts, and only items its resolver could not match are
+// echoed in not_found. A matched item therefore satisfies the write whether it
+// was newly added or already present — treating the no-op as failure would
+// leave pending watches queued forever and replaying them would re-mark items
+// the user removed from their history.
+function historyWriteLanded(
+  r: HistoryAddResponse | undefined,
+  bucket: "movies" | "shows",
+): boolean {
+  if (!r) return false;
+  if (r.not_found?.[bucket]?.length) return false;
+  // A show-bucket write can also single out episodes that failed to resolve.
+  if (bucket === "shows" && r.not_found?.episodes?.length) return false;
+  return true;
+}
+
 function num(v: number | string | undefined): number | undefined {
   if (typeof v === "number") return v;
   if (typeof v === "string" && v.trim() !== "") {
@@ -100,39 +122,36 @@ async function postHistory(target: SimklTarget): Promise<boolean> {
   try {
     invalidateHistoryCache();
     if (target.kind === "movie") {
-      const r = await simklRequest<{ added?: { movies?: number } }>("/sync/history", {
+      const r = await simklRequest<HistoryAddResponse>("/sync/history", {
         method: "POST",
         body: { movies: [{ ids: target.ids, watched_at: watchedAt }] },
       });
-      return (r?.added?.movies ?? 0) > 0;
+      return historyWriteLanded(r, "movies");
     }
     if (target.kind === "episode") {
-      const r = await simklRequest<{ added?: { episodes?: number; shows?: number } }>(
-        "/sync/history",
-        {
-          method: "POST",
-          body: {
-            shows: [
-              {
-                ids: target.show.ids,
-                seasons: [
-                  {
-                    number: target.season,
-                    episodes: [{ number: target.number, watched_at: watchedAt }],
-                  },
-                ],
-              },
-            ],
-          },
+      const r = await simklRequest<HistoryAddResponse>("/sync/history", {
+        method: "POST",
+        body: {
+          shows: [
+            {
+              ids: target.show.ids,
+              seasons: [
+                {
+                  number: target.season,
+                  episodes: [{ number: target.number, watched_at: watchedAt }],
+                },
+              ],
+            },
+          ],
         },
-      );
-      return (r?.added?.episodes ?? 0) > 0;
+      });
+      return historyWriteLanded(r, "shows");
     }
-    const r = await simklRequest<{ added?: { shows?: number } }>("/sync/history", {
+    const r = await simklRequest<HistoryAddResponse>("/sync/history", {
       method: "POST",
       body: { shows: [{ ids: simklTargetIds(target), watched_at: watchedAt }] },
     });
-    return (r?.added?.shows ?? 0) > 0;
+    return historyWriteLanded(r, "shows");
   } catch {
     return false;
   }
@@ -164,7 +183,7 @@ export async function markEpisodesWatched(
   const watchedAt = new Date().toISOString();
   try {
     invalidateHistoryCache();
-    const result = await simklRequest<{ added?: { episodes?: number } }>("/sync/history", {
+    const result = await simklRequest<HistoryAddResponse>("/sync/history", {
       method: "POST",
       body: {
         shows: [
@@ -180,7 +199,7 @@ export async function markEpisodesWatched(
         ],
       },
     });
-    return (result?.added?.episodes ?? 0) >= new Set(episodes).size;
+    return historyWriteLanded(result, "shows");
   } catch {
     return false;
   }

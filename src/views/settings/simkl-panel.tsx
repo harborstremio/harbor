@@ -1,15 +1,7 @@
 import { TrackerIdentity } from "./tracker-identity";
 import simklLogo from "@/assets/simkl.png";
 import { TrackerConnect } from "./tracker-connect";
-import { Dropdown } from "@/components/dropdown";
-import {
-  Info,
-  Languages,
-  LogOut,
-  PenLine,
-  Radio,
-  Star,
-} from "./icons";
+import { Info, LogOut, PenLine, Radio, Star } from "./icons";
 import { useEffect, useState } from "react";
 import { SimklDeviceModal } from "@/components/simkl/simkl-device-modal";
 import { useProfiles } from "@/lib/profiles";
@@ -18,7 +10,7 @@ import { fetchSimklAvatar } from "@/lib/simkl/profile";
 import { useSimkl } from "@/lib/simkl/provider";
 import { useT } from "@/lib/i18n";
 import { Section, ToggleRow } from "./shared";
-import { ModalButton, ROW_DESC, SettingGroup, SettingRow, SettingsModal } from "./kit";
+import { ModalButton, ROW_DESC, SettingGroup, SettingsModal } from "./kit";
 import { SButton } from "./ui";
 import { clearCalendarCache } from "@/lib/simkl/calendar";
 import { clearHomeRailsCache } from "@/lib/simkl/home-rails";
@@ -139,28 +131,6 @@ export function SimklPanel() {
               onChange={(val) => update({ simklEnableUserRatings: val })}
               leading={<PenLine size={20} strokeWidth={2.1} />}
             />
-
-            <SettingRow
-              icon={<Languages size={20} strokeWidth={2.1} />}
-              label={t("Anime Title Language")}
-              desc={t("Preferred language for anime titles displayed on poster cards.")}
-            >
-              <div className="w-[280px] max-w-full">
-                <Dropdown
-                  value={settings.simklAnimeTitleLanguage}
-                  onChange={(v) =>
-                    update({ simklAnimeTitleLanguage: v as "english" | "romaji" | "native" })
-                  }
-                  className="w-full"
-                  options={[
-                    { value: "english", label: t("English") },
-                    { value: "romaji", label: t("Romaji") },
-                    { value: "native", label: t("Native/Japanese") },
-                  ]}
-                />
-              </div>
-            </SettingRow>
-
 
           </Section>
 
@@ -295,7 +265,6 @@ export function SimklPanel() {
                       simklUpNextRailEnabled: false,
                       simklTrendingRailEnabled: false,
                       showSimklBadge: true,
-                      simklAnimeTitleLanguage: "english",
                       simklGranularFilters: {
                         movies: { plantowatch: true },
                         shows: { watching: true, plantowatch: true },

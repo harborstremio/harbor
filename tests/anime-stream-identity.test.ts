@@ -48,6 +48,18 @@ test("seasonal anime resolves its own cour-relative number", () => {
   assert.equal(findAnimeEntryNumber(saoII, [[2, 1]]), 1);
 });
 
+test("a freshly published flat entry resolves its season-1 episode by key", () => {
+  const flat = {
+    mappings: { kitsu_id: 50404 },
+    episodes: { "1": {}, "2": {}, "3": {} },
+  };
+  assert.equal(findAnimeEntryNumber(flat, [[1, 2]]), 2);
+  // A later provider season is never guessed from a flat entry; the
+  // sibling/sequel resolvers must prove ownership instead.
+  assert.equal(findAnimeEntryNumber(flat, [[2, 2]]), null);
+  assert.equal(findAnimeEntryNumber(flat, [[1, 9]]), null);
+});
+
 test("franchise trap: an entry that never aired the requested season yields null instead of guessing", () => {
   const drStoneS1 = {
     mappings: { kitsu_id: 41493 },

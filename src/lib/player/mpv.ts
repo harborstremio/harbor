@@ -634,6 +634,20 @@ export function createMpvBridge(mpvOptions?: MpvOptions): PlayerBridge {
         (prefix.includes("vapoursynth") && (level === "fatal" || level === "error"))
       ) {
         handleSvpFilterFailure();
+        return;
+      }
+      // Shader load and compile problems are reported by mpv's video output at
+      // warn/error, not by the property setter, so they are the only signal
+      // that a chain did not take effect.
+      if (
+        level !== "fatal" &&
+        level !== "error" &&
+        !/shader|glsl/i.test(prefix)
+      ) {
+        return;
+      }
+      if (/fail|error|cannot|unable|no such file|not found|unsupported/i.test(text)) {
+        console.warn(`[shaders] mpv ${level} (${prefix}): ${text}`);
       }
       return;
     }
@@ -769,6 +783,10 @@ export function createMpvBridge(mpvOptions?: MpvOptions): PlayerBridge {
       }
       if (name === "dwidth" && typeof data === "number") snap.videoWidth = data;
       if (name === "dheight" && typeof data === "number") snap.videoHeight = data;
+      // Native decoded size, needed to reason about how much upscaling headroom
+      // the window actually offers. `dwidth` is the post-scale display width.
+      if (name === "width" && typeof data === "number") snap.videoSourceWidth = data;
+      if (name === "height" && typeof data === "number") snap.videoSourceHeight = data;
       if (name === "video-params/gamma" && typeof data === "string" && data) snap.hdrGamma = data;
       if (name === "demuxer-cache-duration" && typeof data === "number") snap.bufferedSec = data;
       if (name === "paused-for-cache" && typeof data === "boolean") snap.buffering = data;

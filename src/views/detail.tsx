@@ -18,9 +18,9 @@ import {
 import { isTextInLanguage } from "@/lib/providers/anime-episode-build";
 import { peekAnimeArt, saveAnimeArt } from "@/lib/providers/anime-art-cache";
 import { imdbToKitsu, tmdbTvToKitsu } from "@/lib/providers/anime-mapping";
-import { kitsuAnime, kitsuMainTvSeries } from "@/lib/providers/kitsu";
+import { kitsuAnime, kitsuMainTvSeries, parseKitsuId } from "@/lib/providers/kitsu";
 import { isOrphanAnimeCandidate } from "@/lib/anime-detect";
-import { recordAnimeCwId } from "@/lib/anime-cw-ids";
+import { getAnimeCanonicalId, recordAnimeCwId } from "@/lib/anime-cw-ids";
 import { stripFranchiseSuffix } from "@/lib/providers/jikan";
 import { peekCachedLogo, resolveLogo } from "@/lib/logo";
 import { pickLocalizedText } from "@/lib/localized-text";
@@ -589,6 +589,19 @@ export function DetailView({
         ? detail.imdbId
         : null;
     if (tmdbTv == null && !imdb) return;
+    // A previous visit already resolved this catalog id to an anime entry
+    // (recordAnimeCwId). Use it immediately so the page opens straight into the
+    // anime view instead of rendering the series view and swapping. Only the
+    // canonical mapping is trusted here — the played-cour mapping can point at
+    // whichever cour was watched last.
+    const recorded =
+      getAnimeCanonicalId(meta.id) ??
+      (imdb != null && imdb !== meta.id ? getAnimeCanonicalId(imdb) : null);
+    const recordedKitsu = recorded != null ? parseKitsuId(recorded) : null;
+    if (recordedKitsu != null && recordedKitsu !== failedKitsu.current) {
+      setDetectedKitsu(recordedKitsu);
+      return;
+    }
     let cancelled = false;
     setDetectingAnime(true);
     (async () => {
@@ -672,7 +685,9 @@ export function DetailView({
 
   useEffect(() => {
     if (!animeCanonicalId) return;
-    if (meta.id.startsWith("tt")) recordAnimeCwId(meta.id, animeCanonicalId);
+    if (meta.id.startsWith("tt") || meta.id.startsWith("tmdb:tv:")) {
+      recordAnimeCwId(meta.id, animeCanonicalId);
+    }
     const imdb = detail?.imdbId;
     if (imdb?.startsWith("tt") && imdb !== meta.id) recordAnimeCwId(imdb, animeCanonicalId);
   }, [animeCanonicalId, meta.id, detail?.imdbId]);

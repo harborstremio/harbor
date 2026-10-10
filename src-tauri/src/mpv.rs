@@ -224,6 +224,10 @@ const OBSERVED_PROPS: &[(&str, u64, PropertyKind)] = &[
     ("secondary-sub-text", 19, PropertyKind::String),
     ("path", 20, PropertyKind::String),
     ("audio-device-list", 21, PropertyKind::Node),
+    // Native decoded size. `dwidth`/`dheight` are the post-scale display size,
+    // so upscaler presets need these to know how much headroom the window has.
+    ("width", 22, PropertyKind::Int64),
+    ("height", 23, PropertyKind::Int64),
 ];
 
 #[derive(Clone, Copy)]
@@ -484,8 +488,13 @@ fn apply_pre_init(
         }
     }
 
+    // A silently dropped option looks identical to a working one from the
+    // outside, so shader failures in particular need to reach the log rather
+    // than vanish into a discarded Result.
     let opt = |k: &str, v: &str| {
-        let _ = init.set_property(k, v);
+        if let Err(e) = init.set_property(k, v) {
+            eprintln!("[harbor::mpv] pre-init option {k} rejected: {e}");
+        }
     };
     if rtx {
         opt("gpu-api", "d3d11");
@@ -1648,6 +1657,50 @@ pub async fn mpv_get_property(state: State<'_, MpvState>, name: String) -> Resul
         Ok(n) if n.is_finite() => serde_json::json!(n),
         _ => Value::String(s),
     })
+}
+
+/// Descriptions of the passes mpv's video output is currently running, taken
+/// from `vo-passes`. `glsl-shaders` only echoes back what was requested, so a
+/// chain that failed to compile still reads as active there. This is what the
+/// video output actually resolved, which is the only way to tell them apart.
+///
+/// `vo-passes` is a node map with `fresh` and `redraw` arrays of
+/// `{desc, last, avg, peak, count, samples}`.
+#[tauri::command]
+pub async fn mpv_vo_passes(state: State<'_, MpvState>) -> Result<Vec<String>, String> {
+    let mpv = {
+        let g = state.inner.lock().await;
+        g.as_ref()
+            .map(|s| s.mpv.clone())
+            .ok_or_else(|| "mpv not started".to_string())?
+    };
+    let node: MpvNode = mpv
+        .get_property("vo-passes")
+        .map_err(|e| format!("get vo-passes: {}", e))?;
+    let mut descs = Vec::new();
+    if let Some(top) = node.map() {
+        for (key, value) in top {
+            if key != "fresh" && key != "redraw" {
+                continue;
+            }
+            let Some(entries) = value.array() else {
+                continue;
+            };
+            for entry in entries {
+                let Some(entry) = entry.map() else { continue };
+                for (field, value) in entry {
+                    if field == "desc" {
+                        if let Some(text) = value.str() {
+                            descs.push(text.to_string());
+                        }
+                    }
+                }
+            }
+        }
+    }
+    descs.sort();
+    descs.dedup();
+    Ok(descs)
 }
 
 #[tauri::command]

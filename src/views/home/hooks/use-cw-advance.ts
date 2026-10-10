@@ -24,6 +24,7 @@ import { isNextAired, resurfaceCandidates, type AnimeMode } from "@/lib/cw-resur
 import { lastPlayedEpisode, readResumeEntry } from "@/lib/resume";
 import { getViewedSeason } from "@/lib/season-view-pref";
 import { getAnimeCwId } from "@/lib/anime-cw-ids";
+import { resolveTrackerAnimeEntry } from "@/lib/anime-tracker-entry";
 import {
   preferredMixedSeason,
   providerAliasCoords,
@@ -68,6 +69,98 @@ function currentEpisode(i: LibraryItem): { season: number; episode: number } | n
 
 function scopedSplitItem(id: string): boolean {
   return isSplitFranchiseKitsu(parseKitsuId(id) ?? parseKitsuId(getAnimeCwId(id) ?? ""));
+}
+
+// A detected-anime row can finish an episode its provider (Cinemeta/TMDB) list
+// does not even contain — a sequel season the provider has not filled in yet,
+// so the row looks unplaceable and finished-with-nothing-next. The played anime
+// entry (Kitsu, with AniZip air dates) knows the episode that actually follows.
+function animeStreamAnchor(item: LibraryItem): { animeId: string; episode: number } | null {
+  const m = /^(kitsu|mal|anilist|anidb):(\d+):(\d+)$/.exec(item.state?.video_id ?? "");
+  return m ? { animeId: `${m[1]}:${m[2]}`, episode: Number(m[3]) } : null;
+}
+
+async function animeEntryFollowUp(
+  item: LibraryItem,
+  from: { season: number; episode: number },
+  tmdbKey: string,
+  watched: (season: number, episode: number) => boolean,
+  skip: ((season: number, episode: number) => boolean) | undefined,
+  listCache: Map<string, PlayEpisode[]>,
+): Promise<PlayEpisode | null> {
+  const stream = animeStreamAnchor(item);
+  // The played entry recorded at playback time (recordAnimePlayId) is the
+  // resolved anime entry for this row; a fresh mapping lookup would fail for
+  // exactly the brand-new seasons this fallback exists for.
+  let animeId = stream?.animeId ?? getAnimeCwId(item._id);
+  const entryList = async (id: string): Promise<PlayEpisode[]> => {
+    const cacheKey = `anime-entry:${id}`;
+    const cached = listCache.get(cacheKey);
+    if (cached !== undefined) return cached;
+    const fetched = await fetchEpisodeList(
+      { id, type: "series", name: item.name } as Meta,
+      { tmdbKey },
+    ).catch(() => []);
+    listCache.set(cacheKey, fetched);
+    return fetched;
+  };
+  let list = animeId ? await entryList(animeId) : [];
+  // The recorded entry can be an earlier cour than the season this row finished,
+  // or there may be no recorded entry at all (a catalog row the app never
+  // flagged as anime). Its episodes then declare that cour's provider season,
+  // so projecting the finished episode into it returns an episode of the wrong
+  // season. Walk to the cour that actually aired `from.season` and use its list.
+  let walked = false;
+  const coveredSeasons = new Set(
+    list.map((v) => v.imdbSeason).filter((n): n is number => typeof n === "number"),
+  );
+  const entryMissesSeason =
+    list.length === 0 || (coveredSeasons.size > 0 && !coveredSeasons.has(from.season));
+  if (entryMissesSeason) {
+    const resolved = await resolveTrackerAnimeEntry(item._id, {
+      season: from.season,
+      episode: from.episode,
+    }).catch(() => null);
+    if (resolved && resolved.id !== animeId) {
+      const nextList = await entryList(resolved.id);
+      if (nextList.length > 0) {
+        animeId = resolved.id;
+        list = nextList;
+        walked = true;
+      }
+    }
+  }
+  if (!animeId || list.length === 0) return null;
+  const inList = (s: number, e: number) => list.some((v) => v.season === s && v.episode === e);
+  let pos: { season: number; episode: number } | null = null;
+  if (stream && animeId === stream.animeId && inList(1, stream.episode)) {
+    pos = { season: 1, episode: stream.episode };
+  } else if (inList(from.season, from.episode)) {
+    pos = { season: from.season, episode: from.episode };
+  } else {
+    const mapped =
+      list.find((v) => v.imdbSeason === from.season && v.imdbEpisode === from.episode) ??
+      list.find((v) => v.absoluteNumber != null && v.absoluteNumber === from.episode) ??
+      // A flat sequel restarts at episode 1, so its entry-relative position is
+      // the provider episode. Only used after the franchise walk selected it.
+      (walked && inList(1, from.episode) ? { season: 1, episode: from.episode } : undefined);
+    if (mapped) pos = { season: mapped.season, episode: mapped.episode };
+  }
+  if (!pos) return null;
+  const idx = list.findIndex((v) => v.season === pos.season && v.episode === pos.episode);
+  for (let k = idx + 1; k < list.length; k++) {
+    const v = list[k];
+    // The entry is the cour that aired `from`'s season, so an entry episode
+    // without its own IMDb mapping is evaluated in provider space at
+    // (from.season, entry number) — never at entry-relative season coords,
+    // which would collide with earlier seasons of the same show.
+    const season = v.imdbSeason ?? from.season;
+    const episode = v.imdbEpisode ?? v.absoluteNumber ?? v.episode;
+    if (skip?.(season, episode)) continue;
+    if (watched(season, episode)) continue;
+    return { ...v, season, episode };
+  }
+  return null;
 }
 
 export function shouldDropFinished(
@@ -346,6 +439,11 @@ export function useCwAdvance(
         const origCur = cur;
         let effCur = cur;
         let remappedMixed = false;
+        // True when the fetched list cannot place the finished episode at all
+        // (it may not even know the sequel season). The primary next-episode
+        // scan is meaningless then, and the row needs the anime-entry fallback
+        // before any drop decision.
+        let unplacedCur = false;
         const scoped = scopedSplitItem(i._id);
         if (fetchOk && list.length > 0) {
           const maxKey = list.reduce((m, e) => Math.max(m, orderKey(e.season, e.episode)), 0);
@@ -355,12 +453,15 @@ export function useCwAdvance(
           ) {
             const abs = list.find((e) => e.absoluteNumber === effCur.episode);
             if (!abs) {
-              remove.add(i._id);
-              continue;
+              unplacedCur = true;
+            } else {
+              effCur = { season: abs.season, episode: abs.episode };
             }
-            effCur = { season: abs.season, episode: abs.episode };
           }
-          if (!list.some((e) => e.season === effCur.season && e.episode === effCur.episode)) {
+          if (
+            !unplacedCur &&
+            !list.some((e) => e.season === effCur.season && e.episode === effCur.episode)
+          ) {
             if (scoped) {
               const hintSeason = preferredMixedSeason(
                 privacyOwner ? undefined : getViewedSeason(i._id),
@@ -380,6 +481,9 @@ export function useCwAdvance(
               );
               if (mapped) effCur = { season: mapped.season, episode: mapped.episode };
             }
+            if (!list.some((e) => e.season === effCur.season && e.episode === effCur.episode)) {
+              unplacedCur = true;
+            }
           }
         }
         const checkWatched = watchedPredicate(
@@ -396,18 +500,43 @@ export function useCwAdvance(
           checkWatched(effCur.season, effCur.episode) ||
           aliasCur.some((a) => checkWatched(a.season, a.episode));
         if (!watchedCur) continue;
-        const nextEp = nextUnwatchedAfter(
-          list,
-          effCur,
-          (s: number, e: number): boolean => {
-            if (s === effCur.season && e === effCur.episode) return true;
-            if (privacyOwner) return false;
-            if (checkWatched(s, e)) return true;
-            if (!scoped) return false;
-            return providerAliasCoords(list, s, e).some((a) => checkWatched(a.season, a.episode));
-          },
-          episodeHiding ? (s, e) => isEpisodeHidden(i._id, s, e) : undefined,
-        );
+        const nextSkip = episodeHiding
+          ? (s: number, e: number) => isEpisodeHidden(i._id, s, e)
+          : undefined;
+        let nextEp = unplacedCur
+          ? null
+          : nextUnwatchedAfter(
+              list,
+              effCur,
+              (s: number, e: number): boolean => {
+                if (s === effCur.season && e === effCur.episode) return true;
+                if (privacyOwner) return false;
+                if (checkWatched(s, e)) return true;
+                if (!scoped) return false;
+                return providerAliasCoords(list, s, e).some(
+                  (a) => checkWatched(a.season, a.episode),
+                );
+              },
+              nextSkip,
+            );
+        // A sequel season can be missing from the provider list entirely, even
+        // for a catalog row the app never flagged as anime (an IMDb/TMDB row not
+        // covered by detection). When the provider list cannot place the
+        // finished episode, try the anime entry resolver; it returns null for an
+        // ordinary series, so the attempt stays bounded to unplaceable rows.
+        const tryAnimeEntry =
+          isAnime || (unplacedCur && (i._id.startsWith("tt") || i._id.startsWith("tmdb:")));
+        if ((!nextEp || unplacedCur) && tryAnimeEntry && !privacyOwner) {
+          const followUp = await animeEntryFollowUp(
+            i,
+            effCur,
+            tmdbKey,
+            checkWatched,
+            nextSkip,
+            listCacheRef.current,
+          );
+          if (followUp) nextEp = followUp;
+        }
         if (nextEp && nextEpAired(list, nextEp, isAnime)) {
           const displaySeason = remappedMixed
             ? nextEp.season
@@ -426,11 +555,20 @@ export function useCwAdvance(
             },
             upNext: true,
           });
-        } else if (animeCwEnd === "timer" && nextEp && nextEp.airDate) {
+        } else if (animeCwEnd === "timer" && nextEp && (nextEp.airDate || isAnime)) {
           next.set(i._id, {
             ...i,
             waitingForAir: true as const,
             nextAirDate: nextEp.airDate,
+          } as LibraryItem);
+        } else if (animeCwEnd === "timer" && unplacedCur && tryAnimeEntry) {
+          // The provider list does not know the season this row finished (a
+          // sequel it has not listed) and no anime entry could be resolved to
+          // date the follow-up. Keep the card rather than calling it caught up;
+          // the countdown appears once any source can place the next episode.
+          next.set(i._id, {
+            ...i,
+            waitingForAir: true as const,
           } as LibraryItem);
         } else if (
           shouldDropFinished(

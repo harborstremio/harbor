@@ -103,6 +103,8 @@ export function createHtml5Bridge(): PlayerBridge {
     snap.subDelaySec = subDelaySec;
     snap.videoWidth = video.videoWidth || 0;
     snap.videoHeight = video.videoHeight || 0;
+    snap.videoSourceWidth = snap.videoWidth;
+    snap.videoSourceHeight = snap.videoHeight;
     if (video.readyState >= HTMLMediaElement.HAVE_CURRENT_DATA && snap.videoWidth > 0) {
       snap.firstFrameReady = true;
     }

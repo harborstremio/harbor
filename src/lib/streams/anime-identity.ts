@@ -8,6 +8,7 @@ import {
   tmdbTvToKitsu,
 } from "@/lib/providers/anime-mapping";
 import { franchiseRoot } from "@/lib/providers/anime-franchise-root";
+import { kitsuSearchAnime } from "@/lib/providers/kitsu";
 import type { PlayEpisode } from "@/lib/view";
 import {
   animeAbsoluteFromScopedId,
@@ -207,10 +208,66 @@ export async function buildStreamIdsWithIdentity(
   episode: PlayEpisode | undefined,
   imdbId: string | null,
   defaultVideoId?: string | null,
+  title?: string | null,
 ): Promise<string[]> {
   const base = buildStreamIds(metaId, episode, imdbId, defaultVideoId);
-  if (!animeIdentityEligible(metaId, episode)) return base;
-  const identity = await resolveAnimeIdentity(metaId, imdbId, episode);
-  if (!identity || base[0] === identity.streamId) return base;
-  return [identity.streamId, ...base.filter((id) => id !== identity.streamId)];
+  if (animeIdentityEligible(metaId, episode)) {
+    const identity = await resolveAnimeIdentity(metaId, imdbId, episode);
+    if (identity && base[0] !== identity.streamId) {
+      return [identity.streamId, ...base.filter((id) => id !== identity.streamId)];
+    }
+    return base;
+  }
+  // Identity resolution needs provider coordinates, so it is skipped for a
+  // brand-new cour whose AniZip entry has none. The row still names an anime
+  // entry, and addons index anime by Kitsu, so add that mapping before the ids
+  // reach them (a mal/anilist row otherwise queries with an id they ignore).
+  if (
+    ANIME_META_RX.test(metaId) &&
+    episode?.kitsuStreamId == null &&
+    typeof episode?.episode === "number"
+  ) {
+    const entry =
+      (await baseKitsuId(metaId).catch(() => null)) ??
+      (await kitsuEntryByTitle(title).catch(() => null));
+    if (entry != null) {
+      const id = `kitsu:${entry}:${episode.episode}`;
+      if (!base.includes(id)) return [id, ...base];
+    }
+  }
+  return base;
+}
+
+function normalizeAnimeTitle(value: string): string {
+  return value
+    .normalize("NFD")
+    .replace(/[\u0300-\u036f]/g, "")
+    .toLowerCase()
+    .replace(/[^a-z0-9]+/g, " ")
+    .trim();
+}
+
+/**
+ * The Kitsu entry for a title, used when ARM/AniZip cannot map the row's own id
+ * (a brand-new cours only Kitsu catalogues). Requires an exact normalized title
+ * so an ambiguous search never routes streams to a different show.
+ */
+export async function kitsuEntryByTitle(title: string | null | undefined): Promise<number | null> {
+  const clean = title?.trim();
+  if (!clean) return null;
+  const want = normalizeAnimeTitle(clean);
+  if (!want) return null;
+  const hits = await kitsuSearchAnime(clean).catch(() => []);
+  let best: number | null = null;
+  let bestScore = 0;
+  for (const hit of hits) {
+    const got = normalizeAnimeTitle(hit.title);
+    if (!got || got !== want) continue;
+    const score = 4 + (hit.subtype === "TV" ? 1 : 0);
+    if (score > bestScore) {
+      bestScore = score;
+      best = hit.id;
+    }
+  }
+  return best;
 }

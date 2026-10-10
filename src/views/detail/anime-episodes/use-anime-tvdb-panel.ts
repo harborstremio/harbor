@@ -3,6 +3,7 @@ import { useT } from "@/lib/i18n";
 import type { KitsuEpisode } from "@/lib/providers/kitsu";
 import { kitsuToTvdb } from "@/lib/providers/anime-mapping";
 import { isFranchiseExtra, type FranchiseEntry } from "@/lib/providers/anime-detail";
+import { isForeignScriptTitle, isGenericEpisodeName } from "@/lib/providers/anime-episode-build";
 import {
   tvdbLangFromIso1,
   tvdbOrderTypeHasEpisodes,
@@ -13,6 +14,7 @@ import {
 } from "@/lib/providers/tvdb";
 import { tmdbLanguageIso } from "@/lib/providers/tmdb/tmdb-client";
 import { pickLocalizedText } from "@/lib/localized-text";
+import { isUpcomingDate } from "@/lib/dates";
 import { harborImdbEpisodesCached } from "@/lib/providers/harbor-imdb";
 import {
   fetchTvdbOrderBySeriesId,
@@ -56,6 +58,26 @@ const isCloseDate = (d1: string, d2: string) => {
   if (isNaN(t1) || isNaN(t2)) return false;
   return Math.abs(t1 - t2) <= 86400000;
 };
+
+// A TVDB season binds to the franchise entry whose start date falls nearest to
+// the season's first aired episode; distant starts are no match at all.
+function entryStartingNear(franchise: FranchiseEntry[], from: string): FranchiseEntry | null {
+  const t = Date.parse(from);
+  if (!Number.isFinite(t)) return null;
+  let best: FranchiseEntry | null = null;
+  let bestDelta = Infinity;
+  for (const f of franchise) {
+    if (!f.startDate) continue;
+    const st = Date.parse(f.startDate);
+    if (!Number.isFinite(st)) continue;
+    const d = Math.abs(st - t);
+    if (d < bestDelta) {
+      bestDelta = d;
+      best = f;
+    }
+  }
+  return best != null && bestDelta <= 60 * 86_400_000 ? best : null;
+}
 
 export function useAnimeTvdbPanel(
   kitsuId: number | null,
@@ -179,6 +201,7 @@ export function useAnimeTvdbPanel(
   const built = useMemo(() => {
     if (!ordering) return null;
     const lang = tmdbLanguageIso();
+    const englishTarget = lang === "" || lang === "en";
     const pool = franchiseEpisodes ?? episodes;
     const franchiseWide = franchiseEpisodes != null;
     const byPair = new Map<string, KitsuEpisode>();
@@ -219,7 +242,47 @@ export function useAnimeTvdbPanel(
       if (bucket.length === 0) continue;
       const seenId = new Set<number>();
       const eps: KitsuEpisode[] = [];
-      for (const e of bucket) {
+      // TVDB rows for the season that is airing right now often lack air dates
+      // and can lag the entry's own provider data, which poisons the upcoming
+      // badge and the aired checks. Bind the season to the franchise entry
+      // that started around the same week and let that entry's episode air
+      // dates fill or correct the rows'.
+      const seasonEntry =
+        franchise && bucket.length > 0
+          ? entryStartingNear(franchise, seasonDateRange(bucket).from ?? "")
+          : null;
+      const entryRowsByNumber = new Map<number, KitsuEpisode>();
+      if (seasonEntry) {
+        for (const p of pool) {
+          if (p.sourceMetaId !== seasonEntry.meta.id || p.number == null) continue;
+          if (!entryRowsByNumber.has(p.number)) entryRowsByNumber.set(p.number, p);
+        }
+      }
+      const now = Date.now();
+      const rowAir = bucket.map((e) => {
+        const poolDate = entryRowsByNumber.get(e.episodeNumber)?.airdate ?? null;
+        if (e.airDate && isUpcomingDate(e.airDate) && poolDate && !isUpcomingDate(poolDate)) {
+          return poolDate;
+        }
+        return e.airDate ?? poolDate ?? null;
+      });
+      const rowTime = rowAir.map((a) => {
+        const t = a ? Date.parse(a) : NaN;
+        return Number.isFinite(t) ? t : null;
+      });
+      let airedFrontier = -1;
+      rowTime.forEach((t, i) => {
+        if (t != null && t <= now) airedFrontier = i;
+      });
+      const seasonOngoing = rowTime.some((t) => t != null && t > now);
+      // Episodes after the last dated-aired row of an ongoing season have no
+      // IMDb rating yet; a hit would be a mis-keyed rating from another
+      // episode (TVDB often dates only the first rows of an unaired season).
+      const rowUnaired = (i: number) => {
+        const t = rowTime[i];
+        return t != null ? t > now : seasonOngoing && airedFrontier >= 0 && i > airedFrontier;
+      };
+      for (const [bi, e] of bucket.entries()) {
         const abs = ordering.absByEpId.get(e.id);
         const img =
           e.stillUrl ?? e.stillPath ?? (abs != null ? ordering.imageByAbs.get(abs) : undefined);
@@ -252,6 +315,15 @@ export function useAnimeTvdbPanel(
             { lang },
           );
         }
+        // A matched pool row can carry a Japanese-script title while TVDB has the
+        // English one for the same row. Only an English target may substitute it;
+        // a localized user keeps their own-language title.
+        if (title == null && match && englishTarget && isForeignScriptTitle(match.title)) {
+          const rowName = e.nameEn ?? e.name;
+          if (rowName && !isGenericEpisodeName(rowName) && !isForeignScriptTitle(rowName)) {
+            title = rowName;
+          }
+        }
 
         let streamId: string | undefined;
         if (!match && franchise) {
@@ -279,9 +351,10 @@ export function useAnimeTvdbPanel(
           }
         }
 
-        const imdbRating =
-          imdbMap?.get(`${e.seasonNumber}:${e.episodeNumber}`) ??
-          (abs != null ? imdbMap?.get(`1:${abs}`) : undefined);
+        const imdbRating = rowUnaired(bi)
+          ? undefined
+          : (imdbMap?.get(`${e.seasonNumber}:${e.episodeNumber}`) ??
+            (abs != null ? imdbMap?.get(`1:${abs}`) : undefined));
 
         const ep: KitsuEpisode = match
           ? {
@@ -312,7 +385,7 @@ export function useAnimeTvdbPanel(
                   { lang },
                 ) ?? e.overview,
               thumbnail: img ?? null,
-              airdate: e.airDate ?? null,
+              airdate: rowAir[bi] ?? null,
               length: e.runtime ?? null,
               imdbSeason: e.seasonNumber,
               imdbEpisode: e.episodeNumber,

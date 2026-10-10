@@ -38,6 +38,7 @@ import { resolvePreferredAnimeTitle } from "@/lib/anime-title";
 import { stripFranchiseSuffix } from "@/lib/providers/jikan";
 import { getAnimeCwId } from "@/lib/anime-cw-ids";
 import { aniZipLookupKey, applyAniZipEpisode, needsAniZipSyncIds } from "@/lib/cw-anime-episode";
+import { resolveCwAnimePlayEpisode } from "@/lib/cw-anime-play";
 import { isSplitFranchiseKitsu } from "@/lib/providers/anime-franchise-root";
 import { parseKitsuId } from "@/lib/providers/kitsu";
 import {
@@ -208,11 +209,6 @@ export const ContinueCard = memo(function ContinueCard({
       if (started) return;
       started = true;
       if (/^(kitsu|mal|anilist|anidb):/.test(item._id)) {
-        resolvePreferredAnimeTitle(item._id, settingsRef.current.simklAnimeTitleLanguage)
-          .then((tt) => {
-            if (!cancelled && tt) setTranslatedTitle(tt);
-          })
-          .catch(() => {});
         animeKitsuMeta(item._id)
           .then((m) => {
             if (cancelled || !m) return;
@@ -331,6 +327,24 @@ export const ContinueCard = memo(function ContinueCard({
     };
   }, [item._id, item.type, item.state?.video_id, authKey]);
 
+  // The preferred title is a display preference the user can change at any time,
+  // so it resolves in its own effect: a language change must not tear down the
+  // card's artwork hydration above.
+  useEffect(() => {
+    // Any anime row qualifies: native anime ids, detected Cinemeta rows, and
+    // Cinemeta rows whose detail page recorded an anime mapping.
+    if (!isAnimeCwItem(item) && getAnimeCwId(item._id) == null) return;
+    let cancelled = false;
+    resolvePreferredAnimeTitle(item._id, settings.animeTitleLanguage)
+      .then((tt) => {
+        if (!cancelled) setTranslatedTitle(tt?.trim() || null);
+      })
+      .catch(() => {});
+    return () => {
+      cancelled = true;
+    };
+  }, [item._id, settings.animeTitleLanguage]);
+
   useEffect(() => {
     setEpTitle(null);
     setEpStill(null);
@@ -414,6 +428,16 @@ export const ContinueCard = memo(function ContinueCard({
   };
 
   const resolveEpisode = async (): Promise<PlayEpisode | undefined> => {
+    // Resolve the anime identity the same way the stream picker does, so a
+    // split series (Bleach TYBW, JoJo) lands on the cour that aired the season
+    // instead of the row's base entry.
+    const animePlay = await resolveCwAnimePlayEpisode({
+      metaId: item._id,
+      season: ep?.season,
+      episode: ep?.episode,
+      name: episodeTitle,
+    });
+    if (animePlay) return animePlay;
     let episode: PlayEpisode | undefined = item.type === "series" && ep ? ep : undefined;
     if (!episode && kitsuThreeSeg) {
       if (kitsuVideo) {
@@ -451,6 +475,11 @@ export const ContinueCard = memo(function ContinueCard({
       const animeId = getAnimeCwId(item._id);
       if (animeId) episode = { ...episode, sourceMetaId: animeId };
     }
+    // The card already resolved this episode's title from the metadata addon.
+    // Carry it onto the episode so a row that is not anime (Simkl/Trakt and
+    // ordinary series) still gives the presence an episode name.
+    if (episode && !episode.name && episodeTitle) episode = { ...episode, name: episodeTitle };
+    if (episode && !episode.still && epStill) episode = { ...episode, still: epStill };
     return episode;
   };
 

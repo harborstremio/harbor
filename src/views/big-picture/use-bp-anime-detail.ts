@@ -9,6 +9,7 @@ import { parseKitsuId, type KitsuEpisode, type KitsuStreamer } from "@/lib/provi
 import type { TmdbDetail } from "@/lib/providers/tmdb";
 import type { TvdbOrderType, TvdbSeasonTypeOption } from "@/lib/providers/tvdb";
 import { pickTvdbImage } from "@/lib/providers/tvdb-proxy";
+import { fillAiredPlaceholderTitles } from "@/lib/providers/episode-placeholder";
 import { useSettings } from "@/lib/settings";
 import type { SpoilerMask } from "@/lib/spoilers";
 import { effectiveOrderProvider, tvdbPanelEnabled } from "@/lib/settings/episode-order";
@@ -246,12 +247,16 @@ export function useBpAnimeDetail(meta: Meta | null, opts?: BpAnimeDetailOptions)
   const visible = tvdb.panel ? tvdb.panel.visibleEpisodes : (order?.visibleEpisodes ?? episodes);
   const proxyImages = useTvdbProxyImages(kitsuId, imdbId, episodes.length, settings.tvdbSeasonType);
   const shown = useMemo(() => {
-    if (Object.keys(proxyImages).length === 0) return visible;
-    return visible.map((ep) => {
+    // The TVDB order can still say "TBA" for an episode that already aired while
+    // the entry's own episodes know the real title; fill those in, keep TBA for
+    // episodes that have not aired.
+    const filled = fillAiredPlaceholderTitles(visible, episodes);
+    if (Object.keys(proxyImages).length === 0) return filled;
+    return filled.map((ep) => {
       const img = pickTvdbImage(proxyImages, ep);
       return img ? { ...ep, thumbnail: img } : ep;
     });
-  }, [visible, proxyImages]);
+  }, [visible, proxyImages, episodes]);
 
   const progress = useAnimeProgressMap({
     episodes,

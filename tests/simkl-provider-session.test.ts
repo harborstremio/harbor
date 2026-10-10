@@ -34,6 +34,7 @@ function fixture() {
   const dependencies: Record<string, unknown> = {
     react,
     "react/jsx-runtime": { jsx: (_: unknown, props: unknown) => ({ props }) },
+    "@/lib/secret-store": { subscribeSecretsReady: () => () => {} },
     "./session": {
       getSession: () => session,
       subscribeSession: (fn: () => void) => {
@@ -44,8 +45,10 @@ function fixture() {
     },
     "./device-auth": {},
     "./ids": {},
+    "./list-status": { isSimklEpisodeWatched: async () => false },
+    "./playback": { hasActiveSimklPlayback: async () => false },
     "./history": {},
-    "./pending-sync": { armOnlineFlush: () => () => {}, flushPendingWatches: async () => {} },
+    "./pending-sync": { armPendingFlush: () => () => {}, flushPendingWatches: async () => {} },
     "./record-watched": {},
     "./scrobble": {},
   };

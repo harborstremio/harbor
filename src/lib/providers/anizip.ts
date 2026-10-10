@@ -35,6 +35,8 @@ export type AniZipEpisode = {
   tvdbId?: number;
   anidbEid?: number;
   airDate?: string;
+  /** Newer entries publish the same date under a lowercase key. */
+  airdate?: string;
   airDateUtc?: string;
   runtime?: number;
   overview?: string;
@@ -43,6 +45,8 @@ export type AniZipEpisode = {
   finaleType?: string;
   filler?: boolean;
   titles?: Record<string, string>;
+  /** Older entries ship the same localized map under the singular key. */
+  title?: Record<string, string>;
 };
 
 export type AniZipMapping = {
@@ -115,21 +119,28 @@ async function get(query: string): Promise<AniZipMapping | null> {
   return p;
 }
 
+/** AniZip carries the localized title map under `titles` or, on older entries, `title`. */
+export function episodeTitleMap(ep: AniZipEpisode | undefined): Record<string, string> | null {
+  return ep?.titles ?? ep?.title ?? null;
+}
+
 export function pickEpisodeTitle(ep: AniZipEpisode | undefined): string | null {
-  if (!ep?.titles) return null;
-  return ep.titles.en ?? ep.titles["x-jat"] ?? ep.titles.ja ?? null;
+  const map = episodeTitleMap(ep);
+  if (!map) return null;
+  return map.en ?? map["x-jat"] ?? map.ja ?? null;
 }
 
 export function pickLocalizedTitle(
   ep: AniZipEpisode | undefined,
   lang: string | null | undefined,
 ): string | null {
-  if (!ep?.titles) return null;
+  const map = episodeTitleMap(ep);
+  if (!map) return null;
   if (lang) {
     const exact = lang.trim();
-    if (ep.titles[exact]) return ep.titles[exact];
+    if (map[exact]) return map[exact];
     const base = exact.split("-")[0]?.toLowerCase() ?? "";
-    if (base && ep.titles[base]) return ep.titles[base];
+    if (base && map[base]) return map[base];
   }
-  return ep.titles.en ?? ep.titles["x-jat"] ?? ep.titles.ja ?? null;
+  return map.en ?? map["x-jat"] ?? map.ja ?? null;
 }

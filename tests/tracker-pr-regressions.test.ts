@@ -210,9 +210,32 @@ test("Simkl must acknowledge the requested episodes, not merely find their show"
     "./client": { simklRequest: async () => response },
   });
   assert.equal(await api.markEpisodesWatched({ imdb: "tt100" }, 1, [1]), false);
+  response = { added: { shows: 1, episodes: 0 }, not_found: { shows: [{}] } };
+  assert.equal(await api.markEpisodesWatched({ imdb: "tt100" }, 1, [1]), false);
   response = { added: { episodes: 1 } };
   assert.equal(await api.markEpisodesWatched({ imdb: "tt100" }, 1, [1]), true);
-  assert.equal(await api.markEpisodesWatched({ imdb: "tt100" }, 1, [1, 2]), false);
+  // An added shortfall with nothing reported unresolved is Simkl's
+  // already-watched no-op: the requested episodes are all watched either way.
+  assert.equal(await api.markEpisodesWatched({ imdb: "tt100" }, 1, [1, 2]), true);
+  assert.equal(await api.markEpisodesWatched({ imdb: "tt100" }, 1, [1]), true);
+});
+
+test("Simkl movie and whole-show history writes accept the already-watched no-op", async () => {
+  const session: any = { username: "a", accessToken: "t" };
+  let response: any = { added: { movies: 0 }, not_found: {} };
+  const api = load("src/lib/simkl/history.ts", {
+    "@/lib/active-profile-id": { activeProfileId: () => "a" },
+    "./session": { getSession: () => session },
+    "@/lib/tracker-resolve": { resolveForMeta: async () => ({ ok: false, reason: "not-found" }) },
+    "./activities/gate": { currentActivitiesAll: async () => "m" },
+    "./ids": { simklTargetIds: (target: any) => target.ids },
+    "./client": { simklRequest: async () => response },
+  });
+  assert.equal(await api.addToHistory({ kind: "movie", ids: { imdb: "tt100" } }), true);
+  response = { added: { movies: 0 }, not_found: { movies: [{}] } };
+  assert.equal(await api.addToHistory({ kind: "movie", ids: { imdb: "tt100" } }), false);
+  response = { added: { shows: 0 }, not_found: {} };
+  assert.equal(await api.addToHistory({ kind: "show", ids: { imdb: "tt100" } }), true);
 });
 test("Trakt's cached history accepts empty success and stays with its account", () => {
   const data = new Map();
@@ -258,7 +281,20 @@ test("Simkl preserves cached history on failure, clears it on empty success and 
       "./session": { getSession: () => session, subscribeSession: (f: any) => (reset = f) },
       "@/lib/active-profile-id": { activeProfileId: () => "a" },
       "./activities/gate": { currentActivitiesAll: async () => marker },
-      "./ids": {},
+      "./ids": {
+        simklEntryIdKeys: (ids: any, kind: "movie" | "show") => {
+          if (!ids) return [];
+          const keys: string[] = [];
+          if (ids.imdb) keys.push(ids.imdb);
+          if (ids.tmdb != null)
+            keys.push(kind === "movie" ? `tmdb:movie:${ids.tmdb}` : `tmdb:tv:${ids.tmdb}`);
+          if (ids.mal != null) keys.push(`mal:${ids.mal}`);
+          if (ids.kitsu != null) keys.push(`kitsu:${ids.kitsu}`);
+          if (ids.anilist != null) keys.push(`anilist:${ids.anilist}`);
+          if (ids.anidb != null) keys.push(`anidb:${ids.anidb}`);
+          return keys;
+        },
+      },
       "./client": {
         simklRequest: async () => {
           if (response instanceof Error) throw response;
@@ -308,6 +344,7 @@ test("Simkl fallback returns actual outcomes and stops after its account changes
       stremioIdToSimklTarget: () => (known ? { ok: true, target: episode } : { ok: false }),
       resolveSimklEpisodeTarget: async () => null,
     },
+    "./scrobble-body": { animeIdentity: () => null },
     "./history": {
       markEpisodesWatched: async () => {
         if (switchDuring) session = { username: "b" };

@@ -16,5 +16,5 @@ test("calendar timestamps retain their exact release instant", () => {
 
 test("AniZip calendar entries prefer the UTC timestamp over the date-only fallback", () => {
   const source = readFileSync(new URL("../src/lib/calendar-library.ts", import.meta.url), "utf8");
-  assert.match(source, /localDateTimeFromIso\(ep\.airDateUtc \?\? ep\.airDate\)/);
+  assert.match(source, /localDateTimeFromIso\(ep\.airDateUtc \?\? ep\.airDate \?\? ep\.airdate\)/);
 });

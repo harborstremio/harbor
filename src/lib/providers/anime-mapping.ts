@@ -7,7 +7,7 @@ import {
   aniZipByTmdbTv,
   type AniZipMapping,
 } from "@/lib/providers/anizip";
-import { kitsuAnime, kitsuMainTvSeries } from "@/lib/providers/kitsu";
+import { kitsuAnime, kitsuMainTvSeries, type KitsuEpisode } from "@/lib/providers/kitsu";
 import { selectSiblingWindows, type AnimeListWindow } from "@/lib/streams/anime-identity-core";
 import { mappingStore } from "./mapping-store";
 
@@ -29,8 +29,8 @@ const ARM = "https://relations.yuna.moe/api/ids";
 const ANIME_LIST_URL =
   "https://raw.githubusercontent.com/Anime-Lists/anime-lists/master/anime-list-master.xml";
 
-const ARM_KITSU_KEY = "harbor.armkitsucache.v2";
-const ANIDB_TVDB_KEY = "harbor.anidbtvdbcache";
+const ARM_KITSU_KEY = "harbor.armkitsucache.v3";
+const ANIDB_TVDB_KEY = "harbor.anidbtvdbcache.v2";
 const ARM_TTL_MS = 30 * 24 * 60 * 60 * 1000;
 const XML_TTL_MS = 7 * 24 * 60 * 60 * 1000;
 
@@ -215,6 +215,40 @@ export async function kitsuToImdb(kitsuId: number): Promise<string | null> {
   if (!arm?.anidb) return null;
   const maps = await loadAnidbMaps();
   return maps.imdb[String(arm.anidb)] ?? null;
+}
+
+/**
+ * Attach the anime-lists season window to episodes AniZip does not cover.
+ *
+ * New seasons often get an AniZip mapping (ids only) before its episode
+ * records exist, and the Kitsu addon labels every cour "season 1" — so a
+ * sequel cour's identity-less rows carry seasonNumber 1 and fall back to the
+ * franchise's season 1 during the TVDB merge (wrong air dates, stills,
+ * overviews and ratings). The window's season/offset gives those rows their
+ * real provider coordinates; rows AniZip already covered keep their own.
+ */
+export async function applyAnidbSeasonWindow(
+  episodes: KitsuEpisode[],
+  kitsuId: number,
+): Promise<void> {
+  if (episodes.every((ep) => ep.imdbSeason != null)) return;
+  const anidb = await kitsuToAnidb(kitsuId).catch(() => null);
+  if (anidb == null) return;
+  const maps = await loadAnidbMaps().catch(() => null);
+  if (!maps) return;
+  const tvdbId = maps.tvdb[String(anidb)];
+  const win =
+    tvdbId != null
+      ? maps.byTvdb?.[String(tvdbId)]?.find((w) => w.anidbId === anidb)
+      : undefined;
+  if (!win || typeof win.season !== "number") return;
+  const imdbId = maps.imdb[String(anidb)] ?? null;
+  for (const ep of episodes) {
+    if (ep.imdbSeason != null || ep.number == null) continue;
+    ep.imdbSeason = win.season;
+    ep.imdbEpisode = ep.number + win.offset;
+    if (imdbId && !ep.imdbId) ep.imdbId = imdbId;
+  }
 }
 
 export async function kitsuToAnidb(kitsuId: number): Promise<number | null> {

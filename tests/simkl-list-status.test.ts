@@ -3,6 +3,25 @@ import { readFileSync } from "node:fs";
 import test from "node:test";
 import ts from "typescript";
 
+// The harness swaps ./client and ./session but keeps the real id helpers, since
+// they are pure and the watched lookup relies on their exact key spellings.
+const idsModule = (() => {
+  const code = ts.transpileModule(readFileSync("src/lib/simkl/ids.ts", "utf8"), {
+    compilerOptions: { target: ts.ScriptTarget.ES2022, module: ts.ModuleKind.CommonJS },
+  }).outputText;
+  const module = { exports: {} as Record<string, unknown> };
+  new Function("require", "module", "exports", code)(
+    () => ({
+      anidbToMal: async () => null,
+      anilistToMal: async () => null,
+      kitsuToMal: async () => null,
+    }),
+    module,
+    module.exports,
+  );
+  return module.exports;
+})();
+
 function harness() {
   let marker: string | null = "revision-1";
   let reset: () => void = () => {};
@@ -26,7 +45,7 @@ function harness() {
         reset = fn;
       },
     },
-    "./ids": { simklTargetIds: (target: unknown) => target },
+    "./ids": idsModule,
   };
   const compiled = ts.transpileModule(readFileSync("src/lib/simkl/list-status.ts", "utf8"), {
     compilerOptions: { target: ts.ScriptTarget.ES2022, module: ts.ModuleKind.CommonJS },
@@ -240,6 +259,41 @@ test("successful status writes are not reported as failed when refreshing the ca
   });
   assert.equal(await h.setSimklStatus({ kind: "show", imdb: "tt100" }, "hold"), "hold");
   await h.clearSimklStatus({ kind: "show", imdb: "tt100" });
+});
+
+test("a queued watch is already covered when Simkl lists the episode watched", async () => {
+  const h = harness(); h.setResponse(shows);
+  assert.equal(await h.isSimklEpisodeWatched("tt100", { season: 1, episode: 1 }), true);
+  assert.equal(await h.isSimklEpisodeWatched("tt100", { season: 1, episode: 2 }), false);
+});
+
+test("a season-scoped row id resolves to the show's own watched set", async () => {
+  const h = harness();
+  h.setResponse({ shows: [{ status: "watching", show: { ids: { imdb: "tt100" } },
+    seasons: [{ number: 2, episodes: [{ number: 2, watched_at: watchedAt }] }] }] });
+  assert.equal(await h.isSimklEpisodeWatched("tt100:2:2", { season: 2, episode: 2 }), true);
+});
+
+test("anime entry-relative and provider spellings both resolve against the watched set", async () => {
+  const h = harness();
+  h.setResponse({ anime: [{ status: "watching", anime: { ids: { kitsu: 9 } },
+    seasons: [{ number: 1, episodes: [{ number: 2, watched_at: watchedAt }] }] }] });
+  assert.equal(await h.isSimklEpisodeWatched("kitsu:9", { season: 1, episode: 2 }), true);
+  assert.equal(await h.isSimklEpisodeWatched("kitsu:9",
+    { season: 2, episode: 2, imdbSeason: 1, imdbEpisode: 2 }), true);
+  assert.equal(await h.isSimklEpisodeWatched("kitsu:9",
+    { season: 2, episode: 2, imdbSeason: 2, imdbEpisode: 2 }), false);
+});
+
+test("a completed show covers any queued episode without per-episode history", async () => {
+  const h = harness();
+  h.setResponse({ shows: [{ status: "completed", show: { ids: { imdb: "tt100" } } }] });
+  assert.equal(await h.isSimklEpisodeWatched("tt100", { season: 3, episode: 7 }), true);
+});
+
+test("a watch without episode coordinates is left to the write path", async () => {
+  const h = harness(); h.setResponse(shows);
+  assert.equal(await h.isSimklEpisodeWatched("tt100", undefined), false);
 });
 
 test("anime seasons sharing a franchise ID combine TVDB coordinates without marking the wrong season", async () => {

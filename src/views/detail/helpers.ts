@@ -1,11 +1,8 @@
-import { daysFromTodayLocal } from "@/lib/dates";
+import { daysFromTodayLocal, isUpcomingDate } from "@/lib/dates";
 import type { Meta } from "@/lib/cinemeta";
 import type { Episode, Season, TmdbDetail } from "@/lib/providers/tmdb";
 
-export function isUpcomingDate(date: string | null | undefined): boolean {
-  const d = daysFromTodayLocal(date);
-  return d != null && d > 0;
-}
+export { isUpcomingDate };
 
 export function airedWithinDays(date: string | null | undefined, days: number): boolean {
   const d = daysFromTodayLocal(date);

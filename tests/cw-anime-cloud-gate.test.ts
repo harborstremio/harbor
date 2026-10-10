@@ -164,9 +164,10 @@ test("resurface walks past watched adjacent episodes", () => {
 });
 
 test("tracker sync cannot corrupt the wrong cour", () => {
-  for (const src of [anilistSync, malSync]) {
-    assert.match(src, /if \(target > total \+ 1\) return;/);
-  }
+  // AniList walks the sequel cour that aired the episode; MAL still bails out.
+  assert.match(anilistSync, /if \(total > 0 && target > total\) \{/);
+  assert.match(anilistSync, /resolveSplitEntry\(media, target\)/);
+  assert.match(malSync, /if \(total > 0 && target > total\) return;/);
   assert.match(anilistSync, /entry && total > 0 && entry\.progress >= total\) return;/);
   assert.match(
     malSync,

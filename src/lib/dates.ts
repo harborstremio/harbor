@@ -52,3 +52,8 @@ export function daysFromTodayLocal(value: string | null | undefined): number | n
   const today = new Date(now.getFullYear(), now.getMonth(), now.getDate());
   return Math.round((air.getTime() - today.getTime()) / DAY_MS);
 }
+
+export function isUpcomingDate(date: string | null | undefined): boolean {
+  const d = daysFromTodayLocal(date);
+  return d != null && d > 0;
+}

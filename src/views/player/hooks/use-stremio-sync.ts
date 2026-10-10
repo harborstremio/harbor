@@ -7,7 +7,7 @@ import type { PlayerSnapshot } from "@/lib/player/bridge";
 import { getPlaybackPosition, subscribePlaybackClock } from "@/lib/player/playback-clock";
 import { useProfiles } from "@/lib/profiles";
 import { recordWatchedBy } from "@/lib/watched-by";
-import { recordAnimeCwId } from "@/lib/anime-cw-ids";
+import { recordAnimePlayId } from "@/lib/anime-cw-ids";
 import type { PlayerSrc } from "@/lib/view";
 import { resumeLibraryGetOne } from "@/lib/player/resume-start";
 import { playerLoadIdentity } from "@/lib/player/load-identity";
@@ -75,7 +75,7 @@ export function useStremioSync(params: {
       resolvedImdbVerified &&
       resolvedImdbId?.startsWith("tt")
     ) {
-      recordAnimeCwId(resolvedImdbId, src.meta.id);
+      recordAnimePlayId(resolvedImdbId, src.meta.id);
     }
   }, [resolvedImdbId, resolvedImdbVerified, src.meta.id]);
   const sessionStartRef = useRef<number>(Date.now());

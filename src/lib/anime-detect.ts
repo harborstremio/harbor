@@ -1,6 +1,7 @@
 import { useSyncExternalStore } from "react";
-import { meta as fetchMeta } from "@/lib/cinemeta";
-import { imdbToKitsu } from "@/lib/providers/anime-mapping";
+import { meta as fetchMeta, type Meta } from "@/lib/cinemeta";
+import { imdbToKitsu, tmdbTvToKitsu } from "@/lib/providers/anime-mapping";
+import { kitsuAnime } from "@/lib/providers/kitsu";
 import { setItemWithRecovery } from "@/lib/storage-recovery";
 
 const STORAGE_KEY = "harbor.anime.detected.v2";
@@ -93,6 +94,24 @@ export function metaLooksAnime(m: {
   if (ANIME_ID_RE.test(id)) return true;
   if (detected.has(id)) return true;
   return isJapaneseAnime(m);
+}
+
+/**
+ * Warm the anime identity resolution for a catalog meta the user is about to
+ * open (the search top match): resolve imdb/tmdb -> kitsu and warm the Kitsu
+ * lookup the detail page's year verdict needs, so detection answers from cache
+ * instead of the series view rendering and then being swapped out.
+ */
+export function warmAnimeResolution(m: Meta): void {
+  if (!metaLooksAnime(m)) return;
+  const imdb = m.id.startsWith("tt") ? m.id : null;
+  const tmdbTv = /^tmdb:tv:(\d+)$/.exec(m.id);
+  if (!imdb && !tmdbTv) return;
+  void (async () => {
+    let k = tmdbTv ? await tmdbTvToKitsu(Number(tmdbTv[1])).catch(() => null) : null;
+    if (k == null && imdb) k = await imdbToKitsu(imdb).catch(() => null);
+    if (k != null) await kitsuAnime(k).catch(() => null);
+  })();
 }
 
 export function detectAnimeForMetas(metas: Array<{ id: string; type?: string }>): void {

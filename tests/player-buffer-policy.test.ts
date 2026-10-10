@@ -88,6 +88,44 @@ test("bigger buffer mode increases Harbor defaults and waits for a useful reserv
   assert.ok(!options.includes("demuxer-readahead-secs=20"));
 });
 
+test("Anime4K keeps bilinear off the scaling path", () => {
+  const performance = {
+    mpvQuality: "performance",
+    mpvHwdec: "auto",
+    mpvBufferBoost: false,
+    mpvDownmixStereo: false,
+    audioDevice: "auto",
+    playerDisplayPanel: "standard",
+    mpvTweaks: {},
+  } as unknown as Settings;
+
+  const plain = compileMpvOptions(performance).split("\n");
+  assert.ok(plain.includes("scale=bilinear"), "the performance profile downsamples by default");
+
+  const withAnime4k = compileMpvOptions(performance, { anime4k: true }).split("\n");
+  // mpv runs `scale` after the user shaders, so a bilinear kernel would undo
+  // the upscale Anime4K just did.
+  assert.ok(!withAnime4k.some(l => /^(scale|cscale|dscale)=bilinear$/.test(l)));
+  // The rest of the cheap profile is unrelated to scaling and stays.
+  assert.ok(withAnime4k.includes("dither=no"));
+  assert.ok(withAnime4k.includes("vd-lavc-fast=yes"));
+});
+
+test("a sharp scaling kernel is left in place for Anime4K", () => {
+  const quality = {
+    mpvQuality: "quality",
+    mpvHwdec: "auto",
+    mpvBufferBoost: false,
+    mpvDownmixStereo: false,
+    audioDevice: "auto",
+    playerDisplayPanel: "standard",
+    mpvTweaks: {},
+  } as unknown as Settings;
+  const options = compileMpvOptions(quality, { anime4k: true }).split("\n");
+  assert.ok(options.includes("scale=ewa_lanczossharp"));
+  assert.ok(options.includes("dscale=mitchell"));
+});
+
 test("SVP uses a removable labeled VapourSynth filter", () => {
   const settings = { svpVpyPath: "/home/user/.local/share/harbor/svp/svp.vpy" } as Settings;
   const options = svpMpvLines(settings, true).split("\n");

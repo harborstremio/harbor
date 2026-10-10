@@ -154,6 +154,7 @@ test("both strip and grid information buttons pass the same playback payload as 
     "@/lib/i18n": { useT: () => (value) => value },
     "./episode-grid": { EpisodeGrid: marker("grid") },
     "./badges": { FillerBadge: marker("filler"), UpcomingBadge: marker("upcoming") },
+    "@/lib/providers/anime-episode-enrich": { unairedIndexes: () => new Set() },
     "./helpers": { isUpcomingDate: () => false },
     "./episode-rating-badge": { EpisodeRatingBadge: marker("rating") },
   });

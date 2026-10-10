@@ -17,6 +17,7 @@ export function useStreamIds(
         episode,
         imdbId,
         meta.behaviorHints?.defaultVideoId,
+        meta.name,
       );
       if (cancelled) return;
       setStreamIds((prev) => {

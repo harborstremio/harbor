@@ -35,6 +35,7 @@ export function useSwitcherRefresh(params: {
       episode,
       imdbId,
       meta.behaviorHints?.defaultVideoId,
+      meta.name,
     );
     if (streamIds.length === 0) return;
     const strictMode = settings.streamFilterLevel === "strict";
