@@ -522,6 +522,10 @@ const settingsRefinements: Record<string, string> = {
   "Controller button glyphs:": "Ký hiệu nút tay cầm:",
   "Previous season": "Mùa trước",
   "Next season": "Mùa sau",
+  "Speed pop-up": "Bảng tốc độ",
+  "Speed pop-up while watching": "Hiện tốc độ khi xem",
+  "Show the playback speed when you change it with a shortcut, the wheel or the speed menu.": "Hiển thị tốc độ phát khi bạn thay đổi bằng phím tắt, con lăn hoặc menu tốc độ.",
+  "Speed pop-up position": "Vị trí bảng tốc độ",
   "Jump to the next unwatched episode": "Nhảy tới tập chưa xem tiếp theo",
   "Scroll the episode list to the first episode you have not watched when you open a show or change season.": "Cuộn danh sách tập tới tập đầu tiên bạn chưa xem khi mở một chương trình hoặc đổi mùa.",
 };

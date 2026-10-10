@@ -135,6 +135,8 @@ export const DEFAULT: Settings = {
   contentAdvisoryShowIgnore: true,
   playerVolumeHud: true,
   playerVolumeHudPosition: "top",
+  playerSpeedHud: true,
+  playerSpeedHudPosition: "top",
   customPlaybackSpeeds: [],
   customSleepMinutes: [],
   defaultPlaybackSpeed: 1,

@@ -522,6 +522,10 @@ const settingsRefinements: Record<string, string> = {
   "Controller button glyphs:": "컨트롤러 버튼 기호:",
   "Previous season": "이전 시즌",
   "Next season": "다음 시즌",
+  "Speed pop-up": "속도 팝업",
+  "Speed pop-up while watching": "시청 중 속도 팝업",
+  "Show the playback speed when you change it with a shortcut, the wheel or the speed menu.": "단축키, 휠 또는 속도 메뉴로 재생 속도를 바꿀 때 표시합니다.",
+  "Speed pop-up position": "속도 팝업 위치",
   "Jump to the next unwatched episode": "다음 미시청 에피소드로 이동",
   "Scroll the episode list to the first episode you have not watched when you open a show or change season.": "프로그램을 열거나 시즌을 바꿀 때 아직 보지 않은 첫 에피소드로 목록을 스크롤합니다.",
 };

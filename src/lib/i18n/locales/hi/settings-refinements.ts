@@ -522,6 +522,10 @@ const settingsRefinements: Record<string, string> = {
   "Controller button glyphs:": "कंट्रोलर के बटन चिह्न:",
   "Previous season": "पिछला सीज़न",
   "Next season": "अगला सीज़न",
+  "Speed pop-up": "स्पीड पॉप-अप",
+  "Speed pop-up while watching": "देखते समय स्पीड पॉप-अप",
+  "Show the playback speed when you change it with a shortcut, the wheel or the speed menu.": "शॉर्टकट, व्हील या स्पीड मेन्यू से प्लेबैक स्पीड बदलने पर उसे दिखाएँ।",
+  "Speed pop-up position": "स्पीड पॉप-अप की स्थिति",
   "Jump to the next unwatched episode": "अगले न देखे गए एपिसोड पर जाएँ",
   "Scroll the episode list to the first episode you have not watched when you open a show or change season.": "कोई शो खोलने या सीज़न बदलने पर एपिसोड सूची को पहले न देखे गए एपिसोड तक स्क्रॉल करें।",
 };

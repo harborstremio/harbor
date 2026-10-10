@@ -5589,6 +5589,28 @@ const SETTINGS_OPTIONS: SettingsOption[] = [
     ],
   },
   {
+    label: "Speed pop-up while watching",
+    section: "player",
+    tab: "onscreen",
+    anchorTitle: "Speed pop-up",
+    keywords: [
+      "speed hud",
+      "speed overlay",
+      "speed popup",
+      "playback speed indicator",
+      "on screen speed",
+      "speed osd",
+      "rate indicator",
+    ],
+  },
+  {
+    label: "Speed pop-up position",
+    section: "player",
+    tab: "onscreen",
+    anchorTitle: "Speed pop-up",
+    keywords: ["speed position", "speed hud placement", "speed overlay position"],
+  },
+  {
     label: "Auto",
     section: "player",
     tab: "engine",

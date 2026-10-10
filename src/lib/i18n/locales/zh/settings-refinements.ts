@@ -522,6 +522,10 @@ const settingsRefinements: Record<string, string> = {
   "Controller button glyphs:": "控制器按钮图标：",
   "Previous season": "上一季",
   "Next season": "下一季",
+  "Speed pop-up": "速度弹出框",
+  "Speed pop-up while watching": "观看时显示速度弹窗",
+  "Show the playback speed when you change it with a shortcut, the wheel or the speed menu.": "通过快捷键、滚轮或速度菜单更改播放速度时显示当前速度。",
+  "Speed pop-up position": "速度弹窗位置",
   "Jump to the next unwatched episode": "跳到下一集未看剧集",
   "Scroll the episode list to the first episode you have not watched when you open a show or change season.": "打开剧集或切换季时，将剧集列表滚动到第一集未看的剧集。",
 };

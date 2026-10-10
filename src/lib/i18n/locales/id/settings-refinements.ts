@@ -522,6 +522,10 @@ const settingsRefinements: Record<string, string> = {
   "Controller button glyphs:": "Simbol tombol pengontrol:",
   "Previous season": "Musim sebelumnya",
   "Next season": "Musim berikutnya",
+  "Speed pop-up": "Pop-up kecepatan",
+  "Speed pop-up while watching": "Pop-up kecepatan saat menonton",
+  "Show the playback speed when you change it with a shortcut, the wheel or the speed menu.": "Tampilkan kecepatan putar saat Anda mengubahnya dengan pintasan, roda mouse, atau menu kecepatan.",
+  "Speed pop-up position": "Posisi pop-up kecepatan",
   "Jump to the next unwatched episode": "Lompat ke episode berikutnya yang belum ditonton",
   "Scroll the episode list to the first episode you have not watched when you open a show or change season.": "Gulir daftar episode ke episode pertama yang belum Anda tonton saat membuka acara atau mengganti musim.",
 };

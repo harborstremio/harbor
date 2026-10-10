@@ -8,6 +8,7 @@ import { XrayOverlay } from "@/components/player/xray/xray-overlay";
 import { BufferingIndicator } from "@/components/player/buffering-indicator";
 import { P2pStatusChip } from "@/components/player/p2p-status-chip";
 import type { VolumeHudPosition, VolumeIndicatorState } from "@/components/player/volume-indicator";
+import type { SpeedIndicatorState } from "@/components/player/speed-indicator";
 import type { ParentalCategory } from "@/lib/providers/harbor-imdb";
 import type { PlayerBridge, PlayerSnapshot } from "@/lib/player/bridge";
 import { writePlayerPrefs } from "@/lib/player-prefs";
@@ -55,6 +56,8 @@ export type PlayerOverlayLayersProps = {
   subtitleOffsetSec: number | null;
   volumeIndicator: VolumeIndicatorState;
   volumeHudPosition: VolumeHudPosition;
+  speedIndicator: SpeedIndicatorState;
+  speedHudPosition: VolumeHudPosition;
   videoFillPill: string | null;
   subDropToast: string | null;
   pipMode: boolean;
@@ -66,6 +69,7 @@ export type PlayerOverlayLayersProps = {
   toggleFullscreen: () => void;
   onVolumeWheel: (deltaY: number) => void;
   onVolumeFeedback: (volume: number, muted: boolean) => void;
+  onSpeedFeedback: (rate: number) => void;
   isLocalSrc: boolean;
   sourceFailed: boolean;
   swappingEp: boolean;
@@ -227,6 +231,8 @@ export const PlayerOverlayLayers = memo(function PlayerOverlayLayers(p: PlayerOv
         subtitleOffsetSec={p.subtitleOffsetSec}
         volumeIndicator={p.volumeIndicator}
         volumeHudPosition={p.volumeHudPosition}
+        speedIndicator={p.speedIndicator}
+        speedHudPosition={p.speedHudPosition}
         videoFillPill={p.videoFillPill}
         subDropToast={p.subDropToast}
         contentAdvisory={p.contentAdvisory}
@@ -415,6 +421,7 @@ export const PlayerOverlayLayers = memo(function PlayerOverlayLayers(p: PlayerOv
           onOpenDvr={p.openDvr}
           sleep={p.sleep}
           onVolumeFeedback={p.onVolumeFeedback}
+          onSpeedFeedback={p.onSpeedFeedback}
           homeServerQualityControl={p.homeServerQualityControl}
         />
       )}

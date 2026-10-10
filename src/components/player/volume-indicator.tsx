@@ -17,14 +17,14 @@ export type VolumeIndicatorState = {
 
 export type VolumeHudPosition = "center" | "top" | "top-left" | "top-right";
 
-const POS: Record<VolumeHudPosition, string> = {
+export const HUD_POSITION_CLASS: Record<VolumeHudPosition, string> = {
   center: "left-[calc(50%-8rem)] top-[calc(50%-2.25rem)]",
   top: "left-[calc(50%-8rem)] top-9",
   "top-left": "left-6 top-9",
   "top-right": "right-6 top-9",
 };
 
-const JAKARTA = '"Plus Jakarta Sans", "Inter", system-ui, sans-serif';
+export const JAKARTA = '"Plus Jakarta Sans", "Inter", system-ui, sans-serif';
 
 export function VolumeIndicator({
   state,
@@ -48,7 +48,7 @@ export function VolumeIndicator({
   const Icon = muted ? VolumeX : volume < 0.5 ? Volume1 : Volume2;
 
   return (
-    <div className={`pointer-events-none absolute z-30 w-64 ${POS[position]}`}>
+    <div className={`pointer-events-none absolute z-30 w-64 ${HUD_POSITION_CLASS[position]}`}>
       <ThreeLiquidGlassSurface
         radius="20px"
         shaderRadius={0.28}

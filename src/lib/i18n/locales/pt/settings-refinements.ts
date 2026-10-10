@@ -522,6 +522,10 @@ const settingsRefinements: Record<string, string> = {
   "Controller button glyphs:": "Símbolos dos botões dos controles:",
   "Previous season": "Temporada anterior",
   "Next season": "Próxima temporada",
+  "Speed pop-up": "Indicador de velocidade",
+  "Speed pop-up while watching": "Indicador de velocidade durante a exibição",
+  "Show the playback speed when you change it with a shortcut, the wheel or the speed menu.": "Mostra a velocidade de reprodução quando você a altera com um atalho, a roda do mouse ou o menu de velocidade.",
+  "Speed pop-up position": "Posição do indicador de velocidade",
   "Jump to the next unwatched episode": "Ir para o próximo episódio não assistido",
   "Scroll the episode list to the first episode you have not watched when you open a show or change season.": "Rola a lista até o primeiro episódio que você não assistiu ao abrir uma série ou trocar de temporada.",
 };

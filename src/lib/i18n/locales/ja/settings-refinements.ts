@@ -522,6 +522,10 @@ const settingsRefinements: Record<string, string> = {
   "Controller button glyphs:": "コントローラーのボタンアイコン：",
   "Previous season": "前のシーズン",
   "Next season": "次のシーズン",
+  "Speed pop-up": "速度ポップアップ",
+  "Speed pop-up while watching": "視聴中の速度ポップアップ",
+  "Show the playback speed when you change it with a shortcut, the wheel or the speed menu.": "ショートカット、ホイール、速度メニューで再生速度を変えたときに表示します。",
+  "Speed pop-up position": "速度ポップアップの位置",
   "Jump to the next unwatched episode": "次の未視聴エピソードへ移動",
   "Scroll the episode list to the first episode you have not watched when you open a show or change season.": "番組を開いたときやシーズンを切り替えたときに、最初の未視聴エピソードまでスクロールします。",
 };
