@@ -1,6 +1,11 @@
 import { useEffect, useMemo, useState } from "react";
 import type { EpgIndex, IptvChannel } from "@/lib/iptv/types";
-import { buildSportsChannelIndex, channelsForGame, type GameChannel } from "@/lib/jl/sports/channels";
+import {
+  buildSportsChannelIndex,
+  channelsForGame,
+  type GameChannel,
+  type SportsChannelIndex,
+} from "@/lib/jl/sports/channels";
 import {
   effectiveTeams,
   useJlFavoritePlayers,
@@ -76,6 +81,21 @@ export function useJlGames(favorites: JlFavoriteTeam[], enabled = true): SportsG
   return games;
 }
 
+/** Which of the viewer's channels carry each game; empty while Smart Channel Finder is off. */
+export function useSportsChannelIndex(
+  channels: IptvChannel[],
+  epg: EpgIndex | null,
+  nowMs: number,
+): SportsChannelIndex {
+  const { settings } = useSettings();
+  const finder = settings.sportsChannelFinder;
+  const bucket = Math.floor(nowMs / INDEX_BUCKET_MS);
+  return useMemo(
+    () => buildSportsChannelIndex(finder ? channels : [], epg, new Date(bucket * INDEX_BUCKET_MS)),
+    [channels, epg, bucket, finder],
+  );
+}
+
 export function useJlSports(params: {
   channels: IptvChannel[];
   epg: EpgIndex | null;
@@ -85,7 +105,7 @@ export function useJlSports(params: {
 }) {
   const { channels, epg, nowMs, active = true } = params;
   const { settings } = useSettings();
-  const { sportsTopGames, sportsChannelFinder, sportsScoreTicker } = settings;
+  const { sportsTopGames, sportsScoreTicker } = settings;
   // Harbor's odds setting covers every sports surface; kids' profiles never see lines.
   const kid = useActiveKid();
   const sportsOdds = settings.sportsShowOdds && !kid;
@@ -93,13 +113,8 @@ export function useJlSports(params: {
   const players = useJlFavoritePlayers();
   const favorites = useMemo(() => effectiveTeams(teams, players), [teams, players]);
   const games = useJlGames(favorites, active);
-  const bucket = Math.floor(nowMs / INDEX_BUCKET_MS);
-
   // Smart Channel Finder off: no channel matching, so every game offers "Ways to watch" only.
-  const index = useMemo(
-    () => buildSportsChannelIndex(sportsChannelFinder ? channels : [], epg, new Date(bucket * INDEX_BUCKET_MS)),
-    [channels, epg, bucket, sportsChannelFinder],
-  );
+  const index = useSportsChannelIndex(channels, epg, nowMs);
 
   const hub = useMemo(() => {
     const now = new Date(nowMs);

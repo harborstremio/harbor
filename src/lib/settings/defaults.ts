@@ -27,6 +27,7 @@ export const DEFAULT: Settings = {
   sportsTopGames: true,
   sportsChannelFinder: true,
   sportsScoreTicker: true,
+  sportsTickerBar: true,
   sportsOdds: true,
   sportsKeysHintDismissed: false,
   tvdbKey: "",

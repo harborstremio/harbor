@@ -124,6 +124,8 @@ export type Settings = {
   sportsTopGames: boolean;
   sportsChannelFinder: boolean;
   sportsScoreTicker: boolean;
+  /** The live-score crawl across the top of the hubs (Tickarr). */
+  sportsTickerBar: boolean;
   sportsOdds: boolean;
   sportsKeysHintDismissed: boolean;
   tvdbKey: string;

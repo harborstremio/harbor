@@ -69,6 +69,7 @@ import { ScreensaverRoot } from "@/components/screensaver/screensaver-root";
 import { CustomCodeMount } from "@/components/custom-code-mount";
 import { MemoryHud } from "@/components/memory-hud";
 import { OfflineBanner } from "@/chrome/offline-banner";
+import { ScoreTickerHost } from "@/views/live/live-home/jl-sports/score-ticker-host";
 
 const MobileShell = lazy(() =>
   import("@/views/mobile/mobile-shell").then((m) => ({ default: m.MobileShell })),
@@ -1626,7 +1627,7 @@ function Shell({ onReady }: { onReady?: () => void }) {
           }
         }}
         data-kids={kidsTop || kid ? "on" : undefined}
-        className="relative flex h-full"
+        className="relative flex h-full pt-(--harbor-top-inset)"
       >
         <div data-harbor-native-backdrop className="relative flex h-full min-w-0 flex-1">
           {!settingsTop &&
@@ -2217,6 +2218,13 @@ function Shell({ onReady }: { onReady?: () => void }) {
         <MemoryHud />
         <TabHotkeys />
         {!player && <OfflineBanner />}
+        {settings.sportsTickerBar && (
+          <ScoreTickerHost
+            bar={!playerActive && !settingsTop && !pickerTop && !bigPicture && !immersive}
+            overlay={playerActive}
+            playing={playSrc}
+          />
+        )}
       </div>
     </GameAccessProvider>
   );

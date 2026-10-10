@@ -2,7 +2,7 @@ import { ExternalLink, Info, Play, Tv } from "lucide-react";
 import { useT } from "@/lib/i18n";
 import type { IptvChannel } from "@/lib/iptv/types";
 import { isStreamingOnly, type GameChannelSource } from "@/lib/jl/sports/channels";
-import { setWatchingGame } from "@/lib/jl/sports/now-watching";
+import { watchGameOn } from "@/lib/jl/sports/now-watching";
 import type { SportsGame } from "@/lib/sports/espn";
 import { JlDialog } from "./jl-dialog";
 import type { JlHubGame } from "./use-jl-sports";
@@ -42,9 +42,8 @@ export function WatchChooser({
             <button
               key={c.channel.id}
               onClick={() => {
-                setWatchingGame(c.channel.id, game);
                 onClose();
-                onPlay(c.channel);
+                watchGameOn(c.channel, game, onPlay);
               }}
               className="flex items-center gap-3 rounded-xl border border-edge-soft bg-canvas/40 px-3.5 py-2.5 text-start transition-colors hover:border-edge focus:border-ink-subtle focus:outline-none"
             >

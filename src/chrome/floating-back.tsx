@@ -58,7 +58,12 @@ export function FloatingBack({
       onClick={goBack}
       aria-label={t("common.back")}
       data-floating-back
-      style={{ position: "fixed", top: offsetTop, insetInlineStart: offsetLeft, zIndex: 70 }}
+      style={{
+        position: "fixed",
+        top: `calc(var(--harbor-top-inset) + ${offsetTop}px)`,
+        insetInlineStart: offsetLeft,
+        zIndex: 70,
+      }}
       className={`${BACK_SHAPE} ${BACK_SKIN}`}
     >
       <ArrowLeft size={15} className="dir-icon" />

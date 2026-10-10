@@ -40,7 +40,7 @@ export function OfflineBanner() {
 
   if (online) return null;
   return (
-    <div className="pointer-events-none fixed inset-x-0 top-16 z-50 flex justify-center">
+    <div className="pointer-events-none fixed inset-x-0 top-[calc(var(--harbor-top-inset)+4rem)] z-50 flex justify-center">
       <div className="pointer-events-auto flex items-center gap-2.5 rounded-full border border-edge-soft bg-elevated/95 py-2 ps-4 pe-2 shadow-[0_8px_28px_-8px_rgba(0,0,0,0.55)] backdrop-blur-md">
         <WifiOff size={14} strokeWidth={2.2} className="text-ink-subtle" />
         <span className="text-[12.5px] font-medium text-ink-muted">

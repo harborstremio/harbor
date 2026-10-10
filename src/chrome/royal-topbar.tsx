@@ -87,7 +87,7 @@ export function RoyalTopbar() {
         data-tv-focus-scope={editing || undefined}
         data-tv-top-chrome
         aria-hidden={chromeHidden}
-        className={`fixed inset-x-0 top-0 z-[60] flex h-20 items-center px-4 transition-[opacity,transform] duration-300 ease-[cubic-bezier(0.16,1,0.3,1)] ${
+        className={`fixed inset-x-0 top-(--harbor-top-inset) z-[60] flex h-20 items-center px-4 transition-[opacity,transform] duration-300 ease-[cubic-bezier(0.16,1,0.3,1)] ${
           chromeHidden
             ? "pointer-events-none -translate-y-1.5 opacity-0"
             : "translate-y-0 opacity-100"
@@ -212,7 +212,7 @@ export function RoyalTopbar() {
         {editing && <NavEditClose />}
       </header>
       {editing && (
-        <div className="fixed inset-x-0 top-20 z-[59] flex justify-center px-4">
+        <div className="fixed inset-x-0 top-[calc(var(--harbor-top-inset)+5rem)] z-[59] flex justify-center px-4">
           <div className="w-full max-w-2xl rounded-2xl border border-edge-soft bg-canvas/90 p-2 shadow-2xl backdrop-blur-xl">
             <NavHiddenTray orientation="horizontal" />
           </div>

@@ -100,6 +100,33 @@ body {
   cursor: default;
 }
 
+/* Space reserved at the top of the window for the score ticker. The shell and the fixed top
+   chrome follow it; registering it lets the change animate so everything slides together. */
+@property --harbor-top-inset {
+  syntax: "<length>";
+  inherits: true;
+  initial-value: 0px;
+}
+
+:root {
+  --harbor-top-inset: 0px;
+  transition: --harbor-top-inset 0.5s cubic-bezier(0.16, 1, 0.3, 1);
+}
+
+:root[data-score-ticker="bar"] {
+  --harbor-top-inset: 40px;
+}
+
+:root[data-score-ticker="tab"] {
+  --harbor-top-inset: 20px;
+}
+
+@media (prefers-reduced-motion: reduce) {
+  :root {
+    transition: none;
+  }
+}
+
 :root[data-player-black="on"] {
   --color-canvas: oklch(0 0 0);
   --color-surface: oklch(0 0 0);

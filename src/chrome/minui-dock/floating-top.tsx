@@ -39,7 +39,7 @@ export function FloatingTop() {
     <div
       aria-hidden={chromeHidden}
       data-tauri-drag-region
-      className={`fixed inset-x-0 top-0 z-[55] flex h-14 items-center gap-2 px-5 transition-opacity duration-300 ${chromeHidden ? "pointer-events-none opacity-0" : "opacity-100"}`}
+      className={`fixed inset-x-0 top-(--harbor-top-inset) z-[55] flex h-14 items-center gap-2 px-5 transition-opacity duration-300 ${chromeHidden ? "pointer-events-none opacity-0" : "opacity-100"}`}
     >
       <button
         type="button"

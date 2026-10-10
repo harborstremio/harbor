@@ -19,7 +19,7 @@ export function HybridTitleBar({ suppressed = false }: { suppressed?: boolean })
   return (
     <div
       data-tauri-drag-region
-      className="fixed inset-x-0 top-0 z-[140] h-9 select-none border-b border-edge-soft/70 bg-canvas/80 backdrop-blur-md"
+      className="fixed inset-x-0 top-(--harbor-top-inset) z-[140] h-9 select-none border-b border-edge-soft/70 bg-canvas/80 backdrop-blur-md"
     >
       <div className="absolute left-0 top-0 flex h-full items-center">
         {mac && <MacDots />}

@@ -18,6 +18,7 @@ type PluginField =
   | "sportsTopGames"
   | "sportsChannelFinder"
   | "sportsScoreTicker"
+  | "sportsTickerBar"
   | "sportsShowOdds";
 
 const PLUGINS: Array<{ field: PluginField; label: string; sub: string }> = [
@@ -35,6 +36,11 @@ const PLUGINS: Array<{ field: PluginField; label: string; sub: string }> = [
     field: "sportsScoreTicker",
     label: "Your teams ticker",
     sub: "A live-score strip for the teams you follow, from kick-off to the final.",
+  },
+  {
+    field: "sportsTickerBar",
+    label: "Score ticker across the top",
+    sub: "Today's scores crawl along the top of the window: five minutes on, three off, and always on while a live channel plays.",
   },
   {
     // The same setting as the Sports page's own odds switch, so both stay in step.

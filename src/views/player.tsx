@@ -23,6 +23,7 @@ import { useSkipSegments, useAdSegments } from "@/lib/skip-intro";
 import { withinAdWindow } from "@/lib/ad-report/window";
 import { isLocalUrl } from "@/lib/player/local-url";
 import { isLivePlaybackSrc } from "@/lib/player/live-src";
+import { ScoreTickerOverlay } from "./live/live-home/jl-sports/score-ticker";
 import { hasPlaybackStartedForStallCheck, stallWaitMs } from "@/lib/player/stall-wait";
 import { useAuth } from "@/lib/auth";
 import { embedFlags } from "./player/player-utils";
@@ -1559,6 +1560,9 @@ function NativePlayerView({
       onMouseMove={wakeChrome}
       onMouseEnter={wakeChrome}
     >
+      {!docked && !heroDocked && !wallpaper && isLiveLike && (
+        <ScoreTickerOverlay chromeVisible={chromeVisible} />
+      )}
       <div
         ref={videoMountRef}
         data-player-video-mount

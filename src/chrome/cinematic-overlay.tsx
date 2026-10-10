@@ -82,7 +82,7 @@ export function CinematicOverlay() {
         data-tv-focus-scope={editing || undefined}
         data-tv-top-chrome
         aria-hidden={chromeHidden}
-        className={`fixed inset-x-0 top-0 z-[60] flex h-24 items-start px-6 pt-3 transition-opacity duration-300 ${
+        className={`fixed inset-x-0 top-(--harbor-top-inset) z-[60] flex h-24 items-start px-6 pt-3 transition-opacity duration-300 ${
           chromeHidden ? "pointer-events-none opacity-0" : "opacity-100"
         }`}
       >
@@ -200,7 +200,7 @@ export function CinematicOverlay() {
         {editing && <NavEditClose />}
       </header>
       {editing && (
-        <div className="fixed inset-x-0 top-24 z-[59] flex justify-center px-4">
+        <div className="fixed inset-x-0 top-[calc(var(--harbor-top-inset)+6rem)] z-[59] flex justify-center px-4">
           <div className="w-full max-w-2xl rounded-2xl border border-white/15 bg-black/70 p-2 shadow-2xl backdrop-blur-xl">
             <NavHiddenTray orientation="horizontal" />
           </div>
