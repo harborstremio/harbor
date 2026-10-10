@@ -60,11 +60,33 @@ export function espnDarkLogo(logo: string): string | null {
 
 const valid = (c: string | null | undefined): c is string => !!c && HEX.test(c);
 
-/** Colours and logos for a side, with TheSportsDB's colours and badge filling ESPN's gaps. */
+/** A team's verified palette and approved logo from JL Vision (hex without '#'). */
+export type BrandLook = { primary: string; secondary: string; logo: string | null } | null;
+
+/**
+ * Colours and logos for a side, with TheSportsDB's colours and badge filling ESPN's gaps. A
+ * verified JL Vision palette and approved logo come first.
+ */
 export function teamLook(
   side: Pick<SportsSide, "name" | "logo" | "color" | "altColor">,
   art?: TeamArt | null,
+  brand?: BrandLook,
 ): TeamLook {
+  if (brand?.primary && valid(brand.primary)) {
+    const base = teamLook(side, art);
+    return {
+      primary: brand.primary.toLowerCase(),
+      secondary: valid(brand.secondary)
+        ? brand.secondary.toLowerCase()
+        : brand.primary.toLowerCase(),
+      logos: brand.logo ? [...new Set([brand.logo, ...base.logos])] : base.logos,
+      monogram: base.monogram,
+    };
+  }
+  if (brand?.logo) {
+    const base = teamLook(side, art);
+    return { ...base, logos: [...new Set([brand.logo, ...base.logos])] };
+  }
   const colors = [side.color, side.altColor, ...(art?.colors ?? [])]
     .filter(valid)
     .map((c) => c.toLowerCase());

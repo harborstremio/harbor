@@ -7,12 +7,14 @@ import {
   subscribeJlSession,
 } from "@/lib/jl/account/client";
 import { createCustomArtStore, resolveArt, type ArtKind } from "./custom-art";
+import { vision, visionArt } from "./vision";
 
 /**
  * Owner-curated sports art: the first choice for a team's, athlete's or college's art, ahead of
  * TheSportsDB and the designed backdrop. Keys follow JL Media Vision's web app
- * ("team:<league>:<espnId>", ...). The art is the signed-in JL account's own (custom-art.ts);
- * signed out, every lookup answers null and the views fall through to the other sources.
+ * ("team:<league>:<espnId>", ...). The art is the signed-in JL account's own (custom-art.ts),
+ * then, for teams, JL Vision's artwork for that viewer (vision.ts); signed out, every lookup
+ * answers null and the views fall through to the other sources.
  */
 
 export const artKey = {
@@ -35,7 +37,7 @@ export const customArt = createCustomArtStore({
  * card or wallpaper borrows the hero; a missing wordmark stays null (the name is set instead).
  */
 export function curatedArt(key: string, kind: ArtKind = "hero"): string | null {
-  return resolveArt(customArt.url, key, kind)?.url ?? null;
+  return curatedArtSlot(key, kind)?.url ?? null;
 }
 
 /** Like curatedArt, and whether the picture was borrowed from the hero (crop to its subject). */
@@ -43,10 +45,12 @@ export function curatedArtSlot(
   key: string,
   kind: ArtKind,
 ): { url: string; borrowed: boolean } | null {
-  return resolveArt(customArt.url, key, kind);
+  return resolveArt(customArt.url, key, kind) ?? resolveArt(visionArt, key, kind);
 }
 
 /** Re-renders the caller when the owner's art loads or changes. */
 export function useCuratedArtVersion(): number {
-  return useSyncExternalStore(customArt.subscribe, customArt.version, customArt.version);
+  const own = useSyncExternalStore(customArt.subscribe, customArt.version, customArt.version);
+  const shared = useSyncExternalStore(vision.subscribe, vision.version, vision.version);
+  return own * 100_000 + shared;
 }

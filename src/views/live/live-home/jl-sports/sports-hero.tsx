@@ -12,6 +12,7 @@ import { fetchPlayerLine, fetchPregameInsight } from "@/lib/jl/sports/people";
 import { espnHeadshot } from "@/lib/jl/sports/search-parse";
 import { mixHeroSlides, photoSlides } from "@/lib/jl/sports/hub-sections";
 import { teamLook, wordmarkAccent, wordmarkLines } from "@/lib/jl/sports/team-look";
+import { brandLook } from "@/lib/jl/sports/vision";
 import { isCurrentLiveGame, visibleScore } from "@/lib/jl/sports/presentation";
 import { useSettings } from "@/lib/settings";
 import { isIndividualCompetition } from "@/lib/sports/competition-metadata";
@@ -459,7 +460,7 @@ function Wordmark({ league, side, name }: { league: string; side: SportsSide; na
     );
   }
   const [first, second] = wordmarkLines({ ...side, name: full });
-  const accent = wordmarkAccent(teamLook(side, art));
+  const accent = wordmarkAccent(teamLook(side, art, brandLook(league, side.id)));
   return (
     <h2 className="jl-wordmark m-0 flex flex-col uppercase" aria-label={full}>
       <span className="jl-wordmark-line text-ink">{first}</span>
@@ -498,11 +499,11 @@ function Matchup({ game }: { game: SportsGame }) {
   );
   return (
     <p className="flex flex-wrap items-center gap-x-4 gap-y-2 text-[clamp(17px,1.45vw,26px)] font-semibold text-ink drop-shadow-[0_2px_12px_rgba(0,0,0,0.6)]">
-      {team(game.away, teamLook(game.away, art.away))}
+      {team(game.away, teamLook(game.away, art.away, brandLook(game.league, game.away.id)))}
       <span className="text-[0.75em] font-medium text-ink-muted">
         {game.state === "pre" ? t("at") : t("vs")}
       </span>
-      {team(game.home, teamLook(game.home, art.home))}
+      {team(game.home, teamLook(game.home, art.home, brandLook(game.league, game.home.id)))}
     </p>
   );
 }

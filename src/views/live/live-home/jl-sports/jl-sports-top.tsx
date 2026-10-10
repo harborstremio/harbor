@@ -1,4 +1,4 @@
-import { GraduationCap, Play, Trophy, Users } from "lucide-react";
+import { GraduationCap, Play, Shield, Trophy, Users } from "lucide-react";
 import { useState } from "react";
 import { useT } from "@/lib/i18n";
 import { artKey, curatedArtSlot, useCuratedArtVersion } from "@/lib/jl/sports/curated-art";
@@ -56,6 +56,13 @@ export function SportsShortcuts({
       >
         <GraduationCap size={16} />
         {t("Colleges")}
+      </button>
+      <button
+        onClick={() => openSportsPage({ kind: "conferences" })}
+        className={`${PILL} border-white/20 bg-canvas/40 text-ink hover:border-white/45`}
+      >
+        <Shield size={16} />
+        {t("Conferences")}
       </button>
     </>
   );

@@ -7,6 +7,7 @@ export type SportsPage =
   | { kind: "world" }
   | { kind: "match-center"; sport: string; matchId: string; name?: string }
   | { kind: "colleges" }
+  | { kind: "conferences"; group?: string; team?: string }
   | { kind: "college"; collegeId: string; name?: string }
   | { kind: "student"; site: string; sport: string; studentId: string; name?: string };
 
@@ -27,6 +28,8 @@ export function sportsPageKey(p: SportsPage): string {
       return `match-center:${p.sport}:${p.matchId}`;
     case "colleges":
       return "colleges";
+    case "conferences":
+      return "conferences";
     case "college":
       return `college:${p.collegeId}`;
     case "student":

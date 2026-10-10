@@ -23,6 +23,7 @@ import { stableIndex } from "@/lib/jl/sports/fanart";
 import { isFollowing, useJlSportsFavorites } from "@/lib/jl/sports/favorites";
 import { isFavoriteGame, type JlFavoriteTeam } from "@/lib/jl/sports/rank";
 import { teamLook } from "@/lib/jl/sports/team-look";
+import { brandLook } from "@/lib/jl/sports/vision";
 import { isCurrentLiveGame } from "@/lib/jl/sports/presentation";
 import { useSportsSessionScope } from "@/lib/jl/sports/session-scope";
 import { fetchStorySummary } from "@/lib/jl/sports/story-feed";
@@ -242,7 +243,7 @@ function StoryBubble({
             />
           ) : (
             <TeamMark
-              look={teamLook(side, art)}
+              look={teamLook(side, art, brandLook(game.league, side.id))}
               className="h-[62%] w-[62%]"
               textClass="text-[22px]"
             />

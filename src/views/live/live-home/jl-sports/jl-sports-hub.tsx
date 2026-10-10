@@ -5,6 +5,7 @@ import {
   Info,
   Play,
   Radio,
+  Shield,
   Sparkles,
   Star,
   Trophy,
@@ -19,6 +20,7 @@ import { useJlLink } from "@/lib/jl/account/sync";
 import { isFollowing, toggleFavoriteTeam } from "@/lib/jl/sports/favorites";
 import type { JlFavoriteTeam } from "@/lib/jl/sports/rank";
 import { teamLook } from "@/lib/jl/sports/team-look";
+import { brandLook } from "@/lib/jl/sports/vision";
 import { isCurrentLiveGame, visibleScore } from "@/lib/jl/sports/presentation";
 import { useSettings } from "@/lib/settings";
 import type { SportsGame, SportsSide } from "@/lib/sports/espn";
@@ -111,6 +113,12 @@ export function JlSportsHub({
             <button onClick={() => openSportsPage({ kind: "colleges" })} className={pill}>
               <GraduationCap size={14} />
               {t("Colleges")}
+            </button>
+          )}
+          {shortcuts && (
+            <button onClick={() => openSportsPage({ kind: "conferences" })} className={pill}>
+              <Shield size={14} />
+              {t("Conferences")}
             </button>
           )}
           <button onClick={actions.account} className={pill}>
@@ -270,7 +278,7 @@ function TopPoster({
             </div>
             <div className="absolute inset-x-0 top-[20%] flex items-center justify-center gap-3">
               <TeamMark
-                look={teamLook(game.away, art.away)}
+                look={teamLook(game.away, art.away, brandLook(game.league, game.away.id))}
                 className="h-[30%] w-[34%] max-h-20 min-h-14"
                 textClass="text-[18px]"
               />
@@ -278,7 +286,7 @@ function TopPoster({
                 {t("at")}
               </span>
               <TeamMark
-                look={teamLook(game.home, art.home)}
+                look={teamLook(game.home, art.home, brandLook(game.league, game.home.id))}
                 className="h-[30%] w-[34%] max-h-20 min-h-14"
                 textClass="text-[18px]"
               />
@@ -456,7 +464,10 @@ function WallCard({
       >
         <GameBackdrop game={game} variant="card" slot="card" focusId={focusId} />
         <div className="relative grid flex-1 grid-cols-[1fr_auto_1fr] items-center gap-2 px-5 pt-6">
-          <WallTeam side={game.away} look={teamLook(game.away, art.away)} />
+          <WallTeam
+            side={game.away}
+            look={teamLook(game.away, art.away, brandLook(game.league, game.away.id))}
+          />
           <div className="flex flex-col items-center gap-1">
             {scored ? (
               <span className="jl-sports-display text-[26px] font-black tabular-nums text-ink 2xl:text-[32px]">
@@ -475,7 +486,10 @@ function WallCard({
               </span>
             )}
           </div>
-          <WallTeam side={game.home} look={teamLook(game.home, art.home)} />
+          <WallTeam
+            side={game.home}
+            look={teamLook(game.home, art.home, brandLook(game.league, game.home.id))}
+          />
         </div>
         <div className="relative flex items-center justify-between gap-2 bg-canvas/65 px-4 py-2 text-[12px] backdrop-blur">
           <span

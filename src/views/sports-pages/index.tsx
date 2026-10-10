@@ -2,6 +2,7 @@ import type { SportsPage } from "@/lib/jl/sports/pages";
 import { AthletePage } from "./athlete";
 import { CollegePage } from "./college";
 import { CollegesPage } from "./colleges";
+import { ConferencesPage } from "./conferences";
 import { LeaguePage } from "./league";
 import { LeaguesPage } from "./leagues";
 import { MatchCenterPage } from "./match-center";
@@ -28,6 +29,8 @@ export function SportsPageView({ page }: { page: SportsPage }) {
       return <CollegesPage page={page} />;
     case "college":
       return <CollegePage page={page} />;
+    case "conferences":
+      return <ConferencesPage page={page} />;
     case "student":
       return <StudentPage page={page} />;
   }

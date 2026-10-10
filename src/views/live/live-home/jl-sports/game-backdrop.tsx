@@ -3,6 +3,7 @@ import { stableIndex, type TeamArt } from "@/lib/jl/sports/fanart";
 import { heroPhotoCandidates } from "@/lib/jl/sports/hub-sections";
 import type { ArtKind } from "@/lib/jl/sports/custom-art";
 import { teamLook, type TeamLook } from "@/lib/jl/sports/team-look";
+import { brandLook } from "@/lib/jl/sports/vision";
 import type { SportsGame, SportsSide } from "@/lib/sports/espn";
 import { hubLeague } from "@/lib/sports/hub-data";
 import { sportsSceneryPhoto } from "@/views/sports/sports-hero-scenery";
@@ -178,7 +179,10 @@ export function gameLooks(
   home: TeamArt | null,
   away: TeamArt | null,
 ): [TeamLook, TeamLook] {
-  return [teamLook(game.away, away), teamLook(game.home, home)];
+  return [
+    teamLook(game.away, away, brandLook(game.league, game.away.id)),
+    teamLook(game.home, home, brandLook(game.league, game.home.id)),
+  ];
 }
 
 export function GameBackdrop({
@@ -245,6 +249,11 @@ export function TeamBackdrop({
     bundled: variant === "hero" ? sportsSceneryPhoto(hubLeague(league)?.group, league) : null,
   });
   return (
-    <ArtLayers photos={photos} looks={[teamLook(side, art)]} variant={variant} curated={curated} />
+    <ArtLayers
+      photos={photos}
+      looks={[teamLook(side, art, brandLook(league, side.id))]}
+      variant={variant}
+      curated={curated}
+    />
   );
 }
