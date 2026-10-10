@@ -48,7 +48,26 @@ function servePublicMediapipe() {
   };
 }
 
-export default defineConfig(({ mode }) => {
+/**
+ * JL account settings are build settings (GitHub variables for the installers, the hosting
+ * project's environment for the web app). A value pasted into the wrong field still builds but
+ * leaves sign-in unable to reach the accounts service, so a wrong value stops the build instead.
+ * Leaving both empty is allowed: the app then says accounts aren't set up.
+ */
+function checkJlAccountSettings() {
+  const url = (process.env.VITE_JL_SUPABASE_URL ?? "").trim();
+  const key = (process.env.VITE_JL_SUPABASE_ANON_KEY ?? "").trim();
+  if (!url && !key) return;
+  if (!/^https:\/\/[a-z0-9-]+\.supabase\.co\/?$/.test(url))
+    throw new Error(
+      "VITE_JL_SUPABASE_URL must be the accounts project address (https://<project>.supabase.co).",
+    );
+  if (!key || /^https?:/i.test(key))
+    throw new Error("VITE_JL_SUPABASE_ANON_KEY must be the accounts project's public (anon) key.");
+}
+
+export default defineConfig(({ mode, command }) => {
+  if (command === "build") checkJlAccountSettings();
   const android = mode === "android" || process.env.HARBOR_TARGET === "android";
   const devHost = process.env.TAURI_DEV_HOST;
   return {
