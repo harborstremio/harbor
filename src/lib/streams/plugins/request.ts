@@ -21,7 +21,8 @@ function loadMap(): Map<string, TmdbRef | null> {
   try {
     const raw = localStorage.getItem(MAP_KEY);
     if (raw) {
-      for (const [k, v] of Object.entries(JSON.parse(raw) as Record<string, TmdbRef | null>)) if (v) map.set(k, v);
+      for (const [k, v] of Object.entries(JSON.parse(raw) as Record<string, TmdbRef | null>))
+        if (v) map.set(k, v);
     }
   } catch {
     /* ignore */
@@ -126,7 +127,7 @@ function tmdbFromIds(ids: string[], kind: "movie" | "tv"): TmdbRef | null {
 }
 
 function episodeFromId(id: string): { season: number; episode: number } | null {
-  const m = /^(?:tt\d+|tmdb:(?:movie:|tv:)?\d+):(\d+):(\d+)$/.exec(id);
+  const m = /^(?:tt\d+|tmdb:(?:movie:|tv:)?\d+|capstan:[^:]+:[^:]+):(\d+):(\d+)$/.exec(id);
   if (!m) return null;
   return { season: Number(m[1]), episode: Number(m[2]) };
 }

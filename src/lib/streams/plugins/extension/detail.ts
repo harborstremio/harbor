@@ -30,7 +30,9 @@ export function parseCapstanId(id: string): { providerId: string; url: string } 
   if (cut <= 0) return null;
   try {
     const providerId = decodeURIComponent(rest.slice(0, cut));
-    const url = decodeURIComponent(rest.slice(cut + 1));
+    // Episode stream ids append raw :season:episode after the encoded page. Strip that suffix
+    // before decoding, so it never becomes part of the provider's URL.
+    const url = decodeURIComponent(rest.slice(cut + 1).replace(/:\d+:\d+$/, ""));
     return providerId && url ? { providerId, url } : null;
   } catch {
     return null;
